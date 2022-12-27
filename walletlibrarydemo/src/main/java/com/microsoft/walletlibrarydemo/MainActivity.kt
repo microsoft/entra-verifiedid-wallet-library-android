@@ -17,6 +17,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun onClickButton() {
         val text = findViewById<TextView>(R.id.textview)
-        text.text = VerifiedIdFlow().init()
+        text.text = VerifiedIdFlow().init(applicationContext)
     }
 }
