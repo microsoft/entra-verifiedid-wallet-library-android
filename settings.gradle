@@ -5,13 +5,10 @@ pluginManagement {
         mavenCentral()
     }
 }
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+
 rootProject.name = "WalletLibrary"
 include ':walletlibrary'
 include ':walletlibrarydemo'
+include ':VerifiableCredential-SDK'
+
+project(':VerifiableCredential-SDK').projectDir = new File('walletlibrary/submodules/VerifiableCredential-SDK-Android/sdk')
