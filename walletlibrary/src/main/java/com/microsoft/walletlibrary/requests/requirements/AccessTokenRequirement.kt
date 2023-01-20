@@ -7,5 +7,6 @@ data class AccessTokenRequirement(
     val configuration: String,
     val client_id: String,
     val resourceId: String,
-    val scope: String
+    val scope: String,
+    val claims: List<RequestedClaim>
 )

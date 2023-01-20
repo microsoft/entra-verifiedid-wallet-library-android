@@ -8,5 +8,6 @@ data class IdTokenRequirement(
     val client_id: String,
     val redirect_uri: String,
     val scope: String,
-    val nonce: String
+    val nonce: String,
+    val claims: List<RequestedClaim>
 )

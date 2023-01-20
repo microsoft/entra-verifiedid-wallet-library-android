@@ -1,3 +1,3 @@
 package com.microsoft.walletlibrary.requests.requirements
 
-data class PinRequirement(val length: String, val type: String)
+data class PinRequirement(val length: String, val type: String, val required: Boolean)

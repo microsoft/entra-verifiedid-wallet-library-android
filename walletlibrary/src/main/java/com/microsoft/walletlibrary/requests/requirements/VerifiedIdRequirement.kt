@@ -9,8 +9,4 @@ data class VerifiedIdRequirement(
 ) {
     var purpose: String? = null
     var credentialIssuanceParams: CredentialIssuanceParams? = null
-
-    fun getMatches(verifiedIds: List<String>): List<String> {
-        return emptyList()
-    }
 }

@@ -8,8 +8,9 @@ sealed class Request(open val requester: String)
 
 class IssuanceRequest(override val requester: String) : Request(requester) {
     var state: String = ""
-    val credentialIssuerMetadata: List<String> = mutableListOf()
-    val contracts: List<Contract> = mutableListOf()
+    val credentialIssuerMetadata: List<String> = emptyList()
+    val contracts: List<Contract> = emptyList()
     var pinRequirement: PinRequirement? = null
-    val credentialFormats: List<CredentialFormat> = mutableListOf()
+    val credentialFormats: List<CredentialFormat> = emptyList()
+    var raw: String = ""
 }
