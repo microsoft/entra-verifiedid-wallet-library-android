@@ -1,12 +1,20 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 data class AccessTokenRequirement(
-    val id: String,
-    val encrypted: Boolean,
-    val required: Boolean,
+    internal val id: String,
+
+    // Properties used by developers to get access token (configuration, clientId, resourceId, scope)
     val configuration: String,
-    val client_id: String,
+    val clientId: String,
     val resourceId: String,
     val scope: String,
-    val claims: List<RequestedClaim>
+
+    // Specific claims requested from access token
+    val claims: List<RequestedClaim>,
+
+    // Indicates whether the requirement must be encrypted
+    internal val encrypted: Boolean = false,
+
+    // Indicates whether the requirement is required or optional
+    val required: Boolean = false
 )

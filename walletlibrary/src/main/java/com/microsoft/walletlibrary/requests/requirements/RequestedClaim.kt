@@ -1,3 +1,11 @@
 package com.microsoft.walletlibrary.requests.requirements
 
-data class RequestedClaim(val required: Boolean, val indexed: Boolean, val claim: String)
+data class RequestedClaim(
+    internal val indexed: Boolean,
+
+    // Value of the claim
+    val claim: String,
+
+    // Indicated if claim is required or optional
+    val required: Boolean = false,
+)
