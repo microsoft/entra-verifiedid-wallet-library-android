@@ -1,7 +1,6 @@
 package com.microsoft.walletlibrary.verifiedid
 
 data class VerifiedIdClaim(
-
     // Represents name of the claim
     val id: String,
 

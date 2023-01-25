@@ -13,11 +13,11 @@ data class VerifiedIdRequirement(
     internal val encrypted: Boolean = false,
 
     // Indicates if the requirement is required or optional
-    val required: Boolean = false
-) {
+    val required: Boolean = false,
+
     // Purpose of the requested Verified ID which could be displayed to user if needed
     var purpose: String = ""
-
+) {
     // Information needed for issuance from presentation
     var credentialIssuanceParams: CredentialIssuanceParams? = null
 }

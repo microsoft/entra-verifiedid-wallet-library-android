@@ -13,7 +13,7 @@ data class IdTokenRequirement(
     val nonce: String,
 
     // Specific claims requested from id token
-    val claims: List<RequestedClaim>,
+    internal val claims: List<RequestedClaim>,
 
     // Indicates whether the requirement must be encrypted
     internal val encrypted: Boolean = false,

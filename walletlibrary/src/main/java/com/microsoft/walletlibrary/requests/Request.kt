@@ -12,8 +12,7 @@ class IssuanceRequest(
 
     // State is sent back with issuance completion response
     var state: String = ""
-) : Request(requester) {
-
+): Request(requester) {
     // Information such as Contract URL to indicate where to get the contract
     val credentialIssuerMetadata: List<String> = emptyList()
 

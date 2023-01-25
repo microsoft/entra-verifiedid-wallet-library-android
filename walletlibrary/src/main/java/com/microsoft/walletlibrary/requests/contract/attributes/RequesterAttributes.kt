@@ -8,4 +8,5 @@ data class RequesterAttributes(
     val locale: String,
 
     // Logo of the requester. If a url is present in contract, it is fetched to this
-    val logo: Logo? = null)
+    val logo: Logo? = null
+)

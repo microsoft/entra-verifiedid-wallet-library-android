@@ -1,7 +1,6 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 data class PinRequirement(
-
     // Length of the pin
     val length: String,
 

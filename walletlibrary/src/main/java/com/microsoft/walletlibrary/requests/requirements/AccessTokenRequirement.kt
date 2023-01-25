@@ -10,7 +10,7 @@ data class AccessTokenRequirement(
     val scope: String,
 
     // Specific claims requested from access token
-    val claims: List<RequestedClaim>,
+    internal val claims: List<RequestedClaim>,
 
     // Indicates whether the requirement must be encrypted
     internal val encrypted: Boolean = false,

@@ -6,4 +6,4 @@ data class ClaimAttributes(
 
     // Label of the claim
     val label: String
-    )
+)
