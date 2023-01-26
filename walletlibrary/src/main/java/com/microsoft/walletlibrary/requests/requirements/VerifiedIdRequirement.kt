@@ -1,16 +1,23 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 data class VerifiedIdRequirement(
-    val id: String,
-    val encrypted: Boolean,
-    val required: Boolean,
-    val types: List<String>,
-    val acceptedIssuers: List<String>
-) {
-    var purpose: String? = null
-    var credentialIssuanceParams: CredentialIssuanceParams? = null
+    internal val id: String,
 
-    fun getMatches(verifiedIds: List<String>): List<String> {
-        return emptyList()
-    }
+    // The types of Verified ID required
+    val types: List<String>,
+
+    // List of accepted issuers for the required Verified ID
+    val acceptedIssuers: List<String>,
+
+    // Indicates if the requirement must be encrypted
+    internal val encrypted: Boolean = false,
+
+    // Indicates if the requirement is required or optional
+    val required: Boolean = false,
+
+    // Purpose of the requested Verified ID which could be displayed to user if needed
+    var purpose: String = ""
+) {
+    // Information needed for issuance from presentation
+    var credentialIssuanceParams: CredentialIssuanceParams? = null
 }
