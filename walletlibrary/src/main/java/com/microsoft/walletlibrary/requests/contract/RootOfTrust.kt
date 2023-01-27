@@ -5,5 +5,5 @@ data class RootOfTrust(
     val source: String,
 
     // Result of verification of source
-    val verified: Boolean
+    val verified: Boolean = false
 )
