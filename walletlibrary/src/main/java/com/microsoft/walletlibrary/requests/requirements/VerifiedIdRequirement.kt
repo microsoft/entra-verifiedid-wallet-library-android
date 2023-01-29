@@ -1,5 +1,7 @@
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.walletlibrary.verifiedid.VerifiedId
+
 data class VerifiedIdRequirement(
     internal val id: String,
 
@@ -13,11 +15,22 @@ data class VerifiedIdRequirement(
     internal val encrypted: Boolean = false,
 
     // Indicates if the requirement is required or optional
-    val required: Boolean = false,
+    override val required: Boolean = false,
 
     // Purpose of the requested Verified ID which could be displayed to user if needed
     var purpose: String = ""
-) {
+): Requirement {
     // Information needed for issuance from presentation
     var credentialIssuanceParams: CredentialIssuanceParams? = null
+    override fun isFulfilled(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    fun fulfill(verifiedId: VerifiedId) {
+
+    }
+
+    fun getMatches(verifiedIds: List<VerifiedId>): List<VerifiedId> {
+        return emptyList()
+    }
 }

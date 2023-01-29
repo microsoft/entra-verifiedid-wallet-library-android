@@ -8,5 +8,13 @@ data class PinRequirement(
     val type: String,
 
     // Indicates if pin is required or optional
-    val required: Boolean = false
-)
+    override val required: Boolean = false
+): Requirement {
+    override fun isFulfilled(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    fun fulfill(pin: String) {
+
+    }
+}

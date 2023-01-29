@@ -19,5 +19,11 @@ data class IdTokenRequirement(
     internal val encrypted: Boolean = false,
 
     // Indicates whether the requirement is required or optional
-    val required: Boolean = false
-)
+    override val required: Boolean = false
+): Requirement {
+    override fun isFulfilled(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    fun fulfill(token: String) {}
+}

@@ -7,5 +7,10 @@ data class RequestedClaim(
     val claim: String,
 
     // Indicated if claim is required or optional
-    val required: Boolean = false,
-)
+    override val required: Boolean = false,
+): Requirement {
+    override fun isFulfilled(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+}

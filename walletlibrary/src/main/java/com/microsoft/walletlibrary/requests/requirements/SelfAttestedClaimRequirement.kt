@@ -10,5 +10,13 @@ data class SelfAttestedClaimRequirement(
     internal val encrypted: Boolean = false,
 
     // Indicates if the requirement is required or optional
-    val required: Boolean = false
-)
+    override val required: Boolean = false
+): Requirement {
+    override fun isFulfilled(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    fun fulfill(claim: String) {
+
+    }
+}
