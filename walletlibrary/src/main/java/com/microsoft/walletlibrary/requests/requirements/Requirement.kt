@@ -4,6 +4,6 @@ interface Requirement {
     // Indicates whether the requirement is required or optional
     val required: Boolean
 
-    // Indicates whether the requirement is fulfilled or not
-    fun isFulfilled(): Boolean
+    // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled
+    fun validate()
 }

@@ -2,7 +2,7 @@ package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
-data class VerifiedIdRequirement(
+class VerifiedIdRequirement(
     internal val id: String,
 
     // The types of Verified ID required
@@ -22,15 +22,18 @@ data class VerifiedIdRequirement(
 ): Requirement {
     // Information needed for issuance from presentation
     var credentialIssuanceParams: CredentialIssuanceParams? = null
-    override fun isFulfilled(): Boolean {
+
+    // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled
+    override fun validate() {
         TODO("Not yet implemented")
     }
 
     fun fulfill(verifiedId: VerifiedId) {
-
+        TODO("Not yet implemented")
     }
 
+    // Fulfills the requirement in the request with specified value
     fun getMatches(verifiedIds: List<VerifiedId>): List<VerifiedId> {
-        return emptyList()
+        TODO("Not yet implemented")
     }
 }
