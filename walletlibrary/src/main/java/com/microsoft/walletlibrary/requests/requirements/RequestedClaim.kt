@@ -1,3 +1,8 @@
+/**---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.walletlibrary.requests.requirements
 
 data class RequestedClaim(
@@ -7,10 +12,5 @@ data class RequestedClaim(
     val claim: String,
 
     // Indicated if claim is required or optional
-    override val required: Boolean = false,
-): Requirement {
-    override fun isFulfilled(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-}
+    val required: Boolean = false,
+)
