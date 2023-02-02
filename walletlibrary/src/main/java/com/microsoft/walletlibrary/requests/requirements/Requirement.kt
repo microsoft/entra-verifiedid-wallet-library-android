@@ -5,7 +5,13 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
-data class CredentialIssuanceParams(
-    // Information like contract url which describes where to get the contract form
-    val credentialIssuerMetadata: List<String>
-)
+/**
+ * Represents the necessary information required in order to complete a Verified ID request (issuance or presentation)
+ */
+interface Requirement {
+    // Indicates whether the requirement is required or optional
+    val required: Boolean
+
+    // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled
+    fun validate()
+}
