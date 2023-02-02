@@ -28,11 +28,12 @@ class VerifiedIdRequirement(
         TODO("Not yet implemented")
     }
 
+    // Fulfills the requirement in the request with specified value
     fun fulfill(verifiedId: VerifiedId) {
         TODO("Not yet implemented")
     }
 
-    // Fulfills the requirement in the request with specified value
+    // Retrieves list of Verified IDs from the provided list that matches this requirement
     fun getMatches(verifiedIds: List<VerifiedId>): List<VerifiedId> {
         TODO("Not yet implemented")
     }
