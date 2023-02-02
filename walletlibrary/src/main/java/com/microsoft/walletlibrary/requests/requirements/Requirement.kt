@@ -1,5 +1,8 @@
 package com.microsoft.walletlibrary.requests.requirements
 
+/**
+ * Represents the necessary information required in order to complete a Verified ID request (issuance or presentation)
+ */
 interface Requirement {
     // Indicates whether the requirement is required or optional
     val required: Boolean
