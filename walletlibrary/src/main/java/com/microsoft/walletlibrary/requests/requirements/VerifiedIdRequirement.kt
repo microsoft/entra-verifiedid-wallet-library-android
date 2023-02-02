@@ -1,7 +1,14 @@
+/**---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
+/**
+ * Represents information that describes Verified IDs required in order to complete a VerifiedID request
+ */
 class VerifiedIdRequirement(
     internal val id: String,
 
