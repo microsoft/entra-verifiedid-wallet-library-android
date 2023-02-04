@@ -1,7 +1,15 @@
+/**---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.walletlibrary
 
-import com.microsoft.walletlibrary.requests.contract.RootOfTrust
+import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 
-interface VerifiedIdClient {
-    val rootOfTrust: RootOfTrust
+// VerifiedIdClient is configured by builder and is used to create requests
+class VerifiedIdClient {
+    suspend fun createRequest(verifiedIdClientInput: VerifiedIdClientInput): VerifiedIdRequest {
+        TODO("Not yet implemented")
+    }
 }
