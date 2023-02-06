@@ -13,10 +13,10 @@ import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttes
 class IdTokenRequirement(
     internal val id: String,
 
-    // Properties used by developers to get access token (configuration, clientId, resourceId, scope)
+    // Properties used by developers to get access token (configuration, clientId, redirectUri, scope)
     val configuration: String,
-    val client_id: String,
-    val redirect_uri: String,
+    val clientId: String,
+    val redirectUri: String,
     val scope: String,
 
     // Nonce is generated using user DID

@@ -13,9 +13,9 @@ import com.microsoft.did.sdk.credential.service.models.attestations.AccessTokenA
 class AccessTokenRequirement(
     internal val id: String,
 
-    // Properties used by developers to get access token (configuration, clientId, resourceId, scope)
+    // Properties used by developers to get access token (configuration, redirectUri, resourceId, scope)
     val configuration: String,
-    val clientId: String,
+    val redirectUri: String,
     val resourceId: String,
     val scope: String,
 
@@ -31,7 +31,7 @@ class AccessTokenRequirement(
     constructor(accessTokenAttestation: AccessTokenAttestation) : this(
         "",
         accessTokenAttestation.configuration,
-        "",
+        accessTokenAttestation.redirectUri,
         accessTokenAttestation.resourceId,
         accessTokenAttestation.scope,
         accessTokenAttestation.claims.map { RequestedClaim(it) },

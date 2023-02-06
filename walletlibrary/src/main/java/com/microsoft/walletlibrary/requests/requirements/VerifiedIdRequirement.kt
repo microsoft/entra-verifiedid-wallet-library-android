@@ -27,17 +27,19 @@ class VerifiedIdRequirement(
     override val required: Boolean = false,
 
     // Purpose of the requested Verified ID which could be displayed to user if needed
-    var purpose: String = ""
-): Requirement {
+    var purpose: String = "",
+
     // Information needed for issuance from presentation
-    var credentialIssuanceParams: CredentialIssuanceParams? = null
+    var issuanceOptions: IssuanceOptions? = null
+): Requirement {
 
     constructor(presentationAttestation: PresentationAttestation) : this(
         "",
         listOf( presentationAttestation.credentialType),
         presentationAttestation.issuers.map { it.iss },
         presentationAttestation.encrypted,
-        presentationAttestation.required
+        presentationAttestation.required,
+        issuanceOptions = IssuanceOptions(presentationAttestation.contracts)
     )
 
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled

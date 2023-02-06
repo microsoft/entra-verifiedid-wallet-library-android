@@ -5,7 +5,7 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
-data class CredentialIssuanceParams(
+data class IssuanceOptions(
     // Information like contract url which describes where to get the contract form
     val credentialIssuerMetadata: List<String>
 )
