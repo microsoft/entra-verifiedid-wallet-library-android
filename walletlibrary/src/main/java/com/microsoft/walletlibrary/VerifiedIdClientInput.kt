@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.walletlibrary.requests.requirements
+package com.microsoft.walletlibrary
 
-data class CredentialIssuanceParams(
-    // Information like contract url which describes where to get the contract form
-    val credentialIssuerMetadata: List<String>
-)
+// Determines and initiates a valid flow
+interface VerifiedIdClientInput {
+}

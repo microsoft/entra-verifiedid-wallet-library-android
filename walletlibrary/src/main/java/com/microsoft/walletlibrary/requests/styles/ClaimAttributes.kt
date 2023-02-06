@@ -3,9 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.walletlibrary.requests.requirements
+package com.microsoft.walletlibrary.requests.styles
 
-data class CredentialIssuanceParams(
-    // Information like contract url which describes where to get the contract form
-    val credentialIssuerMetadata: List<String>
+data class ClaimAttributes(
+    // Type of the claim (eg. String or Date)
+    val type: String,
+
+    // Label of the claim
+    val label: String
 )
