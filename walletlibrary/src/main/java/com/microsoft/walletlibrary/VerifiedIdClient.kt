@@ -9,7 +9,7 @@ import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 
 /**
  * VerifiedIdClient is configured by builder and is used to create requests.
- * */
+ */
 class VerifiedIdClient {
 
     // Creates an issuance or presentation request based on the provided input.

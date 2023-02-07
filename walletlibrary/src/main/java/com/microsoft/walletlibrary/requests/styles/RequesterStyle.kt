@@ -7,7 +7,7 @@ package com.microsoft.walletlibrary.requests.styles
 
 /**
  * Holds information describing look and feel of a requester.
- * */
+ */
 data class RequesterStyle(
     // Name of the requester.
     val requester: String,

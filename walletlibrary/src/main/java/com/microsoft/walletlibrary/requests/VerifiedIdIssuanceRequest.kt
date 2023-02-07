@@ -13,7 +13,7 @@ import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
  * VerifiedIdIssuanceRequest handles information contained in an issuance request like the visual
  * styling of requester, requirements needed in order to complete the request and information about
  * trust model of requester like domain url and verification status.
- * */
+ */
 @Suppress("UNCHECKED_CAST")
 class VerifiedIdIssuanceRequest(
     // Attributes describing the requester (eg. name, logo).
@@ -27,7 +27,7 @@ class VerifiedIdIssuanceRequest(
 
     // Attributes describing the Verified ID (eg. name, issuer, logo, background and text colors).
     val verifiedIdStyle: VerifiedIDStyle? = null
-) : VerifiedIdRequest {
+): VerifiedIdRequest {
 
     // Indicates whether issuance request is satisfied on client side.
     override fun isSatisfied(): Boolean {

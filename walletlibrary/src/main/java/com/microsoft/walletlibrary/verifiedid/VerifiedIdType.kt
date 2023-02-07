@@ -7,7 +7,7 @@ package com.microsoft.walletlibrary.verifiedid
 
 /**
  * List of VerifiedID types supported.
- * */
+ */
 enum class VerifiedIdType {
     VERIFIABLE_CREDENTIAL
 }

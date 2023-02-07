@@ -7,6 +7,6 @@ package com.microsoft.walletlibrary
 
 /**
  * Determines and initiates a valid flow using the provided url string.
- * */
-class URLVerifiedIdClientInput(private val url: String) : VerifiedIdClientInput {
+ */
+class URLVerifiedIdClientInput(private val url: String): VerifiedIdClientInput {
 }

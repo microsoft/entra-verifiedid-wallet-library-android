@@ -12,7 +12,7 @@ import com.microsoft.walletlibrary.requests.styles.RequesterStyle
  * VerifiedIdRequest handles information contained in a request like the visual styling of requester,
  * requirements needed in order to complete a request and information about trust model of requester
  * like domain url and verification status.
- * */
+ */
 interface VerifiedIdRequest {
     // Attributes describing the requester (eg. name, logo).
     val requesterStyle: RequesterStyle

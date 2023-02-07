@@ -7,7 +7,7 @@ package com.microsoft.walletlibrary.verifiedid
 
 /**
  * Holds the information related to a VerifiedID like the claims, type, issued and expiry dates.
- * */
+ */
 data class VerifiedId(
     internal val id: String,
 

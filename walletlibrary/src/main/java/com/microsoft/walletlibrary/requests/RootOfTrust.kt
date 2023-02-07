@@ -7,7 +7,7 @@ package com.microsoft.walletlibrary.requests
 
 /**
  * Information about trust model of requester like domain url and verification status.
- * */
+ */
 data class RootOfTrust(
     // Source of root of trust (eg. well-known endpoint url).
     val source: String,
