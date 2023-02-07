@@ -4,6 +4,7 @@ import com.microsoft.did.sdk.credential.service.models.attestations.Presentation
 import com.microsoft.walletlibrary.requests.requirements.IssuanceOptions
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 
+// Maps PresentationAttestation object from VC SDK to VerifiedIdRequirement in library
 fun PresentationAttestation.toVerifiedIdRequirement(): VerifiedIdRequirement {
     return VerifiedIdRequirement(
         "",

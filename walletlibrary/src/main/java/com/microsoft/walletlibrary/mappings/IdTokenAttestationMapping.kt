@@ -1,10 +1,9 @@
 package com.microsoft.walletlibrary.mappings
 
-import com.microsoft.did.sdk.credential.service.models.attestations.ClaimAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
 import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
-import com.microsoft.walletlibrary.requests.requirements.RequestedClaim
 
+// Maps IdTokenAttestation object from VC SDK to IdTokenRequirement in library
 fun IdTokenAttestation.toIdTokenRequirement(): IdTokenRequirement {
     return IdTokenRequirement(
         "",

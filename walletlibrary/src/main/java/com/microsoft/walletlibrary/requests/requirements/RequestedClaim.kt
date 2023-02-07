@@ -13,5 +13,4 @@ data class RequestedClaim(
 
     // Indicated if claim is required or optional.
     val required: Boolean = false,
-) {
-}
+)
