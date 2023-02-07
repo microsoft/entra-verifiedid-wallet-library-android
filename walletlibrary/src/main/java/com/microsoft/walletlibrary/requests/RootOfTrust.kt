@@ -3,12 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.walletlibrary.requests.requirements
+package com.microsoft.walletlibrary.requests
 
 /**
- * Represents the information needed for issuance of a Verified ID invoked from a presentation.
+ * Information about trust model of requester like domain url and verification status.
  */
-data class CredentialIssuanceParams(
-    // Information like contract url which describes where to get the contract form.
-    val credentialIssuerMetadata: List<String>
+data class RootOfTrust(
+    // Source of root of trust (eg. well-known endpoint url).
+    val source: String,
+
+    // Result of verification of source.
+    val verified: Boolean = false
 )

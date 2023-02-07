@@ -1,10 +1,9 @@
 package com.microsoft.walletlibrarydemo
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
-import com.microsoft.walletlibrary.VerifiedIdFlow
+import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,6 +16,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun onClickButton() {
         val text = findViewById<TextView>(R.id.textview)
-        text.text = VerifiedIdFlow().init()
+        text.text = "Hello from library"
     }
 }

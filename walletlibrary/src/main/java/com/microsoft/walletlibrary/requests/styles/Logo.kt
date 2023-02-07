@@ -3,8 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.walletlibrary.requests.contract.attributes
+package com.microsoft.walletlibrary.requests.styles
 
+/**
+ * Holds information describing a logo.
+ */
 data class Logo(
     // If image needs to be fetched, service will use this property.
     var uri: String? = null,

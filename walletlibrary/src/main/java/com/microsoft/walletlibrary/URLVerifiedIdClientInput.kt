@@ -5,9 +5,8 @@
 
 package com.microsoft.walletlibrary
 
-class VerifiedIdFlow {
-
-    fun init(): String {
-        return "Hello from library!!"
-    }
+/**
+ * Determines and initiates a valid flow using the provided url string.
+ */
+class URLVerifiedIdClientInput(private val url: String): VerifiedIdClientInput {
 }
