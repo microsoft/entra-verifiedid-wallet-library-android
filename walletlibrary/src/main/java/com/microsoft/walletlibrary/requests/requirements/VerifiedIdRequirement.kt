@@ -5,7 +5,6 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
-import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 /**
@@ -32,15 +31,6 @@ class VerifiedIdRequirement(
     // Information needed for issuance from presentation.
     var issuanceOptions: IssuanceOptions? = null
 ): Requirement {
-    constructor(presentationAttestation: PresentationAttestation) : this(
-        "",
-        listOf( presentationAttestation.credentialType),
-        presentationAttestation.issuers.map { it.iss },
-        presentationAttestation.encrypted,
-        presentationAttestation.required,
-        issuanceOptions = IssuanceOptions(presentationAttestation.contracts)
-    )
-
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {
         TODO("Not yet implemented")

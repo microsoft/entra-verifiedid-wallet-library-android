@@ -2,7 +2,7 @@ package com.microsoft.walletlibrary
 
 import com.microsoft.did.sdk.credential.service.models.attestations.AccessTokenAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.ClaimAttestation
-import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
+import com.microsoft.walletlibrary.mappings.toAccessTokenRequirement
 import org.assertj.core.api.Assertions
 import org.junit.Test
 
@@ -36,7 +36,7 @@ class AccessTokenRequirementTest {
 
     @Test
     fun `test mapping from vc sdk with required and encrypted as false`() {
-        val expectedAccessTokenRequirement = AccessTokenRequirement(actualAccessTokenAttestation)
+        val expectedAccessTokenRequirement = actualAccessTokenAttestation.toAccessTokenRequirement()
         val expectedClaimName = "name"
         Assertions.assertThat(expectedAccessTokenRequirement.claims.first().claim).isEqualTo(expectedClaimName)
         Assertions.assertThat(expectedAccessTokenRequirement.claims.first().required).isEqualTo(true)
@@ -52,7 +52,7 @@ class AccessTokenRequirementTest {
     @Test
     fun `test mapping from vc sdk with required and encrypted as true`() {
         setupInput(claimAttestations, required = true, encrypted = true)
-        val expectedAccessTokenRequirement = AccessTokenRequirement(actualAccessTokenAttestation)
+        val expectedAccessTokenRequirement = actualAccessTokenAttestation.toAccessTokenRequirement()
         val expectedClaimName = "name"
         Assertions.assertThat(expectedAccessTokenRequirement.claims.first().claim).isEqualTo(expectedClaimName)
         Assertions.assertThat(expectedAccessTokenRequirement.claims.first().required).isEqualTo(true)
@@ -68,7 +68,7 @@ class AccessTokenRequirementTest {
     fun `test mapping from vc sdk with list of claims`() {
         claimAttestations.add(ClaimAttestation("company", true, "string"))
         setupInput(claimAttestations, required = true, encrypted = true)
-        val expectedAccessTokenRequirement = AccessTokenRequirement(actualAccessTokenAttestation)
+        val expectedAccessTokenRequirement = actualAccessTokenAttestation.toAccessTokenRequirement()
         val expectedClaimNames = listOf("name", "company")
         Assertions.assertThat(expectedAccessTokenRequirement.claims.map { it.claim }
             .containsAll(expectedClaimNames)).isEqualTo(true)
