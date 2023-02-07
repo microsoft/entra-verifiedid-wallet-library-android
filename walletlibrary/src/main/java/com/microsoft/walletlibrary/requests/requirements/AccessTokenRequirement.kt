@@ -12,8 +12,9 @@ class AccessTokenRequirement(
     internal val id: String,
 
     // Properties used by developers to get access token (configuration, clientId, resourceId, scope).
+
     val configuration: String,
-    val clientId: String,
+    val redirectUri: String,
     val resourceId: String,
     val scope: String,
 

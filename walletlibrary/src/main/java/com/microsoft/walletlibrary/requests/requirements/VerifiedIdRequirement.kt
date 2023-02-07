@@ -26,11 +26,11 @@ class VerifiedIdRequirement(
     override val required: Boolean = false,
 
     // Purpose of the requested Verified ID which could be displayed to user if needed.
-    var purpose: String = ""
-): Requirement {
-    // Information needed for issuance from presentation.
-    var credentialIssuanceParams: CredentialIssuanceParams? = null
+    var purpose: String = "",
 
+    // Information needed for issuance from presentation.
+    var issuanceOptions: IssuanceOptions? = null
+): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {
         TODO("Not yet implemented")

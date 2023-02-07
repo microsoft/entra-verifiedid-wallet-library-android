@@ -3,6 +3,12 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+repositories {
+    google()
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+}
+
 android {
     namespace 'com.microsoft.walletlibrary'
     compileSdkVersion compile_sdk_version as Integer
@@ -36,6 +42,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0"
     implementation project(':VerifiableCredential-SDK')
     testImplementation "junit:junit:$junit_version"
+    testImplementation "org.assertj:assertj-core:$assertj_test_version"
     androidTestImplementation "androidx.test.ext:junit:$androidx_test_junit_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidx_test_espresso_core_version"
 }

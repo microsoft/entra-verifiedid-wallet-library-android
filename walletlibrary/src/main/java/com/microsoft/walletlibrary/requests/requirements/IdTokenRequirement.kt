@@ -13,8 +13,8 @@ class IdTokenRequirement(
 
     // Properties used by developers to get access token (configuration, clientId, resourceId, scope).
     val configuration: String,
-    val client_id: String,
-    val redirect_uri: String,
+    val clientId: String,
+    val redirectUri: String,
     val scope: String,
 
     // Nonce is generated using user DID.
@@ -29,6 +29,7 @@ class IdTokenRequirement(
     // Indicates whether the requirement is required or optional.
     override val required: Boolean = false
 ): Requirement {
+
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {
         TODO("Not yet implemented")
