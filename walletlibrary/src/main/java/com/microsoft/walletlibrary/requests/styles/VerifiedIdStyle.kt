@@ -12,16 +12,16 @@ data class VerifiedIDStyle(
     // What locale the display information is in.
     val locale: String,
 
-    // Title of the Verified Id
+    // Title of the Verified Id.
     val title: String,
 
-    // Issuer of the Verified Id
+    // Issuer of the Verified Id.
     val issuer: String,
 
-    // The background color of the Verified Id in hex
+    // The background color of the Verified Id in hex.
     val backgroundColor: String,
 
-    // The color of the text written on Verified Id in hex
+    // The color of the text written on Verified Id in hex.
     val textColor: String,
 
     // Description of the Verified Id.
