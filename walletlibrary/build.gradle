@@ -42,7 +42,10 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0"
     implementation project(':VerifiableCredential-SDK')
     testImplementation "junit:junit:$junit_version"
+<<<<<<< HEAD
     testImplementation "org.assertj:assertj-core:$assertj_test_version"
+=======
+>>>>>>> dev
     androidTestImplementation "androidx.test.ext:junit:$androidx_test_junit_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidx_test_espresso_core_version"
 }

@@ -5,11 +5,13 @@
 
 package com.microsoft.walletlibrary.verifiedid
 
-// Represents each claim that is embedded in a VerifiedID
+/**
+ * Represents each claim that is embedded in a VerifiedID.
+ */
 data class VerifiedIdClaim(
-    // Represents name of the claim
+    // Represents name of the claim.
     val id: String,
 
-    // Represents value of the claim
+    // Represents value of the claim.
     val value: Any
 )

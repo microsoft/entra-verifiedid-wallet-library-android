@@ -5,6 +5,8 @@
 
 package com.microsoft.walletlibrary
 
-// Determines and initiates a valid flow
+/**
+ * Determines and initiates a valid flow.
+ */
 interface VerifiedIdClientInput {
 }

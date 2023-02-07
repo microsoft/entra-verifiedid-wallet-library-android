@@ -8,18 +8,18 @@ package com.microsoft.walletlibrary.requests.requirements
 import com.microsoft.did.sdk.credential.service.models.attestations.SelfIssuedAttestation
 
 /**
- * Represents information that describes self-attested claims required in order to complete a VerifiedID request
+ * Represents information that describes self-attested claims required in order to complete a VerifiedID request.
  */
 class SelfAttestedClaimRequirement(
     internal val id: String,
 
-    // Claims requested
+    // Claim requested.
     val claim: List<ClaimRequirement>,
 
-    // Indicates if the requirement must be encrypted
+    // Indicates if the requirement must be encrypted.
     internal val encrypted: Boolean = false,
 
-    // Indicates if the requirement is required or optional
+    // Indicates if the requirement is required or optional.
     override val required: Boolean = false
 ): Requirement {
     constructor(selfIssuedAttestation: SelfIssuedAttestation) : this(
@@ -29,12 +29,12 @@ class SelfAttestedClaimRequirement(
         selfIssuedAttestation.required
     )
 
-    // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled
+    // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {
         TODO("Not yet implemented")
     }
 
-    // Fulfills the requirement in the request with specified value
+    // Fulfills the requirement in the request with specified value.
     fun fulfill(selfAttestedClaimName: String, selfAttestedClaimValue: String) {
         TODO("Not yet implemented")
     }

@@ -5,14 +5,16 @@
 
 package com.microsoft.walletlibrary.requests.styles
 
-// Holds information describing look and feel of a requester
+/**
+ * Holds information describing look and feel of a requester.
+ */
 data class RequesterStyle(
-    // Name of the requester
+    // Name of the requester.
     val requester: String,
 
-    // Locale of the requester
+    // Locale of the requester.
     val locale: String,
 
-    // Logo of the requester. If a url is present in contract, it is fetched to this
+    // Logo of the requester. If a url is present in contract, it is fetched to this.
     val logo: Logo? = null
 )

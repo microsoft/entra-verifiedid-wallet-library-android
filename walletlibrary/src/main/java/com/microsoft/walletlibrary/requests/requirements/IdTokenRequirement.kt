@@ -8,27 +8,27 @@ package com.microsoft.walletlibrary.requests.requirements
 import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
 
 /**
- * Represents information that describes Id Token required in order to complete a VerifiedID request
+ * Represents information that describes Id Token required in order to complete a VerifiedID request.
  */
 class IdTokenRequirement(
     internal val id: String,
 
-    // Properties used by developers to get access token (configuration, clientId, redirectUri, scope)
+    // Properties used by developers to get access token (configuration, clientId, resourceId, scope).
     val configuration: String,
     val clientId: String,
     val redirectUri: String,
     val scope: String,
 
-    // Nonce is generated using user DID
+    // Nonce is generated using user DID.
     val nonce: String,
 
-    // Specific claims requested from id token
+    // Specific claims requested from id token.
     internal val claims: List<RequestedClaim>,
 
-    // Indicates whether the requirement must be encrypted
+    // Indicates whether the requirement must be encrypted.
     internal val encrypted: Boolean = false,
 
-    // Indicates whether the requirement is required or optional
+    // Indicates whether the requirement is required or optional.
     override val required: Boolean = false
 ): Requirement {
     constructor(idTokenAttestation: IdTokenAttestation) : this(
@@ -43,12 +43,12 @@ class IdTokenRequirement(
         idTokenAttestation.required
     )
 
-    // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled
+    // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {
         TODO("Not yet implemented")
     }
 
-    // Fulfills the requirement in the request with specified value
+    // Fulfills the requirement in the request with specified value.
     fun fulfill(idToken: String) {
         TODO("Not yet implemented")
     }
