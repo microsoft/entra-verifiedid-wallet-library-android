@@ -23,15 +23,21 @@ class RequestResolverFactoryTest {
     }
 
     @Test
-    fun `test registering one resolver`() {
+    fun resolver_RegisterOneHandler_Succeeds() {
+        // Arrange
         requestResolverFactory.requestResolvers.add(mockRequestResolver)
         hasCompatibleResolver()
+
+        // Act
         val actualResult = requestResolverFactory.getResolver(mockVerifiedIdClientInput)
+
+        // Assert
         Assertions.assertThat(actualResult).isEqualTo(mockRequestResolver)
     }
 
     @Test
-    fun `test without registering any resolver`() {
+    fun resolver_NoResolverRegistration_Throws() {
+        // Act and Assert
         Assertions.assertThatThrownBy { requestResolverFactory.getResolver(mockVerifiedIdClientInput) }
             .isInstanceOf(
                 ResolverMissingException::class.java
@@ -39,9 +45,12 @@ class RequestResolverFactoryTest {
     }
 
     @Test
-    fun `test without any compatible resolver for input`() {
+    fun resolver_NoCompatibleResolver_Throws() {
+        // Arrange
         requestResolverFactory.requestResolvers.add(mockRequestResolver)
         doesNotHaveCompatibleResolver(mockRequestResolver)
+
+        // Act and Assert
         Assertions.assertThatThrownBy { requestResolverFactory.getResolver(mockVerifiedIdClientInput) }
             .isInstanceOf(
                 UnSupportedInputException::class.java
@@ -49,13 +58,18 @@ class RequestResolverFactoryTest {
     }
 
     @Test
-    fun `test registering multiple resolvers`() {
+    fun resolver_RegisterMultipleResolver_Succeeds() {
+        // Arrange
         val secondMockRequestResolver: RequestResolver = mockk()
         requestResolverFactory.requestResolvers.add(mockRequestResolver)
         requestResolverFactory.requestResolvers.add(secondMockRequestResolver)
         hasCompatibleResolver()
         doesNotHaveCompatibleResolver(secondMockRequestResolver)
+
+        // Act
         val actualResult = requestResolverFactory.getResolver(mockVerifiedIdClientInput)
+
+        // Assert
         Assertions.assertThat(actualResult).isEqualTo(mockRequestResolver)
     }
 }

@@ -24,37 +24,51 @@ class RequestHandlerFactoryTest {
     }
 
     @Test
-    fun `test registering one handler`() {
+    fun handler_RegisterOneHandler_Succeeds() {
+        // Arrange
         requestHandlerFactory.requestHandlers.add(firstMockRequestHandler)
         hasCompatibleResolver()
+
+        // Act
         val actualResult = requestHandlerFactory.getHandler(mockRequestResolver)
+
+        // Assert
         assertThat(actualResult).isEqualTo(firstMockRequestHandler)
     }
 
     @Test
-    fun `test without registering any handler`() {
+    fun handler_NoHandlerRegistration_Throws() {
+        // Act and Assert
         assertThatThrownBy { requestHandlerFactory.getHandler(mockRequestResolver) }.isInstanceOf(
             HandlerMissingException::class.java
         )
     }
 
     @Test
-    fun `test without any compatible resolver for handler`() {
+    fun handler_NoCompatibleResolver_Throws() {
+        // Arrange
         requestHandlerFactory.requestHandlers.add(firstMockRequestHandler)
         doesNotHaveCompatibleResolver(firstMockRequestHandler)
+
+        // Act and Assert
         assertThatThrownBy { requestHandlerFactory.getHandler(mockRequestResolver) }.isInstanceOf(
             UnSupportedResolverException::class.java
         )
     }
 
     @Test
-    fun `test registering multiple handlers`() {
+    fun handler_RegisterMultipleHandlers_Succeeds() {
+        // Arrange
         val secondMockRequestHandler: RequestHandler = mockk()
         requestHandlerFactory.requestHandlers.add(firstMockRequestHandler)
         requestHandlerFactory.requestHandlers.add(secondMockRequestHandler)
         hasCompatibleResolver()
         doesNotHaveCompatibleResolver(secondMockRequestHandler)
+
+        // Act
         val actualResult = requestHandlerFactory.getHandler(mockRequestResolver)
+
+        // Assert
         assertThat(actualResult).isEqualTo(firstMockRequestHandler)
     }
 }

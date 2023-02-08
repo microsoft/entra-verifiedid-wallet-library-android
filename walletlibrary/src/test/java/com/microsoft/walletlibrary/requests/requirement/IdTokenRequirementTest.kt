@@ -35,9 +35,14 @@ class IdTokenRequirementTest {
     }
 
     @Test
-    fun `test mapping from vc sdk with required and encrypted as false`() {
-        val expectedIdTokenRequirement = actualIdTokenAttestation.toIdTokenRequirement()
+    fun idTokenMapping_RequiredAndEncryptedFalse_Succeeds() {
+        // Arrange
         val expectedClaimName = "name"
+
+        // Act
+        val expectedIdTokenRequirement = actualIdTokenAttestation.toIdTokenRequirement()
+
+        // Assert
         Assertions.assertThat(expectedIdTokenRequirement.claims.first().claim).isEqualTo(expectedClaimName)
         Assertions.assertThat(expectedIdTokenRequirement.claims.first().required).isEqualTo(true)
         Assertions.assertThat(expectedIdTokenRequirement.required).isEqualTo(false)
@@ -50,10 +55,15 @@ class IdTokenRequirementTest {
     }
 
     @Test
-    fun `test mapping from vc sdk with required and encrypted as true`() {
+    fun idTokenMapping_RequiredAndEncryptedTrue_Succeeds() {
+        // Arrange
         setupInput(claimAttestations, required = true, encrypted = true)
-        val expectedIdTokenRequirement = actualIdTokenAttestation.toIdTokenRequirement()
         val expectedClaimName = "name"
+
+        // Act
+        val expectedIdTokenRequirement = actualIdTokenAttestation.toIdTokenRequirement()
+
+        // Assert
         Assertions.assertThat(expectedIdTokenRequirement.claims.first().claim).isEqualTo(expectedClaimName)
         Assertions.assertThat(expectedIdTokenRequirement.claims.first().required).isEqualTo(true)
         Assertions.assertThat(expectedIdTokenRequirement.required).isEqualTo(true)
@@ -65,11 +75,16 @@ class IdTokenRequirementTest {
     }
 
     @Test
-    fun `test mapping from vc sdk with list of claims`() {
+    fun idTokenMapping_ListOfClaims_Succeeds() {
+        // Arrange
         claimAttestations.add(ClaimAttestation("company", true, "string"))
         setupInput(claimAttestations, required = true, encrypted = true)
-        val expectedIdTokenRequirement = actualIdTokenAttestation.toIdTokenRequirement()
         val expectedClaimNames = listOf("name", "company")
+
+        // Act
+        val expectedIdTokenRequirement = actualIdTokenAttestation.toIdTokenRequirement()
+
+        // Assert
         Assertions.assertThat(expectedIdTokenRequirement.claims.map { it.claim }
             .containsAll(expectedClaimNames)).isEqualTo(true)
         Assertions.assertThat(expectedIdTokenRequirement.claims.first().required).isEqualTo(true)
