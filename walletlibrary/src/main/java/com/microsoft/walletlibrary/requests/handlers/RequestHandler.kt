@@ -13,5 +13,5 @@ import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 interface RequestHandler {
 
     // Handle and process the provided raw request and returns a VerifiedIdRequest.
-    fun handleRequest(rawRequest: String): VerifiedIdRequest
+    fun <T> handleRequest(rawRequest: T): VerifiedIdRequest
 }
