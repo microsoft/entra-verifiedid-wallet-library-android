@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrary
+package com.microsoft.walletlibrary.requests.requirement
 
 import com.microsoft.did.sdk.credential.service.models.attestations.AcceptedIssuer
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
