@@ -11,15 +11,15 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 
 class RequestHandlerFactoryTest {
-    private val firstMockRequestHandler: RequestHandler = mockk()
-    private val mockRequestResolver: RequestResolver = mockk()
+    private val firstMockRequestHandler: RequestHandler<Any> = mockk()
+    private val mockRequestResolver: RequestResolver<Any> = mockk()
     private val requestHandlerFactory = RequestHandlerFactory()
 
     private fun hasCompatibleResolver() {
         every { mockRequestResolver.canResolve(firstMockRequestHandler) } returns true
     }
 
-    private fun doesNotHaveCompatibleResolver(mockRequestHandler: RequestHandler) {
+    private fun doesNotHaveCompatibleResolver(mockRequestHandler: RequestHandler<Any>) {
         every { mockRequestResolver.canResolve(mockRequestHandler) } returns false
     }
 
@@ -59,7 +59,7 @@ class RequestHandlerFactoryTest {
     @Test
     fun handler_RegisterMultipleHandlers_Succeeds() {
         // Arrange
-        val secondMockRequestHandler: RequestHandler = mockk()
+        val secondMockRequestHandler: RequestHandler<Any> = mockk()
         requestHandlerFactory.requestHandlers.add(firstMockRequestHandler)
         requestHandlerFactory.requestHandlers.add(secondMockRequestHandler)
         hasCompatibleResolver()

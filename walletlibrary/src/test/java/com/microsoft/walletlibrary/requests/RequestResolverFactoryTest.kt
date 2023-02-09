@@ -10,7 +10,7 @@ import org.assertj.core.api.Assertions
 import org.junit.Test
 
 class RequestResolverFactoryTest {
-    private val mockRequestResolver: RequestResolver = mockk()
+    private val mockRequestResolver: RequestResolver<Any> = mockk()
     private val requestResolverFactory = RequestResolverFactory()
     private val mockVerifiedIdRequestInput: VerifiedIdRequestInput = mockk()
 
@@ -18,7 +18,7 @@ class RequestResolverFactoryTest {
         every { mockRequestResolver.canResolve(mockVerifiedIdRequestInput) } returns true
     }
 
-    private fun doesNotHaveCompatibleResolver(mockRequestResolver: RequestResolver) {
+    private fun doesNotHaveCompatibleResolver(mockRequestResolver: RequestResolver<Any>) {
         every { mockRequestResolver.canResolve(mockVerifiedIdRequestInput) } returns false
     }
 
@@ -60,7 +60,7 @@ class RequestResolverFactoryTest {
     @Test
     fun resolver_RegisterMultipleResolver_Succeeds() {
         // Arrange
-        val secondMockRequestResolver: RequestResolver = mockk()
+        val secondMockRequestResolver: RequestResolver<Any> = mockk()
         requestResolverFactory.requestResolvers.add(mockRequestResolver)
         requestResolverFactory.requestResolvers.add(secondMockRequestResolver)
         hasCompatibleResolver()
