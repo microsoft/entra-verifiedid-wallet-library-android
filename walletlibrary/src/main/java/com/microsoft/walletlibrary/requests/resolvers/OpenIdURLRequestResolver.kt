@@ -11,13 +11,13 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
-import com.microsoft.walletlibrary.wrapper.OpenIdResolverForVC
+import com.microsoft.walletlibrary.wrapper.OpenIdForVCResolver
 
 /**
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
-class OpenIdURLRequestResolver : RequestResolver<OpenIdRawRequest> {
+class OpenIdURLRequestResolver: RequestResolver<OpenIdRawRequest> {
     companion object {
         private const val OPENID_SCHEME = "openid-vc"
     }
@@ -40,6 +40,6 @@ class OpenIdURLRequestResolver : RequestResolver<OpenIdRawRequest> {
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) throw UnSupportedVerifiedIdRequestInputException(
             "Provided VerifiedIdRequestInput is not supported."
         )
-        return OpenIdResolverForVC.getRequest(verifiedIdRequestInput.url.toString())
+        return OpenIdForVCResolver.getRequest(verifiedIdRequestInput.url.toString())
     }
 }

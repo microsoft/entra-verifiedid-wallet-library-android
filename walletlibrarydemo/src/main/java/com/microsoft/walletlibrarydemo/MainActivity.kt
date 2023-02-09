@@ -5,8 +5,8 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.microsoft.did.sdk.VerifiableCredentialSdk
 import com.microsoft.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.VerifiedIdClientBuilder
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import kotlinx.coroutines.runBlocking
@@ -22,10 +22,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun onClickButton() {
         val text = findViewById<TextView>(R.id.textview)
-        VerifiableCredentialSdk.init(applicationContext)
+        VerifiedIdClientBuilder(applicationContext).build()
         runBlocking {
-            val requestResolver =
-                OpenIdURLRequestResolver().resolve(VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://beta.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/presentationRequests/6563213c-bdcc-4b2a-9551-4ad356f10321")))
+            // Use the test uri here
+            val requestResolver = OpenIdURLRequestResolver().resolve(VerifiedIdRequestURL(Uri.parse("")))
             text.text = (requestResolver.rawRequest as PresentationRequest).entityIdentifier
         }
     }

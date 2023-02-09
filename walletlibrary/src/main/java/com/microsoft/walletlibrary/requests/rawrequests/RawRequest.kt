@@ -6,7 +6,7 @@
 package com.microsoft.walletlibrary.requests.rawrequests
 
 /**
- * Represents raw request
+ * Represents raw request.
  */
 interface RawRequest<T> {
     val rawRequest: T

@@ -8,6 +8,6 @@ package com.microsoft.walletlibrary.requests.rawrequests
 import com.microsoft.did.sdk.credential.service.Request
 
 /**
- * Represents the OpenID raw request
+ * Represents the OpenID raw request.
  */
 data class OpenIdRawRequest(override val rawRequest: Request): RawRequest<Request>
