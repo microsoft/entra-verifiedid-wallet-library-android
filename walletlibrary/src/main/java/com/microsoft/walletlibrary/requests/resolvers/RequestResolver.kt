@@ -9,8 +9,8 @@ import com.microsoft.walletlibrary.requests.handlers.RequestHandler
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 
 /**
- * An implementation RequestResolver is specific to a certain type of RequestHandler and VerifiedIdClientInput.
- * It can resolve a VerifiedIdClientInput and return a raw request.
+ * An implementation RequestResolver is specific to a certain type of RequestHandler and VerifiedIdRequestInput.
+ * It can resolve a VerifiedIdRequestInput and return a raw request.
  */
 interface RequestResolver<out T> {
 

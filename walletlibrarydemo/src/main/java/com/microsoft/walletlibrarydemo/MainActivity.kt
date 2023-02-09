@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         VerifiableCredentialSdk.init(applicationContext)
         runBlocking {
             val requestResolver =
-                OpenIdURLRequestResolver().resolve(VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://beta.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/presentationRequests/1ae058df-7659-4b15-8dcc-ab895ce9dbc4")))
+                OpenIdURLRequestResolver().resolve(VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://beta.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/presentationRequests/6563213c-bdcc-4b2a-9551-4ad356f10321")))
             text.text = (requestResolver.rawRequest as PresentationRequest).entityIdentifier
         }
     }
