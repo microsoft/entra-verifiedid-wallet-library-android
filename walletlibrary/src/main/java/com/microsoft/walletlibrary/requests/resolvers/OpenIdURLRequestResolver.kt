@@ -5,14 +5,13 @@
 
 package com.microsoft.walletlibrary.requests.resolvers
 
-import com.microsoft.did.sdk.VerifiableCredentialSdk
-import com.microsoft.walletlibrary.mappings.getRawRequest
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
 import com.microsoft.walletlibrary.requests.handlers.RequestHandler
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
+import com.microsoft.walletlibrary.wrapper.OpenIdResolverForVC
 
 /**
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
@@ -41,6 +40,6 @@ class OpenIdURLRequestResolver : RequestResolver<OpenIdRawRequest> {
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) throw UnSupportedVerifiedIdRequestInputException(
             "Provided VerifiedIdRequestInput is not supported."
         )
-        return VerifiableCredentialSdk.presentationService.getRawRequest(verifiedIdRequestInput.url.toString())
+        return OpenIdResolverForVC.getRequest(verifiedIdRequestInput.url.toString())
     }
 }
