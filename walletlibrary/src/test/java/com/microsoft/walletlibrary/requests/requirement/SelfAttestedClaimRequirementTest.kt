@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrary
+package com.microsoft.walletlibrary.requests.requirement
 
 import com.microsoft.did.sdk.credential.service.models.attestations.ClaimAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.SelfIssuedAttestation
@@ -16,10 +16,15 @@ class SelfAttestedClaimRequirementTest {
     private lateinit var actualSelfIssuedAttestation: SelfIssuedAttestation
 
     @Test
-    fun `test mapping from vc sdk with required and encrypted as false`() {
-        val expectedSelfAttestedRequirement = actualSelfIssuedAttestation.toSelfAttestedClaimRequirement()
+    fun selfAttestedMapping_RequiredAndEncryptedFalse_Succeeds() {
+        // Arrange
         val expectedClaimName = "name"
         val expectedClaimType = "string"
+
+        // Act
+        val expectedSelfAttestedRequirement = actualSelfIssuedAttestation.toSelfAttestedClaimRequirement()
+
+        // Assert
         assertThat(expectedSelfAttestedRequirement.claim.first().claim).isEqualTo(expectedClaimName)
         assertThat(expectedSelfAttestedRequirement.claim.first().type).isEqualTo(expectedClaimType)
         assertThat(expectedSelfAttestedRequirement.claim.first().required).isEqualTo(true)
@@ -28,11 +33,16 @@ class SelfAttestedClaimRequirementTest {
     }
 
     @Test
-    fun `test mapping from vc sdk with required and encrypted as true`() {
+    fun selfAttestedMapping_RequiredAndEncryptedTrue_Succeeds() {
+        // Arrange
         setupInput(claimAttestations, required = true, encrypted = true)
-        val expectedSelfAttestedRequirement = actualSelfIssuedAttestation.toSelfAttestedClaimRequirement()
         val expectedClaimName = "name"
         val expectedClaimType = "string"
+
+        // Act
+        val expectedSelfAttestedRequirement = actualSelfIssuedAttestation.toSelfAttestedClaimRequirement()
+
+        // Assert
         assertThat(expectedSelfAttestedRequirement.claim.first().claim).isEqualTo(expectedClaimName)
         assertThat(expectedSelfAttestedRequirement.claim.first().type).isEqualTo(expectedClaimType)
         assertThat(expectedSelfAttestedRequirement.claim.first().required).isEqualTo(true)
@@ -41,12 +51,17 @@ class SelfAttestedClaimRequirementTest {
     }
 
     @Test
-    fun `test mapping from vc sdk with list of claims`() {
+    fun selfAttestedMapping_ListOfClaims_Succeeds() {
+        // Arrange
         claimAttestations.add(ClaimAttestation("company", true, "string"))
         setupInput(claimAttestations, required = true, encrypted = true)
-        val expectedSelfAttestedRequirement = actualSelfIssuedAttestation.toSelfAttestedClaimRequirement()
         val expectedClaimNames = listOf("name", "company")
         val expectedClaimType = "string"
+
+        // Act
+        val expectedSelfAttestedRequirement = actualSelfIssuedAttestation.toSelfAttestedClaimRequirement()
+
+        // Assert
         assertThat(expectedSelfAttestedRequirement.claim.map { it.claim }
             .containsAll(expectedClaimNames)).isEqualTo(true)
         assertThat(expectedSelfAttestedRequirement.claim.map { it.type }

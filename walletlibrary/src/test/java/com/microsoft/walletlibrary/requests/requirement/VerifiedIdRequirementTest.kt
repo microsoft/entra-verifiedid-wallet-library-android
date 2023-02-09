@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrary
+package com.microsoft.walletlibrary.requests.requirement
 
 import com.microsoft.did.sdk.credential.service.models.attestations.AcceptedIssuer
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
@@ -33,10 +33,15 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun `test mapping from vc sdk with required and encrypted as false`() {
+    fun verifiedIdReqMapping_RequiredAndEncryptedFalse_Succeeds() {
+        // Arrange
         val expectedPurpose = "Testing"
+
+        // Act
         val expectedVerifiedIdRequirement = actualPresentationAttestation.toVerifiedIdRequirement()
         expectedVerifiedIdRequirement.purpose = expectedPurpose
+
+        // Assert
         assertThat(expectedVerifiedIdRequirement.required).isEqualTo(false)
         assertThat(expectedVerifiedIdRequirement.encrypted).isEqualTo(false)
         assertThat(expectedVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(
@@ -54,11 +59,16 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun `test mapping from vc sdk with required and encrypted as true`() {
+    fun verifiedIdReqMapping_RequiredAndEncryptedTrue_Succeeds() {
+        // Arrange
         setupInput(expectedAcceptedIssuers, expectedContracts, required = true, encrypted = true)
         val expectedPurpose = "Testing"
+
+        // Act
         val expectedVerifiedIdRequirement = actualPresentationAttestation.toVerifiedIdRequirement()
         expectedVerifiedIdRequirement.purpose = expectedPurpose
+
+        // Assert
         assertThat(expectedVerifiedIdRequirement.required).isEqualTo(true)
         assertThat(expectedVerifiedIdRequirement.encrypted).isEqualTo(true)
         assertThat(expectedVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(
@@ -76,11 +86,16 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun `test mapping from vc sdk with empty contract list`() {
+    fun verifiedIdReqMapping_EmptyContractList_Succeeds() {
+        // Arrange
         setupInput(expectedAcceptedIssuers, emptyList(), required = true, encrypted = true)
         val expectedPurpose = "Testing"
+
+        // Act
         val expectedVerifiedIdRequirement = actualPresentationAttestation.toVerifiedIdRequirement()
         expectedVerifiedIdRequirement.purpose = expectedPurpose
+
+        // Assert
         assertThat(expectedVerifiedIdRequirement.required).isEqualTo(true)
         assertThat(expectedVerifiedIdRequirement.encrypted).isEqualTo(true)
         assertThat(expectedVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(
@@ -98,11 +113,16 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun `test mapping from vc sdk with empty issuers list`() {
+    fun verifiedIdReqMapping_EmptyIssuerList_Succeeds() {
+        // Arrange
         setupInput(emptyList(), emptyList(), required = true, encrypted = true)
         val expectedPurpose = "Testing"
+
+        // Act
         val expectedVerifiedIdRequirement = actualPresentationAttestation.toVerifiedIdRequirement()
         expectedVerifiedIdRequirement.purpose = expectedPurpose
+
+        // Assert
         assertThat(expectedVerifiedIdRequirement.required).isEqualTo(true)
         assertThat(expectedVerifiedIdRequirement.encrypted).isEqualTo(true)
         assertThat(expectedVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(
