@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.requests
 
-import com.microsoft.walletlibrary.VerifiedIdClientInput
+import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.resolvers.RequestResolver
 import com.microsoft.walletlibrary.util.ResolverMissingException
 import com.microsoft.walletlibrary.util.UnSupportedInputException
@@ -12,14 +12,14 @@ import org.junit.Test
 class RequestResolverFactoryTest {
     private val mockRequestResolver: RequestResolver = mockk()
     private val requestResolverFactory = RequestResolverFactory()
-    private val mockVerifiedIdClientInput: VerifiedIdClientInput = mockk()
+    private val mockVerifiedIdRequestInput: VerifiedIdRequestInput = mockk()
 
     private fun hasCompatibleResolver() {
-        every { mockRequestResolver.canResolve(mockVerifiedIdClientInput) } returns true
+        every { mockRequestResolver.canResolve(mockVerifiedIdRequestInput) } returns true
     }
 
     private fun doesNotHaveCompatibleResolver(mockRequestResolver: RequestResolver) {
-        every { mockRequestResolver.canResolve(mockVerifiedIdClientInput) } returns false
+        every { mockRequestResolver.canResolve(mockVerifiedIdRequestInput) } returns false
     }
 
     @Test
@@ -29,7 +29,7 @@ class RequestResolverFactoryTest {
         hasCompatibleResolver()
 
         // Act
-        val actualResult = requestResolverFactory.getResolver(mockVerifiedIdClientInput)
+        val actualResult = requestResolverFactory.getResolver(mockVerifiedIdRequestInput)
 
         // Assert
         Assertions.assertThat(actualResult).isEqualTo(mockRequestResolver)
@@ -38,7 +38,7 @@ class RequestResolverFactoryTest {
     @Test
     fun resolver_NoResolverRegistration_Throws() {
         // Act and Assert
-        Assertions.assertThatThrownBy { requestResolverFactory.getResolver(mockVerifiedIdClientInput) }
+        Assertions.assertThatThrownBy { requestResolverFactory.getResolver(mockVerifiedIdRequestInput) }
             .isInstanceOf(
                 ResolverMissingException::class.java
             )
@@ -51,7 +51,7 @@ class RequestResolverFactoryTest {
         doesNotHaveCompatibleResolver(mockRequestResolver)
 
         // Act and Assert
-        Assertions.assertThatThrownBy { requestResolverFactory.getResolver(mockVerifiedIdClientInput) }
+        Assertions.assertThatThrownBy { requestResolverFactory.getResolver(mockVerifiedIdRequestInput) }
             .isInstanceOf(
                 UnSupportedInputException::class.java
             )
@@ -67,7 +67,7 @@ class RequestResolverFactoryTest {
         doesNotHaveCompatibleResolver(secondMockRequestResolver)
 
         // Act
-        val actualResult = requestResolverFactory.getResolver(mockVerifiedIdClientInput)
+        val actualResult = requestResolverFactory.getResolver(mockVerifiedIdRequestInput)
 
         // Assert
         Assertions.assertThat(actualResult).isEqualTo(mockRequestResolver)

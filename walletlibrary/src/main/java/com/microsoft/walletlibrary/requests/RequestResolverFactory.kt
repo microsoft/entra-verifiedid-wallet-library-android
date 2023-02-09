@@ -5,7 +5,7 @@
 
 package com.microsoft.walletlibrary.requests
 
-import com.microsoft.walletlibrary.VerifiedIdClientInput
+import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.resolvers.RequestResolver
 import com.microsoft.walletlibrary.util.ResolverMissingException
 import com.microsoft.walletlibrary.util.UnSupportedInputException
@@ -14,12 +14,12 @@ import com.microsoft.walletlibrary.util.UnSupportedInputException
  * RequestResolverFactory holds a list of RequestResolver objects and returns a resolver that can resolve the provided VerifiedIdClientInput.
  */
 class RequestResolverFactory {
-    internal val requestResolvers = mutableListOf<RequestResolver>()
+    internal val requestResolvers = mutableListOf<RequestResolver<Any>>()
 
     // Returns the first resolver in the list that can resolve the provided VerifiedIdClientInput.
-    fun getResolver(verifiedIdClientInput: VerifiedIdClientInput): RequestResolver {
+    fun getResolver(verifiedIdRequestInput: VerifiedIdRequestInput): RequestResolver<Any> {
         if (requestResolvers.isEmpty()) throw ResolverMissingException("No request resolver is registered")
-        val compatibleRequestResolvers = requestResolvers.filter { it.canResolve(verifiedIdClientInput) }
+        val compatibleRequestResolvers = requestResolvers.filter { it.canResolve(verifiedIdRequestInput) }
         if (compatibleRequestResolvers.isEmpty()) throw UnSupportedInputException("No compatible request resolver is registered for this input")
         return compatibleRequestResolvers.first()
     }

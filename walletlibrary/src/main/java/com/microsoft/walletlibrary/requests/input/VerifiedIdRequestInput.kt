@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.walletlibrary
+package com.microsoft.walletlibrary.requests.input
 
 /**
- * Determines and initiates a valid flow using the provided url string.
+ * Determines and initiates a valid flow.
  */
-class URLVerifiedIdClientInput(private val url: String): VerifiedIdClientInput {
+interface VerifiedIdRequestInput {
 }
