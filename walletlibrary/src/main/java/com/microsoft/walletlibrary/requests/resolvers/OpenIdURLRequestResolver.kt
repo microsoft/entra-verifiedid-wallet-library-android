@@ -19,9 +19,6 @@ import com.microsoft.walletlibrary.wrapper.OpenIdForVCResolver
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
 class OpenIdURLRequestResolver: RequestResolver {
-/*    companion object {
-        private const val OPENID_SCHEME = "openid-vc"
-    }*/
 
     // Indicates whether the raw request returned by this resolver can be handled by provided handler.
     override fun canResolve(requestHandler: RequestHandler): Boolean {
