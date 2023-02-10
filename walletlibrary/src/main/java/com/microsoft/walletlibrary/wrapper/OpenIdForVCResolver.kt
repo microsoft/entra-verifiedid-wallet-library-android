@@ -10,6 +10,7 @@ import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
+import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 
 /**
@@ -25,7 +26,7 @@ object OpenIdForVCResolver {
                 val request = presentationRequestResult.payload
                 return when (val requestType = getRequestType(request)) {
                     RequestType.ISSUANCE -> getIssuanceRequest(request.content.claims.vpTokenInRequest.presentationDefinition.credentialPresentationInputDescriptors.first().issuanceMetadataList.first().issuerContract)
-                    else -> OpenIdRawRequest(requestType, request)
+                    else -> VerifiedIdOpenIdJwtRawRequest(requestType, request)
                 }
             }
             is Result.Failure -> {
@@ -50,7 +51,7 @@ object OpenIdForVCResolver {
             VerifiableCredentialSdk.issuanceService.getRequest(uri)) {
             is Result.Success -> {
                 val request = issuanceRequestResult.payload
-                OpenIdRawRequest(RequestType.ISSUANCE, request)
+                VerifiedIdOpenIdJwtRawRequest(RequestType.ISSUANCE, request)
             }
             is Result.Failure -> {
                 throw VerifiedIdRequestFetchException(
