@@ -23,7 +23,7 @@ object OpenIdForVCResolver {
                 OpenIdRawRequest(presentationRequestResult.payload)
             }
             is Result.Failure -> {
-                throw VerifiedIdRequestFetchException("", presentationRequestResult.payload)
+                throw VerifiedIdRequestFetchException("Unable to fetch request", presentationRequestResult.payload)
             }
         }
     }
