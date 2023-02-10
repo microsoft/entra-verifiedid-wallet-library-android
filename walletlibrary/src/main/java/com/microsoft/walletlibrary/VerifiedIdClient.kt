@@ -6,6 +6,7 @@
 package com.microsoft.walletlibrary
 
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
+import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 
 /**
  * VerifiedIdClient is configured by builder and is used to create requests.
@@ -13,7 +14,7 @@ import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 class VerifiedIdClient {
 
     // Creates an issuance or presentation request based on the provided input.
-    suspend fun createRequest(verifiedIdClientInput: VerifiedIdClientInput): VerifiedIdRequest {
+    suspend fun createRequest(verifiedIdRequestInput: VerifiedIdRequestInput): VerifiedIdRequest {
         TODO("Not yet implemented")
     }
 }

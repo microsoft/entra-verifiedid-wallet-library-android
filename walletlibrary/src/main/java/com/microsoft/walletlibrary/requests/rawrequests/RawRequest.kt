@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.walletlibrary
+package com.microsoft.walletlibrary.requests.rawrequests
 
 /**
- * Determines and initiates a valid flow.
+ * Represents raw request.
  */
-interface VerifiedIdClientInput {
+interface RawRequest<T> {
+    val rawRequest: T
 }

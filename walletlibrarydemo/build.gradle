@@ -47,6 +47,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1"
     implementation project(':walletlibrary')
+    implementation project(':VerifiableCredential-SDK')
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation "androidx.test.ext:junit:$androidx_test_junit_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidx_test_espresso_core_version"
