@@ -11,7 +11,6 @@ import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
-import com.microsoft.walletlibrary.requests.handlers.RequestHandler
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 
 /**
@@ -31,7 +30,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         val requestResolverFactory = RequestResolverFactory()
         requestResolverFactory.requestResolvers.add(OpenIdURLRequestResolver())
         val requestHandlerFactory = RequestHandlerFactory()
-        requestHandlerFactory.requestHandlers.add(OpenIdRequestHandler() as RequestHandler<Any>)
+        requestHandlerFactory.requestHandlers.add(OpenIdRequestHandler())
         VerifiableCredentialSdk.init(context)
         return VerifiedIdClient(requestResolverFactory, requestHandlerFactory)
     }

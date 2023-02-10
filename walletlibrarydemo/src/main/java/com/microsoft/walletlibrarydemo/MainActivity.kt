@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         runBlocking {
             // Use the test uri here
             val requestResolver: VerifiedIdRequest? =
-                verifiedIdClient.createRequest(VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://beta.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/issuanceRequests/604323d7-213d-42a1-8f86-0665d579d016")))
+                verifiedIdClient.createRequest(VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://beta.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/issuanceRequests/58f80671-50e4-4ef9-b93b-ef0b5b11ae27")))
             if (requestResolver != null) {
                 if (requestResolver is VerifiedIdPresentationRequest)
                     text.text =

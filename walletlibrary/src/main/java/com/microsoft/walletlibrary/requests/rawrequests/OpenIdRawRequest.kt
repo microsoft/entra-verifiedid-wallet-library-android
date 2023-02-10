@@ -13,4 +13,4 @@ import com.microsoft.did.sdk.credential.service.Request
 data class OpenIdRawRequest(
     override val requestType: RequestType,
     override val rawRequest: Request
-) : RawRequest<Request>
+): RawRequest
