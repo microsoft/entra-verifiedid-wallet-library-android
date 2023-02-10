@@ -5,15 +5,16 @@
 
 package com.microsoft.walletlibrary.requests.handlers
 
+import com.microsoft.walletlibrary.mappings.toVerifiedIdIssuanceRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 
 /**
  * OIDC protocol specific implementation of RequestHandler. It can handle OpenID raw request and returns a VerifiedIdRequest.
  */
-class OpenIdRequestHandler: RequestHandler<OpenIdRawRequest> {
+class OpenIdRequestHandler : RequestHandler<OpenIdRawRequest> {
 
     override fun handleRequest(rawRequest: OpenIdRawRequest): VerifiedIdRequest {
-        TODO("Not yet implemented")
+        return rawRequest.toVerifiedIdIssuanceRequest()
     }
 }

@@ -6,8 +6,10 @@
 package com.microsoft.walletlibrary.wrapper
 
 import com.microsoft.did.sdk.VerifiableCredentialSdk
+import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
+import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 
 /**
@@ -17,13 +19,44 @@ object OpenIdForVCResolver {
 
     // Fetches the request from VC SDK using the url and converts it to raw request.
     suspend fun getRequest(uri: String): OpenIdRawRequest {
-        return when (val presentationRequestResult =
+        when (val presentationRequestResult =
             VerifiableCredentialSdk.presentationService.getRequest(uri)) {
             is Result.Success -> {
-                OpenIdRawRequest(presentationRequestResult.payload)
+                val request = presentationRequestResult.payload
+                return when (val requestType = getRequestType(request)) {
+                    RequestType.ISSUANCE -> getIssuanceRequest(request.content.claims.vpTokenInRequest.presentationDefinition.credentialPresentationInputDescriptors.first().issuanceMetadataList.first().issuerContract)
+                    else -> OpenIdRawRequest(requestType, request)
+                }
             }
             is Result.Failure -> {
-                throw VerifiedIdRequestFetchException("Unable to fetch request", presentationRequestResult.payload)
+                throw VerifiedIdRequestFetchException(
+                    "Unable to fetch presentation request",
+                    presentationRequestResult.payload
+                )
+            }
+        }
+    }
+
+    private fun getRequestType(request: PresentationRequest): RequestType {
+        return if (request.content.prompt == com.microsoft.walletlibrary.util.Constants.PURE_ISSUANCE_FLOW_VALUE)
+            RequestType.ISSUANCE
+        else
+            RequestType.PRESENTATION
+
+    }
+
+    private suspend fun getIssuanceRequest(uri: String): OpenIdRawRequest {
+        return when (val issuanceRequestResult =
+            VerifiableCredentialSdk.issuanceService.getRequest(uri)) {
+            is Result.Success -> {
+                val request = issuanceRequestResult.payload
+                OpenIdRawRequest(RequestType.ISSUANCE, request)
+            }
+            is Result.Failure -> {
+                throw VerifiedIdRequestFetchException(
+                    "Unable to fetch issuance request",
+                    issuanceRequestResult.payload
+                )
             }
         }
     }

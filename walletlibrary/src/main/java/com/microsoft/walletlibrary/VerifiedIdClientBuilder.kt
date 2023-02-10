@@ -8,6 +8,11 @@ package com.microsoft.walletlibrary
 import android.content.Context
 import com.microsoft.did.sdk.VerifiableCredentialSdk
 import com.microsoft.did.sdk.util.log.SdkLog
+import com.microsoft.walletlibrary.requests.RequestHandlerFactory
+import com.microsoft.walletlibrary.requests.RequestResolverFactory
+import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
+import com.microsoft.walletlibrary.requests.handlers.RequestHandler
+import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 
 /**
  * Entry point to Wallet Library - VerifiedIdClientBuilder configures the builder with required and optional configurations.
@@ -23,7 +28,11 @@ class VerifiedIdClientBuilder(private val context: Context) {
 
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
     fun build(): VerifiedIdClient {
+        val requestResolverFactory = RequestResolverFactory()
+        requestResolverFactory.requestResolvers.add(OpenIdURLRequestResolver())
+        val requestHandlerFactory = RequestHandlerFactory()
+        requestHandlerFactory.requestHandlers.add(OpenIdRequestHandler() as RequestHandler<Any>)
         VerifiableCredentialSdk.init(context)
-        return VerifiedIdClient()
+        return VerifiedIdClient(requestResolverFactory, requestHandlerFactory)
     }
 }

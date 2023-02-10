@@ -9,5 +9,6 @@ package com.microsoft.walletlibrary.requests.rawrequests
  * Represents raw request.
  */
 interface RawRequest<T> {
+    val requestType: RequestType
     val rawRequest: T
 }
