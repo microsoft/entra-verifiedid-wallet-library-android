@@ -6,6 +6,7 @@
 package com.microsoft.walletlibrary.requests.handlers
 
 import com.microsoft.walletlibrary.mappings.toVerifiedIdIssuanceRequest
+import com.microsoft.walletlibrary.mappings.toVerifiedIdPresentationRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdPresentationRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
@@ -32,6 +33,6 @@ class OpenIdRequestHandler : RequestHandler {
     }
 
     private fun handlePresentationRequest(rawRequest: RawRequest): VerifiedIdPresentationRequest {
-        TODO("Not yet implemented")
+        return (rawRequest as OpenIdRawRequest).toVerifiedIdPresentationRequest()
     }
 }

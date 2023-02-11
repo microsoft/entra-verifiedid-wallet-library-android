@@ -8,5 +8,4 @@ package com.microsoft.walletlibrary.requests.input
 /**
  * Determines and initiates a valid flow.
  */
-interface VerifiedIdRequestInput {
-}
+interface VerifiedIdRequestInput

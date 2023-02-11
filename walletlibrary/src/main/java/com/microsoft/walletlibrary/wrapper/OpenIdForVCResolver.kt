@@ -24,10 +24,8 @@ object OpenIdForVCResolver {
             VerifiableCredentialSdk.presentationService.getRequest(uri)) {
             is Result.Success -> {
                 val request = presentationRequestResult.payload
-                return when (val requestType = getRequestType(request)) {
-                    RequestType.ISSUANCE -> getIssuanceRequest(request.content.claims.vpTokenInRequest.presentationDefinition.credentialPresentationInputDescriptors.first().issuanceMetadataList.first().issuerContract)
-                    else -> VerifiedIdOpenIdJwtRawRequest(requestType, request)
-                }
+                val requestType = getRequestType(request)
+                return VerifiedIdOpenIdJwtRawRequest(requestType, request)
             }
             is Result.Failure -> {
                 throw VerifiedIdRequestFetchException(
