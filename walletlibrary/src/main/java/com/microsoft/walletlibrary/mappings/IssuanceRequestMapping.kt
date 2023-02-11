@@ -5,9 +5,14 @@
 
 package com.microsoft.walletlibrary.mappings
 
-import com.microsoft.did.sdk.credential.service.models.contracts.display.ClaimDescriptor
-import com.microsoft.walletlibrary.requests.styles.ClaimAttributes
+import com.microsoft.did.sdk.credential.service.IssuanceRequest
+import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 
-fun ClaimDescriptor.toClaimAttributes(): ClaimAttributes {
-    return ClaimAttributes(type = this.type, label = this.label)
+fun IssuanceRequest.toRequesterStyle(): RequesterStyle {
+    val logo = this.contract.display.card.logo
+    return RequesterStyle(
+        this.entityName,
+        "",
+        logo?.toLogo()
+    )
 }

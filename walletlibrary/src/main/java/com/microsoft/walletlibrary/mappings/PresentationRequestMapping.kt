@@ -5,8 +5,15 @@
 
 package com.microsoft.walletlibrary.mappings
 
+import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.requests.styles.Logo
+import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 
-fun com.microsoft.did.sdk.credential.service.models.contracts.display.Logo.toLogo(): Logo {
-    return Logo(this.uri, this.image, this.description)
+fun PresentationRequest.toRequesterStyle(): RequesterStyle {
+    val registration = this.content.registration
+    return RequesterStyle(
+        this.entityName,
+        "",
+        Logo(registration.logoUri, registration.logoData, "")
+    )
 }
