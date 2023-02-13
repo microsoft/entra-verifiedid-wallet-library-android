@@ -11,7 +11,7 @@ import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 /**
  * Maps IdTokenAttestation object from VC SDK to IdTokenRequirement in library
  */
-fun IdTokenAttestation.toIdTokenRequirement(): IdTokenRequirement {
+internal fun IdTokenAttestation.toIdTokenRequirement(): IdTokenRequirement {
     return IdTokenRequirement(
         "",
         this.configuration,

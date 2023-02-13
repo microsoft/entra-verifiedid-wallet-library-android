@@ -13,7 +13,7 @@ import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 /**
  * Maps PresentationAttestation object from VC SDK to VerifiedIdRequirement in library
  */
-fun PresentationAttestation.toVerifiedIdRequirement(): VerifiedIdRequirement {
+internal fun PresentationAttestation.toVerifiedIdRequirement(): VerifiedIdRequirement {
     return VerifiedIdRequirement(
         "",
         listOf(this.credentialType),

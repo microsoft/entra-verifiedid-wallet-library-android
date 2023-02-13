@@ -11,7 +11,7 @@ import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
 /**
  * Maps AccessTokenAttestation object from VC SDK to AccessTokenRequirement in library
  */
-fun AccessTokenAttestation.toAccessTokenRequirement(): AccessTokenRequirement {
+internal fun AccessTokenAttestation.toAccessTokenRequirement(): AccessTokenRequirement {
     return AccessTokenRequirement(
         "",
         this.configuration,

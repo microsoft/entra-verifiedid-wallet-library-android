@@ -11,7 +11,7 @@ import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomai
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.requests.RootOfTrust
 
-fun LinkedDomainResult.toRootOfTrust(): RootOfTrust {
+internal fun LinkedDomainResult.toRootOfTrust(): RootOfTrust {
     return when (this) {
         is LinkedDomainVerified -> RootOfTrust(domainUrl, true)
         is LinkedDomainUnVerified -> RootOfTrust(domainUrl, false)

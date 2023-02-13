@@ -5,7 +5,11 @@
 
 package com.microsoft.walletlibrary.requests.rawrequests
 
+import com.microsoft.walletlibrary.requests.VerifiedIdRequest
+
 /**
  * Represents the OpenID raw request and the request type.
  */
-interface OpenIdRawRequest: RawRequest
+internal interface OpenIdRawRequest: RawRequest {
+    fun handleRawRequest(): VerifiedIdRequest
+}

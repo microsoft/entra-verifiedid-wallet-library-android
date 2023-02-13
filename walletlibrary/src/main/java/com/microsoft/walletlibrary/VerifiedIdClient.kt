@@ -13,16 +13,16 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 /**
  * VerifiedIdClient is configured by builder and is used to create requests.
  */
-class VerifiedIdClient(private val requestResolverFactory: RequestResolverFactory, private val requestHandlerFactory: RequestHandlerFactory) {
+class VerifiedIdClient(
+    private val requestResolverFactory: RequestResolverFactory,
+    private val requestHandlerFactory: RequestHandlerFactory
+) {
 
     // Creates an issuance or presentation request based on the provided input.
-    suspend fun createRequest(verifiedIdRequestInput: VerifiedIdRequestInput): VerifiedIdRequest? {
+    suspend fun createRequest(verifiedIdRequestInput: VerifiedIdRequestInput): VerifiedIdRequest {
         val requestResolver = requestResolverFactory.getResolver(verifiedIdRequestInput)
-        if (requestResolver.canResolve(verifiedIdRequestInput)) {
-            val rawRequest = requestResolver.resolve(verifiedIdRequestInput)
-            val requestHandler = requestHandlerFactory.getHandler(requestResolver)
-            return requestHandler.handleRequest(rawRequest)
-        }
-        return null
+        val rawRequest = requestResolver.resolve(verifiedIdRequestInput)
+        val requestHandler = requestHandlerFactory.getHandler(requestResolver)
+        return requestHandler.handleRequest(rawRequest)
     }
 }

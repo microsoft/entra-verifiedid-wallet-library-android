@@ -13,7 +13,7 @@ import com.microsoft.walletlibrary.requests.rawrequests.RawRequest
  * An implementation RequestResolver is specific to a certain type of RequestHandler and VerifiedIdRequestInput.
  * It can resolve a VerifiedIdRequestInput and return a raw request.
  */
-interface RequestResolver {
+internal interface RequestResolver {
 
     // Indicates whether the raw request returned by this resolver can be handled by provided handler.
     fun canResolve(requestHandler: RequestHandler): Boolean

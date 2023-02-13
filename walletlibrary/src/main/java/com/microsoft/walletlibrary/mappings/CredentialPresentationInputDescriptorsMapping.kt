@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Cred
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 
-fun CredentialPresentationInputDescriptor.toVerifiedIdRequirement(): VerifiedIdRequirement {
+internal fun CredentialPresentationInputDescriptor.toVerifiedIdRequirement(): VerifiedIdRequirement {
     return VerifiedIdRequirement(
         this.id,
         this.schemas.map { it.uri },

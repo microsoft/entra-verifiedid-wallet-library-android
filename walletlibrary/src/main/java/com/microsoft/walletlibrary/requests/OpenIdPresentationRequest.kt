@@ -8,6 +8,9 @@ package com.microsoft.walletlibrary.requests
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 
+/**
+ * Presentation request specific to OpenId protocol.
+ */
 class OpenIdPresentationRequest(
     // Attributes describing the requester (eg. name, logo).
     override val requesterStyle: RequesterStyle,
@@ -23,7 +26,7 @@ class OpenIdPresentationRequest(
     }
 
     // Completes the request and returns nothing if successful.
-    override suspend fun <Nothing> complete(): Result<Nothing> {
+    override suspend fun <Unit> complete(): Result<Unit> {
         TODO("Not yet implemented")
     }
 

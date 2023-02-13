@@ -11,7 +11,7 @@ import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequir
 /**
  * Maps SelfIssuedAttestation object from VC SDK to SelfAttestedClaimRequirement in library
  */
-fun SelfIssuedAttestation.toSelfAttestedClaimRequirement(): SelfAttestedClaimRequirement {
+internal fun SelfIssuedAttestation.toSelfAttestedClaimRequirement(): SelfAttestedClaimRequirement {
     return SelfAttestedClaimRequirement(
         "",
         this.claims.map { it.toClaimRequirement() },
