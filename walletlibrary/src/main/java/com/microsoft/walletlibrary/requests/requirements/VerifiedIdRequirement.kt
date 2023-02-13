@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 /**
@@ -16,9 +17,6 @@ class VerifiedIdRequirement(
     // The types of Verified ID required.
     val types: List<String>,
 
-    // List of accepted issuers for the required Verified ID.
-    val acceptedIssuers: List<String>,
-
     // Indicates if the requirement must be encrypted.
     internal val encrypted: Boolean = false,
 
@@ -29,7 +27,7 @@ class VerifiedIdRequirement(
     var purpose: String = "",
 
     // Information needed for issuance from presentation.
-    var issuanceOptions: IssuanceOptions? = null
+    val issuanceOptions: List<VerifiedIdRequestInput> = mutableListOf()
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {

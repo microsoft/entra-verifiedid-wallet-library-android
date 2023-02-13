@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.requests.handlers.RequestHandler
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
+import com.microsoft.walletlibrary.util.Constants
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.wrapper.OpenIdForVCResolver
 
@@ -17,13 +18,10 @@ import com.microsoft.walletlibrary.wrapper.OpenIdForVCResolver
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
-class OpenIdURLRequestResolver: RequestResolver<OpenIdRawRequest> {
-    companion object {
-        private const val OPENID_SCHEME = "openid-vc"
-    }
+internal class OpenIdURLRequestResolver: RequestResolver {
 
     // Indicates whether the raw request returned by this resolver can be handled by provided handler.
-    override fun canResolve(requestHandler: RequestHandler<OpenIdRawRequest>): Boolean {
+    override fun canResolve(requestHandler: RequestHandler): Boolean {
         if (requestHandler is OpenIdRequestHandler) return true
         return false
     }
@@ -31,7 +29,7 @@ class OpenIdURLRequestResolver: RequestResolver<OpenIdRawRequest> {
     // Indicates whether this resolver can resolve the provided input.
     override fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean {
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) return false
-        if (verifiedIdRequestInput.url.scheme == OPENID_SCHEME) return true
+        if (verifiedIdRequestInput.url.scheme == Constants.OPENID_SCHEME) return true
         return false
     }
 

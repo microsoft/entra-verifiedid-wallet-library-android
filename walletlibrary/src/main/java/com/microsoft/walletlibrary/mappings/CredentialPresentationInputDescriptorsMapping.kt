@@ -6,20 +6,17 @@
 package com.microsoft.walletlibrary.mappings
 
 import android.net.Uri
-import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 
-/**
- * Maps PresentationAttestation object from VC SDK to VerifiedIdRequirement in library
- */
-internal fun PresentationAttestation.toVerifiedIdRequirement(): VerifiedIdRequirement {
+internal fun CredentialPresentationInputDescriptor.toVerifiedIdRequirement(): VerifiedIdRequirement {
     return VerifiedIdRequirement(
-        "",
-        listOf(this.credentialType),
-        this.encrypted,
-        this.required,
-        "",
-        issuanceOptions = this.contracts.map { VerifiedIdRequestURL(Uri.parse(it)) }
+        this.id,
+        this.schemas.map { it.uri },
+        encrypted = false,
+        required = true,
+        this.purpose,
+        this.issuanceMetadataList.map { VerifiedIdRequestURL(Uri.parse(it.issuerContract)) }
     )
 }

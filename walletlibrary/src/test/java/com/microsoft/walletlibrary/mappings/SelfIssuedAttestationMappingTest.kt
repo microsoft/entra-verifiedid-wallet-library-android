@@ -1,12 +1,11 @@
-package com.microsoft.walletlibrary.requests.requirement
+package com.microsoft.walletlibrary.mappings
 
 import com.microsoft.did.sdk.credential.service.models.attestations.ClaimAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.SelfIssuedAttestation
-import com.microsoft.walletlibrary.mappings.toSelfAttestedClaimRequirement
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-class SelfAttestedClaimRequirementTest {
+class SelfIssuedAttestationMappingTest {
     private val claimAttestations = mutableListOf(ClaimAttestation("name", true, "string"))
 
     init {

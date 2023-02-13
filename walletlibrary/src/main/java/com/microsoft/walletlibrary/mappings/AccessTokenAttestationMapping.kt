@@ -1,3 +1,8 @@
+/**---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.walletlibrary.mappings
 
 import com.microsoft.did.sdk.credential.service.models.attestations.AccessTokenAttestation
@@ -6,7 +11,7 @@ import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
 /**
  * Maps AccessTokenAttestation object from VC SDK to AccessTokenRequirement in library
  */
-fun AccessTokenAttestation.toAccessTokenRequirement(): AccessTokenRequirement {
+internal fun AccessTokenAttestation.toAccessTokenRequirement(): AccessTokenRequirement {
     return AccessTokenRequirement(
         "",
         this.configuration,

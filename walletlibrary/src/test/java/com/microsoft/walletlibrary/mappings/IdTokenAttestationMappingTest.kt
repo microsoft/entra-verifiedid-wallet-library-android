@@ -1,12 +1,11 @@
-package com.microsoft.walletlibrary.requests.requirement
+package com.microsoft.walletlibrary.mappings
 
 import com.microsoft.did.sdk.credential.service.models.attestations.ClaimAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
-import com.microsoft.walletlibrary.mappings.toIdTokenRequirement
 import org.assertj.core.api.Assertions
 import org.junit.Test
 
-class IdTokenRequirementTest {
+class IdTokenAttestationMappingTest {
     private val claimAttestations = mutableListOf(ClaimAttestation("name", true, "string"))
     private val expectedConfiguration: String = "https://testconfiguration.com"
     private val expectedClientId = "testClientId"

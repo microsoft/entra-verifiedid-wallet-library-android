@@ -5,9 +5,11 @@
 
 package com.microsoft.walletlibrary.requests.rawrequests
 
-import com.microsoft.did.sdk.credential.service.Request
+import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 
 /**
- * Represents the OpenID raw request.
+ * Represents the OpenID raw request and the request type.
  */
-data class OpenIdRawRequest(override val rawRequest: Request): RawRequest<Request>
+internal interface OpenIdRawRequest: RawRequest {
+    fun handleRawRequest(): VerifiedIdRequest
+}

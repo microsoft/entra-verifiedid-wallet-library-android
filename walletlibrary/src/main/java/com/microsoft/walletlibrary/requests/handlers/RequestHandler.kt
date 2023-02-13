@@ -6,12 +6,13 @@
 package com.microsoft.walletlibrary.requests.handlers
 
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
+import com.microsoft.walletlibrary.requests.rawrequests.RawRequest
 
 /**
  * An implementation of RequestHandler is protocol specific. It can handle and process the raw request and returns a VerifiedIdRequest.
  */
-interface RequestHandler<in T> {
+internal interface RequestHandler {
 
     // Handle and process the provided raw request and returns a VerifiedIdRequest.
-    fun handleRequest(rawRequest: T): VerifiedIdRequest
+    fun handleRequest(rawRequest: RawRequest): VerifiedIdRequest
 }
