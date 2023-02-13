@@ -1,12 +1,12 @@
-package com.microsoft.walletlibrary.requests.requirement
+package com.microsoft.walletlibrary.mappings
 
 import com.microsoft.did.sdk.credential.service.models.attestations.AcceptedIssuer
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
-import com.microsoft.walletlibrary.mappings.toVerifiedIdRequirement
+import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-class VerifiedIdRequirementTest {
+class PresentationAttestationMappingTest {
     private lateinit var actualPresentationAttestation: PresentationAttestation
     private val expectedCredentialType = "TestCredential"
     private val expectedAcceptedIssuers = listOf("TestIssuer1")
@@ -25,7 +25,7 @@ class VerifiedIdRequirementTest {
         actualPresentationAttestation = PresentationAttestation(
             expectedCredentialType,
             issuers = issuers.map { AcceptedIssuer(it) },
-            contracts,
+            emptyList(),
             required = required,
             encrypted = encrypted,
             claims = emptyList()
@@ -33,7 +33,7 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun verifiedIdReqMapping_RequiredAndEncryptedFalse_Succeeds() {
+    fun verifiedIdReqMapping_RequiredAndEncryptedFalseEmptyContractList_Succeeds() {
         // Arrange
         val expectedPurpose = "Testing"
 
@@ -47,46 +47,13 @@ class VerifiedIdRequirementTest {
         assertThat(expectedVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(
             true
         )
-        assertThat(expectedVerifiedIdRequirement.acceptedIssuers.containsAll(expectedAcceptedIssuers)).isEqualTo(
-            true
-        )
-        assertThat(
-            expectedVerifiedIdRequirement.issuanceOptions?.credentialIssuerMetadata?.containsAll(
-                expectedContracts
-            )
-        ).isEqualTo(true)
+        assertThat(expectedVerifiedIdRequirement.issuanceOptions.map { (it as VerifiedIdRequestURL).url }
+            .isEmpty()).isEqualTo(true)
         assertThat(expectedVerifiedIdRequirement.purpose).isEqualTo(expectedPurpose)
     }
 
     @Test
-    fun verifiedIdReqMapping_RequiredAndEncryptedTrue_Succeeds() {
-        // Arrange
-        setupInput(expectedAcceptedIssuers, expectedContracts, required = true, encrypted = true)
-        val expectedPurpose = "Testing"
-
-        // Act
-        val expectedVerifiedIdRequirement = actualPresentationAttestation.toVerifiedIdRequirement()
-        expectedVerifiedIdRequirement.purpose = expectedPurpose
-
-        // Assert
-        assertThat(expectedVerifiedIdRequirement.required).isEqualTo(true)
-        assertThat(expectedVerifiedIdRequirement.encrypted).isEqualTo(true)
-        assertThat(expectedVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(
-            true
-        )
-        assertThat(expectedVerifiedIdRequirement.acceptedIssuers.containsAll(expectedAcceptedIssuers)).isEqualTo(
-            true
-        )
-        assertThat(
-            expectedVerifiedIdRequirement.issuanceOptions?.credentialIssuerMetadata?.containsAll(
-                expectedContracts
-            )
-        ).isEqualTo(true)
-        assertThat(expectedVerifiedIdRequirement.purpose).isEqualTo(expectedPurpose)
-    }
-
-    @Test
-    fun verifiedIdReqMapping_EmptyContractList_Succeeds() {
+    fun verifiedIdReqMapping_RequiredAndEncryptedTrueEmptyContractList_Succeeds() {
         // Arrange
         setupInput(expectedAcceptedIssuers, emptyList(), required = true, encrypted = true)
         val expectedPurpose = "Testing"
@@ -98,17 +65,9 @@ class VerifiedIdRequirementTest {
         // Assert
         assertThat(expectedVerifiedIdRequirement.required).isEqualTo(true)
         assertThat(expectedVerifiedIdRequirement.encrypted).isEqualTo(true)
-        assertThat(expectedVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(
-            true
-        )
-        assertThat(expectedVerifiedIdRequirement.acceptedIssuers.containsAll(expectedAcceptedIssuers)).isEqualTo(
-            true
-        )
-        assertThat(
-            expectedVerifiedIdRequirement.issuanceOptions?.credentialIssuerMetadata?.containsAll(
-                expectedContracts
-            )
-        ).isEqualTo(false)
+        assertThat(expectedVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(true)
+        assertThat(expectedVerifiedIdRequirement.issuanceOptions.map { (it as VerifiedIdRequestURL).url }
+            .isEmpty()).isEqualTo(true)
         assertThat(expectedVerifiedIdRequirement.purpose).isEqualTo(expectedPurpose)
     }
 
@@ -128,14 +87,8 @@ class VerifiedIdRequirementTest {
         assertThat(expectedVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(
             true
         )
-        assertThat(expectedVerifiedIdRequirement.acceptedIssuers.containsAll(expectedAcceptedIssuers)).isEqualTo(
-            false
-        )
-        assertThat(
-            expectedVerifiedIdRequirement.issuanceOptions?.credentialIssuerMetadata?.containsAll(
-                expectedContracts
-            )
-        ).isEqualTo(false)
+        assertThat(expectedVerifiedIdRequirement.issuanceOptions.map { (it as VerifiedIdRequestURL).url }
+            .isEmpty()).isEqualTo(true)
         assertThat(expectedVerifiedIdRequirement.purpose).isEqualTo(expectedPurpose)
     }
 }

@@ -5,18 +5,16 @@
 
 package com.microsoft.walletlibrary.mappings
 
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.requests.RootOfTrust
 
 fun LinkedDomainResult.toRootOfTrust(): RootOfTrust {
-    var source = ""
-    var verificationStatus = false
-    if (this is LinkedDomainVerified) {
-        source = domainUrl
-        verificationStatus = true
-    } else if (this is LinkedDomainUnVerified)
-        source = domainUrl
-    return RootOfTrust(source, verificationStatus)
+    return when (this) {
+        is LinkedDomainVerified -> RootOfTrust(domainUrl, true)
+        is LinkedDomainUnVerified -> RootOfTrust(domainUrl, false)
+        is LinkedDomainMissing -> RootOfTrust("", false)
+    }
 }
