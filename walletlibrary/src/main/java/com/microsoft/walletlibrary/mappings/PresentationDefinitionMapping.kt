@@ -4,8 +4,11 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Pres
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator
 import com.microsoft.walletlibrary.requests.requirements.Requirement
+import com.microsoft.walletlibrary.util.MissingInputDescriptorException
 
 fun PresentationDefinition.toGroupRequirement(): Requirement {
+    if(this.credentialPresentationInputDescriptors.isEmpty())
+        throw MissingInputDescriptorException("There is no credential input descriptor in presentation definition.")
     return if (this.credentialPresentationInputDescriptors.size == 1)
         this.credentialPresentationInputDescriptors.first().toVerifiedIdRequirement()
     else {
