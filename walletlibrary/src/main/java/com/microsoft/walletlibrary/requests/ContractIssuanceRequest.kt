@@ -12,7 +12,7 @@ import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
 /**
  * Issuance request specific to OpenId protocol.
  */
-class OpenIdIssuanceRequest(
+class ContractIssuanceRequest(
     // Attributes describing the requester (eg. name, logo).
     override val requesterStyle: RequesterStyle,
 

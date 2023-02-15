@@ -6,7 +6,7 @@
 package com.microsoft.walletlibrary.mappings
 
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
-import com.microsoft.walletlibrary.requests.OpenIdIssuanceRequest
+import com.microsoft.walletlibrary.requests.ContractIssuanceRequest
 import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
 
 internal fun IssuanceRequest.toRequesterStyle(): OpenIdRequesterStyle {
@@ -17,8 +17,8 @@ internal fun IssuanceRequest.toRequesterStyle(): OpenIdRequesterStyle {
     )
 }
 
-internal fun IssuanceRequest.toOpenIdIssuanceRequest(): OpenIdIssuanceRequest {
-    return OpenIdIssuanceRequest(
+internal fun IssuanceRequest.toOpenIdIssuanceRequest(): ContractIssuanceRequest {
+    return ContractIssuanceRequest(
         this.toRequesterStyle(),
         this.getAttestations().toRequirement(),
         this.linkedDomainResult.toRootOfTrust(),
