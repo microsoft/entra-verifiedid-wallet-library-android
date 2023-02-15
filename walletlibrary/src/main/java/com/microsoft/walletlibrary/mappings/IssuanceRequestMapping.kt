@@ -10,11 +10,10 @@ import com.microsoft.walletlibrary.requests.OpenIdIssuanceRequest
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 
 internal fun IssuanceRequest.toRequesterStyle(): RequesterStyle {
-    val logo = this.contract.display.card.logo
     return RequesterStyle(
         this.entityName,
         "",
-        logo?.toLogo()
+        null
     )
 }
 

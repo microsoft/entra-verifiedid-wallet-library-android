@@ -23,7 +23,7 @@ class OpenIdIssuanceRequest(
     override val rootOfTrust: RootOfTrust,
 
     // Attributes describing the Verified ID (eg. name, issuer, logo, background and text colors).
-    val verifiedIdStyle: VerifiedIDStyle? = null
+    val verifiedIdStyle: VerifiedIDStyle
 ): VerifiedIdIssuanceRequest {
     override suspend fun <VerifiedId> complete(): Result<VerifiedId> {
         TODO("Not yet implemented")

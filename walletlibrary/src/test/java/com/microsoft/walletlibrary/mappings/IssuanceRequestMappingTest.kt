@@ -5,9 +5,7 @@ import com.microsoft.did.sdk.credential.service.models.attestations.*
 import com.microsoft.did.sdk.credential.service.models.contracts.display.ClaimDescriptor
 import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
-import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
-import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
-import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
+import com.microsoft.walletlibrary.requests.requirements.*
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -27,6 +25,12 @@ class IssuanceRequestMappingTest {
     private lateinit var idTokenAttestation: IdTokenAttestation
     private val expectedResourceId = "testResourceId"
     private lateinit var accessTokenAttestation: AccessTokenAttestation
+    private val expectedLogoUri = "testLogoUri"
+    private val expectedLogoImage ="testLogoImage"
+    private val expectedLogoDescription ="testLogoDescription"
+    private val expectedCredentialType = "TestCredential"
+    private val expectedAcceptedIssuers = listOf("TestIssuer1")
+    private lateinit var presentationAttestation: PresentationAttestation
 
     init {
         setupInput(true)
@@ -38,7 +42,7 @@ class IssuanceRequestMappingTest {
         every { issuanceRequest.entityName } returns expectedEntityName
         every { issuanceRequest.linkedDomainResult } returns LinkedDomainVerified(expectedLinkedDomainSource)
         setupContract()
-        setupDisplay()
+        setupDisplayContract()
         setupCardDescriptor(logoPresent)
     }
 
@@ -47,7 +51,7 @@ class IssuanceRequestMappingTest {
         every { issuanceRequest.contract.display } returns mockk()
     }
 
-    private fun setupDisplay() {
+    private fun setupDisplayContract() {
         val claimDescriptor: ClaimDescriptor = mockk()
         every { claimDescriptor.type } returns "type"
         every { claimDescriptor.label } returns "label"
@@ -73,9 +77,9 @@ class IssuanceRequestMappingTest {
     }
 
     private fun setupLogo(logo: Logo) {
-        every { logo.uri } returns "testLogoUri"
-        every { logo.image } returns "testLogoImage"
-        every { logo.description } returns "testLogoDescription"
+        every { logo.uri } returns expectedLogoUri
+        every { logo.image } returns expectedLogoImage
+        every { logo.description } returns expectedLogoDescription
     }
 
     private fun setupSelfIssuedAttestation() {
@@ -107,6 +111,17 @@ class IssuanceRequestMappingTest {
             expectedRedirectUri,
             expectedScope,
             encrypted = false
+        )
+    }
+
+    private fun setupPresentationAttestation() {
+        presentationAttestation = PresentationAttestation(
+            expectedCredentialType,
+            issuers = expectedAcceptedIssuers.map { AcceptedIssuer(it) },
+            emptyList(),
+            required = false,
+            encrypted = false,
+            claims = emptyList()
         )
     }
 
@@ -161,7 +176,27 @@ class IssuanceRequestMappingTest {
     }
 
     @Test
-    fun issuanceRequestMapping_NoLogoInStyle_ReturnsSuccessfulRequestWithNoLogo() {
+    fun issuanceRequestMapping_MultipleAttestationPresent_ReturnsGroupRequirementInOpenIdRequest() {
+        // Arrange
+        setupSelfIssuedAttestation()
+        setupPresentationAttestation()
+        every { credentialAttestations.selfIssued } returns selfIssuedAttestation
+        every { credentialAttestations.idTokens } returns emptyList()
+        every { credentialAttestations.accessTokens } returns emptyList()
+        every { credentialAttestations.presentations } returns listOf(presentationAttestation)
+
+        // Act
+        val actualOpenIdRequest = issuanceRequest.toOpenIdIssuanceRequest()
+
+        // Assert
+        assertThat(actualOpenIdRequest.requirement).isInstanceOf(GroupRequirement::class.java)
+        assertThat((actualOpenIdRequest.requirement as GroupRequirement).requirementOperator).isEqualTo(
+            GroupRequirementOperator.ALL)
+        assertThat(actualOpenIdRequest.requirement.required).isEqualTo(true)
+    }
+
+    @Test
+    fun issuanceRequestMapping_NoLogoInRequesterStyle_ReturnsSuccessfulRequestWithNoLogo() {
         // Arrange
         setupInput(false)
         setupSelfIssuedAttestation()
@@ -175,5 +210,71 @@ class IssuanceRequestMappingTest {
 
         // Assert
         assertThat(actualOpenIdRequest.requesterStyle.logo).isNull()
+    }
+
+    @Test
+    fun issuanceRequestMapping_LogoPresentInVerifiedIdStyle_ReturnsSuccessfulRequestWithLogo() {
+        // Arrange
+        setupInput(true)
+        setupSelfIssuedAttestation()
+        every { credentialAttestations.selfIssued } returns selfIssuedAttestation
+        every { credentialAttestations.idTokens } returns emptyList()
+        every { credentialAttestations.accessTokens } returns emptyList()
+        every { credentialAttestations.presentations } returns emptyList()
+
+        // Act
+        val actualOpenIdRequest = issuanceRequest.toOpenIdIssuanceRequest()
+
+        // Assert
+        assertThat(actualOpenIdRequest.verifiedIdStyle.logo).isNotNull
+        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.uri).isEqualTo(expectedLogoUri)
+        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.image).isEqualTo(expectedLogoImage)
+        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.description).isEqualTo(expectedLogoDescription)
+    }
+
+    @Test
+    fun issuanceRequestMapping_NoLogoInVerifiedIdStyle_ReturnsSuccessfulRequestWithNoLogo() {
+        // Arrange
+        setupInput(false)
+        setupSelfIssuedAttestation()
+        every { credentialAttestations.selfIssued } returns selfIssuedAttestation
+        every { credentialAttestations.idTokens } returns emptyList()
+        every { credentialAttestations.accessTokens } returns emptyList()
+        every { credentialAttestations.presentations } returns emptyList()
+
+        // Act
+        val actualOpenIdRequest = issuanceRequest.toOpenIdIssuanceRequest()
+
+        // Assert
+        assertThat(actualOpenIdRequest.verifiedIdStyle.logo).isNull()
+    }
+
+    @Test
+    fun issuanceRequestMapping_mapRootOfTrust_ReturnsRequest() {
+        // Arrange
+        setupInput(false)
+        setupSelfIssuedAttestation()
+        every { credentialAttestations.selfIssued } returns selfIssuedAttestation
+        every { credentialAttestations.idTokens } returns emptyList()
+        every { credentialAttestations.accessTokens } returns emptyList()
+        every { credentialAttestations.presentations } returns emptyList()
+
+        // Act
+        val actualOpenIdRequest = issuanceRequest.toOpenIdIssuanceRequest()
+
+        // Assert
+        assertThat(actualOpenIdRequest.rootOfTrust.verified).isEqualTo(true)
+        assertThat(actualOpenIdRequest.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
+    }
+
+    @Test
+    fun issuanceRequestMapping_mapRequesterStyle_ReturnsRequesterStyle() {
+        // Act
+        val actualRequesterStyle = issuanceRequest.toRequesterStyle()
+
+        // Assert
+        assertThat(actualRequesterStyle.requester).isEqualTo(expectedEntityName)
+        assertThat(actualRequesterStyle.logo).isNull()
+        assertThat(actualRequesterStyle.locale).isEqualTo("")
     }
 }
