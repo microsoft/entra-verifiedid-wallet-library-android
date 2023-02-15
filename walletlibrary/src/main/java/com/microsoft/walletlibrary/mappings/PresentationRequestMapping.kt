@@ -19,12 +19,10 @@ internal fun PresentationRequest.toRequesterStyle(): RequesterStyle {
     )
 }
 
-fun PresentationRequest.toOpenIdPresentationRequest(): OpenIdPresentationRequest {
-    val credentialPresentationInputDescriptor =
-        this.content.claims.vpTokenInRequest.presentationDefinition.credentialPresentationInputDescriptors.first()
+internal fun PresentationRequest.toOpenIdPresentationRequest(): OpenIdPresentationRequest {
     return OpenIdPresentationRequest(
         this.toRequesterStyle(),
-        credentialPresentationInputDescriptor.toVerifiedIdRequirement(),
+        this.getPresentationDefinition().toRequirement(),
         this.linkedDomainResult.toRootOfTrust()
     )
 }
