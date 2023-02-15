@@ -28,7 +28,7 @@ data class VerifiedIDStyle(
     val description: String,
 
     // Display attributes per claim.
-    val claimAttributes: List<ClaimAttributes>,
+    val claimAttributes: Map<String, ClaimAttributes>,
 
     // Logo that should be displayed on the Verified Id.
     val logo: Logo? = null
