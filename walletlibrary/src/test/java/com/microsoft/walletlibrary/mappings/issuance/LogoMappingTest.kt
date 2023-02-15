@@ -1,6 +1,7 @@
-package com.microsoft.walletlibrary.mappings
+package com.microsoft.walletlibrary.mappings.issuance
 
 import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
+import com.microsoft.walletlibrary.mappings.issuance.toLogo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 

@@ -3,8 +3,8 @@ package com.microsoft.walletlibrary.requests.rawrequests
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.Request
-import com.microsoft.walletlibrary.mappings.toOpenIdIssuanceRequest
-import com.microsoft.walletlibrary.mappings.toOpenIdPresentationRequest
+import com.microsoft.walletlibrary.mappings.issuance.toOpenIdIssuanceRequest
+import com.microsoft.walletlibrary.mappings.presentation.toOpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.util.UnExpectedRequestTypeException
 

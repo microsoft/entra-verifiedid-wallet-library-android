@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrary.mappings
+package com.microsoft.walletlibrary.mappings.issuance
 
 import com.microsoft.did.sdk.credential.service.models.contracts.display.*
 import io.mockk.every

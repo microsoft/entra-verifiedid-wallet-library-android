@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.walletlibrary.mappings
+package com.microsoft.walletlibrary.mappings.presentation
 
 import com.microsoft.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.mappings.toRootOfTrust
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.styles.Logo
 import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle

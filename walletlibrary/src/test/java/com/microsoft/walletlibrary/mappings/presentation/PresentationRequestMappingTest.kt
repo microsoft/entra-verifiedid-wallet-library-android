@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrary.mappings
+package com.microsoft.walletlibrary.mappings.presentation
 
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified

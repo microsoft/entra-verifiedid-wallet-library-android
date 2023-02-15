@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrary.mappings
+package com.microsoft.walletlibrary.mappings.issuance
 
 import com.microsoft.did.sdk.credential.service.models.attestations.ClaimAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.SelfIssuedAttestation
