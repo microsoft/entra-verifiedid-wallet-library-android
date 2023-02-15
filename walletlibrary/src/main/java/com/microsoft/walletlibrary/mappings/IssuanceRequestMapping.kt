@@ -9,7 +9,7 @@ import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.walletlibrary.requests.ContractIssuanceRequest
 import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
 
-internal fun IssuanceRequest.toRequesterStyle(): OpenIdRequesterStyle {
+private fun IssuanceRequest.getRequesterStyle(): OpenIdRequesterStyle {
     return OpenIdRequesterStyle(
         this.entityName,
         "",
@@ -17,9 +17,9 @@ internal fun IssuanceRequest.toRequesterStyle(): OpenIdRequesterStyle {
     )
 }
 
-internal fun IssuanceRequest.toOpenIdIssuanceRequest(): ContractIssuanceRequest {
+internal fun IssuanceRequest.toContractIssuanceRequest(): ContractIssuanceRequest {
     return ContractIssuanceRequest(
-        this.toRequesterStyle(),
+        this.getRequesterStyle(),
         this.getAttestations().toRequirement(),
         this.linkedDomainResult.toRootOfTrust(),
         this.contract.display.toVerifiedIdStyle()

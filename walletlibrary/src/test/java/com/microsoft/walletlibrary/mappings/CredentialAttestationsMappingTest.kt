@@ -2,7 +2,7 @@ package com.microsoft.walletlibrary.mappings
 
 import com.microsoft.did.sdk.credential.service.models.attestations.*
 import com.microsoft.walletlibrary.requests.requirements.*
-import com.microsoft.walletlibrary.util.UnsupportedRequirementTypeException
+import com.microsoft.walletlibrary.util.MissingRequirementException
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -169,7 +169,7 @@ class CredentialAttestationsMappingTest {
         // Act and Assert
         assertThatThrownBy {
             credentialAttestations.toRequirement()
-        }.isInstanceOf(UnsupportedRequirementTypeException::class.java)
+        }.isInstanceOf(MissingRequirementException::class.java)
     }
 
 }
