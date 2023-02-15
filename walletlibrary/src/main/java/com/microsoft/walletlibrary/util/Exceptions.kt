@@ -26,3 +26,5 @@ class UnExpectedRequestTypeException(message: String = "", cause: Throwable? = n
 class MissingInputDescriptorException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
 class MissingVerifiedIdTypeException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
+class UnsupportedRequirementTypeException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)

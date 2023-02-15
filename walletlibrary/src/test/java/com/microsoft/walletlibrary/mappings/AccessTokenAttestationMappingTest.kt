@@ -39,17 +39,17 @@ class AccessTokenAttestationMappingTest {
         val expectedClaimName = "name"
 
         // Act
-        val expectedAccessTokenRequirement = actualAccessTokenAttestation.toAccessTokenRequirement()
+        val actualAccessTokenRequirement = actualAccessTokenAttestation.toAccessTokenRequirement()
 
         // Assert
-        Assertions.assertThat(expectedAccessTokenRequirement.claims.first().claim).isEqualTo(expectedClaimName)
-        Assertions.assertThat(expectedAccessTokenRequirement.claims.first().required).isEqualTo(true)
-        Assertions.assertThat(expectedAccessTokenRequirement.required).isEqualTo(false)
-        Assertions.assertThat(expectedAccessTokenRequirement.encrypted).isEqualTo(false)
-        Assertions.assertThat(expectedAccessTokenRequirement.configuration).isEqualTo(expectedConfiguration)
-        Assertions.assertThat(expectedAccessTokenRequirement.redirectUri).isEqualTo(expectedRedirectUri)
-        Assertions.assertThat(expectedAccessTokenRequirement.resourceId).isEqualTo(expectedResourceId)
-        Assertions.assertThat(expectedAccessTokenRequirement.scope).isEqualTo(expectedScope)
+        Assertions.assertThat(actualAccessTokenRequirement.claims.first().claim).isEqualTo(expectedClaimName)
+        Assertions.assertThat(actualAccessTokenRequirement.claims.first().required).isEqualTo(true)
+        Assertions.assertThat(actualAccessTokenRequirement.required).isEqualTo(false)
+        Assertions.assertThat(actualAccessTokenRequirement.encrypted).isEqualTo(false)
+        Assertions.assertThat(actualAccessTokenRequirement.configuration).isEqualTo(expectedConfiguration)
+        Assertions.assertThat(actualAccessTokenRequirement.redirectUri).isEqualTo(expectedRedirectUri)
+        Assertions.assertThat(actualAccessTokenRequirement.resourceId).isEqualTo(expectedResourceId)
+        Assertions.assertThat(actualAccessTokenRequirement.scope).isEqualTo(expectedScope)
 
     }
 
@@ -60,17 +60,17 @@ class AccessTokenAttestationMappingTest {
         val expectedClaimName = "name"
 
         // Act
-        val expectedAccessTokenRequirement = actualAccessTokenAttestation.toAccessTokenRequirement()
+        val actualAccessTokenRequirement = actualAccessTokenAttestation.toAccessTokenRequirement()
 
         // Assert
-        Assertions.assertThat(expectedAccessTokenRequirement.claims.first().claim).isEqualTo(expectedClaimName)
-        Assertions.assertThat(expectedAccessTokenRequirement.claims.first().required).isEqualTo(true)
-        Assertions.assertThat(expectedAccessTokenRequirement.required).isEqualTo(true)
-        Assertions.assertThat(expectedAccessTokenRequirement.encrypted).isEqualTo(true)
-        Assertions.assertThat(expectedAccessTokenRequirement.configuration).isEqualTo(expectedConfiguration)
-        Assertions.assertThat(expectedAccessTokenRequirement.redirectUri).isEqualTo(expectedRedirectUri)
-        Assertions.assertThat(expectedAccessTokenRequirement.resourceId).isEqualTo(expectedResourceId)
-        Assertions.assertThat(expectedAccessTokenRequirement.scope).isEqualTo(expectedScope)
+        Assertions.assertThat(actualAccessTokenRequirement.claims.first().claim).isEqualTo(expectedClaimName)
+        Assertions.assertThat(actualAccessTokenRequirement.claims.first().required).isEqualTo(true)
+        Assertions.assertThat(actualAccessTokenRequirement.required).isEqualTo(true)
+        Assertions.assertThat(actualAccessTokenRequirement.encrypted).isEqualTo(true)
+        Assertions.assertThat(actualAccessTokenRequirement.configuration).isEqualTo(expectedConfiguration)
+        Assertions.assertThat(actualAccessTokenRequirement.redirectUri).isEqualTo(expectedRedirectUri)
+        Assertions.assertThat(actualAccessTokenRequirement.resourceId).isEqualTo(expectedResourceId)
+        Assertions.assertThat(actualAccessTokenRequirement.scope).isEqualTo(expectedScope)
     }
 
     @Test
@@ -81,17 +81,17 @@ class AccessTokenAttestationMappingTest {
         val expectedClaimNames = listOf("name", "company")
 
         // Act
-        val expectedAccessTokenRequirement = actualAccessTokenAttestation.toAccessTokenRequirement()
+        val actualAccessTokenRequirement = actualAccessTokenAttestation.toAccessTokenRequirement()
 
         // Assert
-        Assertions.assertThat(expectedAccessTokenRequirement.claims.map { it.claim }
+        Assertions.assertThat(actualAccessTokenRequirement.claims.map { it.claim }
             .containsAll(expectedClaimNames)).isEqualTo(true)
-        Assertions.assertThat(expectedAccessTokenRequirement.claims.first().required).isEqualTo(true)
-        Assertions.assertThat(expectedAccessTokenRequirement.required).isEqualTo(true)
-        Assertions.assertThat(expectedAccessTokenRequirement.encrypted).isEqualTo(true)
-        Assertions.assertThat(expectedAccessTokenRequirement.configuration).isEqualTo(expectedConfiguration)
-        Assertions.assertThat(expectedAccessTokenRequirement.redirectUri).isEqualTo(expectedRedirectUri)
-        Assertions.assertThat(expectedAccessTokenRequirement.resourceId).isEqualTo(expectedResourceId)
-        Assertions.assertThat(expectedAccessTokenRequirement.scope).isEqualTo(expectedScope)
+        Assertions.assertThat(actualAccessTokenRequirement.claims.first().required).isEqualTo(true)
+        Assertions.assertThat(actualAccessTokenRequirement.required).isEqualTo(true)
+        Assertions.assertThat(actualAccessTokenRequirement.encrypted).isEqualTo(true)
+        Assertions.assertThat(actualAccessTokenRequirement.configuration).isEqualTo(expectedConfiguration)
+        Assertions.assertThat(actualAccessTokenRequirement.redirectUri).isEqualTo(expectedRedirectUri)
+        Assertions.assertThat(actualAccessTokenRequirement.resourceId).isEqualTo(expectedResourceId)
+        Assertions.assertThat(actualAccessTokenRequirement.scope).isEqualTo(expectedScope)
     }
 }

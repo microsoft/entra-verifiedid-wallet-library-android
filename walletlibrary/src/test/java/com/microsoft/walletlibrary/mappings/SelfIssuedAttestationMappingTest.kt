@@ -6,13 +6,20 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class SelfIssuedAttestationMappingTest {
+    private lateinit var actualSelfIssuedAttestation: SelfIssuedAttestation
     private val claimAttestations = mutableListOf(ClaimAttestation("name", true, "string"))
 
     init {
         setupInput(claimAttestations, required = false, encrypted = false)
     }
 
-    private lateinit var actualSelfIssuedAttestation: SelfIssuedAttestation
+    private fun setupInput(
+        claimAttestations: List<ClaimAttestation>,
+        required: Boolean,
+        encrypted: Boolean
+    ) {
+        actualSelfIssuedAttestation = SelfIssuedAttestation(claimAttestations, required, encrypted)
+    }
 
     @Test
     fun selfAttestedMapping_RequiredAndEncryptedFalse_Succeeds() {
@@ -21,14 +28,14 @@ class SelfIssuedAttestationMappingTest {
         val expectedClaimType = "string"
 
         // Act
-        val expectedSelfAttestedRequirement = actualSelfIssuedAttestation.toSelfAttestedClaimRequirement()
+        val actualSelfAttestedRequirement = actualSelfIssuedAttestation.toSelfAttestedClaimRequirement()
 
         // Assert
-        assertThat(expectedSelfAttestedRequirement.claim.first().claim).isEqualTo(expectedClaimName)
-        assertThat(expectedSelfAttestedRequirement.claim.first().type).isEqualTo(expectedClaimType)
-        assertThat(expectedSelfAttestedRequirement.claim.first().required).isEqualTo(true)
-        assertThat(expectedSelfAttestedRequirement.required).isEqualTo(false)
-        assertThat(expectedSelfAttestedRequirement.encrypted).isEqualTo(false)
+        assertThat(actualSelfAttestedRequirement.claim.first().claim).isEqualTo(expectedClaimName)
+        assertThat(actualSelfAttestedRequirement.claim.first().type).isEqualTo(expectedClaimType)
+        assertThat(actualSelfAttestedRequirement.claim.first().required).isEqualTo(true)
+        assertThat(actualSelfAttestedRequirement.required).isEqualTo(false)
+        assertThat(actualSelfAttestedRequirement.encrypted).isEqualTo(false)
     }
 
     @Test
@@ -39,14 +46,14 @@ class SelfIssuedAttestationMappingTest {
         val expectedClaimType = "string"
 
         // Act
-        val expectedSelfAttestedRequirement = actualSelfIssuedAttestation.toSelfAttestedClaimRequirement()
+        val actualSelfAttestedRequirement = actualSelfIssuedAttestation.toSelfAttestedClaimRequirement()
 
         // Assert
-        assertThat(expectedSelfAttestedRequirement.claim.first().claim).isEqualTo(expectedClaimName)
-        assertThat(expectedSelfAttestedRequirement.claim.first().type).isEqualTo(expectedClaimType)
-        assertThat(expectedSelfAttestedRequirement.claim.first().required).isEqualTo(true)
-        assertThat(expectedSelfAttestedRequirement.required).isEqualTo(true)
-        assertThat(expectedSelfAttestedRequirement.encrypted).isEqualTo(true)
+        assertThat(actualSelfAttestedRequirement.claim.first().claim).isEqualTo(expectedClaimName)
+        assertThat(actualSelfAttestedRequirement.claim.first().type).isEqualTo(expectedClaimType)
+        assertThat(actualSelfAttestedRequirement.claim.first().required).isEqualTo(true)
+        assertThat(actualSelfAttestedRequirement.required).isEqualTo(true)
+        assertThat(actualSelfAttestedRequirement.encrypted).isEqualTo(true)
     }
 
     @Test
@@ -58,23 +65,15 @@ class SelfIssuedAttestationMappingTest {
         val expectedClaimType = "string"
 
         // Act
-        val expectedSelfAttestedRequirement = actualSelfIssuedAttestation.toSelfAttestedClaimRequirement()
+        val actualSelfAttestedRequirement = actualSelfIssuedAttestation.toSelfAttestedClaimRequirement()
 
         // Assert
-        assertThat(expectedSelfAttestedRequirement.claim.map { it.claim }
+        assertThat(actualSelfAttestedRequirement.claim.map { it.claim }
             .containsAll(expectedClaimNames)).isEqualTo(true)
-        assertThat(expectedSelfAttestedRequirement.claim.map { it.type }
+        assertThat(actualSelfAttestedRequirement.claim.map { it.type }
             .contains(expectedClaimType)).isEqualTo(true)
-        assertThat(expectedSelfAttestedRequirement.claim.first().required).isEqualTo(true)
-        assertThat(expectedSelfAttestedRequirement.required).isEqualTo(true)
-        assertThat(expectedSelfAttestedRequirement.encrypted).isEqualTo(true)
-    }
-
-    private fun setupInput(
-        claimAttestations: List<ClaimAttestation>,
-        required: Boolean,
-        encrypted: Boolean
-    ) {
-        actualSelfIssuedAttestation = SelfIssuedAttestation(claimAttestations, required, encrypted)
+        assertThat(actualSelfAttestedRequirement.claim.first().required).isEqualTo(true)
+        assertThat(actualSelfAttestedRequirement.required).isEqualTo(true)
+        assertThat(actualSelfAttestedRequirement.encrypted).isEqualTo(true)
     }
 }

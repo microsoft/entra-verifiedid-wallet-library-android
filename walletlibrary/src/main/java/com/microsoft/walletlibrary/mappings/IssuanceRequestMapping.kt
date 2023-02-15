@@ -21,7 +21,7 @@ internal fun IssuanceRequest.toRequesterStyle(): RequesterStyle {
 internal fun IssuanceRequest.toOpenIdIssuanceRequest(): OpenIdIssuanceRequest {
     return OpenIdIssuanceRequest(
         this.toRequesterStyle(),
-        this.getAttestations().selfIssued.toSelfAttestedClaimRequirement(),
+        this.getAttestations().toRequirement(),
         this.linkedDomainResult.toRootOfTrust(),
         this.contract.display.toVerifiedIdStyle()
     )

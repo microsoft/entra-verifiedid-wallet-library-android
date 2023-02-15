@@ -35,11 +35,11 @@ class PresentationDefinitionMappingTest {
     @Test
     fun presentationDefinitionMapping_WithOneInputDescriptor_ReturnsVerifiedIdRequirement() {
         // Act
-        val expectedRequirement = presentationDefinition.toRequirement()
+        val actualRequirement = presentationDefinition.toRequirement()
 
         // Assert
-        assertThat(expectedRequirement).isInstanceOf(VerifiedIdRequirement::class.java)
-        assertThat(expectedRequirement.required).isEqualTo(true)
+        assertThat(actualRequirement).isInstanceOf(VerifiedIdRequirement::class.java)
+        assertThat(actualRequirement.required).isEqualTo(true)
     }
 
     @Test
@@ -50,11 +50,11 @@ class PresentationDefinitionMappingTest {
         setupInput(listOf(expectedInputDescriptor1, expectedInputDescriptor2))
 
         // Act
-        val expectedRequirement = presentationDefinition.toRequirement()
+        val actualRequirement = presentationDefinition.toRequirement()
 
         // Assert
-        assertThat(expectedRequirement).isInstanceOf(GroupRequirement::class.java)
-        assertThat(expectedRequirement.required).isEqualTo(true)
-        assertThat((expectedRequirement as GroupRequirement).requirementOperator).isEqualTo(GroupRequirementOperator.ANY)
+        assertThat(actualRequirement).isInstanceOf(GroupRequirement::class.java)
+        assertThat(actualRequirement.required).isEqualTo(true)
+        assertThat((actualRequirement as GroupRequirement).requirementOperator).isEqualTo(GroupRequirementOperator.ANY)
     }
 }
