@@ -10,6 +10,7 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Sche
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -112,8 +113,8 @@ class PresentationRequestMappingTest {
         val actualOpenIdRequest = presentationRequest.toOpenIdPresentationRequest()
 
         // Assert
-        assertThat(actualOpenIdRequest.requesterStyle.logo).isNotNull
-        assertThat(actualOpenIdRequest.requesterStyle.logo?.image).isNull()
+        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo).isNotNull
+        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo?.image).isNull()
     }
 
     @Test
@@ -125,9 +126,9 @@ class PresentationRequestMappingTest {
         val actualOpenIdRequest = presentationRequest.toOpenIdPresentationRequest()
 
         // Assert
-        assertThat(actualOpenIdRequest.requesterStyle.logo).isNotNull
-        assertThat(actualOpenIdRequest.requesterStyle.logo?.uri).isEqualTo(expectedLogoUri)
-        assertThat(actualOpenIdRequest.requesterStyle.logo?.image).isEqualTo(expectedLogoImage)
+        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo).isNotNull
+        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo?.uri).isEqualTo(expectedLogoUri)
+        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo?.image).isEqualTo(expectedLogoImage)
     }
 
     @Test

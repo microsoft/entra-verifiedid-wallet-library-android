@@ -6,6 +6,7 @@ import com.microsoft.did.sdk.credential.service.models.contracts.display.ClaimDe
 import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.requests.requirements.*
+import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -209,7 +210,7 @@ class IssuanceRequestMappingTest {
         val actualOpenIdRequest = issuanceRequest.toOpenIdIssuanceRequest()
 
         // Assert
-        assertThat(actualOpenIdRequest.requesterStyle.logo).isNull()
+        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo).isNull()
     }
 
     @Test

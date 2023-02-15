@@ -7,10 +7,10 @@ package com.microsoft.walletlibrary.mappings
 
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdIssuanceRequest
-import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
 
-internal fun IssuanceRequest.toRequesterStyle(): RequesterStyle {
-    return RequesterStyle(
+internal fun IssuanceRequest.toRequesterStyle(): OpenIdRequesterStyle {
+    return OpenIdRequesterStyle(
         this.entityName,
         "",
         null

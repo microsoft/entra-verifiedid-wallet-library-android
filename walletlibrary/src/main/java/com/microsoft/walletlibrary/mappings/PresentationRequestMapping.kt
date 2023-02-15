@@ -8,11 +8,11 @@ package com.microsoft.walletlibrary.mappings
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.styles.Logo
-import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
 
-internal fun PresentationRequest.toRequesterStyle(): RequesterStyle {
+internal fun PresentationRequest.toRequesterStyle(): OpenIdRequesterStyle {
     val registration = this.content.registration
-    return RequesterStyle(
+    return OpenIdRequesterStyle(
         this.entityName,
         "",
         Logo(registration.logoUri, registration.logoData, "")
