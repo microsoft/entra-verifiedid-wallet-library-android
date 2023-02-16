@@ -25,8 +25,8 @@ class MissingInputDescriptorException(message: String = "", cause: Throwable? = 
 
 class MissingVerifiedIdTypeException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
-class MissingRequirementException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
-
 class RequirementCastingException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
 class InputCastingException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
+class MissingRequirementException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)

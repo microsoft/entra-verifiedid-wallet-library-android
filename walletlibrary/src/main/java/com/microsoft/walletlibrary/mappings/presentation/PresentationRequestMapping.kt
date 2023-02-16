@@ -11,7 +11,7 @@ import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.styles.Logo
 import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
 
-private fun PresentationRequest.getRequesterStyle(): OpenIdRequesterStyle {
+internal fun PresentationRequest.getRequesterStyle(): OpenIdRequesterStyle {
     val registration = this.content.registration
     return OpenIdRequesterStyle(
         this.entityName,
