@@ -136,7 +136,7 @@ class IssuanceRequestMappingTest {
         every { credentialAttestations.presentations } returns emptyList()
 
         // Act
-        val actualOpenIdRequest = issuanceRequest.toOpenIdIssuanceRequest()
+        val actualOpenIdRequest = issuanceRequest.toContractIssuanceRequest()
 
         // Assert
         assertThat(actualOpenIdRequest.requirement).isInstanceOf(SelfAttestedClaimRequirement::class.java)
@@ -154,7 +154,7 @@ class IssuanceRequestMappingTest {
         every { credentialAttestations.presentations } returns emptyList()
 
         // Act
-        val actualOpenIdRequest = issuanceRequest.toOpenIdIssuanceRequest()
+        val actualOpenIdRequest = issuanceRequest.toContractIssuanceRequest()
 
         // Assert
         assertThat(actualOpenIdRequest.requirement).isInstanceOf(IdTokenRequirement::class.java)
@@ -170,7 +170,7 @@ class IssuanceRequestMappingTest {
         every { credentialAttestations.presentations } returns emptyList()
 
         // Act
-        val actualOpenIdRequest = issuanceRequest.toOpenIdIssuanceRequest()
+        val actualOpenIdRequest = issuanceRequest.toContractIssuanceRequest()
 
         // Assert
         assertThat(actualOpenIdRequest.requirement).isInstanceOf(AccessTokenRequirement::class.java)
@@ -187,7 +187,7 @@ class IssuanceRequestMappingTest {
         every { credentialAttestations.presentations } returns listOf(presentationAttestation)
 
         // Act
-        val actualOpenIdRequest = issuanceRequest.toOpenIdIssuanceRequest()
+        val actualOpenIdRequest = issuanceRequest.toContractIssuanceRequest()
 
         // Assert
         assertThat(actualOpenIdRequest.requirement).isInstanceOf(GroupRequirement::class.java)
@@ -207,7 +207,7 @@ class IssuanceRequestMappingTest {
         every { credentialAttestations.presentations } returns emptyList()
 
         // Act
-        val actualOpenIdRequest = issuanceRequest.toOpenIdIssuanceRequest()
+        val actualOpenIdRequest = issuanceRequest.toContractIssuanceRequest()
 
         // Assert
         assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo).isNull()
@@ -224,7 +224,7 @@ class IssuanceRequestMappingTest {
         every { credentialAttestations.presentations } returns emptyList()
 
         // Act
-        val actualOpenIdRequest = issuanceRequest.toOpenIdIssuanceRequest()
+        val actualOpenIdRequest = issuanceRequest.toContractIssuanceRequest()
 
         // Assert
         assertThat(actualOpenIdRequest.verifiedIdStyle.logo).isNotNull
@@ -244,7 +244,7 @@ class IssuanceRequestMappingTest {
         every { credentialAttestations.presentations } returns emptyList()
 
         // Act
-        val actualOpenIdRequest = issuanceRequest.toOpenIdIssuanceRequest()
+        val actualOpenIdRequest = issuanceRequest.toContractIssuanceRequest()
 
         // Assert
         assertThat(actualOpenIdRequest.verifiedIdStyle.logo).isNull()
@@ -261,21 +261,13 @@ class IssuanceRequestMappingTest {
         every { credentialAttestations.presentations } returns emptyList()
 
         // Act
-        val actualOpenIdRequest = issuanceRequest.toOpenIdIssuanceRequest()
+        val actualOpenIdRequest = issuanceRequest.toContractIssuanceRequest()
 
         // Assert
         assertThat(actualOpenIdRequest.rootOfTrust.verified).isEqualTo(true)
         assertThat(actualOpenIdRequest.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
-    }
-
-    @Test
-    fun issuanceRequestMapping_mapRequesterStyle_ReturnsRequesterStyle() {
-        // Act
-        val actualRequesterStyle = issuanceRequest.toRequesterStyle()
-
-        // Assert
-        assertThat(actualRequesterStyle.requester).isEqualTo(expectedEntityName)
-        assertThat(actualRequesterStyle.logo).isNull()
-        assertThat(actualRequesterStyle.locale).isEqualTo("")
+        assertThat(actualOpenIdRequest.requesterStyle.requester).isEqualTo(expectedEntityName)
+        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo).isNull()
+        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).locale).isEqualTo("")
     }
 }

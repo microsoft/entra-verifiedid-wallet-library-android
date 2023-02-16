@@ -142,16 +142,8 @@ class PresentationRequestMappingTest {
         // Assert
         assertThat(actualOpenIdRequest.rootOfTrust.verified).isEqualTo(true)
         assertThat(actualOpenIdRequest.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
-    }
-
-    @Test
-    fun presentationRequestMapping_mapRequesterStyle_ReturnsRequesterStyle() {
-        // Act
-        val actualRequesterStyle = presentationRequest.toRequesterStyle()
-
-        // Assert
-        assertThat(actualRequesterStyle.requester).isEqualTo(expectedEntityName)
-        assertThat(actualRequesterStyle.logo).isNotNull
-        assertThat(actualRequesterStyle.locale).isEqualTo("")
+        assertThat(actualOpenIdRequest.requesterStyle.requester).isEqualTo(expectedEntityName)
+        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo).isNotNull
+        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).locale).isEqualTo("")
     }
 }

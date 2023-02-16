@@ -9,26 +9,22 @@ import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAt
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator
 import com.microsoft.walletlibrary.requests.requirements.Requirement
-import com.microsoft.walletlibrary.util.UnsupportedRequirementTypeException
+import com.microsoft.walletlibrary.util.MissingRequirementException
 
-fun CredentialAttestations.toRequirement(): Requirement {
-    val requirementList = mutableListOf<Requirement>()
+internal fun CredentialAttestations.toRequirement(): Requirement {
+    val requirements = mutableListOf<Requirement>()
     if (this.idTokens.isNotEmpty())
-        requirementList.addAll(this.idTokens.map { it.toIdTokenRequirement() })
+        requirements.addAll(this.idTokens.map { it.toIdTokenRequirement() })
     if (this.accessTokens.isNotEmpty())
-        requirementList.addAll(this.accessTokens.map { it.toAccessTokenRequirement() })
+        requirements.addAll(this.accessTokens.map { it.toAccessTokenRequirement() })
     if (this.presentations.isNotEmpty())
-        requirementList.addAll(this.presentations.map { it.toVerifiedIdRequirement() })
+        requirements.addAll(this.presentations.map { it.toVerifiedIdRequirement() })
     if (this.selfIssued.claims.isNotEmpty())
-        requirementList.addAll(listOf(this.selfIssued.toSelfAttestedClaimRequirement()))
-    if (requirementList.isEmpty())
-        throw UnsupportedRequirementTypeException("Requirement type is not supported")
-    return if (requirementList.size > 1) {
-        val groupRequirement = GroupRequirement()
-        groupRequirement.required = true
-        groupRequirement.requirements.addAll(requirementList)
-        groupRequirement.requirementOperator = GroupRequirementOperator.ALL
-        groupRequirement
-    } else
-        requirementList.first()
+        requirements.addAll(listOf(this.selfIssued.toSelfAttestedClaimRequirement()))
+    if (requirements.isEmpty())
+        throw MissingRequirementException("There is no requirement in the request")
+    return if (requirements.size > 1)
+        GroupRequirement(true, requirements, GroupRequirementOperator.ALL)
+    else
+        requirements.first()
 }

@@ -5,12 +5,11 @@ enum class GroupRequirementOperator {
     ALL
 }
 
-class GroupRequirement: Requirement {
-    override var required: Boolean = false
-
-    val requirements = mutableListOf<Requirement>()
-
-    var requirementOperator = GroupRequirementOperator.ANY
+class GroupRequirement(
+    override val required: Boolean,
+    val requirements: List<Requirement>,
+    val requirementOperator: GroupRequirementOperator
+): Requirement {
 
     override fun validate() {
         TODO("Not yet implemented")
