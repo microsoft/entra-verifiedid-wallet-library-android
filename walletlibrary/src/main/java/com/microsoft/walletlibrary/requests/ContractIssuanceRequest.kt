@@ -5,9 +5,12 @@
 
 package com.microsoft.walletlibrary.requests
 
+import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
+import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import com.microsoft.walletlibrary.wrapper.ContractResponder
 
 /**
  * Issuance request specific to OpenId protocol.
@@ -25,8 +28,11 @@ class ContractIssuanceRequest(
     // Attributes describing the Verified ID (eg. name, issuer, logo, background and text colors).
     val verifiedIdStyle: VerifiedIDStyle
 ): VerifiedIdIssuanceRequest {
-    override suspend fun <VerifiedId> complete(): Result<VerifiedId> {
-        TODO("Not yet implemented")
+
+    var request: IssuanceRequest? = null
+
+    override suspend fun complete(): Result<VerifiedId> {
+        return Result.success(ContractResponder.sendIssuanceResponse(this))
     }
 
     override fun isSatisfied(): Boolean {

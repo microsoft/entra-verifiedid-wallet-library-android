@@ -12,13 +12,15 @@ class SelfAttestedClaimRequirement(
     internal val id: String,
 
     // Claim requested.
-    val claim: List<ClaimRequirement>,
+    val claim: String,
 
     // Indicates if the requirement must be encrypted.
     internal val encrypted: Boolean = false,
 
     // Indicates if the requirement is required or optional.
-    override val required: Boolean = false
+    override val required: Boolean = false,
+
+    var value: String = ""
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {
@@ -26,7 +28,7 @@ class SelfAttestedClaimRequirement(
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(selfAttestedClaimName: String, selfAttestedClaimValue: String) {
-        TODO("Not yet implemented")
+    fun fulfill(selfAttestedClaimValue: String) {
+        value = selfAttestedClaimValue
     }
 }

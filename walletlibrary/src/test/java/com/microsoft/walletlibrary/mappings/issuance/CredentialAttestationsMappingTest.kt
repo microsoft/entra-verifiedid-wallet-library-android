@@ -82,8 +82,8 @@ class CredentialAttestationsMappingTest {
         // Assert
         assertThat(actualRequirement)
             .isInstanceOf(SelfAttestedClaimRequirement::class.java)
-        assertThat((actualRequirement as SelfAttestedClaimRequirement).claim.first().claim).isEqualTo(expectedClaimName)
-        assertThat(actualRequirement.required).isEqualTo(false)
+        assertThat((actualRequirement as SelfAttestedClaimRequirement).claim).isEqualTo(expectedClaimName)
+        assertThat(actualRequirement.required).isEqualTo(true)
     }
 
     @Test

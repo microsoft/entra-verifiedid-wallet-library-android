@@ -140,7 +140,7 @@ class IssuanceRequestMappingTest {
 
         // Assert
         assertThat(actualOpenIdRequest.requirement).isInstanceOf(SelfAttestedClaimRequirement::class.java)
-        assertThat(actualOpenIdRequest.requirement.required).isEqualTo(false)
+        assertThat(actualOpenIdRequest.requirement.required).isEqualTo(true)
         assertThat(actualOpenIdRequest.requesterStyle.requester).isEqualTo(expectedEntityName)
     }
 

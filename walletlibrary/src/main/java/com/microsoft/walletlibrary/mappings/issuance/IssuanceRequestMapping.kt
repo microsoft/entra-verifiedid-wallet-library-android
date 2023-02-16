@@ -10,7 +10,7 @@ import com.microsoft.walletlibrary.mappings.toRootOfTrust
 import com.microsoft.walletlibrary.requests.ContractIssuanceRequest
 import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
 
-private fun IssuanceRequest.getRequesterStyle(): OpenIdRequesterStyle {
+internal fun IssuanceRequest.getRequesterStyle(): OpenIdRequesterStyle {
     return OpenIdRequesterStyle(
         this.entityName,
         "",
@@ -19,10 +19,12 @@ private fun IssuanceRequest.getRequesterStyle(): OpenIdRequesterStyle {
 }
 
 internal fun IssuanceRequest.toContractIssuanceRequest(): ContractIssuanceRequest {
-    return ContractIssuanceRequest(
+    val contractIssuanceRequest = ContractIssuanceRequest(
         this.getRequesterStyle(),
         this.getAttestations().toRequirement(),
         this.linkedDomainResult.toRootOfTrust(),
         this.contract.display.toVerifiedIdStyle()
     )
+    contractIssuanceRequest.request = this
+    return contractIssuanceRequest
 }

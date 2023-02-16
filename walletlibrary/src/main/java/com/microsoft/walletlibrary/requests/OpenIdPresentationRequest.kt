@@ -26,7 +26,7 @@ class OpenIdPresentationRequest(
     }
 
     // Completes the request and returns nothing if successful.
-    override suspend fun <Unit> complete(): Result<Unit> {
+    override suspend fun complete(): Result<Unit> {
         TODO("Not yet implemented")
     }
 

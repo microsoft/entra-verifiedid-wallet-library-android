@@ -20,7 +20,7 @@ internal fun CredentialAttestations.toRequirement(): Requirement {
     if (this.presentations.isNotEmpty())
         requirements.addAll(this.presentations.map { it.toVerifiedIdRequirement() })
     if (this.selfIssued.claims.isNotEmpty())
-        requirements.addAll(listOf(this.selfIssued.toSelfAttestedClaimRequirement()))
+        requirements.addAll(listOf(this.selfIssued.toRequirement()))
     if (requirements.isEmpty())
         throw MissingRequirementException("There is no requirement in the request")
     return if (requirements.size > 1)

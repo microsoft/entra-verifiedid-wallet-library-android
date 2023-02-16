@@ -16,6 +16,7 @@ import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.util.InputCastingException
 import com.microsoft.walletlibrary.util.RequirementCastingException
 import com.microsoft.walletlibrary.util.UnSupportedProtocolException
+import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.ContractResolver
 
 /**
@@ -23,7 +24,7 @@ import com.microsoft.walletlibrary.wrapper.ContractResolver
  */
 internal class OpenIdRequestHandler : RequestHandler {
 
-    override suspend fun handleRequest(rawRequest: RawRequest): VerifiedIdRequest {
+    override suspend fun handleRequest(rawRequest: RawRequest): VerifiedIdRequest<*> {
         if ((rawRequest !is OpenIdRawRequest))
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
         val requestContent = rawRequest.handleRawRequest()
@@ -33,7 +34,7 @@ internal class OpenIdRequestHandler : RequestHandler {
         }
     }
 
-    private fun handlePresentationRequest(requestContent: VerifiedIdRequestContent): VerifiedIdRequest {
+    private fun handlePresentationRequest(requestContent: VerifiedIdRequestContent): VerifiedIdRequest<Unit> {
         return OpenIdPresentationRequest(
             requestContent.requesterStyle,
             requestContent.requirement,
@@ -41,7 +42,7 @@ internal class OpenIdRequestHandler : RequestHandler {
         )
     }
 
-    private suspend fun handleIssuanceRequest(requestContent: VerifiedIdRequestContent): VerifiedIdRequest {
+    private suspend fun handleIssuanceRequest(requestContent: VerifiedIdRequestContent): VerifiedIdRequest<VerifiedId> {
         if (requestContent.requirement !is VerifiedIdRequirement)
             throw RequirementCastingException("Requirement is not the expected VerifiedId Requirement")
         if (requestContent.requirement.issuanceOptions.first() !is VerifiedIdRequestURL)
