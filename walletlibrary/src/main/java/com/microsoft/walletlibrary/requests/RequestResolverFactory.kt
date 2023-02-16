@@ -17,7 +17,7 @@ class RequestResolverFactory {
     internal val requestResolvers = mutableListOf<RequestResolver>()
 
     // Returns the first resolver in the list that can resolve the provided VerifiedIdClientInput.
-    fun getResolver(verifiedIdRequestInput: VerifiedIdRequestInput): RequestResolver {
+    internal fun getResolver(verifiedIdRequestInput: VerifiedIdRequestInput): RequestResolver {
         if (requestResolvers.isEmpty()) throw ResolverMissingException("No request resolver is registered")
         val compatibleRequestResolvers = requestResolvers.filter { it.canResolve(verifiedIdRequestInput) }
         if (compatibleRequestResolvers.isEmpty()) throw UnSupportedInputException("No compatible request resolver is registered for this input")

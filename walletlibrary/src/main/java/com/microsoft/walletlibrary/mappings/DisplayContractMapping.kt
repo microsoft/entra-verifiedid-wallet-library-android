@@ -17,7 +17,7 @@ internal fun DisplayContract.toVerifiedIdStyle(): VerifiedIDStyle {
         cardDescriptor.backgroundColor,
         cardDescriptor.textColor,
         cardDescriptor.description,
-        this.claims.values.map { it.toClaimAttributes() },
+        this.claims.mapValues { it.value.toClaimAttributes() },
         cardDescriptor.logo?.toLogo()
     )
 }

@@ -6,22 +6,21 @@
 package com.microsoft.walletlibrary.mappings
 
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
-import com.microsoft.walletlibrary.requests.OpenIdIssuanceRequest
-import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.requests.ContractIssuanceRequest
+import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
 
-internal fun IssuanceRequest.toRequesterStyle(): RequesterStyle {
-    val logo = this.contract.display.card.logo
-    return RequesterStyle(
+private fun IssuanceRequest.getRequesterStyle(): OpenIdRequesterStyle {
+    return OpenIdRequesterStyle(
         this.entityName,
         "",
-        logo?.toLogo()
+        null
     )
 }
 
-internal fun IssuanceRequest.toOpenIdIssuanceRequest(): OpenIdIssuanceRequest {
-    return OpenIdIssuanceRequest(
-        this.toRequesterStyle(),
-        this.getAttestations().selfIssued.toSelfAttestedClaimRequirement(),
+internal fun IssuanceRequest.toContractIssuanceRequest(): ContractIssuanceRequest {
+    return ContractIssuanceRequest(
+        this.getRequesterStyle(),
+        this.getAttestations().toRequirement(),
         this.linkedDomainResult.toRootOfTrust(),
         this.contract.display.toVerifiedIdStyle()
     )

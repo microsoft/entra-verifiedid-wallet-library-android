@@ -39,17 +39,17 @@ class IdTokenAttestationMappingTest {
         val expectedClaimName = "name"
 
         // Act
-        val expectedIdTokenRequirement = actualIdTokenAttestation.toIdTokenRequirement()
+        val actualIdTokenRequirement = actualIdTokenAttestation.toIdTokenRequirement()
 
         // Assert
-        Assertions.assertThat(expectedIdTokenRequirement.claims.first().claim).isEqualTo(expectedClaimName)
-        Assertions.assertThat(expectedIdTokenRequirement.claims.first().required).isEqualTo(true)
-        Assertions.assertThat(expectedIdTokenRequirement.required).isEqualTo(false)
-        Assertions.assertThat(expectedIdTokenRequirement.encrypted).isEqualTo(false)
-        Assertions.assertThat(expectedIdTokenRequirement.configuration).isEqualTo(expectedConfiguration)
-        Assertions.assertThat(expectedIdTokenRequirement.clientId).isEqualTo(expectedClientId)
-        Assertions.assertThat(expectedIdTokenRequirement.redirectUri).isEqualTo(expectedRedirectUri)
-        Assertions.assertThat(expectedIdTokenRequirement.scope).isEqualTo(expectedScope)
+        Assertions.assertThat(actualIdTokenRequirement.claims.first().claim).isEqualTo(expectedClaimName)
+        Assertions.assertThat(actualIdTokenRequirement.claims.first().required).isEqualTo(true)
+        Assertions.assertThat(actualIdTokenRequirement.required).isEqualTo(false)
+        Assertions.assertThat(actualIdTokenRequirement.encrypted).isEqualTo(false)
+        Assertions.assertThat(actualIdTokenRequirement.configuration).isEqualTo(expectedConfiguration)
+        Assertions.assertThat(actualIdTokenRequirement.clientId).isEqualTo(expectedClientId)
+        Assertions.assertThat(actualIdTokenRequirement.redirectUri).isEqualTo(expectedRedirectUri)
+        Assertions.assertThat(actualIdTokenRequirement.scope).isEqualTo(expectedScope)
 
     }
 
@@ -60,17 +60,17 @@ class IdTokenAttestationMappingTest {
         val expectedClaimName = "name"
 
         // Act
-        val expectedIdTokenRequirement = actualIdTokenAttestation.toIdTokenRequirement()
+        val actualIdTokenRequirement = actualIdTokenAttestation.toIdTokenRequirement()
 
         // Assert
-        Assertions.assertThat(expectedIdTokenRequirement.claims.first().claim).isEqualTo(expectedClaimName)
-        Assertions.assertThat(expectedIdTokenRequirement.claims.first().required).isEqualTo(true)
-        Assertions.assertThat(expectedIdTokenRequirement.required).isEqualTo(true)
-        Assertions.assertThat(expectedIdTokenRequirement.encrypted).isEqualTo(true)
-        Assertions.assertThat(expectedIdTokenRequirement.configuration).isEqualTo(expectedConfiguration)
-        Assertions.assertThat(expectedIdTokenRequirement.clientId).isEqualTo(expectedClientId)
-        Assertions.assertThat(expectedIdTokenRequirement.redirectUri).isEqualTo(expectedRedirectUri)
-        Assertions.assertThat(expectedIdTokenRequirement.scope).isEqualTo(expectedScope)
+        Assertions.assertThat(actualIdTokenRequirement.claims.first().claim).isEqualTo(expectedClaimName)
+        Assertions.assertThat(actualIdTokenRequirement.claims.first().required).isEqualTo(true)
+        Assertions.assertThat(actualIdTokenRequirement.required).isEqualTo(true)
+        Assertions.assertThat(actualIdTokenRequirement.encrypted).isEqualTo(true)
+        Assertions.assertThat(actualIdTokenRequirement.configuration).isEqualTo(expectedConfiguration)
+        Assertions.assertThat(actualIdTokenRequirement.clientId).isEqualTo(expectedClientId)
+        Assertions.assertThat(actualIdTokenRequirement.redirectUri).isEqualTo(expectedRedirectUri)
+        Assertions.assertThat(actualIdTokenRequirement.scope).isEqualTo(expectedScope)
     }
 
     @Test
@@ -81,17 +81,17 @@ class IdTokenAttestationMappingTest {
         val expectedClaimNames = listOf("name", "company")
 
         // Act
-        val expectedIdTokenRequirement = actualIdTokenAttestation.toIdTokenRequirement()
+        val actualIdTokenRequirement = actualIdTokenAttestation.toIdTokenRequirement()
 
         // Assert
-        Assertions.assertThat(expectedIdTokenRequirement.claims.map { it.claim }
+        Assertions.assertThat(actualIdTokenRequirement.claims.map { it.claim }
             .containsAll(expectedClaimNames)).isEqualTo(true)
-        Assertions.assertThat(expectedIdTokenRequirement.claims.first().required).isEqualTo(true)
-        Assertions.assertThat(expectedIdTokenRequirement.required).isEqualTo(true)
-        Assertions.assertThat(expectedIdTokenRequirement.encrypted).isEqualTo(true)
-        Assertions.assertThat(expectedIdTokenRequirement.configuration).isEqualTo(expectedConfiguration)
-        Assertions.assertThat(expectedIdTokenRequirement.clientId).isEqualTo(expectedClientId)
-        Assertions.assertThat(expectedIdTokenRequirement.redirectUri).isEqualTo(expectedRedirectUri)
-        Assertions.assertThat(expectedIdTokenRequirement.scope).isEqualTo(expectedScope)
+        Assertions.assertThat(actualIdTokenRequirement.claims.first().required).isEqualTo(true)
+        Assertions.assertThat(actualIdTokenRequirement.required).isEqualTo(true)
+        Assertions.assertThat(actualIdTokenRequirement.encrypted).isEqualTo(true)
+        Assertions.assertThat(actualIdTokenRequirement.configuration).isEqualTo(expectedConfiguration)
+        Assertions.assertThat(actualIdTokenRequirement.clientId).isEqualTo(expectedClientId)
+        Assertions.assertThat(actualIdTokenRequirement.redirectUri).isEqualTo(expectedRedirectUri)
+        Assertions.assertThat(actualIdTokenRequirement.scope).isEqualTo(expectedScope)
     }
 }

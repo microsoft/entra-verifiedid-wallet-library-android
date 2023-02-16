@@ -19,7 +19,7 @@ import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 object OpenIdForVCResolver {
 
     // Fetches the request from VC SDK using the url and converts it to raw request.
-    suspend fun getRequest(uri: String): OpenIdRawRequest {
+    internal suspend fun getRequest(uri: String): OpenIdRawRequest {
         when (val presentationRequestResult =
             VerifiableCredentialSdk.presentationService.getRequest(uri)) {
             is Result.Success -> {

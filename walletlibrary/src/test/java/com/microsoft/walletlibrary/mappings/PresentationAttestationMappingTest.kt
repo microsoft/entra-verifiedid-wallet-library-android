@@ -38,18 +38,18 @@ class PresentationAttestationMappingTest {
         val expectedPurpose = "Testing"
 
         // Act
-        val expectedVerifiedIdRequirement = actualPresentationAttestation.toVerifiedIdRequirement()
-        expectedVerifiedIdRequirement.purpose = expectedPurpose
+        val actualVerifiedIdRequirement = actualPresentationAttestation.toVerifiedIdRequirement()
+        actualVerifiedIdRequirement.purpose = expectedPurpose
 
         // Assert
-        assertThat(expectedVerifiedIdRequirement.required).isEqualTo(false)
-        assertThat(expectedVerifiedIdRequirement.encrypted).isEqualTo(false)
-        assertThat(expectedVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(
+        assertThat(actualVerifiedIdRequirement.required).isEqualTo(false)
+        assertThat(actualVerifiedIdRequirement.encrypted).isEqualTo(false)
+        assertThat(actualVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(
             true
         )
-        assertThat(expectedVerifiedIdRequirement.issuanceOptions.map { (it as VerifiedIdRequestURL).url }
+        assertThat(actualVerifiedIdRequirement.issuanceOptions.map { (it as VerifiedIdRequestURL).url }
             .isEmpty()).isEqualTo(true)
-        assertThat(expectedVerifiedIdRequirement.purpose).isEqualTo(expectedPurpose)
+        assertThat(actualVerifiedIdRequirement.purpose).isEqualTo(expectedPurpose)
     }
 
     @Test
@@ -59,16 +59,16 @@ class PresentationAttestationMappingTest {
         val expectedPurpose = "Testing"
 
         // Act
-        val expectedVerifiedIdRequirement = actualPresentationAttestation.toVerifiedIdRequirement()
-        expectedVerifiedIdRequirement.purpose = expectedPurpose
+        val actualVerifiedIdRequirement = actualPresentationAttestation.toVerifiedIdRequirement()
+        actualVerifiedIdRequirement.purpose = expectedPurpose
 
         // Assert
-        assertThat(expectedVerifiedIdRequirement.required).isEqualTo(true)
-        assertThat(expectedVerifiedIdRequirement.encrypted).isEqualTo(true)
-        assertThat(expectedVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(true)
-        assertThat(expectedVerifiedIdRequirement.issuanceOptions.map { (it as VerifiedIdRequestURL).url }
+        assertThat(actualVerifiedIdRequirement.required).isEqualTo(true)
+        assertThat(actualVerifiedIdRequirement.encrypted).isEqualTo(true)
+        assertThat(actualVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(true)
+        assertThat(actualVerifiedIdRequirement.issuanceOptions.map { (it as VerifiedIdRequestURL).url }
             .isEmpty()).isEqualTo(true)
-        assertThat(expectedVerifiedIdRequirement.purpose).isEqualTo(expectedPurpose)
+        assertThat(actualVerifiedIdRequirement.purpose).isEqualTo(expectedPurpose)
     }
 
     @Test
@@ -78,17 +78,17 @@ class PresentationAttestationMappingTest {
         val expectedPurpose = "Testing"
 
         // Act
-        val expectedVerifiedIdRequirement = actualPresentationAttestation.toVerifiedIdRequirement()
-        expectedVerifiedIdRequirement.purpose = expectedPurpose
+        val actualVerifiedIdRequirement = actualPresentationAttestation.toVerifiedIdRequirement()
+        actualVerifiedIdRequirement.purpose = expectedPurpose
 
         // Assert
-        assertThat(expectedVerifiedIdRequirement.required).isEqualTo(true)
-        assertThat(expectedVerifiedIdRequirement.encrypted).isEqualTo(true)
-        assertThat(expectedVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(
+        assertThat(actualVerifiedIdRequirement.required).isEqualTo(true)
+        assertThat(actualVerifiedIdRequirement.encrypted).isEqualTo(true)
+        assertThat(actualVerifiedIdRequirement.types.contains(expectedCredentialType)).isEqualTo(
             true
         )
-        assertThat(expectedVerifiedIdRequirement.issuanceOptions.map { (it as VerifiedIdRequestURL).url }
+        assertThat(actualVerifiedIdRequirement.issuanceOptions.map { (it as VerifiedIdRequestURL).url }
             .isEmpty()).isEqualTo(true)
-        assertThat(expectedVerifiedIdRequirement.purpose).isEqualTo(expectedPurpose)
+        assertThat(actualVerifiedIdRequirement.purpose).isEqualTo(expectedPurpose)
     }
 }
