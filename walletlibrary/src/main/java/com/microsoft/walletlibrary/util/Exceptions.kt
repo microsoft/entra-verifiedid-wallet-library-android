@@ -30,3 +30,13 @@ class RequirementCastingException(message: String = "", cause: Throwable? = null
 class InputCastingException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
 class MissingRequirementException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
+class SelfAttestedClaimRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
+class IdTokenRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
+class AccessTokenRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
+class VerifiedIdRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
+class PinRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)

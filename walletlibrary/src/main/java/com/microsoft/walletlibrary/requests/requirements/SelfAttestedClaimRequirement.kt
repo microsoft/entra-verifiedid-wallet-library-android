@@ -5,6 +5,8 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.walletlibrary.util.SelfAttestedClaimRequirementNotFulfilledException
+
 /**
  * Represents information that describes self-attested claims required in order to complete a VerifiedID request.
  */
@@ -24,7 +26,9 @@ class SelfAttestedClaimRequirement(
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {
-        TODO("Not yet implemented")
+        //TODO("should required field be checked?")
+        if (value == null)
+            throw SelfAttestedClaimRequirementNotFulfilledException("SelfAttestedClaimRequirement has not been fulfilled.")
     }
 
     // Fulfills the requirement in the request with specified value.

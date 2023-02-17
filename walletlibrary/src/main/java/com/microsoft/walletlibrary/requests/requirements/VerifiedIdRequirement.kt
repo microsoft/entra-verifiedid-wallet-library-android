@@ -6,6 +6,7 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
+import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 /**
@@ -33,7 +34,8 @@ class VerifiedIdRequirement(
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {
-        TODO("Not yet implemented")
+        if (verifiedId == null)
+            throw VerifiedIdRequirementNotFulfilledException("VerifiedIdRequirement has not been fulfilled.")
     }
 
     // Fulfills the requirement in the request with specified value.
