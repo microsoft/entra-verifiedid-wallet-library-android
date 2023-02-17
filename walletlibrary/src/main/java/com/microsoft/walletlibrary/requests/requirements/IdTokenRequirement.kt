@@ -27,7 +27,9 @@ class IdTokenRequirement(
     internal val encrypted: Boolean = false,
 
     // Indicates whether the requirement is required or optional.
-    override val required: Boolean = false
+    override val required: Boolean = false,
+
+    internal var idToken: String? = null
 ): Requirement {
 
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
@@ -36,7 +38,7 @@ class IdTokenRequirement(
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(idToken: String) {
-        TODO("Not yet implemented")
+    fun fulfill(idTokenValue: String) {
+        idToken = idTokenValue
     }
 }

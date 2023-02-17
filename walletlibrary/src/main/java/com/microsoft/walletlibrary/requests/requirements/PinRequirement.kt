@@ -16,7 +16,9 @@ class PinRequirement(
     val type: String,
 
     // Indicates if pin is required or optional.
-    override val required: Boolean = false
+    override val required: Boolean = false,
+
+    internal var pin: String? = null
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {
@@ -24,7 +26,7 @@ class PinRequirement(
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(pin: String) {
-        TODO("Not yet implemented")
+    fun fulfill(pinValue: String) {
+        pin = pinValue
     }
 }

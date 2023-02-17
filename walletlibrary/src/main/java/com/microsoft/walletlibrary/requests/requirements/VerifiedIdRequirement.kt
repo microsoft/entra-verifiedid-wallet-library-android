@@ -27,7 +27,9 @@ class VerifiedIdRequirement(
     var purpose: String = "",
 
     // Information needed for issuance from presentation.
-    val issuanceOptions: List<VerifiedIdRequestInput> = mutableListOf()
+    val issuanceOptions: List<VerifiedIdRequestInput> = mutableListOf(),
+
+    internal var verifiedId: VerifiedId? = null
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {
@@ -35,8 +37,8 @@ class VerifiedIdRequirement(
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(verifiedId: VerifiedId) {
-        TODO("Not yet implemented")
+    fun fulfill(verifiedIdValue: VerifiedId) {
+        verifiedId = verifiedIdValue
     }
 
     // Retrieves list of Verified IDs from the provided list that matches this requirement.

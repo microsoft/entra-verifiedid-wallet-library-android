@@ -20,7 +20,7 @@ class SelfAttestedClaimRequirement(
     // Indicates if the requirement is required or optional.
     override val required: Boolean = false,
 
-    var value: String = ""
+    internal var value: String? = null
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {

@@ -28,10 +28,9 @@ internal class OpenIdRequestHandler : RequestHandler {
         if ((rawRequest !is OpenIdRawRequest))
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
         val requestContent = rawRequest.handleRawRequest()
-        return when (rawRequest.requestType) {
-            RequestType.PRESENTATION -> handlePresentationRequest(requestContent)
-            RequestType.ISSUANCE -> handleIssuanceRequest(requestContent)
-        }
+        if (rawRequest.requestType == RequestType.ISSUANCE)
+            return handleIssuanceRequest(requestContent)
+        return handlePresentationRequest(requestContent)
     }
 
     private fun handlePresentationRequest(requestContent: VerifiedIdRequestContent): VerifiedIdRequest<Unit> {
