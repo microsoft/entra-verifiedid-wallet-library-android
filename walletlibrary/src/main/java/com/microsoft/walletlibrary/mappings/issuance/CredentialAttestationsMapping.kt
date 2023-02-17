@@ -11,6 +11,9 @@ import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperato
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.MissingRequirementException
 
+/**
+ * Maps each attestation object in CredentialAttestation to its corresponding Requirement object in library.
+ */
 internal fun CredentialAttestations.toRequirement(): Requirement {
     val requirements = mutableListOf<Requirement>()
     if (this.idTokens.isNotEmpty())

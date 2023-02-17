@@ -5,7 +5,7 @@
 
 package com.microsoft.walletlibrary.requests
 
-import com.microsoft.walletlibrary.requests.rawrequests.RawContract
+import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
@@ -15,9 +15,9 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
 
 /**
- * Issuance request specific to OpenId protocol.
+ * Issuance request specific to Manifest/Contract.
  */
-class ContractIssuanceRequest(
+class ManifestIssuanceRequest(
     // Attributes describing the requester (eg. name, logo).
     override val requesterStyle: RequesterStyle,
 
@@ -30,7 +30,7 @@ class ContractIssuanceRequest(
     // Attributes describing the Verified ID (eg. name, issuer, logo, background and text colors).
     val verifiedIdStyle: VerifiedIDStyle,
 
-    val request: RawContract
+    val request: RawManifest
 ): VerifiedIdIssuanceRequest {
     override suspend fun complete(): Result<VerifiedId> {
         return try {

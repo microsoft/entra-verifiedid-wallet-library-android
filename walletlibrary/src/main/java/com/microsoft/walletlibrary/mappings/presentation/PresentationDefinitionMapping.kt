@@ -11,6 +11,9 @@ import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperato
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.MissingInputDescriptorException
 
+/**
+ * Maps PresentationDefinition object of Presentation Exchange in SDK to corresponding Requirement to library.
+ */
 internal fun PresentationDefinition.toRequirement(): Requirement {
     if (this.credentialPresentationInputDescriptors.isEmpty())
         throw MissingInputDescriptorException("There is no credential input descriptor in presentation definition.")

@@ -11,6 +11,9 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
 
+/**
+ * Maps CredentialPresentationInputDescriptor object of presentation in SDK to VerifiedIdRequirement object in library.
+ */
 internal fun CredentialPresentationInputDescriptor.toVerifiedIdRequirement(): VerifiedIdRequirement {
     if (this.schemas.isEmpty())
         throw MissingVerifiedIdTypeException("There is no VerifiedId Type in credential input descriptor.")

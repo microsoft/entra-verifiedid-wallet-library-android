@@ -17,7 +17,7 @@ import com.microsoft.walletlibrary.util.InputCastingException
 import com.microsoft.walletlibrary.util.RequirementCastingException
 import com.microsoft.walletlibrary.util.UnSupportedProtocolException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
-import com.microsoft.walletlibrary.wrapper.ContractResolver
+import com.microsoft.walletlibrary.wrapper.ManifestResolver
 
 /**
  * OIDC protocol specific implementation of RequestHandler. It can handle OpenID raw request and returns a VerifiedIdRequest.
@@ -47,6 +47,6 @@ internal class OpenIdRequestHandler : RequestHandler {
         if (requestContent.requirement.issuanceOptions.first() !is VerifiedIdRequestURL)
             throw InputCastingException("VerifiedId Input is not the expected VerifiedIdRequestURL type")
         val contractUrl = (requestContent.requirement.issuanceOptions.first() as VerifiedIdRequestURL).url
-        return ContractResolver.getIssuanceRequest(contractUrl.toString())
+        return ManifestResolver.getIssuanceRequest(contractUrl.toString())
     }
 }

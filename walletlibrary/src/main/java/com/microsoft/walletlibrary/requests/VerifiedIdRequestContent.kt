@@ -10,9 +10,9 @@ import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 
 /**
  * Contents in a Verified Id Request.
- * It is used to map protocol specific requests to abstract request objects.
+ * It is used to map protocol specific requests in SDK to abstract request objects in library.
  */
-class VerifiedIdRequestContent(
+internal class VerifiedIdRequestContent(
     // Attributes describing the requester (eg. name, logo).
     internal val requesterStyle: RequesterStyle,
 

@@ -11,6 +11,9 @@ import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomai
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.requests.RootOfTrust
 
+/**
+ * Maps LinkedDomainResult object from VC SDK to RootOfTrust object in library.
+ */
 internal fun LinkedDomainResult.toRootOfTrust(): RootOfTrust {
     return when (this) {
         is LinkedDomainVerified -> RootOfTrust(domainUrl, true)

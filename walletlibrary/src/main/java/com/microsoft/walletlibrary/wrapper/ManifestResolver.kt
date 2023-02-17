@@ -7,22 +7,22 @@ package com.microsoft.walletlibrary.wrapper
 
 import com.microsoft.did.sdk.VerifiableCredentialSdk
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.walletlibrary.mappings.issuance.toContractIssuanceRequest
-import com.microsoft.walletlibrary.requests.ContractIssuanceRequest
+import com.microsoft.walletlibrary.mappings.issuance.toManifestIssuanceRequest
+import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 
 /**
  * Wrapper class to wrap the get Issuance Request from VC SDK and return a raw request.
  */
-object ContractResolver {
+object ManifestResolver {
 
     // Fetches the issuance request from VC SDK using the url and converts it to raw request.
-    internal suspend fun getIssuanceRequest(uri: String): ContractIssuanceRequest {
+    internal suspend fun getIssuanceRequest(uri: String): ManifestIssuanceRequest {
         return when (val issuanceRequestResult =
             VerifiableCredentialSdk.issuanceService.getRequest(uri)) {
             is Result.Success -> {
                 val request = issuanceRequestResult.payload
-                request.toContractIssuanceRequest()
+                request.toManifestIssuanceRequest()
             }
             is Result.Failure -> {
                 throw VerifiedIdRequestFetchException(

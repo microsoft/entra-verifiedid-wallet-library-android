@@ -11,6 +11,9 @@ import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.styles.Logo
 import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
 
+/**
+ * Maps PresentationRequest object from VC SDK to RequesterStyle and OpenIdPresentationRequest in library.
+ */
 internal fun PresentationRequest.getRequesterStyle(): OpenIdRequesterStyle {
     val registration = this.content.registration
     return OpenIdRequesterStyle(
