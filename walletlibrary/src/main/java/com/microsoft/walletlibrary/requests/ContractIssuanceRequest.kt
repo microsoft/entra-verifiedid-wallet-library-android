@@ -6,9 +6,11 @@
 package com.microsoft.walletlibrary.requests
 
 import com.microsoft.walletlibrary.requests.rawrequests.RawContract
+import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
+import com.microsoft.walletlibrary.util.RequirementValidationException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
 
@@ -40,7 +42,17 @@ class ContractIssuanceRequest(
     }
 
     override fun isSatisfied(): Boolean {
-        TODO("Not yet implemented")
+        try {
+            if (requirement is GroupRequirement) {
+                for (req in requirement.requirements) {
+                    req.validate()
+                }
+            } else
+                requirement.validate()
+        } catch (exception: RequirementValidationException) {
+            return false
+        }
+        return true
     }
 
     override fun cancel(message: String?): Result<Void> {
