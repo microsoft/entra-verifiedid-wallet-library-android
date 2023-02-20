@@ -11,6 +11,7 @@ import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
 import com.microsoft.walletlibrary.util.RequirementValidationException
+import com.microsoft.walletlibrary.util.WalletLibraryException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
 
@@ -36,7 +37,7 @@ class ManifestIssuanceRequest(
         return try {
             val verifiedId = VerifiedIdRequester.sendIssuanceResponse(this)
             Result.success(verifiedId)
-        } catch (exception: Exception) {
+        } catch (exception: WalletLibraryException) {
             Result.failure(exception)
         }
     }

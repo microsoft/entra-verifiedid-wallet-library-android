@@ -17,7 +17,7 @@ import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 object ManifestResolver {
 
     // Fetches the issuance request from VC SDK using the url and converts it to raw request.
-    internal suspend fun getIssuanceRequest(uri: String): ManifestIssuanceRequest {
+    suspend fun getIssuanceRequest(uri: String): ManifestIssuanceRequest {
         return when (val issuanceRequestResult =
             VerifiableCredentialSdk.issuanceService.getRequest(uri)) {
             is Result.Success -> {

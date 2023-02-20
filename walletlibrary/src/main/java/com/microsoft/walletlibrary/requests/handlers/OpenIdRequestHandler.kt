@@ -42,11 +42,18 @@ internal class OpenIdRequestHandler : RequestHandler {
     }
 
     private suspend fun handleIssuanceRequest(requestContent: VerifiedIdRequestContent): VerifiedIdRequest<VerifiedId> {
+        validateRequirement(requestContent)
+        val contractUrl = ((requestContent.requirement as VerifiedIdRequirement).issuanceOptions.first() as VerifiedIdRequestURL).url
+        return getIssuanceRequest(contractUrl.toString())
+    }
+
+    private fun validateRequirement(requestContent: VerifiedIdRequestContent) {
         if (requestContent.requirement !is VerifiedIdRequirement)
             throw RequirementCastingException("Requirement is not the expected VerifiedId Requirement")
         if (requestContent.requirement.issuanceOptions.first() !is VerifiedIdRequestURL)
             throw InputCastingException("VerifiedId Input is not the expected VerifiedIdRequestURL type")
-        val contractUrl = (requestContent.requirement.issuanceOptions.first() as VerifiedIdRequestURL).url
-        return ManifestResolver.getIssuanceRequest(contractUrl.toString())
+    }
+    private suspend fun getIssuanceRequest(contractUrl: String): VerifiedIdRequest<VerifiedId> {
+        return ManifestResolver.getIssuanceRequest(contractUrl)
     }
 }

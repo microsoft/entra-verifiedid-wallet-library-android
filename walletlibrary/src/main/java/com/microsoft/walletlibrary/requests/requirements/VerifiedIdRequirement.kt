@@ -30,7 +30,7 @@ class VerifiedIdRequirement(
     // Information needed for issuance from presentation.
     val issuanceOptions: List<VerifiedIdRequestInput> = mutableListOf(),
 
-    internal var verifiedId: VerifiedId? = null
+    private var verifiedId: VerifiedId? = null
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {

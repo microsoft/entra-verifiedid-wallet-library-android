@@ -132,7 +132,7 @@ class PresentationRequestMappingTest {
     }
 
     @Test
-    fun presentationRequestMapping_mapRootOfTrust_ReturnsRequest() {
+    fun presentationRequestMapping_MapRootOfTrust_ReturnsRequest() {
         // Arrange
         setupInput(listOf(inputDescriptor), true)
 
@@ -145,5 +145,18 @@ class PresentationRequestMappingTest {
         assertThat(actualOpenIdRequest.requesterStyle.requester).isEqualTo(expectedEntityName)
         assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo).isNotNull
         assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).locale).isEqualTo("")
+    }
+
+    @Test
+    fun presentationRequestMapping_MapRequesterStyle_ReturnsOpenIdRequesterStyle() {
+        // Act
+        val actualRequesterStyle = presentationRequest.getRequesterStyle()
+
+        // Assert
+        assertThat(actualRequesterStyle).isInstanceOf(OpenIdRequesterStyle::class.java)
+        assertThat(actualRequesterStyle.requester).isEqualTo(expectedEntityName)
+        assertThat(actualRequesterStyle.logo).isNotNull
+        assertThat(actualRequesterStyle.logo?.uri).isEqualTo(expectedLogoUri)
+        assertThat(actualRequesterStyle.logo?.image).isEqualTo(expectedLogoImage)
     }
 }
