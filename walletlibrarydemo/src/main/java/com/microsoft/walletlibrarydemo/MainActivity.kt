@@ -2,110 +2,72 @@ package com.microsoft.walletlibrarydemo
 
 import android.net.Uri
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.microsoft.walletlibrary.VerifiedIdClientBuilder
-import com.microsoft.walletlibrary.requests.ContractIssuanceRequest
+import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
+import com.microsoft.walletlibrarydemo.databinding.ActivityMainBinding
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+
     private lateinit var verifiedIdRequest: VerifiedIdRequest<*>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        val button = findViewById<Button>(R.id.button)
-        button.setOnClickListener { onClickButton() }
-        val buttonComplete = findViewById<Button>(R.id.buttonComplete)
-        buttonComplete.setOnClickListener { completeIssuance() }
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.button.setOnClickListener { onClickButton() }
+        binding.buttonComplete.setOnClickListener { completeIssuance() }
 
     }
 
     private fun onClickButton() {
-        val text = findViewById<TextView>(R.id.textview)
-        val nameLabel = findViewById<TextView>(R.id.nameLabel)
-        val name = findViewById<EditText>(R.id.name)
-        val companyLabel = findViewById<TextView>(R.id.companyLabel)
-        val company = findViewById<EditText>(R.id.company)
-        val button = findViewById<Button>(R.id.button)
-        val buttonComplete = findViewById<Button>(R.id.buttonComplete)
         val verifiedIdClient = VerifiedIdClientBuilder(applicationContext).build()
+        binding.buttonComplete.isEnabled = true
+        binding.button.isEnabled = false
         runBlocking {
             // Use the test uri here
             verifiedIdRequest =
-                verifiedIdClient.createRequest(VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/issuanceRequests/c7893e52-9131-40b2-9c02-621791a1182d")))
+                verifiedIdClient.createRequest(VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/issuanceRequests/624bcccb-294f-4742-b76e-8d528c728541")))
             if (verifiedIdRequest is OpenIdPresentationRequest)
-                text.text =
-                    "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
-            else if (verifiedIdRequest is ContractIssuanceRequest) {
-                text.text =
-                    "Issuance request for ${(verifiedIdRequest as ContractIssuanceRequest).verifiedIdStyle?.title}"
-                nameLabel.visibility = View.VISIBLE
-                name.visibility = View.VISIBLE
-                companyLabel.visibility = View.VISIBLE
-                company.visibility = View.VISIBLE
-                buttonComplete.visibility = View.VISIBLE
-                button.visibility = View.GONE
+                binding.textview.text = "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
+            else if (verifiedIdRequest is ManifestIssuanceRequest) {
+                binding.textview.text = "Issuance request for ${(verifiedIdRequest as ManifestIssuanceRequest).verifiedIdStyle?.title}"
+                configureSelfIssuedFields()
             }
         }
     }
 
+    private fun configureSelfIssuedFields() {
+        binding.nameLabel.visibility = View.VISIBLE
+        binding.name.visibility = View.VISIBLE
+        binding.companyLabel.visibility = View.VISIBLE
+        binding.company.visibility = View.VISIBLE
+    }
+
     private fun completeIssuance() {
-        val text = findViewById<TextView>(R.id.textview)
-        val name = findViewById<EditText>(R.id.name)
-        val company = findViewById<EditText>(R.id.company)
-/*        name.setOnEditorActionListener { textView: TextView, actionId: Int, event: KeyEvent? ->
-            onEditorAction(textView, actionId, event, "name")
-        }
-        company.setOnEditorActionListener { textView: TextView, actionId: Int, event: KeyEvent? ->
-            onEditorAction(textView, actionId, event, "company")
-        }*/
         val requirement = verifiedIdRequest.requirement
         if (requirement is GroupRequirement) {
             val requirements = requirement.requirements
             for (req in requirements) {
                 if (req is SelfAttestedClaimRequirement) {
                     if (req.claim == "name")
-                        req.fulfill(name.text.toString())
+                        req.fulfill(binding.name.text.toString())
                     if (req.claim == "company")
-                        req.fulfill(company.text.toString())
+                        req.fulfill(binding.company.text.toString())
                 }
             }
         }
         runBlocking {
             val response = verifiedIdRequest.complete()
-            text.text = response.getOrDefault("").toString()
+            binding.textview.text = response.getOrDefault("").toString()
         }
-    }
-
-    private fun onEditorAction(
-        view: TextView,
-        actionId: Int,
-        event: KeyEvent?,
-        claimName: String
-    ): Boolean {
-        if (actionId == EditorInfo.IME_ACTION_DONE || (actionId == EditorInfo.IME_NULL && event?.action == KeyEvent.ACTION_DOWN)) {
-            val requirement = verifiedIdRequest.requirement
-            if (requirement is GroupRequirement) {
-                val requirements = requirement.requirements
-                for (req in requirements) {
-                    if (req is SelfAttestedClaimRequirement) {
-                        if (req.claim == claimName)
-                            req.fulfill(view.text.toString())
-                    }
-                }
-            }
-            return true
-        }
-        return false
+        binding.buttonComplete.isEnabled = false
     }
 }

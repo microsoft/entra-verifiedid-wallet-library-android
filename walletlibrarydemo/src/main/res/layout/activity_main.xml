@@ -4,43 +4,46 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginHorizontal="10dp"
+    android:layout_marginVertical="10dp"
     tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/nameLabel"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Name:"
         android:labelFor="@id/name"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textview"
+        app:layout_constraintTop_toBottomOf="@id/textContainer"
         android:visibility="gone"
         android:layout_marginHorizontal="60dp"
-        android:layout_marginVertical="60dp"/>
+        android:layout_marginTop="60dp"/>
 
     <EditText
         android:id="@+id/name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="60dp"
-        android:layout_marginVertical="60dp"
+        android:layout_marginHorizontal="60dp"
+        android:layout_marginBottom="60dp"
         android:imeOptions="flagNoExtractUi"
         android:importantForAutofill="no"
         android:inputType="textPersonName"
         android:hint="Enter your name"
         android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textview"/>
+        app:layout_constraintTop_toBottomOf="@id/nameLabel"/>
 
     <TextView
         android:id="@+id/companyLabel"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Company:"
         android:labelFor="@id/company"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/nameLabel"
         android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/name"
         android:layout_marginStart="60dp"
         android:layout_marginVertical="30dp"/>
 
@@ -48,48 +51,59 @@
         android:id="@+id/company"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="60dp"
-        android:layout_marginVertical="30dp"
+        android:layout_marginHorizontal="60dp"
+        android:layout_marginBottom="30dp"
         android:imeOptions="flagNoExtractUi"
         android:importantForAutofill="no"
         android:inputType="textPersonName"
         android:hint="Enter your company"
         android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/name"/>
+        app:layout_constraintTop_toBottomOf="@id/companyLabel"/>
 
     <Button
         android:id="@+id/button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Initiate Issuance"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginVertical="20dp"
+        android:text="Initiate Request"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/buttonComplete"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/textview"
         tools:layout_editor_absoluteX="148dp"
         tools:layout_editor_absoluteY="330dp" />
 
     <Button
         android:id="@+id/buttonComplete"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Complete Issuance"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="Complete Request"
+        android:enabled="false"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginVertical="20dp"
+        app:layout_constraintStart_toEndOf="@id/button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/textview"
         tools:layout_editor_absoluteX="148dp"
         tools:layout_editor_absoluteY="330dp" />
 
-    <TextView
-        android:id="@+id/textview"
+    <ScrollView
+        android:id="@+id/textContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button" />
+        app:layout_constraintTop_toBottomOf="@id/button" >
+
+        <TextView
+            android:id="@+id/textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hello World!" />
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
