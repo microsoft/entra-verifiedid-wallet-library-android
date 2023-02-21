@@ -2,14 +2,15 @@ package com.microsoft.walletlibrarydemo
 
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.microsoft.walletlibrary.VerifiedIdClientBuilder
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
+import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrarydemo.databinding.ActivityMainBinding
 import kotlinx.coroutines.runBlocking
@@ -22,52 +23,48 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.button.setOnClickListener { onClickButton() }
-        binding.buttonComplete.setOnClickListener { completeIssuance() }
-
+        configureViews()
     }
 
-    private fun onClickButton() {
+    private fun configureViews() {
+        binding.initiateIssuance.setOnClickListener { initiateIssuance() }
+        binding.completeIssuance.setOnClickListener { completeIssuance() }
+    }
+
+    private fun initiateIssuance() {
         val verifiedIdClient = VerifiedIdClientBuilder(applicationContext).build()
-        binding.buttonComplete.isEnabled = true
-        binding.button.isEnabled = false
+        binding.completeIssuance.isEnabled = true
+        binding.initiateIssuance.isEnabled = false
         runBlocking {
             // Use the test uri here
             verifiedIdRequest =
-                verifiedIdClient.createRequest(VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/issuanceRequests/624bcccb-294f-4742-b76e-8d528c728541")))
+                verifiedIdClient.createRequest(VerifiedIdRequestURL(Uri.parse("")))
             if (verifiedIdRequest is OpenIdPresentationRequest)
-                binding.textview.text = "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
+                binding.textview.text =
+                    "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
             else if (verifiedIdRequest is ManifestIssuanceRequest) {
-                binding.textview.text = "Issuance request for ${(verifiedIdRequest as ManifestIssuanceRequest).verifiedIdStyle?.title}"
-                configureSelfIssuedFields()
+                binding.textview.text =
+                    "Issuance request for ${(verifiedIdRequest as ManifestIssuanceRequest).verifiedIdStyle?.title}"
+                configureViewsForSelfAttestedRequirements(verifiedIdRequest.requirement)
             }
         }
     }
 
-    private fun configureSelfIssuedFields() {
-        binding.nameLabel.visibility = View.VISIBLE
-        binding.name.visibility = View.VISIBLE
-        binding.companyLabel.visibility = View.VISIBLE
-        binding.company.visibility = View.VISIBLE
+    private fun configureViewsForSelfAttestedRequirements(requirements: Requirement) {
+        val requirement = if (requirements is GroupRequirement)
+            requirements.requirements.map { it as SelfAttestedClaimRequirement }
+        else listOf(requirements as SelfAttestedClaimRequirement)
+        val adapter = RequirementsAdapter(applicationContext, requirement)
+        binding.requirementsList.layoutManager = LinearLayoutManager(applicationContext)
+        binding.requirementsList.isNestedScrollingEnabled = false
+        binding.requirementsList.adapter = adapter
     }
 
     private fun completeIssuance() {
-        val requirement = verifiedIdRequest.requirement
-        if (requirement is GroupRequirement) {
-            val requirements = requirement.requirements
-            for (req in requirements) {
-                if (req is SelfAttestedClaimRequirement) {
-                    if (req.claim == "name")
-                        req.fulfill(binding.name.text.toString())
-                    if (req.claim == "company")
-                        req.fulfill(binding.company.text.toString())
-                }
-            }
-        }
         runBlocking {
             val response = verifiedIdRequest.complete()
             binding.textview.text = response.getOrDefault("").toString()
         }
-        binding.buttonComplete.isEnabled = false
+        binding.completeIssuance.isEnabled = false
     }
 }
