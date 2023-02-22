@@ -9,7 +9,7 @@ import com.microsoft.walletlibrary.requests.VerifiedIdRequestContent
 internal class VerifiedIdOpenIdJwtRawRequest(
     override val requestType: RequestType, override val rawRequest: PresentationRequest
 ): OpenIdRawRequest {
-    override fun handleRawRequest(): VerifiedIdRequestContent {
+    override fun mapToRequestContent(): VerifiedIdRequestContent {
         return VerifiedIdRequestContent(
             this.rawRequest.getRequesterStyle(),
             this.rawRequest.getPresentationDefinition().toRequirement(),

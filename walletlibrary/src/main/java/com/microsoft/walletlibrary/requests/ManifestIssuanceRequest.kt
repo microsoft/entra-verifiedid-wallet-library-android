@@ -35,7 +35,7 @@ class ManifestIssuanceRequest(
 ): VerifiedIdIssuanceRequest {
     override suspend fun complete(): Result<VerifiedId> {
         return try {
-            val verifiedId = VerifiedIdRequester.sendIssuanceResponse(this)
+            val verifiedId = VerifiedIdRequester.sendIssuanceResponse(request.rawRequest, requirement)
             Result.success(verifiedId)
         } catch (exception: WalletLibraryException) {
             Result.failure(exception)

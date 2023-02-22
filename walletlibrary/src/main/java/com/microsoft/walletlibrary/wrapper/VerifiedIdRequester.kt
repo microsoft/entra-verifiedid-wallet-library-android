@@ -6,21 +6,23 @@
 package com.microsoft.walletlibrary.wrapper
 
 import com.microsoft.did.sdk.VerifiableCredentialSdk
+import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.mappings.issuance.addRequirements
 import com.microsoft.walletlibrary.mappings.issuance.toVerifiedId
-import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
+import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 /**
  * Wrapper class to wrap the completion of Issuance Request via VC SDK, map the received VerifiableCredential to VerifiedId and return it.
  */
 object VerifiedIdRequester {
-    internal suspend fun sendIssuanceResponse(verifiedIdRequest: ManifestIssuanceRequest): VerifiedId {
-        val issuanceRequest = verifiedIdRequest.request.rawRequest
+    internal suspend fun sendIssuanceResponse(
+        issuanceRequest: IssuanceRequest,
+        requirement: Requirement
+    ): VerifiedId {
         val issuanceResponse = IssuanceResponse(issuanceRequest)
-        val requirement = verifiedIdRequest.requirement
         issuanceResponse.addRequirements(requirement)
         when (val result = VerifiableCredentialSdk.issuanceService.sendResponse(issuanceResponse)) {
             is Result.Success -> return result.payload.toVerifiedId()
