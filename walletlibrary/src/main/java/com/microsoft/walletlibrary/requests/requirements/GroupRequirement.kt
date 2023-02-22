@@ -20,6 +20,9 @@ class GroupRequirement(
 ): Requirement {
 
     override fun validate() {
-        TODO("Not yet implemented")
+        //TODO("Not fully implemented yet")
+        for (requirement in requirements) {
+            requirement.validate()
+        }
     }
 }
