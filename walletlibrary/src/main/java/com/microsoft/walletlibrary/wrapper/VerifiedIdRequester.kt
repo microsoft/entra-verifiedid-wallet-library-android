@@ -12,6 +12,7 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.mappings.issuance.addRequirements
 import com.microsoft.walletlibrary.mappings.issuance.toVerifiedId
 import com.microsoft.walletlibrary.requests.requirements.Requirement
+import com.microsoft.walletlibrary.util.VerifiedIdResponseCompletionException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 /**
@@ -26,7 +27,12 @@ object VerifiedIdRequester {
         issuanceResponse.addRequirements(requirement)
         when (val result = VerifiableCredentialSdk.issuanceService.sendResponse(issuanceResponse)) {
             is Result.Success -> return result.payload.toVerifiedId()
-            is Result.Failure -> throw result.payload
+            is Result.Failure -> {
+                throw VerifiedIdResponseCompletionException(
+                    "Unable to complete issuance response",
+                    result.payload
+                )
+            }
         }
     }
 }
