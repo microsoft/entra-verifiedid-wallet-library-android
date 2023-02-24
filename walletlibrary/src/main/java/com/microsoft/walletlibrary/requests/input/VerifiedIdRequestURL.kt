@@ -10,5 +10,4 @@ import android.net.Uri
 /**
  * Determines and initiates a valid flow using the provided url string.
  */
-class VerifiedIdRequestURL(internal val url: Uri): VerifiedIdRequestInput {
-}
+class VerifiedIdRequestURL(internal val url: Uri): VerifiedIdRequestInput
