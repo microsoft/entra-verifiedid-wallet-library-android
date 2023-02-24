@@ -40,7 +40,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         requestHandlerFactory.requestHandlers.addAll(requestHandlers)
         
         VerifiableCredentialSdk.init(context)
-        return VerifiedIdClient(requestResolverFactory, requestHandlerFactory)
+        return VerifiedIdClient(requestResolverFactory, requestHandlerFactory, logger)
     }
 
     private fun registerRequestHandler(requestHandler: RequestHandler) {

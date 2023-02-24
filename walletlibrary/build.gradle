@@ -47,4 +47,6 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1"
     androidTestImplementation "androidx.test.ext:junit:$androidx_test_junit_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidx_test_espresso_core_version"
+    androidTestImplementation "org.assertj:assertj-core:$assertj_test_version"
+    androidTestImplementation "io.mockk:mockk:$mockk_version"
 }
