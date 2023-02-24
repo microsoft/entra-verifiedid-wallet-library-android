@@ -38,6 +38,7 @@ class VerifiedIdRequirementTest {
 
     @Test
     fun verifiedIdRequirement_validateUnFulfilledRequirement_ThrowsException() {
+        // Act and Assert
         Assertions.assertThatThrownBy {
             verifiedIdRequirement.validate()
         }.isInstanceOf(VerifiedIdRequirementNotFulfilledException::class.java)

@@ -34,6 +34,7 @@ class PinRequirementTest {
 
     @Test
     fun pinRequirement_validateUnFulfilledRequirement_ThrowsException() {
+        // Act and Assert
         Assertions.assertThatThrownBy {
             pinRequirement.validate()
         }.isInstanceOf(PinRequirementNotFulfilledException::class.java)

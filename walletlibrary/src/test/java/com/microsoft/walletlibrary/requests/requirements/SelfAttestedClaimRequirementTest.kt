@@ -36,6 +36,7 @@ class SelfAttestedClaimRequirementTest {
 
     @Test
     fun selfAttestedRequirement_validateUnFulfilledRequirement_ThrowsException() {
+        // Act and Assert
         Assertions.assertThatThrownBy {
             selfAttestedClaimRequirement.validate()
         }.isInstanceOf(SelfAttestedClaimRequirementNotFulfilledException::class.java)

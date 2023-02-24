@@ -42,6 +42,7 @@ class IdTokenRequirementTest {
 
     @Test
     fun idTokenRequirement_validateUnFulfilledRequirement_ThrowsException() {
+        // Act and Assert
         Assertions.assertThatThrownBy {
             idTokenRequirement.validate()
         }.isInstanceOf(IdTokenRequirementNotFulfilledException::class.java)
