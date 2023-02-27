@@ -6,7 +6,6 @@
 package com.microsoft.walletlibrary.requests
 
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
-import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
@@ -35,7 +34,8 @@ class ManifestIssuanceRequest(
 ): VerifiedIdIssuanceRequest {
     override suspend fun complete(): Result<VerifiedId> {
         return try {
-            val verifiedId = VerifiedIdRequester.sendIssuanceResponse(this)
+            val verifiedId =
+                VerifiedIdRequester.sendIssuanceResponse(request.rawRequest, requirement)
             Result.success(verifiedId)
         } catch (exception: WalletLibraryException) {
             Result.failure(exception)
@@ -44,12 +44,7 @@ class ManifestIssuanceRequest(
 
     override fun isSatisfied(): Boolean {
         try {
-            if (requirement is GroupRequirement) {
-                for (req in requirement.requirements) {
-                    req.validate()
-                }
-            } else
-                requirement.validate()
+            requirement.validate()
         } catch (exception: RequirementValidationException) {
             return false
         }

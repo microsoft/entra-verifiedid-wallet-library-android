@@ -14,10 +14,9 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedIdType
  * Maps VerifiableCredential object in SDK to VerifiedId object in library.
  */
 internal fun VerifiableCredential.toVerifiedId(): VerifiedId {
-    val map = this.contents.vc.credentialSubject.mapValues { it.value }
+    val map = contents.vc.credentialSubject.mapValues { it.value }
     val claims = mutableListOf<VerifiedIdClaim>()
-    for (entry in map) {
+    for (entry in map)
         claims.add(VerifiedIdClaim(entry.key, entry.value))
-    }
-    return VerifiedId(this.jti, VerifiedIdType.VERIFIABLE_CREDENTIAL, claims, this.contents.iat, this.contents.exp, this.raw)
+    return VerifiedId(jti, VerifiedIdType.VERIFIABLE_CREDENTIAL, claims, contents.iat, contents.exp, raw)
 }

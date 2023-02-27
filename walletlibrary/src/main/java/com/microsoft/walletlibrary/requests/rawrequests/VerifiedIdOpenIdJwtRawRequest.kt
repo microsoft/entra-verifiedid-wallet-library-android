@@ -1,3 +1,8 @@
+/**---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.walletlibrary.requests.rawrequests
 
 import com.microsoft.did.sdk.credential.service.PresentationRequest
@@ -9,7 +14,7 @@ import com.microsoft.walletlibrary.requests.VerifiedIdRequestContent
 internal class VerifiedIdOpenIdJwtRawRequest(
     override val requestType: RequestType, override val rawRequest: PresentationRequest
 ): OpenIdRawRequest {
-    override fun handleRawRequest(): VerifiedIdRequestContent {
+    override fun mapToRequestContent(): VerifiedIdRequestContent {
         return VerifiedIdRequestContent(
             this.rawRequest.getRequesterStyle(),
             this.rawRequest.getPresentationDefinition().toRequirement(),

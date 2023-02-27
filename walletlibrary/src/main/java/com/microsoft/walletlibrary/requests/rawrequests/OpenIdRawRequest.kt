@@ -13,5 +13,5 @@ import com.microsoft.walletlibrary.requests.VerifiedIdRequestContent
  */
 internal interface OpenIdRawRequest: RawRequest {
     override val rawRequest: PresentationRequest
-    fun handleRawRequest(): VerifiedIdRequestContent
+    fun mapToRequestContent(): VerifiedIdRequestContent
 }

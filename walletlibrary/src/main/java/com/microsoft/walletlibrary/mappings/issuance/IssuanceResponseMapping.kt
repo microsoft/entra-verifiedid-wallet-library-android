@@ -31,14 +31,14 @@ private fun IssuanceResponse.addSelfAttestedClaimRequirement(selfAttestedClaimRe
 
 private fun IssuanceResponse.addIdTokenRequirement(idTokenRequirement: IdTokenRequirement) {
     idTokenRequirement.idToken?.let {
-        requestedSelfAttestedClaimMap[idTokenRequirement.configuration] =
+        requestedIdTokenMap[idTokenRequirement.configuration] =
             it
     }
 }
 
 private fun IssuanceResponse.addAccessTokenRequirement(accessTokenRequirement: AccessTokenRequirement) {
     accessTokenRequirement.accessToken?.let {
-        requestedSelfAttestedClaimMap[accessTokenRequirement.configuration] =
+        requestedAccessTokenMap[accessTokenRequirement.configuration] =
             it
     }
 }

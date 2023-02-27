@@ -19,6 +19,8 @@ class UnSupportedVerifiedIdRequestInputException(message: String = "", cause: Th
 
 class VerifiedIdRequestFetchException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
+class VerifiedIdResponseCompletionException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
 class UnSupportedProtocolException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
 class MissingInputDescriptorException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
