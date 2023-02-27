@@ -23,6 +23,7 @@ internal fun IssuanceResponse.addRequirements(requirement: Requirement) {
 }
 
 private fun IssuanceResponse.addSelfAttestedClaimRequirement(selfAttestedClaimRequirement: SelfAttestedClaimRequirement) {
+    selfAttestedClaimRequirement.validate()
     selfAttestedClaimRequirement.value?.let {
         requestedSelfAttestedClaimMap[selfAttestedClaimRequirement.claim] =
             it
@@ -30,6 +31,7 @@ private fun IssuanceResponse.addSelfAttestedClaimRequirement(selfAttestedClaimRe
 }
 
 private fun IssuanceResponse.addIdTokenRequirement(idTokenRequirement: IdTokenRequirement) {
+    idTokenRequirement.validate()
     idTokenRequirement.idToken?.let {
         requestedIdTokenMap[idTokenRequirement.configuration] =
             it
@@ -37,6 +39,7 @@ private fun IssuanceResponse.addIdTokenRequirement(idTokenRequirement: IdTokenRe
 }
 
 private fun IssuanceResponse.addAccessTokenRequirement(accessTokenRequirement: AccessTokenRequirement) {
+    accessTokenRequirement.validate()
     accessTokenRequirement.accessToken?.let {
         requestedAccessTokenMap[accessTokenRequirement.configuration] =
             it
@@ -44,12 +47,14 @@ private fun IssuanceResponse.addAccessTokenRequirement(accessTokenRequirement: A
 }
 
 private fun IssuanceResponse.addPinRequirement(pinRequirement: PinRequirement) {
+    pinRequirement.validate()
     pinRequirement.pin?.let {
         issuancePin = IssuancePin(it)
     }
 }
 
 private fun IssuanceResponse.addGroupRequirement(groupRequirement: GroupRequirement) {
+    groupRequirement.validate()
     val requirements = groupRequirement.requirements
     for (requirement in requirements) {
         addRequirements(requirement)
