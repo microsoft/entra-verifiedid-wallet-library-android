@@ -51,4 +51,31 @@ class VerifiableCredentialMappingTest {
         assertThat(actualResult.issuedOn).isEqualTo(expectedIssuedOn)
         assertThat(actualResult.expiresOn).isEqualTo(expectedExpiry)
     }
+
+    @Test
+    fun mapVerifiableCredential_ProvideVerifiableCredential_ThrowsException() {
+
+        val expectedClaims = mutableMapOf<String, String>()
+        expectedClaims[expectedClaimName] = expectedClaimValue
+        verifiableCredentialDescriptor =
+            VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap())
+        verifiableCredentialContent = VerifiableCredentialContent(
+            "testvccjti",
+            verifiableCredentialDescriptor,
+            "",
+            "",
+            expectedIssuedOn,
+            expectedExpiry
+        )
+        verifiableCredential =
+            VerifiableCredential(expectedJti, expectedRaw, verifiableCredentialContent)
+
+        val actualResult = verifiableCredential.toVerifiedId()
+        assertThat(actualResult.id).isEqualTo(expectedJti)
+        assertThat(actualResult.type).isEqualTo(VerifiedIdType.VERIFIABLE_CREDENTIAL)
+        assertThat(actualResult.raw).isEqualTo(expectedRaw)
+        assertThat(actualResult.claims.size).isEqualTo(0)
+        assertThat(actualResult.issuedOn).isEqualTo(expectedIssuedOn)
+        assertThat(actualResult.expiresOn).isEqualTo(expectedExpiry)
+    }
 }

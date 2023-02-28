@@ -29,6 +29,7 @@ class IssuanceResponseMappingTest {
     private val expectedIdTokenValue = "Test Id Token"
     private val expectedConfiguration = "configuration"
     private val expectedAccessTokenValue = "Test Access Token"
+    private val expectedPinValue = "1234"
     private val idTokenRequirement =
         IdTokenRequirement(
             "",
@@ -54,6 +55,7 @@ class IssuanceResponseMappingTest {
             required = true,
             accessToken = expectedAccessTokenValue
         )
+    private val pinRequirement = PinRequirement("4", "numeric", true, pin = "1234")
     private val groupRequirement = GroupRequirement(
         true,
         listOf(selfAttestedClaimRequirement, accessTokenRequirement),
@@ -106,6 +108,33 @@ class IssuanceResponseMappingTest {
         assertThat(issuanceResponse.requestedAccessTokenMap[expectedConfiguration]).isEqualTo(
             expectedAccessTokenValue
         )
+    }
+
+    @Test
+    fun addRequirementToResponse_AddPinRequirementWithNoSalt_AddsRequirementToIssuanceResponse() {
+        // Act
+        issuanceResponse.addRequirements(pinRequirement)
+
+        // Assert
+        assertThat(issuanceResponse.issuancePin?.pin).isEqualTo(
+            expectedPinValue
+        )
+    }
+
+    @Test
+    fun addRequirementToResponse_AddPinRequirementWithSalt_AddsRequirementToIssuanceResponse() {
+        // Arrange
+        val expectedPinSalt = "abcdefg"
+        pinRequirement.pinSalt = expectedPinSalt
+
+        // Act
+        issuanceResponse.addRequirements(pinRequirement)
+
+        // Assert
+        assertThat(issuanceResponse.issuancePin?.pin).isEqualTo(
+            expectedPinValue
+        )
+        assertThat(issuanceResponse.issuancePin?.pinSalt).isEqualTo(expectedPinSalt)
     }
 
     @Test
