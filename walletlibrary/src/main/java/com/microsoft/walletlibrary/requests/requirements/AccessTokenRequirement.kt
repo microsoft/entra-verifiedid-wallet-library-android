@@ -5,6 +5,8 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.walletlibrary.util.AccessTokenRequirementNotFulfilledException
+
 /**
  * Represents information that describes Access Token required in order to complete a VerifiedID request.
  */
@@ -12,7 +14,6 @@ class AccessTokenRequirement(
     internal val id: String,
 
     // Properties used by developers to get access token (configuration, clientId, resourceId, scope).
-
     val configuration: String,
     val redirectUri: String,
     val resourceId: String,
@@ -25,15 +26,18 @@ class AccessTokenRequirement(
     internal val encrypted: Boolean = false,
 
     // Indicates whether the requirement is required or optional.
-    override val required: Boolean = false
+    override val required: Boolean = false,
+
+    internal var accessToken: String? = null
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {
-        TODO("Not yet implemented")
+        if (accessToken == null)
+            throw AccessTokenRequirementNotFulfilledException("AccessTokenRequirement has not been fulfilled.")
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(accessToken: String) {
-        TODO("Not yet implemented")
+    fun fulfill(accessTokenValue: String) {
+        accessToken = accessTokenValue
     }
 }

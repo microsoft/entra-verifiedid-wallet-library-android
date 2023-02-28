@@ -10,8 +10,8 @@ package com.microsoft.walletlibrary.requests
  * styling of requester, requirements needed in order to complete the request and information about
  * trust model of requester like domain url and verification status.
  */
-interface VerifiedIdPresentationRequest: VerifiedIdRequest {
+interface VerifiedIdPresentationRequest: VerifiedIdRequest<Unit> {
 
     // Completes the request and returns nothing if successful.
-    override suspend fun <Nothing> complete(): Result<Nothing>
+    override suspend fun complete(): Result<Unit>
 }

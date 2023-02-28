@@ -35,7 +35,7 @@ class OpenIdURLRequestResolverTest {
     fun resolver_CanResolveHandler_ReturnsFalse() {
         // Arrange
         class MockRequestHandler : RequestHandler {
-            override fun handleRequest(rawRequest: RawRequest): VerifiedIdRequest {
+            override suspend fun handleRequest(rawRequest: RawRequest): VerifiedIdRequest<Unit> {
                 return mockk()
             }
 

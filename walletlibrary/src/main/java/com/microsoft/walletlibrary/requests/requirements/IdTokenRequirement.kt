@@ -5,6 +5,8 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.walletlibrary.util.IdTokenRequirementNotFulfilledException
+
 /**
  * Represents information that describes Id Token required in order to complete a VerifiedID request.
  */
@@ -27,16 +29,19 @@ class IdTokenRequirement(
     internal val encrypted: Boolean = false,
 
     // Indicates whether the requirement is required or optional.
-    override val required: Boolean = false
+    override val required: Boolean = false,
+
+    internal var idToken: String? = null
 ): Requirement {
 
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {
-        TODO("Not yet implemented")
+        if (idToken == null)
+            throw IdTokenRequirementNotFulfilledException("IdTokenRequirement has not been fulfilled.")
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(idToken: String) {
-        TODO("Not yet implemented")
+    fun fulfill(idTokenValue: String) {
+        idToken = idTokenValue
     }
 }

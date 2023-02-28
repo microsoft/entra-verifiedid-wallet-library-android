@@ -13,7 +13,7 @@ import com.microsoft.walletlibrary.requests.styles.RequesterStyle
  * requirements needed in order to complete a request and information about trust model of requester
  * like domain url and verification status.
  */
-interface VerifiedIdRequest {
+interface VerifiedIdRequest<out T> {
     // Attributes describing the requester (eg. name, logo).
     val requesterStyle: RequesterStyle
 
@@ -27,7 +27,7 @@ interface VerifiedIdRequest {
     fun isSatisfied(): Boolean
 
     // Completes the request and returns a generic object if successful.
-    suspend fun <T> complete(): Result<T>
+    suspend fun complete(): Result<T>
 
     // Cancels the request with an optional message.
     fun cancel(message: String?): Result<Void>

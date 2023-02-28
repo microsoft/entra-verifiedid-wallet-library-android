@@ -6,6 +6,7 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
+import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 /**
@@ -27,16 +28,19 @@ class VerifiedIdRequirement(
     var purpose: String = "",
 
     // Information needed for issuance from presentation.
-    val issuanceOptions: List<VerifiedIdRequestInput> = mutableListOf()
+    val issuanceOptions: List<VerifiedIdRequestInput> = mutableListOf(),
+
+    internal var verifiedId: VerifiedId? = null
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate() {
-        TODO("Not yet implemented")
+        if (verifiedId == null)
+            throw VerifiedIdRequirementNotFulfilledException("VerifiedIdRequirement has not been fulfilled.")
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(verifiedId: VerifiedId) {
-        TODO("Not yet implemented")
+    fun fulfill(verifiedIdValue: VerifiedId) {
+        verifiedId = verifiedIdValue
     }
 
     // Retrieves list of Verified IDs from the provided list that matches this requirement.

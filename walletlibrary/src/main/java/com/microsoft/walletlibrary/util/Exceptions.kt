@@ -19,12 +19,28 @@ class UnSupportedVerifiedIdRequestInputException(message: String = "", cause: Th
 
 class VerifiedIdRequestFetchException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
-class UnSupportedProtocolException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+class VerifiedIdResponseCompletionException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
-class UnExpectedRequestTypeException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+class UnSupportedProtocolException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
 class MissingInputDescriptorException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
 class MissingVerifiedIdTypeException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
+class RequirementCastingException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
+class InputCastingException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
 class MissingRequirementException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
+open class RequirementValidationException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
+class SelfAttestedClaimRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
+
+class IdTokenRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
+
+class AccessTokenRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
+
+class VerifiedIdRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
+
+class PinRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)

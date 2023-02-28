@@ -1,3 +1,8 @@
+/**---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.walletlibrary.requests.requirements
 
 enum class GroupRequirementOperator {
@@ -5,6 +10,9 @@ enum class GroupRequirementOperator {
     ALL
 }
 
+/**
+ * Represents a group of requirements required to complete the request.
+ */
 class GroupRequirement(
     override val required: Boolean,
     val requirements: List<Requirement>,
@@ -12,6 +20,9 @@ class GroupRequirement(
 ): Requirement {
 
     override fun validate() {
-        TODO("Not yet implemented")
+        //TODO("Not fully implemented yet")
+        for (requirement in requirements) {
+            requirement.validate()
+        }
     }
 }

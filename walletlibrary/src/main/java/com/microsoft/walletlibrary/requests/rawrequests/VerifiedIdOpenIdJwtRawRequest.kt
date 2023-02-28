@@ -1,21 +1,24 @@
+/**---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.walletlibrary.requests.rawrequests
 
-import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.PresentationRequest
-import com.microsoft.did.sdk.credential.service.Request
-import com.microsoft.walletlibrary.mappings.toContractIssuanceRequest
-import com.microsoft.walletlibrary.mappings.toOpenIdPresentationRequest
-import com.microsoft.walletlibrary.requests.VerifiedIdRequest
-import com.microsoft.walletlibrary.util.UnExpectedRequestTypeException
+import com.microsoft.walletlibrary.mappings.presentation.getRequesterStyle
+import com.microsoft.walletlibrary.mappings.presentation.toRequirement
+import com.microsoft.walletlibrary.mappings.toRootOfTrust
+import com.microsoft.walletlibrary.requests.VerifiedIdRequestContent
 
 internal class VerifiedIdOpenIdJwtRawRequest(
-    override val requestType: RequestType, override val rawRequest: Request
+    override val requestType: RequestType, override val rawRequest: PresentationRequest
 ): OpenIdRawRequest {
-    override fun handleRawRequest(): VerifiedIdRequest {
-        return when (rawRequest) {
-            is IssuanceRequest -> rawRequest.toContractIssuanceRequest()
-            is PresentationRequest -> rawRequest.toOpenIdPresentationRequest()
-            else -> throw UnExpectedRequestTypeException("Provided Request is not the expected Presentation or Issuance Request")
-        }
+    override fun mapToRequestContent(): VerifiedIdRequestContent {
+        return VerifiedIdRequestContent(
+            this.rawRequest.getRequesterStyle(),
+            this.rawRequest.getPresentationDefinition().toRequirement(),
+            this.rawRequest.linkedDomainResult.toRootOfTrust()
+        )
     }
 }

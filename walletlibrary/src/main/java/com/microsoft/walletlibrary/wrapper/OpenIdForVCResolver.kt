@@ -14,11 +14,11 @@ import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRe
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 
 /**
- * Wrapper class to wrap the getRequest call from VC SDK and return a raw request.
+ * Wrapper class to wrap the get Presentation Request from VC SDK and return a raw request.
  */
 object OpenIdForVCResolver {
 
-    // Fetches the request from VC SDK using the url and converts it to raw request.
+    // Fetches the presentation request from VC SDK using the url and converts it to raw request.
     internal suspend fun getRequest(uri: String): OpenIdRawRequest {
         when (val presentationRequestResult =
             VerifiableCredentialSdk.presentationService.getRequest(uri)) {
@@ -41,22 +41,5 @@ object OpenIdForVCResolver {
             RequestType.ISSUANCE
         else
             RequestType.PRESENTATION
-
-    }
-
-    private suspend fun getIssuanceRequest(uri: String): OpenIdRawRequest {
-        return when (val issuanceRequestResult =
-            VerifiableCredentialSdk.issuanceService.getRequest(uri)) {
-            is Result.Success -> {
-                val request = issuanceRequestResult.payload
-                VerifiedIdOpenIdJwtRawRequest(RequestType.ISSUANCE, request)
-            }
-            is Result.Failure -> {
-                throw VerifiedIdRequestFetchException(
-                    "Unable to fetch issuance request",
-                    issuanceRequestResult.payload
-                )
-            }
-        }
     }
 }
