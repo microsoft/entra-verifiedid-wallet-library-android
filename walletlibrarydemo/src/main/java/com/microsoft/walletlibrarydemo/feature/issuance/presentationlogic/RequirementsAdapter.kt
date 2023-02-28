@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrarydemo
+package com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -8,9 +8,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.RecyclerView
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
+import com.microsoft.walletlibrarydemo.R
 import com.microsoft.walletlibrarydemo.databinding.RequirementSelfattestedRowBinding
 
-sealed class RequirementViewHolder(view: View) : RecyclerView.ViewHolder(view)
+sealed class RequirementViewHolder(view: View): RecyclerView.ViewHolder(view)
 class SelfAttestedHolder(val binding: RequirementSelfattestedRowBinding): RequirementViewHolder(binding.root)
 
 class RequirementsAdapter(
