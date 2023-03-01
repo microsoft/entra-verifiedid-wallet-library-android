@@ -6,9 +6,11 @@
 package com.microsoft.walletlibrary.requests.rawrequests
 
 import com.microsoft.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.mappings.issuance.toPinRequirement
 import com.microsoft.walletlibrary.mappings.presentation.getRequesterStyle
 import com.microsoft.walletlibrary.mappings.presentation.toRequirement
 import com.microsoft.walletlibrary.mappings.toRootOfTrust
+import com.microsoft.walletlibrary.requests.InjectedIdToken
 import com.microsoft.walletlibrary.requests.VerifiedIdRequestContent
 
 internal class VerifiedIdOpenIdJwtRawRequest(
@@ -16,9 +18,15 @@ internal class VerifiedIdOpenIdJwtRawRequest(
 ): OpenIdRawRequest {
     override fun mapToRequestContent(): VerifiedIdRequestContent {
         return VerifiedIdRequestContent(
-            this.rawRequest.getRequesterStyle(),
-            this.rawRequest.getPresentationDefinition().toRequirement(),
-            this.rawRequest.linkedDomainResult.toRootOfTrust()
+            rawRequest.getRequesterStyle(),
+            rawRequest.getPresentationDefinition().toRequirement(),
+            rawRequest.linkedDomainResult.toRootOfTrust(),
+            rawRequest.content.idTokenHint?.let {
+                InjectedIdToken(
+                    it,
+                    rawRequest.content.pinDetails?.toPinRequirement()
+                )
+            }
         )
     }
 }

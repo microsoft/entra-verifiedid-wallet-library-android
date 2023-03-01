@@ -11,7 +11,6 @@ import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
-import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 import com.microsoft.walletlibrarydemo.databinding.IdTokenHintFragmentBinding
 import kotlinx.coroutines.runBlocking
 
@@ -47,14 +46,13 @@ class IdTokenHintFragment: Fragment() {
         runBlocking {
             // Use the test uri here
             verifiedIdRequest =
-                verifiedIdClient.createRequest(VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/issuanceRequests/07fce9f9-328a-4b8e-82a7-0e9d3f867bc5")))
+                verifiedIdClient.createRequest(VerifiedIdRequestURL(Uri.parse("")))
             if (verifiedIdRequest is OpenIdPresentationRequest)
                 binding.textview.text =
                     "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
             else if (verifiedIdRequest is ManifestIssuanceRequest) {
                 binding.textview.text =
                     "Issuance request for ${(verifiedIdRequest as ManifestIssuanceRequest).verifiedIdStyle?.title}"
-                (verifiedIdRequest.requirement as IdTokenRequirement).fulfill(verifiedIdRequest.)
             }
         }
     }

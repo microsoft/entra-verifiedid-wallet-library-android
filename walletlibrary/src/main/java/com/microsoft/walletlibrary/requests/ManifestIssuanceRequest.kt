@@ -22,7 +22,7 @@ class ManifestIssuanceRequest(
     override val requesterStyle: RequesterStyle,
 
     // Information describing the requirements needed to complete the flow.
-    override val requirement: Requirement,
+    override var requirement: Requirement,
 
     // Root of trust of the requester (eg. linked domains).
     override val rootOfTrust: RootOfTrust,

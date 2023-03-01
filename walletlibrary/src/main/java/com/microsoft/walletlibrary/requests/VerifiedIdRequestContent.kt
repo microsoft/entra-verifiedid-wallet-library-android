@@ -20,5 +20,7 @@ internal class VerifiedIdRequestContent(
     internal val requirement: Requirement,
 
     // Root of trust of the requester (eg. linked domains).
-    internal val rootOfTrust: RootOfTrust
+    internal val rootOfTrust: RootOfTrust,
+
+    internal val injectedIdToken: InjectedIdToken?
 )

@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.requests.handlers
 
+import com.microsoft.walletlibrary.requests.InjectedIdToken
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequestContent
@@ -12,7 +13,7 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
-import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.requests.requirements.*
 import com.microsoft.walletlibrary.util.InputCastingException
 import com.microsoft.walletlibrary.util.RequirementCastingException
 import com.microsoft.walletlibrary.util.UnSupportedProtocolException
@@ -44,7 +45,36 @@ internal class OpenIdRequestHandler: RequestHandler {
     private suspend fun handleIssuanceRequest(requestContent: VerifiedIdRequestContent): VerifiedIdRequest<VerifiedId> {
         validateRequirement(requestContent)
         val contractUrl = ((requestContent.requirement as VerifiedIdRequirement).issuanceOptions.first() as VerifiedIdRequestURL).url
-        return getIssuanceRequest(contractUrl.toString())
+        val verifiedIdRequest = getIssuanceRequest(contractUrl.toString())
+        requestContent.injectedIdToken?.let {
+            return addRequirementsForIdTokenHint(verifiedIdRequest, it)
+        }
+        return verifiedIdRequest
+    }
+
+    private fun addRequirementsForIdTokenHint(verifiedIdRequest: VerifiedIdRequest<VerifiedId>, injectedIdToken: InjectedIdToken): VerifiedIdRequest<VerifiedId> {
+        val pinRequirement = injectedIdToken.pinRequirement
+        when(val requirement = verifiedIdRequest.requirement) {
+            is IdTokenRequirement -> {
+                requirement.fulfill(injectedIdToken.rawToken)
+                val requirements: MutableList<Requirement> = mutableListOf(requirement)
+                pinRequirement?.let { requirements.add(it) }
+                val groupRequirement = GroupRequirement(false, requirements, GroupRequirementOperator.ALL)
+                verifiedIdRequest.requirement = groupRequirement
+            }
+            is GroupRequirement -> {
+                val requirements = mutableListOf<Requirement>()
+                requirements.addAll(requirement.requirements)
+                for (req in requirement.requirements) {
+                    if (req is IdTokenRequirement) {
+                        req.fulfill(injectedIdToken.rawToken)
+                        pinRequirement?.let { requirements.add(it) }
+                    }
+                }
+                requirement.requirements = requirements
+            }
+        }
+        return verifiedIdRequest
     }
 
     private fun validateRequirement(requestContent: VerifiedIdRequestContent) {
