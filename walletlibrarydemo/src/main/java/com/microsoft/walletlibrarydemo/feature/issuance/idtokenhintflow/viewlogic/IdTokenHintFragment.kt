@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrarydemo.feature.issuance.viewlogic
+package com.microsoft.walletlibrarydemo.feature.issuance.idtokenhintflow.viewlogic
 
 import android.net.Uri
 import android.os.Bundle
@@ -6,27 +6,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.microsoft.walletlibrary.VerifiedIdClientBuilder
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
-import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
-import com.microsoft.walletlibrary.requests.requirements.Requirement
-import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
-import com.microsoft.walletlibrarydemo.databinding.SelfAttestedFragmentBinding
-import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.RequirementsAdapter
+import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
+import com.microsoft.walletlibrarydemo.databinding.IdTokenHintFragmentBinding
 import kotlinx.coroutines.runBlocking
 
-class SelfAttestedFragment: Fragment() {
-    private var _binding: SelfAttestedFragmentBinding? = null
+class IdTokenHintFragment: Fragment() {
+    private var _binding: IdTokenHintFragmentBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var verifiedIdRequest: VerifiedIdRequest<*>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = SelfAttestedFragmentBinding.inflate(inflater, container, false)
+        _binding = IdTokenHintFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -51,26 +47,16 @@ class SelfAttestedFragment: Fragment() {
         runBlocking {
             // Use the test uri here
             verifiedIdRequest =
-                verifiedIdClient.createRequest(VerifiedIdRequestURL(Uri.parse("")))
+                verifiedIdClient.createRequest(VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/issuanceRequests/07fce9f9-328a-4b8e-82a7-0e9d3f867bc5")))
             if (verifiedIdRequest is OpenIdPresentationRequest)
                 binding.textview.text =
                     "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
             else if (verifiedIdRequest is ManifestIssuanceRequest) {
                 binding.textview.text =
                     "Issuance request for ${(verifiedIdRequest as ManifestIssuanceRequest).verifiedIdStyle?.title}"
-                configureViewsForSelfAttestedRequirements(verifiedIdRequest.requirement)
+                (verifiedIdRequest.requirement as IdTokenRequirement).fulfill(verifiedIdRequest.)
             }
         }
-    }
-
-    private fun configureViewsForSelfAttestedRequirements(requirements: Requirement) {
-        val requirement = if (requirements is GroupRequirement)
-            requirements.requirements.map { it as SelfAttestedClaimRequirement }
-        else listOf(requirements as SelfAttestedClaimRequirement)
-        val adapter = RequirementsAdapter(requireContext(), requirement)
-        binding.requirementsList.layoutManager = LinearLayoutManager(context)
-        binding.requirementsList.isNestedScrollingEnabled = false
-        binding.requirementsList.adapter = adapter
     }
 
     private fun completeIssuance() {

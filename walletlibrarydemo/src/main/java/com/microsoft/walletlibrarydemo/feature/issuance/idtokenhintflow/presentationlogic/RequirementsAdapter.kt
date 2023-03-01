@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic
+package com.microsoft.walletlibrarydemo.feature.issuance.idtokenhintflow.presentationlogic
 
 import android.content.Context
 import android.view.LayoutInflater
