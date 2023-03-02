@@ -6,6 +6,10 @@
 package com.microsoft.walletlibrary.requests.rawrequests
 
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
+import com.microsoft.walletlibrary.mappings.issuance.getRequesterStyle
+import com.microsoft.walletlibrary.mappings.issuance.toRequirement
+import com.microsoft.walletlibrary.mappings.toRootOfTrust
+import com.microsoft.walletlibrary.requests.VerifiedIdRequestContent
 
 /**
  * Represents the raw issuance request from VC SDK.
@@ -13,4 +17,13 @@ import com.microsoft.did.sdk.credential.service.IssuanceRequest
 class RawManifest(
     override val rawRequest: IssuanceRequest,
     override val requestType: RequestType
-): RawRequest
+): RawRequest {
+    internal fun mapToRequestContent(): VerifiedIdRequestContent {
+        return VerifiedIdRequestContent(
+            rawRequest.getRequesterStyle(),
+            rawRequest.getAttestations().toRequirement(),
+            rawRequest.linkedDomainResult.toRootOfTrust(),
+            null
+        )
+    }
+}

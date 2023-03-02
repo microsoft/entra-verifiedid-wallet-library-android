@@ -46,7 +46,7 @@ class IdTokenHintFragment: Fragment() {
         runBlocking {
             // Use the test uri here
             verifiedIdRequest =
-                verifiedIdClient.createRequest(VerifiedIdRequestURL(Uri.parse("")))
+                verifiedIdClient.createRequest(VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/issuanceRequests/4281558b-2ec3-489f-8d01-40c69e433d0a")))
             if (verifiedIdRequest is OpenIdPresentationRequest)
                 binding.textview.text =
                     "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"

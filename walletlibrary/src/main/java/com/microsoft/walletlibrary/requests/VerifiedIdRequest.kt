@@ -18,7 +18,7 @@ interface VerifiedIdRequest<out T> {
     val requesterStyle: RequesterStyle
 
     // Information describing the requirements needed to complete the flow.
-    var requirement: Requirement
+    val requirement: Requirement
 
     // Root of trust of the requester (eg. linked domains).
     val rootOfTrust: RootOfTrust

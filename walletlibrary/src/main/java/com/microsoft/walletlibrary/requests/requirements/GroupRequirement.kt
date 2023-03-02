@@ -15,7 +15,7 @@ enum class GroupRequirementOperator {
  */
 class GroupRequirement(
     override val required: Boolean,
-    var requirements: List<Requirement>,
+    val requirements: MutableList<Requirement>,
     val requirementOperator: GroupRequirementOperator
 ): Requirement {
 

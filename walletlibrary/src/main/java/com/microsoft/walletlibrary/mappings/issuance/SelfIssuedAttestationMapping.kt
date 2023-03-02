@@ -24,5 +24,5 @@ internal fun SelfIssuedAttestation.toRequirement(): Requirement {
         val required = it.required
         SelfAttestedClaimRequirement("", it.claim, encrypted, required)
     }
-    return GroupRequirement(required, requirements, GroupRequirementOperator.ALL)
+    return GroupRequirement(required, requirements.toMutableList(), GroupRequirementOperator.ALL)
 }
