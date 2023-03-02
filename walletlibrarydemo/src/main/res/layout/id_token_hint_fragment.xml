@@ -36,10 +36,43 @@
         tools:layout_editor_absoluteX="148dp"
         tools:layout_editor_absoluteY="330dp" />
 
+    <LinearLayout
+        android:id="@+id/idTokenHint_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginVertical="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textContainer">
+
+    <TextView
+        android:id="@+id/idTokenHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:text="Id Token Hint Fulfilled" />
+
+        <EditText
+            android:id="@+id/pin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="flagNoExtractUi"
+            android:importantForAutofill="no"
+            android:textSize="16sp"
+            android:visibility="gone"
+            android:hint="Enter the pin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/idTokenHint" />
+    </LinearLayout>
+
     <ScrollView
         android:id="@+id/textContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginVertical="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/initiate_issuance" >

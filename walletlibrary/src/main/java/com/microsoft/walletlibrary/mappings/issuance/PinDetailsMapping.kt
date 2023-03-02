@@ -7,5 +7,5 @@ import com.microsoft.walletlibrary.requests.requirements.PinRequirement
  * Maps PinDetails object from VC SDK to PinRequirement in library
  */
 internal fun PinDetails.toPinRequirement(): PinRequirement {
-    return PinRequirement(length, type, true)
+    return PinRequirement(length, type, true, salt)
 }
