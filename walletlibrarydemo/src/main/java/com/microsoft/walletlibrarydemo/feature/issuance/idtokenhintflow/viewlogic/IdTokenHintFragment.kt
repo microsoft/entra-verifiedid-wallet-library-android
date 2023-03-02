@@ -18,7 +18,7 @@ import com.microsoft.walletlibrary.util.WalletLibraryException
 import com.microsoft.walletlibrarydemo.databinding.IdTokenHintFragmentBinding
 import kotlinx.coroutines.runBlocking
 
-class IdTokenHintFragment : Fragment() {
+class IdTokenHintFragment: Fragment() {
     private var _binding: IdTokenHintFragmentBinding? = null
     private val binding get() = _binding!!
 
@@ -48,13 +48,14 @@ class IdTokenHintFragment : Fragment() {
     }
 
     private fun initiateIssuance() {
-        val verifiedIdClient = VerifiedIdClientBuilder(requireContext()).build()
         binding.completeIssuance.isEnabled = true
         binding.initiateIssuance.isEnabled = false
         runBlocking {
+            val verifiedIdClient = VerifiedIdClientBuilder(requireContext()).build()
             // Use the test uri here
-            verifiedIdRequest =
-                verifiedIdClient.createRequest(VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/issuanceRequests/39076720-3a7e-4806-b094-1a9c8f946afd")))
+            val verifiedIdRequestUrl =
+                VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/issuanceRequests/5446d767-17c6-4025-bc0a-78811589ac03"))
+            verifiedIdRequest = verifiedIdClient.createRequest(verifiedIdRequestUrl)
             if (verifiedIdRequest is OpenIdPresentationRequest)
                 binding.textview.text =
                     "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
@@ -62,43 +63,30 @@ class IdTokenHintFragment : Fragment() {
                 binding.textview.text =
                     "Issuance request for ${(verifiedIdRequest as ManifestIssuanceRequest).verifiedIdStyle?.title}"
                 when (verifiedIdRequest.requirement) {
-                    is GroupRequirement -> {
-                        val requirements =
-                            (verifiedIdRequest.requirement as GroupRequirement).requirements
-                        for (requirement in requirements) {
-                            if (requirement is PinRequirement) {
-                                binding.pin.visibility = View.VISIBLE
-                            } else if (requirement is IdTokenRequirement) {
-                                try {
-                                    requirement.validate()
-                                    binding.idTokenHint.visibility = View.VISIBLE
-                                } catch (_: WalletLibraryException) {
-
-                                }
-                            }
-                        }
-                    }
-
+                    is GroupRequirement -> configureIdTokenHintWithPinView()
+                    is IdTokenRequirement -> configureIdTokenHintWithoutPinView()
                 }
             }
         }
     }
 
     private fun completeIssuance() {
-        runBlocking {
-            if (!binding.pin.text.toString().isNullOrEmpty()) {
-                when (verifiedIdRequest.requirement) {
-                    is GroupRequirement -> {
-                        val requirements =
-                            (verifiedIdRequest.requirement as GroupRequirement).requirements
-                        for (requirement in requirements) {
-                            if (requirement is PinRequirement) {
-                                requirement.fulfill(binding.pin.text.toString())
-                            }
-                        }
+        if (binding.pin.text.toString().isNotEmpty()) {
+            when (verifiedIdRequest.requirement) {
+                is GroupRequirement -> {
+                    val requirements = (verifiedIdRequest.requirement as GroupRequirement).requirements
+                    for (requirement in requirements) {
+                        if (requirement is PinRequirement)
+                            requirement.fulfill(binding.pin.text.toString())
                     }
                 }
             }
+        }
+        configureIssuanceCompletionView()
+    }
+
+    private fun configureIssuanceCompletionView() {
+        runBlocking {
             val response = verifiedIdRequest.complete()
             binding.idTokenHint.visibility = View.GONE
             binding.pin.visibility = View.GONE
@@ -108,5 +96,29 @@ class IdTokenHintFragment : Fragment() {
                 binding.textview.text = response.exceptionOrNull().toString()
         }
         binding.completeIssuance.isEnabled = false
+    }
+
+    private fun configureIdTokenHintWithPinView() {
+        val requirements =
+            (verifiedIdRequest.requirement as GroupRequirement).requirements
+        for (requirement in requirements) {
+            if (requirement is PinRequirement) {
+                binding.pin.visibility = View.VISIBLE
+            } else if (requirement is IdTokenRequirement) {
+                configureIdTokenHintView(requirement)
+            }
+        }
+    }
+
+    private fun configureIdTokenHintWithoutPinView() {
+        configureIdTokenHintView(verifiedIdRequest.requirement as IdTokenRequirement)
+    }
+
+    private fun configureIdTokenHintView(requirement: IdTokenRequirement) {
+        try {
+            requirement.validate()
+            binding.idTokenHint.visibility = View.VISIBLE
+        } catch (_: WalletLibraryException) {
+        }
     }
 }
