@@ -7,6 +7,18 @@
     android:layout_marginHorizontal="10dp"
     android:layout_marginVertical="10dp">
 
+   <TextView
+       android:id="@+id/flow_heading"
+       android:textStyle="bold"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:text="Id Token hint Flow"
+       android:textSize="20sp"
+       android:textAlignment="center"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintTop_toTopOf="parent"/>
+
     <Button
         android:id="@+id/initiate_issuance"
         android:layout_width="0dp"
@@ -17,7 +29,7 @@
         android:text="Initiate Request"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/completeIssuance"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/flow_heading"
         tools:layout_editor_absoluteX="148dp"
         tools:layout_editor_absoluteY="330dp" />
 
@@ -32,7 +44,7 @@
         android:layout_marginVertical="20dp"
         app:layout_constraintStart_toEndOf="@id/initiate_issuance"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/flow_heading"
         tools:layout_editor_absoluteX="148dp"
         tools:layout_editor_absoluteY="330dp" />
 

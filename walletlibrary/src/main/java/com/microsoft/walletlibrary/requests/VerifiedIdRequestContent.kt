@@ -31,8 +31,16 @@ internal class VerifiedIdRequestContent(
         when (requirement) {
             is IdTokenRequirement -> {
                 val groupRequirement =
-                    GroupRequirement(false, mutableListOf(requirement), GroupRequirementOperator.ALL)
-                fulfillIdTokenRequirement(requirement as IdTokenRequirement, idToken, groupRequirement)
+                    GroupRequirement(
+                        false,
+                        mutableListOf(requirement),
+                        GroupRequirementOperator.ALL
+                    )
+                fulfillIdTokenRequirement(
+                    requirement as IdTokenRequirement,
+                    idToken,
+                    groupRequirement
+                )
                 requirement = groupRequirement
             }
             is GroupRequirement -> addRequirementsForIdTokenHintToGroupRequirement(idToken)
@@ -47,7 +55,7 @@ internal class VerifiedIdRequestContent(
                     fulfillIdTokenRequirement(
                         requirementInGroup,
                         idToken,
-                        (requirement as GroupRequirement)
+                        requirement as GroupRequirement
                     )
             }
         }
