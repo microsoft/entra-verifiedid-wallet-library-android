@@ -22,7 +22,7 @@ class IdTokenFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Context
         val verifiedIdClient = VerifiedIdClientBuilder(context).build()
         // Use the test uri here
         val verifiedIdRequestUrl =
-            VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/issuanceRequests/c662eff3-3b57-4a0c-ba03-ec11f6e46dde"))
+            VerifiedIdRequestURL(Uri.parse(""))
         verifiedIdRequest = verifiedIdClient.createRequest(verifiedIdRequestUrl)
     }
 
