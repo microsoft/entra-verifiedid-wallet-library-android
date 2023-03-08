@@ -2,6 +2,14 @@ package com.microsoft.walletlibrary.requests.handlers
 
 import android.net.Uri
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
+import com.microsoft.did.sdk.credential.service.models.attestations.ClaimAttestation
+import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
+import com.microsoft.did.sdk.credential.service.models.attestations.SelfIssuedAttestation
+import com.microsoft.did.sdk.credential.service.models.contracts.InputContract
+import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.did.sdk.credential.service.models.contracts.display.CardDescriptor
+import com.microsoft.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
+import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.RootOfTrust
@@ -45,23 +53,56 @@ class OpenIdRequestHandlerTest {
     private val verifiedIdRequirement: VerifiedIdRequirement = mockk()
     private val issuanceRequest: IssuanceRequest = mockk()
     private val manifestIssuanceRequest: ManifestIssuanceRequest = mockk()
+    private val rawManifest: RawManifest = mockk()
     private val verifiedIdStyle: VerifiedIDStyle = mockk()
+    private val expectedClaimName = "name"
+    private val expectedClaimType = "string"
+    private val claimAttestation = ClaimAttestation(expectedClaimName, true, expectedClaimType)
+    private val expectedIssuer = "issuer"
+    private val expectedCardDescription = "card description"
+    private val expectedTextColor = "#000000"
+    private val expectedBackgroundColor = "#FFFFFF"
+    private val expectedIssuerInCard = "Test Issuer"
+    private val expectedCardTitle = "Card Title"
+    private val expectedConsentTitle = "Consent Title"
+    private val expectedConsentInstructions = "Consent Instructions"
+    private val selfIssuedAttestation =
+        SelfIssuedAttestation(required = true, claims = listOf(claimAttestation))
+    private val credentialAttestations = CredentialAttestations(selfIssued = selfIssuedAttestation)
+    private val inputContract = InputContract(
+        "",
+        "",
+        expectedIssuer,
+        credentialAttestations
+    )
+    private val cardDescriptor = CardDescriptor(
+        expectedCardTitle,
+        expectedIssuerInCard,
+        expectedBackgroundColor,
+        expectedTextColor,
+        null,
+        expectedCardDescription
+    )
+    private val consentDescriptor =
+        ConsentDescriptor(expectedConsentTitle, expectedConsentInstructions)
+    private val displayContract =
+        DisplayContract("", "", "", cardDescriptor, consentDescriptor, emptyMap())
+    private val contract = VerifiableCredentialContract("", inputContract, displayContract)
 
     init {
         setupInput(RequestType.PRESENTATION, selfAttestedClaimRequirement)
     }
 
-    private fun setupInput(requestType: RequestType,requirement: Requirement) {
+    private fun setupInput(requestType: RequestType, requirement: Requirement) {
         openIdRequestHandler = spyk(OpenIdRequestHandler(), recordPrivateCalls = true)
 
         verifiedIdOpenIdJwtRawRequest = mockk()
-        if (requestType == RequestType.PRESENTATION) {
+        every { verifiedIdOpenIdJwtRawRequest.mapToRequestContent() } returns verifiedIdRequestContent
+        mockRequestContent(selfAttestedClaimRequirement)
+        if (requestType == RequestType.PRESENTATION)
             every { verifiedIdOpenIdJwtRawRequest.requestType } returns RequestType.PRESENTATION
-            every { verifiedIdOpenIdJwtRawRequest.mapToRequestContent() } returns verifiedIdRequestContent
-            mockRequestContent(selfAttestedClaimRequirement)
-        } else if (requestType == RequestType.ISSUANCE) {
+        else if (requestType == RequestType.ISSUANCE)
             mockForIssuanceType(requirement)
-        }
     }
 
     private fun createMockRawRequest() {
@@ -72,7 +113,6 @@ class OpenIdRequestHandlerTest {
 
     private fun mockForIssuanceType(verifiedIdRequirement: Requirement) {
         every { verifiedIdOpenIdJwtRawRequest.requestType } returns RequestType.ISSUANCE
-        every { verifiedIdOpenIdJwtRawRequest.mapToRequestContent() } returns verifiedIdRequestContent
         mockRequestContent(verifiedIdRequirement)
         mockRequestInput()
         mockManifestIssuanceRequest()
@@ -82,6 +122,7 @@ class OpenIdRequestHandlerTest {
         every { verifiedIdRequestContent.requesterStyle } returns requesterStyle
         every { verifiedIdRequestContent.requirement } returns requirement
         every { verifiedIdRequestContent.rootOfTrust } returns rootOfTrust
+        every { verifiedIdRequestContent.injectedIdToken } returns null
     }
 
     private fun mockRequestInput() {
@@ -92,14 +133,17 @@ class OpenIdRequestHandlerTest {
         every { contractUri.toString() } returns contractString
         every { verifiedIdRequirement.issuanceOptions } returns issuanceOptions
         every { verifiedIdRequestURL.url } returns contractUri
-        every { openIdRequestHandler["getIssuanceRequest"](contractString) } returns manifestIssuanceRequest
+        every { openIdRequestHandler["getIssuanceRequest"](contractString) } returns rawManifest
+        every { rawManifest.rawRequest } returns issuanceRequest
+        every { rawManifest.mapToRequestContent() } returns verifiedIdRequestContent
+        every { issuanceRequest.contract } returns contract
     }
 
     private fun mockManifestIssuanceRequest() {
         val rawManifest = RawManifest(issuanceRequest, RequestType.ISSUANCE)
         every { manifestIssuanceRequest.request } returns rawManifest
         every { manifestIssuanceRequest.requesterStyle } returns requesterStyle
-        every { manifestIssuanceRequest.rootOfTrust } returns  rootOfTrust
+        every { manifestIssuanceRequest.rootOfTrust } returns rootOfTrust
         every { manifestIssuanceRequest.requirement } returns selfAttestedClaimRequirement
         every { manifestIssuanceRequest.verifiedIdStyle } returns verifiedIdStyle
     }
@@ -139,14 +183,14 @@ class OpenIdRequestHandlerTest {
         setupInput(RequestType.ISSUANCE, verifiedIdRequirement)
 
         // Act
-        val request = runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
+        val request =
+            runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
 
         // Assert
         assertThat(request).isInstanceOf(ManifestIssuanceRequest::class.java)
         assertThat(request.requesterStyle).isEqualTo(requesterStyle)
         assertThat(request.rootOfTrust).isEqualTo(rootOfTrust)
-        assertThat(request.requirement).isInstanceOf(SelfAttestedClaimRequirement::class.java)
-        assertThat((request.requirement as SelfAttestedClaimRequirement).claim).isEqualTo(expectedRequirementClaimName)
+        assertThat(request.requirement).isInstanceOf(VerifiedIdRequirement::class.java)
     }
 
     @Test
@@ -156,7 +200,8 @@ class OpenIdRequestHandlerTest {
 
         // Act and assert
         Assertions.assertThatThrownBy {
-            val request = runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
+            val request =
+                runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
         }.isInstanceOf(RequirementCastingException::class.java)
     }
 }

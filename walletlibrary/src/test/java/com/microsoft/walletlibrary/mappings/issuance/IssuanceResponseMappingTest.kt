@@ -56,7 +56,7 @@ class IssuanceResponseMappingTest {
         )
     private val groupRequirement = GroupRequirement(
         true,
-        listOf(selfAttestedClaimRequirement, accessTokenRequirement),
+        mutableListOf(selfAttestedClaimRequirement, accessTokenRequirement),
         GroupRequirementOperator.ALL
     )
 

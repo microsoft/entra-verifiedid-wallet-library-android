@@ -13,7 +13,7 @@ class PinRequirementTest {
 
     private fun setupInput() {
         pinRequirement = PinRequirement(
-            "id",
+            4,
             "numeric",
             true
         )

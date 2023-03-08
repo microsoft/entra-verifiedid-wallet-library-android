@@ -50,6 +50,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         setupInputDescriptors(inputDescriptors)
         setupLogo(logoPresent)
         every { mockPresentationRequest.content.prompt } returns expectedPromptForIssuance
+        every { mockPresentationRequest.content.idTokenHint } returns null
         verifiedIdOpenIdJwtRawRequest =
             VerifiedIdOpenIdJwtRawRequest(RequestType.PRESENTATION, mockPresentationRequest)
     }

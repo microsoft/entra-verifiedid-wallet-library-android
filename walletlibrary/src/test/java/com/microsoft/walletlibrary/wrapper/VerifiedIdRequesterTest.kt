@@ -19,6 +19,7 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.mappings.issuance.toRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
+import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrary.util.VerifiedIdResponseCompletionException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdType
@@ -83,6 +84,7 @@ class VerifiedIdRequesterTest {
 
     private fun setupInput(isFailure: Boolean) {
         requirement = credentialAttestations.toRequirement()
+        (requirement as SelfAttestedClaimRequirement).fulfill("Test")
         mockkStatic(VerifiableCredentialSdk::class)
         every { VerifiableCredentialSdk.issuanceService } returns mockIssuanceService
         if (!isFailure) {
