@@ -20,6 +20,8 @@ class PinRequirement(
     // Indicates if pin is required or optional.
     override val required: Boolean = false,
 
+    internal var pinSalt: String? = null,
+
     internal var pin: String? = null
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
