@@ -23,8 +23,14 @@ android {
     }
 
     buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+        }
+
         release {
             minifyEnabled false
+            debuggable false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -49,4 +55,16 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidx_test_espresso_core_version"
     androidTestImplementation "org.assertj:assertj-core:$assertj_test_version"
     androidTestImplementation "io.mockk:mockk:$mockk_version"
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+    destinationDirectory = reporting.file("$project.buildDir/outputs/jar/")
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleDebug' || task.name == 'assembleRelease') {
+        task.dependsOn 'sourcesJar'
+    }
 }
