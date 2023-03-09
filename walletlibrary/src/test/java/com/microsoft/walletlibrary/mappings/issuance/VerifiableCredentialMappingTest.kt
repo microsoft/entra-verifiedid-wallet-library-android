@@ -41,7 +41,10 @@ class VerifiableCredentialMappingTest {
 
     @Test
     fun mapVerifiableCredential_ProvideVerifiableCredential_ReturnsVerifiedId() {
+        // Act
         val actualResult = verifiableCredential.toVerifiedId()
+
+        // Assert
         assertThat(actualResult.id).isEqualTo(expectedJti)
         assertThat(actualResult.type).isEqualTo(VerifiedIdType.VERIFIABLE_CREDENTIAL)
         assertThat(actualResult.raw).isEqualTo(expectedRaw)

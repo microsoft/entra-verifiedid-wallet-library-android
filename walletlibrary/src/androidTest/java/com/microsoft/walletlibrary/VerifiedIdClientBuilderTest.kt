@@ -38,7 +38,10 @@ class VerifiedIdClientBuilderTest {
 
     @Test
     fun builder_WithNoLogConsumers_ReturnsVerifiedIdWithNoLogConsumer() {
+        // Act
         val actualResult = verifiedIdClientBuilder.build()
+
+        // Assert
         assertThat(actualResult.requestHandlerFactory.requestHandlers.size).isEqualTo(1)
         assertThat(actualResult.requestResolverFactory.requestResolvers.size).isEqualTo(1)
         assertThat(actualResult.logger.CONSUMERS).isEmpty()
@@ -46,8 +49,13 @@ class VerifiedIdClientBuilderTest {
 
     @Test
     fun builder_WithOneLogConsumer_ReturnsVerifiedIdWithOneLogConsumer() {
+        // Arrange
         setupInput(1)
+
+        // Act
         val actualResult = verifiedIdClientBuilder.build()
+
+        // Assert
         assertThat(actualResult.requestHandlerFactory.requestHandlers.size).isEqualTo(1)
         assertThat(actualResult.requestResolverFactory.requestResolvers.size).isEqualTo(1)
         assertThat(actualResult.logger.CONSUMERS.size).isEqualTo(1)
@@ -55,8 +63,13 @@ class VerifiedIdClientBuilderTest {
 
     @Test
     fun builder_WithMultipleLogConsumers_ReturnsVerifiedIdWithMultipleLogConsumers() {
+        // Arrange
         setupInput(3)
+
+        //Act
         val actualResult = verifiedIdClientBuilder.build()
+
+        // Assert
         assertThat(actualResult.requestHandlerFactory.requestHandlers.size).isEqualTo(1)
         assertThat(actualResult.requestResolverFactory.requestResolvers.size).isEqualTo(1)
         assertThat(actualResult.logger.CONSUMERS.size).isEqualTo(3)

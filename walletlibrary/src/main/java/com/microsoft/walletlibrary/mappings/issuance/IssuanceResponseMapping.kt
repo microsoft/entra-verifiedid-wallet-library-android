@@ -52,6 +52,9 @@ private fun IssuanceResponse.addPinRequirement(pinRequirement: PinRequirement) {
         issuancePin = IssuancePin(it)
         issuancePin?.pinSalt = pinRequirement.salt
     }
+    pinRequirement.salt?.let {
+        issuancePin?.pinSalt = it
+    }
 }
 
 private fun IssuanceResponse.addGroupRequirement(groupRequirement: GroupRequirement) {

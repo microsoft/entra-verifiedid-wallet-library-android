@@ -10,8 +10,10 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Sche
 import com.microsoft.walletlibrary.requests.VerifiedIdRequestContent
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
+import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
 import io.mockk.every
 import io.mockk.mockk
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -33,12 +35,13 @@ class VerifiedIdOpenIdJwtRawRequestTest {
     private val expectedPromptForIssuance = "create"
 
     init {
-        setupInput(listOf(mockInputDescriptor), true)
+        setupInput(listOf(mockInputDescriptor), logoPresent = true, isSchemaEmpty = false)
     }
 
     private fun setupInput(
         inputDescriptors: List<CredentialPresentationInputDescriptor>,
-        logoPresent: Boolean
+        logoPresent: Boolean,
+        isSchemaEmpty: Boolean
     ) {
         every { mockPresentationRequest.content } returns mockPresentationRequestContent
         every { mockPresentationRequest.getPresentationDefinition() } returns mockPresentationDefinition
@@ -47,7 +50,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
             expectedLinkedDomainSource
         )
         setupPresentationContent()
-        setupInputDescriptors(inputDescriptors)
+        setupInputDescriptors(inputDescriptors, isSchemaEmpty)
         setupLogo(logoPresent)
         every { mockPresentationRequest.content.prompt } returns expectedPromptForIssuance
         verifiedIdOpenIdJwtRawRequest =
@@ -58,19 +61,28 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         every { mockPresentationRequest.content.registration } returns mockRegistration
     }
 
-    private fun setupInputDescriptors(inputDescriptors: List<CredentialPresentationInputDescriptor>) {
+    private fun setupInputDescriptors(
+        inputDescriptors: List<CredentialPresentationInputDescriptor>,
+        isSchemaEmpty: Boolean
+    ) {
         every { mockPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns inputDescriptors
         for (inputDescriptor in inputDescriptors) {
-            every { inputDescriptor.schemas } returns listOf(mockSchema)
             every { inputDescriptor.id } returns expectedInputDescriptorId
             every { inputDescriptor.purpose } returns expectedPurpose
             every { inputDescriptor.issuanceMetadataList } returns emptyList()
-            setupSchema()
+            setupSchema(inputDescriptor, isSchemaEmpty)
         }
     }
 
-    private fun setupSchema() {
-        every { mockSchema.uri } returns expectedSchemaUri
+    private fun setupSchema(
+        inputDescriptor: CredentialPresentationInputDescriptor,
+        isEmpty: Boolean
+    ) {
+        if (!isEmpty) {
+            every { inputDescriptor.schemas } returns listOf(mockSchema)
+            every { mockSchema.uri } returns expectedSchemaUri
+        } else
+            every { inputDescriptor.schemas } returns emptyList()
     }
 
     private fun setupLogo(logoPresent: Boolean) {
@@ -103,7 +115,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
     @Test
     fun mapOpenIdJwtRawRequest_mapPresentationRequestWithNoLogoToRequestContent_ReturnsRequestContent() {
         // Arrange
-        setupInput(listOf(mockInputDescriptor), false)
+        setupInput(listOf(mockInputDescriptor), logoPresent = false, isSchemaEmpty = false)
 
         // Act
         val actualResult = verifiedIdOpenIdJwtRawRequest.mapToRequestContent()
@@ -118,5 +130,16 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         assertThat(actualResult.requirement).isInstanceOf(VerifiedIdRequirement::class.java)
         assertThat(actualResult.rootOfTrust.verified).isEqualTo(true)
         assertThat(actualResult.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
+    }
+
+    @Test
+    fun mapOpenIdJwtRawRequest_mapPresentationRequestWithNoSchemaToRequestContent_ThrowsException() {
+        // Arrange
+        setupInput(listOf(mockInputDescriptor), logoPresent = false, isSchemaEmpty = true)
+
+        // Act and Assert
+        Assertions.assertThatThrownBy {
+            verifiedIdOpenIdJwtRawRequest.mapToRequestContent()
+        }.isInstanceOf(MissingVerifiedIdTypeException::class.java)
     }
 }
