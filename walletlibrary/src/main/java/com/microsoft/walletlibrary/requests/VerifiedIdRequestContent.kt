@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperato
 import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.util.Constants.IDTOKENHINT_CONFIGURATION
 
 /**
  * Contents in a Verified Id Request.
@@ -51,12 +52,14 @@ internal class VerifiedIdRequestContent(
         if (requirement is GroupRequirement) {
             val requirementsInGroup = (requirement as GroupRequirement).requirements
             for (requirementInGroup in requirementsInGroup) {
-                if (requirementInGroup is IdTokenRequirement)
+                if (requirementInGroup is IdTokenRequirement) {
+                    if (requirementInGroup.configuration == IDTOKENHINT_CONFIGURATION)
                     fulfillIdTokenRequirement(
                         requirementInGroup,
                         idToken,
                         requirement as GroupRequirement
                     )
+                }
             }
         }
     }

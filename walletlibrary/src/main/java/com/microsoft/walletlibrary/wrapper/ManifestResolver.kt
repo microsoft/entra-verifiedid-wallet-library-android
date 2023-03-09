@@ -8,7 +8,6 @@ package com.microsoft.walletlibrary.wrapper
 import com.microsoft.did.sdk.VerifiableCredentialSdk
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
-import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 
 /**
@@ -22,7 +21,7 @@ object ManifestResolver {
             VerifiableCredentialSdk.issuanceService.getRequest(uri)) {
             is Result.Success -> {
                 val request = issuanceRequestResult.payload
-                RawManifest(request, RequestType.ISSUANCE)
+                RawManifest(request)
             }
             is Result.Failure -> {
                 throw VerifiedIdRequestFetchException(

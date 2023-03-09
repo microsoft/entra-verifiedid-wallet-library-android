@@ -6,8 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
-import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
+import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest
+import com.microsoft.walletlibrary.requests.VerifiedIdPresentationRequest
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
@@ -47,12 +47,12 @@ class SelfAttestedFragment: Fragment() {
             viewModel.initiateIssuance()
             val verifiedIdRequest = viewModel.verifiedIdRequest
             binding.initiateIssuance.isEnabled = false
-            if (verifiedIdRequest is OpenIdPresentationRequest)
+            if (verifiedIdRequest is VerifiedIdPresentationRequest)
                 binding.textview.text =
                     "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
-            else if (verifiedIdRequest is ManifestIssuanceRequest) {
+            else if (verifiedIdRequest is VerifiedIdIssuanceRequest) {
                 binding.textview.text =
-                    "Issuance request for ${verifiedIdRequest.verifiedIdStyle.title}"
+                    "Issuance request from ${verifiedIdRequest.requesterStyle.requester}"
                 configureViewsForSelfAttestedRequirements(verifiedIdRequest.requirement)
                 binding.completeIssuance.isEnabled = true
             }

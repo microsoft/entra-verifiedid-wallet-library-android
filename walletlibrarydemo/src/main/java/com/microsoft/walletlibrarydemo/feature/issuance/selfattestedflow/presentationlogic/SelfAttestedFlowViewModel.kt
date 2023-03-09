@@ -5,16 +5,14 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.microsoft.walletlibrary.VerifiedIdClientBuilder
-import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
-import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 //TODO(Add dependency injection)
 class SelfAttestedFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Context):
     ViewModel() {
     var verifiedIdRequest: VerifiedIdRequest<*>? = null
-    var verifiedIdResult: Result<VerifiedId>? = null
+    var verifiedIdResult: Result<Any?>? = null
 
     suspend fun initiateIssuance() {
         val verifiedIdClient = VerifiedIdClientBuilder(context).build()
@@ -25,6 +23,6 @@ class SelfAttestedFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Co
     }
 
     suspend fun completeIssuance() {
-        verifiedIdResult = (verifiedIdRequest as ManifestIssuanceRequest).complete()
+        verifiedIdResult = verifiedIdRequest?.complete()
     }
 }

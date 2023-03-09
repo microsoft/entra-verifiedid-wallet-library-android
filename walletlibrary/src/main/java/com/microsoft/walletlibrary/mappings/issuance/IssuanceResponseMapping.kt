@@ -50,7 +50,7 @@ private fun IssuanceResponse.addPinRequirement(pinRequirement: PinRequirement) {
     pinRequirement.validate()
     pinRequirement.pin?.let {
         issuancePin = IssuancePin(it)
-        issuancePin?.pinSalt = pinRequirement.pinSalt
+        issuancePin?.pinSalt = pinRequirement.salt
     }
 }
 

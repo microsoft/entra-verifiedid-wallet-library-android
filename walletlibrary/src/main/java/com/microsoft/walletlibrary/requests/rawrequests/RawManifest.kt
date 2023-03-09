@@ -16,7 +16,7 @@ import com.microsoft.walletlibrary.requests.VerifiedIdRequestContent
  */
 class RawManifest(
     override val rawRequest: IssuanceRequest,
-    override val requestType: RequestType
+    override val requestType: RequestType = RequestType.ISSUANCE
 ): RawRequest {
     internal fun mapToRequestContent(): VerifiedIdRequestContent {
         return VerifiedIdRequestContent(

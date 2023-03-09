@@ -5,17 +5,15 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.microsoft.walletlibrary.VerifiedIdClientBuilder
-import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.PinRequirement
-import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 //TODO(Add dependency injection)
 class IdTokenFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Context): ViewModel() {
     var verifiedIdRequest: VerifiedIdRequest<*>? = null
-    var verifiedIdResult: Result<VerifiedId>? = null
+    var verifiedIdResult: Result<Any?>? = null
     var pin: String? = null
 
     suspend fun initiateIssuance() {
@@ -37,6 +35,6 @@ class IdTokenFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Context
                 requirement.validate()
             }
         }
-        verifiedIdResult = (verifiedIdRequest as ManifestIssuanceRequest).complete()
+        verifiedIdResult = verifiedIdRequest?.complete()
     }
 }
