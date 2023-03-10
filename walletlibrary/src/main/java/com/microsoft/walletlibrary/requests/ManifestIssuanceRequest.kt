@@ -17,7 +17,7 @@ import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
 /**
  * Issuance request specific to Manifest/Contract.
  */
-class ManifestIssuanceRequest(
+internal class ManifestIssuanceRequest(
     // Attributes describing the requester (eg. name, logo).
     override val requesterStyle: RequesterStyle,
 

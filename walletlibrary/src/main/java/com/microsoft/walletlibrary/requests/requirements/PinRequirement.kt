@@ -12,7 +12,7 @@ import com.microsoft.walletlibrary.util.PinRequirementNotFulfilledException
  */
 class PinRequirement(
     // Length of the pin.
-    val length: String,
+    val length: Int,
 
     // Type of the pin (eg. alphanumeric, numeric).
     val type: String,
@@ -20,7 +20,7 @@ class PinRequirement(
     // Indicates if pin is required or optional.
     override val required: Boolean = false,
 
-    internal var pinSalt: String? = null,
+    internal val salt: String? = null,
 
     internal var pin: String? = null
 ): Requirement {

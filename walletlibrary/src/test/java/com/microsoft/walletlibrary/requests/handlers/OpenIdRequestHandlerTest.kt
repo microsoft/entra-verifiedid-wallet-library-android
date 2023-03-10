@@ -96,7 +96,7 @@ class OpenIdRequestHandlerTest {
     }
 
     private fun mockManifestIssuanceRequest() {
-        val rawManifest = RawManifest(issuanceRequest, RequestType.ISSUANCE)
+        val rawManifest = RawManifest(issuanceRequest)
         every { manifestIssuanceRequest.request } returns rawManifest
         every { manifestIssuanceRequest.requesterStyle } returns requesterStyle
         every { manifestIssuanceRequest.rootOfTrust } returns  rootOfTrust

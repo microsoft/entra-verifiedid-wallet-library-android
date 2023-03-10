@@ -15,14 +15,14 @@ import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequir
  * Maps SelfIssuedAttestation object from VC SDK to SelfAttestedClaimRequirement in library.
  */
 internal fun SelfIssuedAttestation.toRequirement(): Requirement {
-    val claims = this.claims
+    val claims = claims
     if (claims.size == 1) {
-        val required = this.required || claims.first().required
-        return SelfAttestedClaimRequirement("", claims.first().claim, this.encrypted, required)
+        val required = required || claims.first().required
+        return SelfAttestedClaimRequirement("", claims.first().claim, encrypted, required)
     }
     val requirements = claims.map {
         val required = it.required
-        SelfAttestedClaimRequirement("", it.claim, this.encrypted, required)
+        SelfAttestedClaimRequirement("", it.claim, encrypted, required)
     }
-    return GroupRequirement(this.required, requirements, GroupRequirementOperator.ALL)
+    return GroupRequirement(required, requirements.toMutableList(), GroupRequirementOperator.ALL)
 }

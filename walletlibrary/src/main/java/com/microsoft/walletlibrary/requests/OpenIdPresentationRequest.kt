@@ -11,7 +11,7 @@ import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 /**
  * Presentation request specific to OpenId protocol.
  */
-class OpenIdPresentationRequest(
+internal class OpenIdPresentationRequest(
     // Attributes describing the requester (eg. name, logo).
     override val requesterStyle: RequesterStyle,
 
