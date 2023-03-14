@@ -5,10 +5,9 @@ import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.models.attestations.ClaimAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
 import com.microsoft.did.sdk.credential.service.models.attestations.SelfIssuedAttestation
+import com.microsoft.did.sdk.credential.service.models.contracts.InputContract
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.did.sdk.credential.service.models.contracts.display.ClaimDescriptor
-import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
-import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
+import com.microsoft.did.sdk.credential.service.models.contracts.display.*
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
@@ -74,6 +73,19 @@ class OpenIdRequestHandlerTest {
     private val expectedCardTitle = "Test Card"
     private val expectedCardDescription = "cardDescription"
     private val expectedCardIssuer = "testIssuer"
+    private val expectedConsentTitle = "Consent Title"
+    private val expectedConsentInstructions = "Consent Instructions"
+    private val inputContract = InputContract(
+        "",
+        "",
+        expectedCardIssuer,
+        credentialAttestations
+    )
+    private lateinit var cardDescriptor: CardDescriptor
+    private val consentDescriptor =
+        ConsentDescriptor(expectedConsentTitle, expectedConsentInstructions)
+    private lateinit var displayContract: DisplayContract
+    private lateinit var verifiableCredentialContract: VerifiableCredentialContract
 
     init {
         setupInput(
@@ -147,20 +159,27 @@ class OpenIdRequestHandlerTest {
 
     private fun mockIssuanceRequest(logoPresent: Boolean, emptyClaims: Boolean) {
         setupSelfIssuedAttestation()
-        val verifiableCredentialContract: VerifiableCredentialContract = mockk()
-        val displayContract: DisplayContract = mockk()
+        val logo = if (logoPresent) Logo(
+            expectedLogoUri,
+            expectedLogoImage,
+            expectedLogoDescription
+        ) else null
+        cardDescriptor = CardDescriptor(expectedCardTitle, expectedCardIssuer, expectedBackgroundColor, expectedTextColor, logo, expectedCardDescription)
+        val claimDescriptor = ClaimDescriptor("type", "label")
+        displayContract = if (emptyClaims)
+            DisplayContract("", expectedLocale, "", cardDescriptor, consentDescriptor, emptyMap())
+        else
+            DisplayContract("", expectedLocale, "", cardDescriptor, consentDescriptor, mutableMapOf("" to claimDescriptor))
+        verifiableCredentialContract =
+            VerifiableCredentialContract("", inputContract, displayContract)
         every { manifestIssuanceRequest.request } returns rawManifest
         every { issuanceRequest.contract } returns verifiableCredentialContract
-        every { verifiableCredentialContract.display } returns displayContract
         every { rawManifest.rawRequest.entityName } returns expectedRequesterName
         every { rawManifest.rawRequest.getAttestations() } returns credentialAttestations
         mockAttestations()
         every { rawManifest.rawRequest.linkedDomainResult } returns LinkedDomainVerified(
             expectedRootOfTrustSource
         )
-        setupContract()
-        setupDisplayContract(emptyClaims)
-        setupCardDescriptor(logoPresent)
     }
 
     private fun mockAttestations() {
@@ -168,45 +187,6 @@ class OpenIdRequestHandlerTest {
         every { credentialAttestations.idTokens } returns emptyList()
         every { credentialAttestations.accessTokens } returns emptyList()
         every { credentialAttestations.presentations } returns emptyList()
-    }
-
-    private fun setupContract() {
-        every { issuanceRequest.contract } returns mockk()
-        every { issuanceRequest.contract.display } returns mockk()
-    }
-
-    private fun setupDisplayContract(emptyClaims: Boolean) {
-        val claimDescriptor: ClaimDescriptor = mockk()
-        every { claimDescriptor.type } returns "type"
-        every { claimDescriptor.label } returns "label"
-        val claims = mutableMapOf<String, ClaimDescriptor>()
-        claims[""] = claimDescriptor
-        every { issuanceRequest.contract.display.locale } returns expectedLocale
-        every { issuanceRequest.contract.display.card } returns mockk()
-        if (emptyClaims)
-            every { issuanceRequest.contract.display.claims } returns emptyMap()
-        else
-            every { issuanceRequest.contract.display.claims } returns claims
-    }
-
-    private fun setupCardDescriptor(logoPresent: Boolean) {
-        every { issuanceRequest.contract.display.card.description } returns expectedCardDescription
-        every { issuanceRequest.contract.display.card.issuedBy } returns expectedCardIssuer
-        every { issuanceRequest.contract.display.card.backgroundColor } returns expectedBackgroundColor
-        every { issuanceRequest.contract.display.card.textColor } returns expectedTextColor
-        every { issuanceRequest.contract.display.card.title } returns expectedCardTitle
-        if (logoPresent) {
-            val logoMock = mockk<Logo>()
-            every { issuanceRequest.contract.display.card.logo } returns logoMock
-            setupLogo(logoMock)
-        } else
-            every { issuanceRequest.contract.display.card.logo } returns null
-    }
-
-    private fun setupLogo(logo: Logo) {
-        every { logo.uri } returns expectedLogoUri
-        every { logo.image } returns expectedLogoImage
-        every { logo.description } returns expectedLogoDescription
     }
 
     private fun setupSelfIssuedAttestation() {
