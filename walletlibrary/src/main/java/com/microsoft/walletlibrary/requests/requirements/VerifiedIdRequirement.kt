@@ -6,6 +6,7 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
+import com.microsoft.walletlibrary.requests.requirements.constraints.VerifiedIdConstraint
 import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
@@ -13,10 +14,13 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
  * Represents information that describes Verified IDs required in order to complete a VerifiedID request.
  */
 class VerifiedIdRequirement(
-    internal val id: String,
+    internal val id: String?,
 
     // The types of Verified ID required.
     val types: List<String>,
+
+    // Constraint that represents how the requirement is fulfilled
+    val constraint: VerifiedIdConstraint,
 
     // Indicates if the requirement must be encrypted.
     internal val encrypted: Boolean = false,

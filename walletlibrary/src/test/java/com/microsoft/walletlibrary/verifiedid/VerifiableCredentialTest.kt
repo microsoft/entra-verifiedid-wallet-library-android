@@ -152,5 +152,6 @@ class VerifiableCredentialTest {
         )
         every { mockVcContent.vc } returns mockVerifiableCredentialDescriptor
         every { mockVerifiableCredentialDescriptor.credentialSubject } returns credentialSubjectMap
+        every { mockVerifiableCredentialDescriptor.type } returns listOf("TestCredential")
     }
 }

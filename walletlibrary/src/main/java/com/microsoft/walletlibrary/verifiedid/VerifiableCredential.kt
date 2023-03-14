@@ -12,6 +12,7 @@ class VerifiableCredential(
     override val id = raw.jti
     override val issuedOn = raw.contents.iat
     override val expiresOn = raw.contents.exp
+    val types = raw.contents.vc.type
 
     override fun getClaims(): List<VerifiedIdClaim> {
         val claimDescriptors = contract.display.claims

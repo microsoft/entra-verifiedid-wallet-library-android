@@ -96,6 +96,7 @@ class VerifiedIdRequesterTest {
             every { mockVerifiableCredential.contents.iat } returns 1234567L
             every { mockVerifiableCredential.contents.exp } returns 0L
             every { mockVerifiableCredential.contents.vc } returns mockVerifiableCredentialDescriptor
+            every { mockVerifiableCredentialDescriptor.type } returns listOf("testCredential")
             expectedCredentialSubject[expectedCredentialSubjectClaimName] = expectedCredentialSubjectClaimValue
             every { mockVerifiableCredentialDescriptor.credentialSubject } returns expectedCredentialSubject
         } else
