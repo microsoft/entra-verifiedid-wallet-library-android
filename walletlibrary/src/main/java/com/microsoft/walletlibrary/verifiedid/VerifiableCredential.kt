@@ -8,7 +8,7 @@ import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCrede
 class VerifiableCredential(
     private val raw: com.microsoft.did.sdk.credential.models.VerifiableCredential,
     private val contract: VerifiableCredentialContract
-) : VerifiedId {
+): VerifiedId {
     override val id = raw.jti
     override val issuedOn = raw.contents.iat
     override val expiresOn = raw.contents.exp
