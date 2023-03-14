@@ -6,9 +6,11 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Sche
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.util.MissingInputDescriptorException
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 
 class PresentationDefinitionMappingTest {
@@ -56,5 +58,16 @@ class PresentationDefinitionMappingTest {
         assertThat(actualRequirement).isInstanceOf(GroupRequirement::class.java)
         assertThat(actualRequirement.required).isEqualTo(true)
         assertThat((actualRequirement as GroupRequirement).requirementOperator).isEqualTo(GroupRequirementOperator.ANY)
+    }
+
+    @Test
+    fun presentationDefinitionMapping_WithNoInputDescriptors_ThrowsException() {
+        // Arrange
+        setupInput(emptyList())
+
+        // Act and Assert
+        assertThatThrownBy {
+            presentationDefinition.toRequirement()
+        }.isInstanceOf(MissingInputDescriptorException::class.java)
     }
 }
