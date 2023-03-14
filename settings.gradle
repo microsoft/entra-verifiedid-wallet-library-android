@@ -1,0 +1,14 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "WalletLibrary"
+include ':walletlibrary'
+include ':walletlibrarydemo'
+include ':VerifiableCredential-SDK'
+
+project(':VerifiableCredential-SDK').projectDir = new File('walletlibrary/submodules/VerifiableCredential-SDK-Android/sdk')
