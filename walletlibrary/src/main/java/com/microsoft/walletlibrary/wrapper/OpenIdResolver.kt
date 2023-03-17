@@ -16,7 +16,7 @@ import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 /**
  * Wrapper class to wrap the get Presentation Request from VC SDK and return a raw request.
  */
-object OpenIdForVCResolver {
+object OpenIdResolver {
 
     // Fetches the presentation request from VC SDK using the url and converts it to raw request.
     internal suspend fun getRequest(uri: String): OpenIdRawRequest {

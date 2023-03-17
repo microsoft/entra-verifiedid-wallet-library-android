@@ -18,5 +18,5 @@ interface VerifiedId {
     val expiresOn: Long?
 
     // Return list of claims in the Verified ID.
-    fun getClaims(): List<VerifiedIdClaim>
+    fun getClaims(): ArrayList<VerifiedIdClaim>
 }

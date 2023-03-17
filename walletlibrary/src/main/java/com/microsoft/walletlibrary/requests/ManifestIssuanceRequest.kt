@@ -46,6 +46,7 @@ internal class ManifestIssuanceRequest(
         try {
             requirement.validate()
         } catch (exception: RequirementValidationException) {
+            //TODO("log exception message")
             return false
         }
         return true

@@ -18,7 +18,7 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-class OpenIdForVCResolverTest {
+class OpenIdResolverTest {
     private val mockPresentationService: PresentationService = mockk()
     private val openIdUrl = ""
     private val mockPresentationRequest: PresentationRequest = mockk()
@@ -43,7 +43,7 @@ class OpenIdForVCResolverTest {
     fun resolveOpenIdRequest_SuccessfulPresentationRequestFromSdk_ReturnsRawRequestOfTypePresentation() {
         runBlocking {
             // Act
-            val actualResult = OpenIdForVCResolver.getRequest(openIdUrl)
+            val actualResult = OpenIdResolver.getRequest(openIdUrl)
 
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedIdOpenIdJwtRawRequest::class.java)
@@ -60,7 +60,7 @@ class OpenIdForVCResolverTest {
         // Act and Assert
         Assertions.assertThatThrownBy {
             runBlocking {
-                OpenIdForVCResolver.getRequest(openIdUrl)
+                OpenIdResolver.getRequest(openIdUrl)
             }
         }.isInstanceOf(VerifiedIdRequestFetchException::class.java)
     }

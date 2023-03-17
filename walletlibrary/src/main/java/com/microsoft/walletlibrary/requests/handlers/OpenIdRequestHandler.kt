@@ -25,7 +25,7 @@ import com.microsoft.walletlibrary.wrapper.ManifestResolver
 /**
  * OIDC protocol specific implementation of RequestHandler. It can handle OpenID raw request and returns a VerifiedIdRequest.
  */
-internal class OpenIdRequestHandler: RequestHandler {
+internal class OpenIdRequestHandler : RequestHandler {
 
     override suspend fun handleRequest(rawRequest: RawRequest): VerifiedIdRequest<*> {
         if (rawRequest !is OpenIdRawRequest)
@@ -33,14 +33,18 @@ internal class OpenIdRequestHandler: RequestHandler {
         val requestContent = rawRequest.mapToRequestContent()
         if (rawRequest.requestType == RequestType.ISSUANCE)
             return handleIssuanceRequest(requestContent)
-        return handlePresentationRequest(requestContent)
+        return handlePresentationRequest(requestContent, rawRequest)
     }
 
-    private fun handlePresentationRequest(requestContent: VerifiedIdRequestContent): VerifiedIdRequest<Unit> {
+    private fun handlePresentationRequest(
+        requestContent: VerifiedIdRequestContent,
+        rawRequest: OpenIdRawRequest
+    ): VerifiedIdRequest<Unit> {
         return OpenIdPresentationRequest(
             requestContent.requesterStyle,
             requestContent.requirement,
-            requestContent.rootOfTrust
+            requestContent.rootOfTrust,
+            rawRequest
         )
     }
 

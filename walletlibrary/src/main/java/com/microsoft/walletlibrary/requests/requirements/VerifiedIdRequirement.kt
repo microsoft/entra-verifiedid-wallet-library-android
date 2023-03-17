@@ -7,6 +7,7 @@ package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.requirements.constraints.VerifiedIdConstraint
+import com.microsoft.walletlibrary.util.VerifiedIdRequirementDoesNotMatchConstraintsException
 import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
@@ -40,15 +41,20 @@ class VerifiedIdRequirement(
     override fun validate() {
         if (verifiedId == null)
             throw VerifiedIdRequirementNotFulfilledException("VerifiedIdRequirement has not been fulfilled.")
+        if (verifiedId?.let { constraint.doesMatch(it) } == true)
+            throw VerifiedIdRequirementDoesNotMatchConstraintsException("Provided VerifiedId does not match the constraints")
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(verifiedIdValue: VerifiedId) {
-        verifiedId = verifiedIdValue
+    fun fulfill(selectedVerifiedId: VerifiedId) {
+        if (constraint.doesMatch(selectedVerifiedId))
+            verifiedId = selectedVerifiedId
+        else
+            throw VerifiedIdRequirementDoesNotMatchConstraintsException("Provided VerifiedId does not match the constraints")
     }
 
     // Retrieves list of Verified IDs from the provided list that matches this requirement.
     fun getMatches(verifiedIds: List<VerifiedId>): List<VerifiedId> {
-        TODO("Not yet implemented")
+        return verifiedIds.filter { constraint.doesMatch(it) }
     }
 }
