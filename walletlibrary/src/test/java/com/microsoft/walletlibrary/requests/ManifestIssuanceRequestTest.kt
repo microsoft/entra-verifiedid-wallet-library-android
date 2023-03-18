@@ -26,7 +26,8 @@ class ManifestIssuanceRequestTest {
     fun manifestIssuanceRequest_SelfAttestedRequirementSatisfied_ReturnsTrue() {
         // Arrange
         requirement = SelfAttestedClaimRequirement(
-            "id", "name",
+            "id",
+            "name",
             encrypted = false,
             required = true
         )
@@ -50,7 +51,8 @@ class ManifestIssuanceRequestTest {
     fun manifestIssuanceRequest_SelfAttestedRequirementNotSatisfied_ReturnsFalse() {
         // Arrange
         requirement = SelfAttestedClaimRequirement(
-            "id", "name",
+            "id",
+            "name",
             encrypted = false,
             required = true
         )
@@ -109,7 +111,8 @@ class ManifestIssuanceRequestTest {
     fun manifestIssuanceRequest_CompleteIssuanceSuccessfully_ReturnsVerifiedId() {
         // Arrange
         requirement = SelfAttestedClaimRequirement(
-            "id", "name",
+            "id",
+            "name",
             encrypted = false,
             required = true
         )
@@ -142,7 +145,8 @@ class ManifestIssuanceRequestTest {
     fun manifestIssuanceRequest_CompleteIssuanceFailure_ThrowsException() {
         // Arrange
         requirement = SelfAttestedClaimRequirement(
-            "id", "name",
+            "id",
+            "name",
             encrypted = false,
             required = true
         )
@@ -174,7 +178,8 @@ class ManifestIssuanceRequestTest {
 
     private fun setupGroupRequirement(fulfillSelfAttested: Boolean, fulfillIdToken: Boolean) {
         val selfAttestedClaimRequirement = SelfAttestedClaimRequirement(
-            "id", "name",
+            "id",
+            "name",
             encrypted = false,
             required = true
         )
