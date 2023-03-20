@@ -25,15 +25,14 @@ object OpenIdResponder {
     ) {
         val presentationResponse = PresentationResponse(presentationRequest)
         presentationResponse.addRequirements(requirement)
-        when (val presentationResponseResult =
-            VerifiableCredentialSdk.presentationService.sendResponse(presentationResponse)) {
-            is Result.Success -> {}
-            is Result.Failure -> {
-                throw OpenIdResponseCompletionException(
-                    "Unable to send presentation response",
-                    presentationResponseResult.payload
-                )
-            }
+        val presentationResponseResult =
+            VerifiableCredentialSdk.presentationService.sendResponse(presentationResponse)
+        if (presentationResponseResult is Result.Failure) {
+            throw OpenIdResponseCompletionException(
+                "Unable to send presentation response",
+                presentationResponseResult.payload
+            )
         }
+
     }
 }
