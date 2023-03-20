@@ -11,18 +11,25 @@ import com.microsoft.walletlibrary.requests.VerifiedIdPresentationRequest
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
+import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrarydemo.databinding.SelfAttestedFragmentBinding
 import com.microsoft.walletlibrarydemo.feature.issuance.selfattestedflow.presentationlogic.RequirementsAdapter
 import com.microsoft.walletlibrarydemo.feature.issuance.selfattestedflow.presentationlogic.SelfAttestedFlowViewModel
+import com.microsoft.walletlibrarydemo.feature.issuance.selfattestedflow.presentationlogic.VerifiableCredentialAdapter
 import kotlinx.coroutines.runBlocking
 
-class SelfAttestedFragment: Fragment() {
+
+class SelfAttestedFragment : Fragment() {
     private var _binding: SelfAttestedFragmentBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var viewModel: SelfAttestedFlowViewModel
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = SelfAttestedFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -73,6 +80,7 @@ class SelfAttestedFragment: Fragment() {
         runBlocking {
             viewModel.completeIssuance()
             configureIssuanceCompletionView()
+            switchToPresentation()
         }
     }
 
@@ -80,10 +88,55 @@ class SelfAttestedFragment: Fragment() {
         binding.completeIssuance.isEnabled = false
         val response = viewModel.verifiedIdResult
         response?.let {
-            if (response.isSuccess)
-                binding.textview.text = response.getOrDefault("").toString()
-            else
+            if (response.isSuccess) {
+                val verifiedId = response.getOrDefault("")
+                binding.textview.text = verifiedId.toString()
+                configureViewsForVerifiedIdClaims(verifiedId as VerifiableCredential)
+            } else
                 binding.textview.text = response.exceptionOrNull().toString()
+        }
+        binding.requirementsList.visibility = View.GONE
+    }
+
+    private fun switchToPresentation() {
+        binding.initiateIssuance.text = "Initiate Presentation"
+        binding.initiateIssuance.isEnabled = true
+        binding.initiateIssuance.setOnClickListener { initiatePresentation() }
+        binding.completeIssuance.setOnClickListener { completePresentation() }
+    }
+
+    private fun initiatePresentation() {
+        runBlocking {
+            viewModel.initiatePresentation()
+            val verifiedIdRequest = viewModel.verifiedIdRequest
+            binding.initiateIssuance.isEnabled = false
+            if (verifiedIdRequest is VerifiedIdPresentationRequest) {
+                binding.textview.text =
+                    "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
+                binding.completeIssuance.text = "Complete Presentation"
+            } else if (verifiedIdRequest is VerifiedIdIssuanceRequest) {
+                binding.textview.text =
+                    "Issuance request from ${verifiedIdRequest.requesterStyle.requester}"
+            }
+            binding.completeIssuance.isEnabled = true
+            binding.claimsList.visibility = View.GONE
+        }
+    }
+
+    private fun configureViewsForVerifiedIdClaims(verifiableCredential: VerifiableCredential) {
+        val adapter =
+            VerifiableCredentialAdapter(requireContext(), verifiableCredential.getClaims())
+        binding.claimsList.layoutManager = LinearLayoutManager(context)
+        binding.claimsList.isNestedScrollingEnabled = false
+        binding.claimsList.adapter = adapter
+    }
+
+    private fun completePresentation() {
+        runBlocking {
+            viewModel.completePresentation()
+            binding.textview.text = "Presentation Complete!!"
+            binding.completeIssuance.isEnabled = false
+            binding.claimsList.visibility = View.VISIBLE
         }
     }
 }
