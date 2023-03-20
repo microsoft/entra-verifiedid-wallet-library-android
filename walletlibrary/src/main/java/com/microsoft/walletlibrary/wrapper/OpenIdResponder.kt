@@ -6,8 +6,11 @@
 package com.microsoft.walletlibrary.wrapper
 
 import com.microsoft.did.sdk.VerifiableCredentialSdk
+import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.mappings.presentation.addRequirements
+import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
 
 
@@ -16,9 +19,14 @@ import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
  */
 object OpenIdResponder {
 
-    internal suspend fun sendPresentationResponse(response: PresentationResponse) {
+    internal suspend fun sendPresentationResponse(
+        presentationRequest: PresentationRequest,
+        requirement: Requirement
+    ) {
+        val presentationResponse = PresentationResponse(presentationRequest)
+        presentationResponse.addRequirements(requirement)
         when (val presentationResponseResult =
-            VerifiableCredentialSdk.presentationService.sendResponse(response)) {
+            VerifiableCredentialSdk.presentationService.sendResponse(presentationResponse)) {
             is Result.Success -> {}
             is Result.Failure -> {
                 throw OpenIdResponseCompletionException(

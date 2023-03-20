@@ -21,7 +21,7 @@ class VerifiedIdRequirement(
     val types: List<String>,
 
     // Constraint that represents how the requirement is fulfilled
-    val constraint: VerifiedIdConstraint,
+    private val constraint: VerifiedIdConstraint,
 
     // Indicates if the requirement must be encrypted.
     internal val encrypted: Boolean = false,

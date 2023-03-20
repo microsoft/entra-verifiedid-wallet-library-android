@@ -32,7 +32,7 @@ internal fun CredentialPresentationInputDescriptor.toVerifiedIdRequirement(): Ve
     )
 }
 
-private fun CredentialPresentationInputDescriptor.toVcTypeConstraint(vcTypes: List<String>): VerifiedIdConstraint {
+fun toVcTypeConstraint(vcTypes: List<String>): VerifiedIdConstraint {
     if (vcTypes.size == 1) return VcTypeConstraint(vcTypes.first())
     val vcTypeConstraints = mutableListOf<VcTypeConstraint>()
     vcTypes.forEach { vcTypeConstraints.add(VcTypeConstraint(it)) }

@@ -2,6 +2,8 @@ package com.microsoft.walletlibrary.mappings.presentation
 
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
+import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
+import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
 import io.mockk.every
 import io.mockk.mockk
@@ -20,7 +22,7 @@ class CredentialPresentationInputDescriptorsMappingTest {
 
 
     init {
-        setupInput(listOf( expectedSchema))
+        setupInput(listOf(expectedSchema))
     }
 
     private fun setupInput(schemaList: List<Schema>) {
@@ -34,7 +36,7 @@ class CredentialPresentationInputDescriptorsMappingTest {
     }
 
     @Test
-    fun inputDescriptorMapping_EmptySchema_ThrowsException  () {
+    fun inputDescriptorMapping_EmptySchema_ThrowsException() {
         // Arrange
         setupInput(emptyList())
 
@@ -119,5 +121,25 @@ class CredentialPresentationInputDescriptorsMappingTest {
         assertThat(actualVerifiedIdRequirement.types.size).isEqualTo(1)
         assertThat(actualVerifiedIdRequirement.required).isEqualTo(expectedRequiredFieldValue)
         assertThat(actualVerifiedIdRequirement.encrypted).isEqualTo(expectedEncryptedFieldValue)
+    }
+
+    @Test
+    fun constraintMapping_WithSingleValidSchemaUri_ReturnsTypeConstraint() {
+        // Act
+        val actualVcTypeConstraint =
+            toVcTypeConstraint(listOf("BusinessCard"))
+
+        // Assert
+        assertThat(actualVcTypeConstraint).isInstanceOf(VcTypeConstraint::class.java)
+    }
+
+    @Test
+    fun constraintMapping_WithMultipleValidSchemaUri_ReturnsGroupConstraint() {
+        // Act
+        val actualConstraint =
+            toVcTypeConstraint(listOf("BusinessCard1", "BusinessCard2"))
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
     }
 }

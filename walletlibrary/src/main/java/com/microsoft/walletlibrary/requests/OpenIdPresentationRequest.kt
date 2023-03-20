@@ -5,7 +5,6 @@
 
 package com.microsoft.walletlibrary.requests
 
-import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
@@ -40,9 +39,8 @@ internal class OpenIdPresentationRequest(
 
     // Completes the request and returns nothing if successful.
     override suspend fun complete(): Result<Unit> {
-        val response = PresentationResponse(request.rawRequest)
         return try {
-            val result = OpenIdResponder.sendPresentationResponse(response)
+            val result = OpenIdResponder.sendPresentationResponse(request.rawRequest, requirement)
             Result.success(result)
         } catch (exception: WalletLibraryException) {
             Result.failure(exception)

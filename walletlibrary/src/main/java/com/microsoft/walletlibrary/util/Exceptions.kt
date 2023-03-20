@@ -47,4 +47,8 @@ class VerifiedIdRequirementNotFulfilledException(message: String = "", cause: Th
 
 class VerifiedIdRequirementDoesNotMatchConstraintsException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
 
+class VerifiedIdRequirementMissingIdException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
+
+class VerifiedIdRequirementIdConflictException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
+
 class PinRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)

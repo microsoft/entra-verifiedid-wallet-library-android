@@ -6,7 +6,7 @@ import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCrede
  * Holds the information related to a VerifiedID like the claims, issued and expiry dates.
  */
 class VerifiableCredential(
-    private val raw: com.microsoft.did.sdk.credential.models.VerifiableCredential,
+    internal val raw: com.microsoft.did.sdk.credential.models.VerifiableCredential,
     private val contract: VerifiableCredentialContract
 ): VerifiedId {
     override val id = raw.jti
