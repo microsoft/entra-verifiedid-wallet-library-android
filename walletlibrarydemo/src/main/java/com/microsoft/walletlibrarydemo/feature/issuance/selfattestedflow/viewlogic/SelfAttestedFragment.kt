@@ -100,6 +100,7 @@ class SelfAttestedFragment : Fragment() {
 
     private fun switchToPresentation() {
         binding.initiateIssuance.text = "Initiate Presentation"
+        binding.completeIssuance.text = "Complete Presentation"
         binding.initiateIssuance.isEnabled = true
         binding.initiateIssuance.setOnClickListener { initiatePresentation() }
         binding.completeIssuance.setOnClickListener { completePresentation() }

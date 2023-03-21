@@ -20,7 +20,7 @@ class SelfAttestedFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Co
     suspend fun initiateIssuance() {
         // Use the test uri here
         val verifiedIdRequestUrl =
-            VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/issuanceRequests/080ed47b-a8b7-4b33-98a5-73abf26c9418"))
+            VerifiedIdRequestURL(Uri.parse(""))
         verifiedIdRequest = verifiedIdClient.createRequest(verifiedIdRequestUrl)
     }
 
@@ -31,7 +31,7 @@ class SelfAttestedFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Co
     suspend fun initiatePresentation() {
         // Use the test uri here
         val verifiedIdRequestUrl =
-            VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/presentationRequests/10b7865e-3320-40a1-a830-2e575817dcbd"))
+            VerifiedIdRequestURL(Uri.parse(""))
         verifiedIdRequest = verifiedIdClient.createRequest(verifiedIdRequestUrl)
     }
 
