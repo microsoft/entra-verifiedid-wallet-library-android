@@ -25,6 +25,8 @@ class OpenIdResponseCompletionException(message: String = "", cause: Throwable? 
 
 class UnSupportedProtocolException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
+class UnSupportedRequirementException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
 class MissingInputDescriptorException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
 class MissingVerifiedIdTypeException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
@@ -50,5 +52,7 @@ class VerifiedIdRequirementDoesNotMatchConstraintsException(message: String = ""
 class VerifiedIdRequirementMissingIdException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
 
 class VerifiedIdRequirementIdConflictException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
+
+class IdInVerifiedIdRequirementDoesNotMatchRequestException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
 
 class PinRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
