@@ -9,6 +9,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import java.util.Date
 
 class VerifiableCredentialTest {
     private val verifiableCredentialFromSdk: com.microsoft.did.sdk.credential.models.VerifiableCredential =
@@ -100,13 +101,14 @@ class VerifiableCredentialTest {
         every { verifiableCredentialContract.display } returns mockDisplayContract
         every { mockDisplayContract.claims } returns emptyMap()
         setupVcContent()
+        val expectedIssuedDate = Date(5*1000)
 
         // Act
         verifiableCredential =
             VerifiableCredential(verifiableCredentialFromSdk, verifiableCredentialContract)
 
         // Assert
-        assertThat(verifiableCredential.issuedOn).isEqualTo(5)
+        assertThat(verifiableCredential.issuedOn).isEqualTo(expectedIssuedDate)
     }
 
     @Test
@@ -115,13 +117,14 @@ class VerifiableCredentialTest {
         every { verifiableCredentialContract.display } returns mockDisplayContract
         every { mockDisplayContract.claims } returns emptyMap()
         setupVcContent()
+        val expectedExpiryDate = Date(1000*1000)
 
         // Act
         verifiableCredential =
             VerifiableCredential(verifiableCredentialFromSdk, verifiableCredentialContract)
 
         // Assert
-        assertThat(verifiableCredential.expiresOn).isEqualTo(1000)
+        assertThat(verifiableCredential.expiresOn).isEqualTo(expectedExpiryDate)
     }
 
     @Test

@@ -1,20 +1,21 @@
 package com.microsoft.walletlibrary.verifiedid
 
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import java.util.*
 
 /**
  * Holds the information related to a VerifiedID like the claims, issued and expiry dates.
  */
 class VerifiableCredential(
-    private val raw: com.microsoft.did.sdk.credential.models.VerifiableCredential,
+    internal val raw: com.microsoft.did.sdk.credential.models.VerifiableCredential,
     private val contract: VerifiableCredentialContract
 ): VerifiedId {
     override val id = raw.jti
-    override val issuedOn = raw.contents.iat
-    override val expiresOn = raw.contents.exp
+    override val issuedOn = Date(raw.contents.iat * 1000L)
+    override val expiresOn = raw.contents.exp?.let { Date(it * 1000L) }
     val types = raw.contents.vc.type
 
-    override fun getClaims(): List<VerifiedIdClaim> {
+    override fun getClaims(): ArrayList<VerifiedIdClaim> {
         val claimDescriptors = contract.display.claims
         val claimValues = raw.contents.vc.credentialSubject
 
