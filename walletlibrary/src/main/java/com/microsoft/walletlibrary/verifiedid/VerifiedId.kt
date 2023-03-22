@@ -5,6 +5,8 @@
 
 package com.microsoft.walletlibrary.verifiedid
 
+import java.util.*
+
 /**
  * Data model for VerifiedId
  */
@@ -12,10 +14,10 @@ interface VerifiedId {
     val id: String
 
     // Time when Verified ID was issued.
-    val issuedOn: Long
+    val issuedOn: Date
 
     // Time when Verified ID expires.
-    val expiresOn: Long?
+    val expiresOn: Date?
 
     // Return list of claims in the Verified ID.
     fun getClaims(): List<VerifiedIdClaim>
