@@ -22,7 +22,6 @@ import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrary.util.VerifiedIdResponseCompletionException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
-import com.microsoft.walletlibrary.verifiedid.VerifiedIdType
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -112,11 +111,11 @@ class VerifiedIdRequesterTest {
 
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedId::class.java)
-            assertThat(actualResult.type).isEqualTo(VerifiedIdType.VERIFIABLE_CREDENTIAL)
+            assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.verifiedid.VerifiableCredential::class.java)
             assertThat(actualResult.issuedOn).isEqualTo(1234567L)
-            assertThat(actualResult.claims.size).isEqualTo(1)
-            assertThat(actualResult.claims.first().id).isEqualTo(expectedCredentialSubjectClaimName)
-            assertThat(actualResult.claims.first().value).isEqualTo(expectedCredentialSubjectClaimValue)
+            assertThat(actualResult.getClaims().size).isEqualTo(1)
+            assertThat(actualResult.getClaims().first().id).isEqualTo(expectedCredentialSubjectClaimName)
+            assertThat(actualResult.getClaims().first().value).isEqualTo(expectedCredentialSubjectClaimValue)
         }
     }
 

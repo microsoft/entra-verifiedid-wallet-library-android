@@ -4,8 +4,11 @@ import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.FixMethodOrder
 import org.junit.Test
+import org.junit.runners.MethodSorters
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class VerifiedIdClientBuilderTest {
     private lateinit var verifiedIdClientBuilder: VerifiedIdClientBuilder
 
@@ -13,10 +16,10 @@ class VerifiedIdClientBuilderTest {
         setupInput(0)
     }
 
-    private fun setupInput(logConsumerCount: Int) {
+    private fun setupInput(logConsumerCountToAddToExisting: Int) {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
         verifiedIdClientBuilder = VerifiedIdClientBuilder(context)
-        mockLogConsumer(logConsumerCount)
+        mockLogConsumer(logConsumerCountToAddToExisting)
     }
 
     private fun mockLogConsumer(logConsumerCount: Int) {
@@ -37,7 +40,10 @@ class VerifiedIdClientBuilderTest {
     }
 
     @Test
-    fun builder_WithNoLogConsumers_ReturnsVerifiedIdWithNoLogConsumer() {
+    fun builder1_WithNoLogConsumers_ReturnsVerifiedIdWithNoLogConsumer() {
+        // Arrange
+        setupInput(0)
+
         // Act
         val actualResult = verifiedIdClientBuilder.build()
 
@@ -48,7 +54,7 @@ class VerifiedIdClientBuilderTest {
     }
 
     @Test
-    fun builder_WithOneLogConsumer_ReturnsVerifiedIdWithOneLogConsumer() {
+    fun builder2_WithOneLogConsumer_ReturnsVerifiedIdWithOneLogConsumer() {
         // Arrange
         setupInput(1)
 
@@ -62,16 +68,16 @@ class VerifiedIdClientBuilderTest {
     }
 
     @Test
-    fun builder_WithMultipleLogConsumers_ReturnsVerifiedIdWithMultipleLogConsumers() {
+    fun builder3_WithMultipleLogConsumers_ReturnsVerifiedIdWithMultipleLogConsumers() {
         // Arrange
         setupInput(3)
 
-        //Act
+        // Act
         val actualResult = verifiedIdClientBuilder.build()
 
         // Assert
         assertThat(actualResult.requestHandlerFactory.requestHandlers.size).isEqualTo(1)
         assertThat(actualResult.requestResolverFactory.requestResolvers.size).isEqualTo(1)
-        assertThat(actualResult.logger.CONSUMERS.size).isEqualTo(3)
+        assertThat(actualResult.logger.CONSUMERS.size).isEqualTo(4)
     }
 }

@@ -13,7 +13,7 @@ import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 /**
  * Wrapper class to wrap the get Issuance Request from VC SDK and return a raw request.
  */
-object ManifestResolver {
+internal object ManifestResolver {
 
     // Fetches the issuance request from VC SDK using the url and converts it to raw request.
     suspend fun getIssuanceRequest(uri: String): RawManifest {

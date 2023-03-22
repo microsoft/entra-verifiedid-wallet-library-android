@@ -1,6 +1,9 @@
 package com.microsoft.walletlibrary.requests
 
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
+import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
+import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator
+import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
@@ -16,26 +19,27 @@ import org.junit.Test
 
 class ManifestIssuanceRequestTest {
     private val requesterStyle: RequesterStyle = mockk()
-    private val requirement = SelfAttestedClaimRequirement(
-        "id", "name",
-        encrypted = false,
-        required = true
-    )
     private val rootOfTrust: RootOfTrust = mockk()
     private val verifiedIdStyle: VerifiedIDStyle = mockk()
     private val rawManifest: RawManifest = mockk()
-    private val manifestIssuanceRequest = ManifestIssuanceRequest(
-        requesterStyle,
-        requirement,
-        rootOfTrust,
-        verifiedIdStyle,
-        rawManifest
-    )
 
     @Test
-    fun manifestIssuanceRequest_SelfAttestedRequirementSatisfied_ReturnsTrue() {
+    fun isSatisfied_SelfAttestedRequirementFulfilled_ReturnsTrue() {
         // Arrange
-        requirement.fulfill("test")
+        val selfAttestedClaimRequirement = SelfAttestedClaimRequirement(
+            "id",
+            "name",
+            encrypted = false,
+            required = true
+        )
+        val manifestIssuanceRequest = ManifestIssuanceRequest(
+            requesterStyle,
+            selfAttestedClaimRequirement,
+            rootOfTrust,
+            verifiedIdStyle,
+            rawManifest
+        )
+        selfAttestedClaimRequirement.fulfill("test")
 
         // Act
         val actualResult = manifestIssuanceRequest.isSatisfied()
@@ -45,7 +49,22 @@ class ManifestIssuanceRequestTest {
     }
 
     @Test
-    fun manifestIssuanceRequest_SelfAttestedRequirementNotSatisfied_ReturnsFalse() {
+    fun isSatisfied_SelfAttestedRequirementNotFulfilled_ReturnsFalse() {
+        // Arrange
+        val selfAttestedClaimRequirement = SelfAttestedClaimRequirement(
+            "id",
+            "name",
+            encrypted = false,
+            required = true
+        )
+        val manifestIssuanceRequest = ManifestIssuanceRequest(
+            requesterStyle,
+            selfAttestedClaimRequirement,
+            rootOfTrust,
+            verifiedIdStyle,
+            rawManifest
+        )
+
         // Act
         val actualResult = manifestIssuanceRequest.isSatisfied()
 
@@ -54,8 +73,60 @@ class ManifestIssuanceRequestTest {
     }
 
     @Test
-    fun manifestIssuanceRequest_CompleteIssuanceSuccessfully_ReturnsVerifiedId() {
+    fun isSatisfied_OneRequirementNotFulfilledInGroupRequirement_ReturnsFalse() {
         // Arrange
+        val manifestIssuanceRequest =
+            setupGroupRequirement(fulfillSelfAttested = true, fulfillIdToken = false)
+
+        // Act
+        val actualResult = manifestIssuanceRequest.isSatisfied()
+
+        // Assert
+        assertThat(actualResult).isFalse
+    }
+
+    @Test
+    fun isSatisfied_MultipleRequirementsNotFulfilledInGroupRequirement_ReturnsFalse() {
+        // Arrange
+        val manifestIssuanceRequest =
+            setupGroupRequirement(fulfillSelfAttested = false, fulfillIdToken = false)
+
+        // Act
+        val actualResult = manifestIssuanceRequest.isSatisfied()
+
+        // Assert
+        assertThat(actualResult).isFalse
+    }
+
+    @Test
+    fun isSatisfied_MultipleRequirementsFulfilledInGroupRequirement_ReturnsTrue() {
+        // Arrange
+        val manifestIssuanceRequest =
+            setupGroupRequirement(fulfillSelfAttested = true, fulfillIdToken = true)
+
+        // Act
+        val actualResult = manifestIssuanceRequest.isSatisfied()
+
+        // Assert
+        assertThat(actualResult).isTrue
+    }
+
+    @Test
+    fun completeIssuance_CompleteIssuanceSuccessfully_ReturnsVerifiedId() {
+        // Arrange
+        val selfAttestedClaimRequirement = SelfAttestedClaimRequirement(
+            "id",
+            "name",
+            encrypted = false,
+            required = true
+        )
+        val manifestIssuanceRequest = ManifestIssuanceRequest(
+            requesterStyle,
+            selfAttestedClaimRequirement,
+            rootOfTrust,
+            verifiedIdStyle,
+            rawManifest
+        )
         val mockVerifiedId: VerifiedId = mockk()
         mockkObject(VerifiedIdRequester)
         coEvery {
@@ -75,8 +146,21 @@ class ManifestIssuanceRequestTest {
     }
 
     @Test
-    fun manifestIssuanceRequest_CompleteIssuanceFailure_ThrowsException() {
+    fun completeIssuance_CompleteIssuanceFailure_ThrowsException() {
         // Arrange
+        val selfAttestedClaimRequirement = SelfAttestedClaimRequirement(
+            "id",
+            "name",
+            encrypted = false,
+            required = true
+        )
+        val manifestIssuanceRequest = ManifestIssuanceRequest(
+            requesterStyle,
+            selfAttestedClaimRequirement,
+            rootOfTrust,
+            verifiedIdStyle,
+            rawManifest
+        )
         mockkObject(VerifiedIdRequester)
         coEvery {
             VerifiedIdRequester.sendIssuanceResponse(
@@ -90,7 +174,47 @@ class ManifestIssuanceRequestTest {
 
             // Assert
             assertThat(actualResult.isFailure).isTrue
-            assertThat(actualResult.exceptionOrNull()).isInstanceOf(VerifiedIdResponseCompletionException::class.java)
+            assertThat(actualResult.exceptionOrNull()).isInstanceOf(
+                VerifiedIdResponseCompletionException::class.java
+            )
         }
+    }
+
+    private fun setupGroupRequirement(
+        fulfillSelfAttested: Boolean,
+        fulfillIdToken: Boolean
+    ): ManifestIssuanceRequest {
+        val selfAttestedClaimRequirement = SelfAttestedClaimRequirement(
+            "id",
+            "name",
+            encrypted = false,
+            required = true
+        )
+        val idTokenRequirement = IdTokenRequirement(
+            "id",
+            "configuration",
+            "clientId",
+            "redirectUri",
+            "scope",
+            "nonce",
+            emptyList()
+        )
+        val groupRequirement = GroupRequirement(
+            true,
+            mutableListOf(selfAttestedClaimRequirement, idTokenRequirement),
+            GroupRequirementOperator.ALL
+        )
+        val manifestIssuanceRequest = ManifestIssuanceRequest(
+            requesterStyle,
+            groupRequirement,
+            rootOfTrust,
+            verifiedIdStyle,
+            rawManifest
+        )
+        if (fulfillSelfAttested)
+            selfAttestedClaimRequirement.fulfill("Test")
+        if (fulfillIdToken)
+            idTokenRequirement.fulfill("Test IdToken")
+        return manifestIssuanceRequest
     }
 }

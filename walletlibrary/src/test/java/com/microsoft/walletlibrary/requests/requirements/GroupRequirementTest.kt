@@ -34,7 +34,7 @@ class GroupRequirementTest {
         )
         groupRequirement = GroupRequirement(
             true,
-            listOf(selfAttestedClaimRequirement, idTokenRequirement),
+            mutableListOf(selfAttestedClaimRequirement, idTokenRequirement),
             GroupRequirementOperator.ALL
         )
     }

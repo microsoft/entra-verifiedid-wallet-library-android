@@ -5,24 +5,20 @@
 
 package com.microsoft.walletlibrary.verifiedid
 
+import java.util.*
+
 /**
- * Holds the information related to a VerifiedID like the claims, type, issued and expiry dates.
+ * Data model for VerifiedId
  */
-data class VerifiedId(
-    internal val id: String,
-
-    // Type of Verified ID.
-    val type: VerifiedIdType,
-
-    // List of claims in the Verified ID.
-    val claims: List<VerifiedIdClaim>,
+interface VerifiedId {
+    val id: String
 
     // Time when Verified ID was issued.
-    val issuedOn: Long,
+    val issuedOn: Date
 
     // Time when Verified ID expires.
-    val expiresOn: Long? = null,
+    val expiresOn: Date?
 
-    // Raw representation of Verified ID.
-    internal var raw: String = ""
-)
+    // Return list of claims in the Verified ID.
+    fun getClaims(): List<VerifiedIdClaim>
+}

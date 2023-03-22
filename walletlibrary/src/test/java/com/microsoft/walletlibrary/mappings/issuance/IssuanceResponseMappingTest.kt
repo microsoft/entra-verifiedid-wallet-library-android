@@ -55,10 +55,9 @@ class IssuanceResponseMappingTest {
             required = true,
             accessToken = expectedAccessTokenValue
         )
-    private val pinRequirement = PinRequirement("4", "numeric", true, pin = "1234")
     private val groupRequirement = GroupRequirement(
         true,
-        listOf(selfAttestedClaimRequirement, accessTokenRequirement),
+        mutableListOf(selfAttestedClaimRequirement, accessTokenRequirement),
         GroupRequirementOperator.ALL
     )
 
@@ -112,6 +111,9 @@ class IssuanceResponseMappingTest {
 
     @Test
     fun addRequirementToResponse_AddPinRequirementWithNoSalt_AddsRequirementToIssuanceResponse() {
+        // Arrange
+        val pinRequirement = PinRequirement(4, "numeric", true, pin = "1234")
+
         // Act
         issuanceResponse.addRequirements(pinRequirement)
 
@@ -125,7 +127,7 @@ class IssuanceResponseMappingTest {
     fun addRequirementToResponse_AddPinRequirementWithSalt_AddsRequirementToIssuanceResponse() {
         // Arrange
         val expectedPinSalt = "abcdefg"
-        pinRequirement.pinSalt = expectedPinSalt
+        val pinRequirement = PinRequirement(4, "numeric", true, expectedPinSalt, "1234")
 
         // Act
         issuanceResponse.addRequirements(pinRequirement)
