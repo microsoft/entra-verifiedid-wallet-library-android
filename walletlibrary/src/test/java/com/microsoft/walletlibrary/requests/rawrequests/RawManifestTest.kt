@@ -37,7 +37,7 @@ class RawManifestTest {
 
     private fun setupInput() {
         mockIssuanceRequest = mockk()
-        rawManifest = RawManifest(mockIssuanceRequest, RequestType.ISSUANCE)
+        rawManifest = RawManifest(mockIssuanceRequest)
         every { mockIssuanceRequest.getAttestations() } returns credentialAttestations
         every { mockIssuanceRequest.entityName } returns expectedIssuerInCard
         every { mockIssuanceRequest.linkedDomainResult } returns LinkedDomainVerified(

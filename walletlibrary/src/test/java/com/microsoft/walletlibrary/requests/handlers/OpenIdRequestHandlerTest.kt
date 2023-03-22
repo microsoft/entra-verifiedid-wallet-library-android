@@ -89,7 +89,8 @@ class OpenIdRequestHandlerTest {
 
     init {
         setupInput(
-            RequestType.PRESENTATION, selfAttestedClaimRequirement,
+            RequestType.PRESENTATION,
+            selfAttestedClaimRequirement,
             logoPresent = true,
             emptyClaims = false
         )
@@ -114,7 +115,7 @@ class OpenIdRequestHandlerTest {
     }
 
     private fun createMockRawRequest() {
-        class MockRawRequest(override val requestType: RequestType, override val rawRequest: Any) :
+        class MockRawRequest(override val requestType: RequestType, override val rawRequest: Any):
             RawRequest
         mockRawRequest = MockRawRequest(RequestType.ISSUANCE, openIdRequestHandler)
     }
@@ -231,7 +232,8 @@ class OpenIdRequestHandlerTest {
     fun handleRequest_PassOpenIdRawRequestWithTypeIssuance_ReturnsManifestIssuanceRequest() {
         //Arrange
         setupInput(
-            RequestType.ISSUANCE, verifiedIdRequirement,
+            RequestType.ISSUANCE,
+            verifiedIdRequirement,
             logoPresent = true,
             emptyClaims = false
         )
@@ -254,7 +256,8 @@ class OpenIdRequestHandlerTest {
     fun handleRequest_PassOpenIdRawRequestWithUnSupportedRequirement_ThrowsException() {
         //Arrange
         setupInput(
-            RequestType.ISSUANCE, selfAttestedClaimRequirement,
+            RequestType.ISSUANCE,
+            selfAttestedClaimRequirement,
             logoPresent = true,
             emptyClaims = false
         )
@@ -269,7 +272,8 @@ class OpenIdRequestHandlerTest {
     fun handleRequest_LogoPresentInVerifiedIdStyle_ReturnsSuccessfulRequestWithLogo() {
         // Arrange
         setupInput(
-            RequestType.ISSUANCE, verifiedIdRequirement,
+            RequestType.ISSUANCE,
+            verifiedIdRequirement,
             logoPresent = true,
             emptyClaims = false
         )
@@ -291,7 +295,8 @@ class OpenIdRequestHandlerTest {
     fun handleRequest_NoLogoInVerifiedIdStyle_ReturnsSuccessfulRequestWithNoLogo() {
         // Arrange
         setupInput(
-            RequestType.ISSUANCE, verifiedIdRequirement,
+            RequestType.ISSUANCE,
+            verifiedIdRequirement,
             logoPresent = false,
             emptyClaims = false
         )
@@ -308,7 +313,8 @@ class OpenIdRequestHandlerTest {
     fun handleRequest_MapDisplayContract_ReturnsVerifiedIdStyleInRequest() {
         // Arrange
         setupInput(
-            RequestType.ISSUANCE, verifiedIdRequirement,
+            RequestType.ISSUANCE,
+            verifiedIdRequirement,
             logoPresent = false,
             emptyClaims = false
         )
@@ -338,7 +344,8 @@ class OpenIdRequestHandlerTest {
     fun handleRequest_MapDisplayContractWithNoClaims_ReturnsVerifiedIdStyleWithNoClaimsInRequest() {
         // Arrange
         setupInput(
-            RequestType.ISSUANCE, verifiedIdRequirement,
+            RequestType.ISSUANCE,
+            verifiedIdRequirement,
             logoPresent = false,
             emptyClaims = true
         )
