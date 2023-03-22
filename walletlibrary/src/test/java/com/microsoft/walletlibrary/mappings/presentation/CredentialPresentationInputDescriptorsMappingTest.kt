@@ -20,7 +20,6 @@ class CredentialPresentationInputDescriptorsMappingTest {
     private val expectedRequiredFieldValue = true
     private val expectedEncryptedFieldValue = false
 
-
     init {
         setupInput(listOf(expectedSchema))
     }

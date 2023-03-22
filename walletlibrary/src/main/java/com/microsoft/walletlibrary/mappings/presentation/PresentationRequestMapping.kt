@@ -6,10 +6,6 @@
 package com.microsoft.walletlibrary.mappings.presentation
 
 import com.microsoft.did.sdk.credential.service.PresentationRequest
-import com.microsoft.walletlibrary.mappings.toRootOfTrust
-import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
-import com.microsoft.walletlibrary.requests.rawrequests.RequestType
-import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.requests.styles.Logo
 import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
 
@@ -22,14 +18,5 @@ internal fun PresentationRequest.getRequesterStyle(): OpenIdRequesterStyle {
         this.entityName,
         "",
         Logo(registration.logoUri, registration.logoData, "")
-    )
-}
-
-internal fun PresentationRequest.toOpenIdPresentationRequest(): OpenIdPresentationRequest {
-    return OpenIdPresentationRequest(
-        this.getRequesterStyle(),
-        this.getPresentationDefinition().toRequirement(),
-        this.linkedDomainResult.toRootOfTrust(),
-        VerifiedIdOpenIdJwtRawRequest(RequestType.PRESENTATION, this)
     )
 }

@@ -27,6 +27,7 @@ internal class OpenIdPresentationRequest(
 
     val request: OpenIdRawRequest
 ) : VerifiedIdPresentationRequest {
+    // Indicates whether presentation request is satisfied on client side.
     override fun isSatisfied(): Boolean {
         try {
             requirement.validate()
@@ -37,7 +38,7 @@ internal class OpenIdPresentationRequest(
         return true
     }
 
-    // Completes the request and returns nothing if successful.
+    // Completes the presentation request and returns Result with success status if successful.
     override suspend fun complete(): Result<Unit> {
         return try {
             val result = OpenIdResponder.sendPresentationResponse(request.rawRequest, requirement)

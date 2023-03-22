@@ -7,11 +7,14 @@ import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.util.*
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 
+/**
+ * Fills the requested verifiable credentials in PresentationResponse object with Requirements object in library.
+ */
 internal fun PresentationResponse.addRequirements(requirement: Requirement) {
     when (requirement) {
         is GroupRequirement -> addGroupRequirement(requirement)
         is VerifiedIdRequirement -> addVerifiedIdRequirement(requirement)
-        else -> throw UnSupportedRequirementException("Requirement type ${requirement::class.java} is not unsupported.")
+        else -> throw UnSupportedRequirementException("Requirement type ${requirement::class.simpleName} is not unsupported.")
     }
 }
 

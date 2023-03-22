@@ -13,7 +13,6 @@ import com.microsoft.walletlibrary.mappings.presentation.addRequirements
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
 
-
 /**
  * Wrapper class to wrap the send presentation response to VC SDK.
  */
