@@ -3,6 +3,7 @@ package com.microsoft.walletlibrary.mappings.presentation
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
+import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
 import io.mockk.every
@@ -125,20 +126,27 @@ class CredentialPresentationInputDescriptorsMappingTest {
     @Test
     fun constraintMapping_WithSingleValidSchemaUri_ReturnsTypeConstraint() {
         // Act
-        val actualVcTypeConstraint =
-            toVcTypeConstraint(listOf("BusinessCard"))
+        val expectedVcType = "BusinessCard"
+        val actualVcTypeConstraint = toVcTypeConstraint(listOf(expectedVcType))
 
         // Assert
         assertThat(actualVcTypeConstraint).isInstanceOf(VcTypeConstraint::class.java)
+        assertThat((actualVcTypeConstraint as VcTypeConstraint).vcType).isEqualTo(expectedVcType)
     }
 
     @Test
     fun constraintMapping_WithMultipleValidSchemaUri_ReturnsGroupConstraint() {
         // Act
-        val actualConstraint =
-            toVcTypeConstraint(listOf("BusinessCard1", "BusinessCard2"))
+        val expectedVcTypes = listOf("BusinessCard1", "BusinessCard2")
+        val actualConstraint = toVcTypeConstraint(expectedVcTypes)
 
         // Assert
         assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
+        assertThat((actualConstraint as GroupConstraint).constraints.size).isEqualTo(2)
+        assertThat(actualConstraint.constraintOperator).isEqualTo(GroupConstraintOperator.ANY)
+        assertThat(actualConstraint.constraints.filterIsInstance<VcTypeConstraint>().size).isEqualTo(2)
+        assertThat(
+            actualConstraint.constraints.filterIsInstance<VcTypeConstraint>()
+                .map { it.vcType }).containsAll(expectedVcTypes)
     }
 }

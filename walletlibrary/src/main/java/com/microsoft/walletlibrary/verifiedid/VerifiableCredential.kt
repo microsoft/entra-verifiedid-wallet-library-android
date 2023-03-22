@@ -6,7 +6,7 @@ import java.util.*
 /**
  * Holds the information related to a VerifiedID like the claims, issued and expiry dates.
  */
-class VerifiableCredential(
+internal class VerifiableCredential(
     internal val raw: com.microsoft.did.sdk.credential.models.VerifiableCredential,
     private val contract: VerifiableCredentialContract
 ): VerifiedId {

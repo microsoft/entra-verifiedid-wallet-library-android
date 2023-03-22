@@ -107,7 +107,7 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun getMatches_OneVerifiedIdMatches_ReturnsEmptyList() {
+    fun getMatches_OneVerifiedIdMatches_ReturnsList() {
         // Arrange
         val mockVerifiedId1: VerifiableCredential = mockk()
         every { mockVerifiedId1.types } returns listOf(expectedVcType)
@@ -123,7 +123,7 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun getMatches_MultipleVerifiedIdsMatch_ReturnsEmptyList() {
+    fun getMatches_MultipleVerifiedIdsMatch_ReturnsList() {
         // Arrange
         val mockVerifiedId1: VerifiableCredential = mockk()
         every { mockVerifiedId1.types } returns listOf(expectedVcType)

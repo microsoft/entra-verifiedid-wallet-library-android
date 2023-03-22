@@ -16,8 +16,8 @@ enum class GroupConstraintOperator {
  * Represents a group of constraints to fulfill a requirement.
  */
 class GroupConstraint(
-    private val constraints: List<VerifiedIdConstraint>,
-    private val constraintOperator: GroupConstraintOperator
+    internal val constraints: List<VerifiedIdConstraint>,
+    internal val constraintOperator: GroupConstraintOperator
 ): VerifiedIdConstraint {
     override fun doesMatch(verifiedId: VerifiedId): Boolean {
         when (constraintOperator) {
