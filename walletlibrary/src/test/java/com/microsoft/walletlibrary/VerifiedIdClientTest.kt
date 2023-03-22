@@ -7,7 +7,6 @@ import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdPresentationRequest
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
-import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.util.*
@@ -24,7 +23,7 @@ class VerifiedIdClientTest {
     private val openIdURLRequestResolver: OpenIdURLRequestResolver = mockk()
     private val presentationRequest: PresentationRequest = mockk()
     private val openIdPresentationRequest: OpenIdPresentationRequest = mockk()
-    private val verifiedIdOpenIdJwtRawRequest = VerifiedIdOpenIdJwtRawRequest(RequestType.PRESENTATION, presentationRequest)
+    private val verifiedIdOpenIdJwtRawRequest = VerifiedIdOpenIdJwtRawRequest(presentationRequest)
     private lateinit var requestHandlerFactory: RequestHandlerFactory
     private lateinit var requestResolverFactory: RequestResolverFactory
 

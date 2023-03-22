@@ -14,7 +14,8 @@ import com.microsoft.walletlibrary.requests.InjectedIdToken
 import com.microsoft.walletlibrary.requests.VerifiedIdRequestContent
 
 internal class VerifiedIdOpenIdJwtRawRequest(
-    override val requestType: RequestType, override val rawRequest: PresentationRequest
+    override val rawRequest: PresentationRequest,
+    override val requestType: RequestType = RequestType.PRESENTATION
 ): OpenIdRawRequest {
     override fun mapToRequestContent(): VerifiedIdRequestContent {
         return VerifiedIdRequestContent(
