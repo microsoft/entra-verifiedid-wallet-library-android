@@ -32,6 +32,7 @@ internal class ManifestIssuanceRequest(
 
     val request: RawManifest
 ): VerifiedIdIssuanceRequest {
+    // Completes the issuance request and returns a Result with VerifiedId if successful.
     override suspend fun complete(): Result<VerifiedId> {
         return try {
             val verifiedId =
@@ -42,10 +43,12 @@ internal class ManifestIssuanceRequest(
         }
     }
 
+    // Indicates whether issuance request is satisfied on client side.
     override fun isSatisfied(): Boolean {
         try {
             requirement.validate()
         } catch (exception: RequirementValidationException) {
+            //TODO("log exception message")
             return false
         }
         return true

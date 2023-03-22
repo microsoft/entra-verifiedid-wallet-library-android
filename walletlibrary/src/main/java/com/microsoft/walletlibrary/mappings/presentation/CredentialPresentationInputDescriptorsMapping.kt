@@ -9,6 +9,10 @@ import android.net.Uri
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
+import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
+import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
+import com.microsoft.walletlibrary.requests.requirements.constraints.VerifiedIdConstraint
 import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
 
 /**
@@ -20,9 +24,17 @@ internal fun CredentialPresentationInputDescriptor.toVerifiedIdRequirement(): Ve
     return VerifiedIdRequirement(
         this.id,
         this.schemas.map { it.uri },
+        toVcTypeConstraint(schemas.map { it.uri }),
         encrypted = false,
         required = true,
         this.purpose,
         this.issuanceMetadataList.map { VerifiedIdRequestURL(Uri.parse(it.issuerContract)) }
     )
+}
+
+internal fun toVcTypeConstraint(vcTypes: List<String>): VerifiedIdConstraint {
+    if (vcTypes.size == 1) return VcTypeConstraint(vcTypes.first())
+    val vcTypeConstraints = mutableListOf<VcTypeConstraint>()
+    vcTypes.forEach { vcTypeConstraints.add(VcTypeConstraint(it)) }
+    return GroupConstraint(vcTypeConstraints, GroupConstraintOperator.ANY)
 }

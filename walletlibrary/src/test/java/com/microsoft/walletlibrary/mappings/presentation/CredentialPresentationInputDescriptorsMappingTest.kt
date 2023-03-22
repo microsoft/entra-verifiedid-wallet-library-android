@@ -2,6 +2,9 @@ package com.microsoft.walletlibrary.mappings.presentation
 
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
+import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
+import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
+import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
 import io.mockk.every
 import io.mockk.mockk
@@ -18,9 +21,8 @@ class CredentialPresentationInputDescriptorsMappingTest {
     private val expectedRequiredFieldValue = true
     private val expectedEncryptedFieldValue = false
 
-
     init {
-        setupInput(listOf( expectedSchema))
+        setupInput(listOf(expectedSchema))
     }
 
     private fun setupInput(schemaList: List<Schema>) {
@@ -34,7 +36,7 @@ class CredentialPresentationInputDescriptorsMappingTest {
     }
 
     @Test
-    fun inputDescriptorMapping_EmptySchema_ThrowsException  () {
+    fun inputDescriptorMapping_EmptySchema_ThrowsException() {
         // Arrange
         setupInput(emptyList())
 
@@ -119,5 +121,32 @@ class CredentialPresentationInputDescriptorsMappingTest {
         assertThat(actualVerifiedIdRequirement.types.size).isEqualTo(1)
         assertThat(actualVerifiedIdRequirement.required).isEqualTo(expectedRequiredFieldValue)
         assertThat(actualVerifiedIdRequirement.encrypted).isEqualTo(expectedEncryptedFieldValue)
+    }
+
+    @Test
+    fun constraintMapping_WithSingleValidSchemaUri_ReturnsTypeConstraint() {
+        // Act
+        val expectedVcType = "BusinessCard"
+        val actualVcTypeConstraint = toVcTypeConstraint(listOf(expectedVcType))
+
+        // Assert
+        assertThat(actualVcTypeConstraint).isInstanceOf(VcTypeConstraint::class.java)
+        assertThat((actualVcTypeConstraint as VcTypeConstraint).vcType).isEqualTo(expectedVcType)
+    }
+
+    @Test
+    fun constraintMapping_WithMultipleValidSchemaUri_ReturnsGroupConstraint() {
+        // Act
+        val expectedVcTypes = listOf("BusinessCard1", "BusinessCard2")
+        val actualConstraint = toVcTypeConstraint(expectedVcTypes)
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
+        assertThat((actualConstraint as GroupConstraint).constraints.size).isEqualTo(2)
+        assertThat(actualConstraint.constraintOperator).isEqualTo(GroupConstraintOperator.ANY)
+        assertThat(actualConstraint.constraints.filterIsInstance<VcTypeConstraint>().size).isEqualTo(2)
+        assertThat(
+            actualConstraint.constraints.filterIsInstance<VcTypeConstraint>()
+                .map { it.vcType }).containsAll(expectedVcTypes)
     }
 }

@@ -3,22 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.walletlibrary.verifiedid
+package com.microsoft.walletlibrary.requests.requirements.constraints
 
-import java.util.*
+import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 /**
- * Data model for VerifiedId
+ * Represents a constraint on the properties of VerifiedId to determine if it matches the constraint.
  */
-interface VerifiedId {
-    val id: String
-
-    // Time when Verified ID was issued.
-    val issuedOn: Date
-
-    // Time when Verified ID expires.
-    val expiresOn: Date?
-
-    // Return list of claims in the Verified ID.
-    fun getClaims(): ArrayList<VerifiedIdClaim>
+interface VerifiedIdConstraint {
+    fun doesMatch(verifiedId: VerifiedId): Boolean
 }

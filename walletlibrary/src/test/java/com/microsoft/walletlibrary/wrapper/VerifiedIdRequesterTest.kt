@@ -30,6 +30,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import java.util.*
 
 class VerifiedIdRequesterTest {
     private val mockIssuanceService: IssuanceService = mockk()
@@ -96,6 +97,7 @@ class VerifiedIdRequesterTest {
             every { mockVerifiableCredential.contents.iat } returns 1234567L
             every { mockVerifiableCredential.contents.exp } returns 0L
             every { mockVerifiableCredential.contents.vc } returns mockVerifiableCredentialDescriptor
+            every { mockVerifiableCredentialDescriptor.type } returns listOf("testCredential")
             expectedCredentialSubject[expectedCredentialSubjectClaimName] = expectedCredentialSubjectClaimValue
             every { mockVerifiableCredentialDescriptor.credentialSubject } returns expectedCredentialSubject
         } else
@@ -104,6 +106,9 @@ class VerifiedIdRequesterTest {
 
     @Test
     fun completeIssuanceRequest_SuccessfulVerifiedCredentialFromSdk_ReturnsVerifiedId() {
+        // Arrange
+        val expectedIssuedDate = Date(1234567*1000)
+
         runBlocking {
             // Act
             val actualResult =
@@ -112,7 +117,7 @@ class VerifiedIdRequesterTest {
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedId::class.java)
             assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.verifiedid.VerifiableCredential::class.java)
-            assertThat(actualResult.issuedOn).isEqualTo(1234567L)
+            assertThat(actualResult.issuedOn).isEqualTo(expectedIssuedDate)
             assertThat(actualResult.getClaims().size).isEqualTo(1)
             assertThat(actualResult.getClaims().first().id).isEqualTo(expectedCredentialSubjectClaimName)
             assertThat(actualResult.getClaims().first().value).isEqualTo(expectedCredentialSubjectClaimValue)

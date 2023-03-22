@@ -6,17 +6,15 @@
 package com.microsoft.walletlibrary.wrapper
 
 import com.microsoft.did.sdk.VerifiableCredentialSdk
-import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
-import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 
 /**
  * Wrapper class to wrap the get Presentation Request from VC SDK and return a raw request.
  */
-object OpenIdForVCResolver {
+object OpenIdResolver {
 
     // Fetches the presentation request from VC SDK using the url and converts it to raw request.
     internal suspend fun getRequest(uri: String): OpenIdRawRequest {
@@ -24,8 +22,7 @@ object OpenIdForVCResolver {
             VerifiableCredentialSdk.presentationService.getRequest(uri)) {
             is Result.Success -> {
                 val request = presentationRequestResult.payload
-                val requestType = getRequestType(request)
-                return VerifiedIdOpenIdJwtRawRequest(requestType, request)
+                return VerifiedIdOpenIdJwtRawRequest(request)
             }
             is Result.Failure -> {
                 throw VerifiedIdRequestFetchException(
@@ -34,12 +31,5 @@ object OpenIdForVCResolver {
                 )
             }
         }
-    }
-
-    private fun getRequestType(request: PresentationRequest): RequestType {
-        return if (request.content.prompt == com.microsoft.walletlibrary.util.Constants.PURE_ISSUANCE_FLOW_VALUE)
-            RequestType.ISSUANCE
-        else
-            RequestType.PRESENTATION
     }
 }

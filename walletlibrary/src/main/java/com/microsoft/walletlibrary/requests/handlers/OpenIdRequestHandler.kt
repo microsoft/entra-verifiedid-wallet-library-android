@@ -33,14 +33,18 @@ internal class OpenIdRequestHandler: RequestHandler {
         val requestContent = rawRequest.mapToRequestContent()
         if (rawRequest.requestType == RequestType.ISSUANCE)
             return handleIssuanceRequest(requestContent)
-        return handlePresentationRequest(requestContent)
+        return handlePresentationRequest(requestContent, rawRequest)
     }
 
-    private fun handlePresentationRequest(requestContent: VerifiedIdRequestContent): VerifiedIdRequest<Unit> {
+    private fun handlePresentationRequest(
+        requestContent: VerifiedIdRequestContent,
+        rawRequest: OpenIdRawRequest
+    ): VerifiedIdRequest<Unit> {
         return OpenIdPresentationRequest(
             requestContent.requesterStyle,
             requestContent.requirement,
-            requestContent.rootOfTrust
+            requestContent.rootOfTrust,
+            rawRequest
         )
     }
 
