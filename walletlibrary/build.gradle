@@ -5,6 +5,7 @@ plugins {
 }
 
 apply plugin: 'kotlin-kapt'
+apply plugin: 'maven-publish'
 
 repositories {
     google()
@@ -108,7 +109,6 @@ dependencies {
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     androidTestImplementation "io.mockk:mockk-android:$mockk_version"
-    androidTestImplementation "android.arch.core:core-testing:1.1.1"
 
     testImplementation project(":VerifiableCredential-SDK")
     testImplementation "androidx.room:room-testing:$androidx_room_persistence_version"
@@ -119,7 +119,6 @@ dependencies {
     testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.21'
     testImplementation "org.assertj:assertj-core:$assertj_test_version"
     testImplementation "junit:junit:$junit_version"
-    testImplementation "android.arch.core:core-testing:1.1.1"
 }
 
 task updateSubmodule(type: Exec) {
@@ -148,4 +147,48 @@ tasks.whenTaskAdded { task ->
 
 task cleanSubmoduleFiles(type: Delete) {
     delete "src/main/assets", "src/main/java/com/microsoft/did"
+}
+
+project.afterEvaluate {
+    publishing {
+        repositories {
+            maven {
+                name = "local"
+                url rootProject.buildDir.path + '/artifacts'
+            }
+        }
+        tasks.withType(PublishToMavenRepository) {
+            onlyIf {
+                (repository == publishing.repositories.local)
+            }
+        }
+        publications {
+            distRelease(MavenPublication) {
+                from components.distRelease
+                groupId = 'com.microsoft.entra.verifiedid'
+                artifactId = 'walletlibrary'
+                version = "0.0.1-alpha.0"
+                pom {
+                    name = 'walletlibrary'
+                    description = 'Entra VerifiedID WalletLibrary Android'
+                    url = 'https://github.com/microsoft/entra-verifiedid-wallet-library-android'
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'https://github.com/microsoft/entra-verifiedid-wallet-library-android/blob/dev/LICENSE'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'microsoft'
+                            name = 'Microsoft'
+                        }
+                    }
+                    scm {
+                        url = 'https://github.com/microsoft/entra-verifiedid-wallet-library-android/tree/dev'
+                    }
+                }
+            }
+        }
+    }
 }
