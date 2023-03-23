@@ -4,7 +4,6 @@ plugins {
 }
 
 repositories {
-    mavenLocal()
     google()
     mavenCentral()
     maven { url "https://jitpack.io" }
@@ -36,15 +35,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
-    }
-    flavorDimensions "main"
-    productFlavors {
-        local {
-            dimension "main"
-        }
-        dist {
-            dimension "main"
-        }
     }
 
     buildFeatures.viewBinding = true
