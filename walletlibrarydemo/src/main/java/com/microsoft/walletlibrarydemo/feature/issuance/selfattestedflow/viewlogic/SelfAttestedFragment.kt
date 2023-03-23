@@ -11,6 +11,7 @@ import com.microsoft.walletlibrary.requests.VerifiedIdPresentationRequest
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
+import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrarydemo.databinding.SelfAttestedFragmentBinding
 import com.microsoft.walletlibrarydemo.feature.issuance.selfattestedflow.presentationlogic.RequirementsAdapter
 import com.microsoft.walletlibrarydemo.feature.issuance.selfattestedflow.presentationlogic.SelfAttestedFlowViewModel
@@ -81,7 +82,7 @@ class SelfAttestedFragment: Fragment() {
         val response = viewModel.verifiedIdResult
         response?.let {
             if (response.isSuccess)
-                binding.textview.text = response.getOrDefault("").toString()
+                binding.textview.text = (response.getOrDefault("") as VerifiableCredential).getClaims().toString()
             else
                 binding.textview.text = response.exceptionOrNull().toString()
         }

@@ -1,6 +1,14 @@
 package com.microsoft.walletlibrary
 
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.did.sdk.credential.service.PresentationRequest
+import com.microsoft.did.sdk.credential.service.models.contracts.InputContract
+import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.did.sdk.credential.service.models.contracts.display.CardDescriptor
+import com.microsoft.did.sdk.credential.service.models.contracts.display.ClaimDescriptor
+import com.microsoft.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
+import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
@@ -10,6 +18,7 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.util.*
+import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -33,7 +42,12 @@ class VerifiedIdClientTest {
         requestHandlerFactory = mockk()
         requestResolverFactory = mockk()
         val verifiedIdClient =
-            VerifiedIdClient(requestResolverFactory, requestHandlerFactory, WalletLibraryLogger)
+            VerifiedIdClient(
+                requestResolverFactory,
+                requestHandlerFactory,
+                WalletLibraryLogger,
+                defaultTestSerializer
+            )
         val verifiedIdRequestURL: VerifiedIdRequestURL = mockk()
         every { requestResolverFactory.getResolver(verifiedIdRequestURL) } returns openIdURLRequestResolver
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) } returns verifiedIdOpenIdJwtRawRequest
@@ -54,7 +68,12 @@ class VerifiedIdClientTest {
         // Arrange
         requestHandlerFactory = mockk()
         requestResolverFactory = RequestResolverFactory()
-        val verifiedIdClient = VerifiedIdClient(requestResolverFactory, requestHandlerFactory, WalletLibraryLogger)
+        val verifiedIdClient = VerifiedIdClient(
+            requestResolverFactory,
+            requestHandlerFactory,
+            WalletLibraryLogger,
+            defaultTestSerializer
+        )
         val verifiedIdRequestURL: VerifiedIdRequestURL = mockk()
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) } returns verifiedIdOpenIdJwtRawRequest
         every { requestHandlerFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
@@ -74,7 +93,12 @@ class VerifiedIdClientTest {
         requestHandlerFactory = RequestHandlerFactory()
         requestResolverFactory = mockk()
         val verifiedIdClient =
-            VerifiedIdClient(requestResolverFactory, requestHandlerFactory, WalletLibraryLogger)
+            VerifiedIdClient(
+                requestResolverFactory,
+                requestHandlerFactory,
+                WalletLibraryLogger,
+                defaultTestSerializer
+            )
         val verifiedIdRequestURL: VerifiedIdRequestURL = mockk()
         every { requestResolverFactory.getResolver(verifiedIdRequestURL) } returns openIdURLRequestResolver
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) } returns verifiedIdOpenIdJwtRawRequest
@@ -94,12 +118,19 @@ class VerifiedIdClientTest {
         requestHandlerFactory = mockk()
         requestResolverFactory = mockk()
         val verifiedIdClient =
-            VerifiedIdClient(requestResolverFactory, requestHandlerFactory, WalletLibraryLogger)
+            VerifiedIdClient(
+                requestResolverFactory,
+                requestHandlerFactory,
+                WalletLibraryLogger,
+                defaultTestSerializer
+            )
         val verifiedIdRequestURL: VerifiedIdRequestURL = mockk()
         every { requestResolverFactory.getResolver(verifiedIdRequestURL) } returns openIdURLRequestResolver
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) } returns verifiedIdOpenIdJwtRawRequest
         every { requestHandlerFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
-        coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }.throws(UnSupportedProtocolException())
+        coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }.throws(
+            UnSupportedProtocolException()
+        )
 
         // Act and Assert
         Assertions.assertThatThrownBy {
@@ -115,10 +146,17 @@ class VerifiedIdClientTest {
         requestHandlerFactory = mockk()
         requestResolverFactory = mockk()
         val verifiedIdClient =
-            VerifiedIdClient(requestResolverFactory, requestHandlerFactory, WalletLibraryLogger)
+            VerifiedIdClient(
+                requestResolverFactory,
+                requestHandlerFactory,
+                WalletLibraryLogger,
+                defaultTestSerializer
+            )
         val verifiedIdRequestURL: VerifiedIdRequestURL = mockk()
         every { requestResolverFactory.getResolver(verifiedIdRequestURL) } returns openIdURLRequestResolver
-        coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) }.throws(UnSupportedVerifiedIdRequestInputException())
+        coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) }.throws(
+            UnSupportedVerifiedIdRequestInputException()
+        )
         every { requestHandlerFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) } returns openIdPresentationRequest
 
@@ -128,5 +166,104 @@ class VerifiedIdClientTest {
                 verifiedIdClient.createRequest(verifiedIdRequestURL)
             }
         }.isInstanceOf(UnSupportedVerifiedIdRequestInputException::class.java)
+    }
+
+    @Test
+    fun encode_ProvideVerifiableCredential_ReturnsEncodedString() {
+        // Arrange
+        requestHandlerFactory = mockk()
+        requestResolverFactory = mockk()
+        val verifiedIdClient =
+            VerifiedIdClient(
+                requestResolverFactory,
+                requestHandlerFactory,
+                WalletLibraryLogger,
+                defaultTestSerializer
+            )
+        val claimDescriptor1 = ClaimDescriptor("text", "name 1")
+        val vc = VerifiableCredential(
+            com.microsoft.did.sdk.credential.models.VerifiableCredential(
+                "123",
+                "raw",
+                VerifiableCredentialContent(
+                    "456",
+                    VerifiableCredentialDescriptor(emptyList(), listOf("TestVC"), mapOf("claim1" to "value1")),
+                    "me",
+                    "Test",
+                    1234567L,
+                    null
+                )
+            ),
+            VerifiableCredentialContract(
+                "1",
+                InputContract("", "", ""),
+                DisplayContract(
+                    card = CardDescriptor("", "", "", "", null, ""),
+                    consent = ConsentDescriptor("", ""),
+                    claims = mapOf("vc.credentialSubject.claim1" to claimDescriptor1)
+                )
+            )
+        )
+        val expectedEncoding = """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"","issuedBy":"","backgroundColor":"","textColor":"","description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}}}"""
+
+        // Act
+        val actualEncodedVc = verifiedIdClient.encode(vc)
+
+        // Assert
+        assertThat(actualEncodedVc).isInstanceOf(Result::class.java)
+        assertThat(actualEncodedVc.isSuccess).isTrue
+        assertThat(actualEncodedVc.getOrNull()).isNotNull
+        assertThat(actualEncodedVc.getOrNull()).isEqualTo(expectedEncoding)
+    }
+
+    @Test
+    fun decode_ProvideEncodedVerifiableCredential_ReturnsVerifiableCredentialObject() {
+        // Arrange
+        requestHandlerFactory = mockk()
+        requestResolverFactory = mockk()
+        val verifiedIdClient =
+            VerifiedIdClient(
+                requestResolverFactory,
+                requestHandlerFactory,
+                WalletLibraryLogger,
+                defaultTestSerializer
+            )
+        val claimDescriptor1 = ClaimDescriptor("text", "name 1")
+        val expectedVc = VerifiableCredential(
+            com.microsoft.did.sdk.credential.models.VerifiableCredential(
+                "123",
+                "raw",
+                VerifiableCredentialContent(
+                    "456",
+                    VerifiableCredentialDescriptor(emptyList(), listOf("TestVC"), emptyMap()),
+                    "me",
+                    "Test",
+                    1234567L,
+                    null
+                )
+            ),
+            VerifiableCredentialContract(
+                "1",
+                InputContract("", "", ""),
+                DisplayContract(
+                    card = CardDescriptor("", "", "", "", null, ""),
+                    consent = ConsentDescriptor("", ""),
+                    claims = mapOf("vc.credentialSubject.claim1" to claimDescriptor1)
+                )
+            )
+        )
+        val encodedVc = """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"","issuedBy":"","backgroundColor":"","textColor":"","description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}}}"""
+
+        // Act
+        val actualDecodedVc = verifiedIdClient.decodeVerifiedId(encodedVc)
+
+        // Assert
+        assertThat(actualDecodedVc).isInstanceOf(Result::class.java)
+        assertThat(actualDecodedVc.isSuccess).isTrue
+        assertThat(actualDecodedVc.getOrNull()).isNotNull
+        assertThat(actualDecodedVc.getOrNull()).isInstanceOf(VerifiableCredential::class.java)
+        assertThat((actualDecodedVc.getOrNull() as VerifiableCredential).getClaims().size).isEqualTo(1)
+        assertThat((actualDecodedVc.getOrNull() as VerifiableCredential).getClaims().first().id).isEqualTo("name 1")
+        assertThat((actualDecodedVc.getOrNull() as VerifiableCredential).getClaims().first().value).isEqualTo("\"value1\"")
     }
 }
