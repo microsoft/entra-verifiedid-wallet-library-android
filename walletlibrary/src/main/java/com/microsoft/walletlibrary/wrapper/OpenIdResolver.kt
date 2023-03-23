@@ -6,8 +6,10 @@
 package com.microsoft.walletlibrary.wrapper
 
 import com.microsoft.did.sdk.VerifiableCredentialSdk
+import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
+import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 
@@ -22,7 +24,8 @@ object OpenIdResolver {
             VerifiableCredentialSdk.presentationService.getRequest(uri)) {
             is Result.Success -> {
                 val request = presentationRequestResult.payload
-                return VerifiedIdOpenIdJwtRawRequest(request)
+                val requestType = getRequestType(request)
+                return VerifiedIdOpenIdJwtRawRequest(request, requestType)
             }
             is Result.Failure -> {
                 throw VerifiedIdRequestFetchException(
@@ -31,5 +34,12 @@ object OpenIdResolver {
                 )
             }
         }
+    }
+
+    private fun getRequestType(request: PresentationRequest): RequestType {
+        return if (request.content.prompt == com.microsoft.walletlibrary.util.Constants.PURE_ISSUANCE_FLOW_VALUE)
+            RequestType.ISSUANCE
+        else
+            RequestType.PRESENTATION
     }
 }

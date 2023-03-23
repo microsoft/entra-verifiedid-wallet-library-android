@@ -10,6 +10,10 @@ import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
+import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 /**
  * VerifiedIdClient is configured by builder and is used to create requests.
@@ -17,7 +21,8 @@ import com.microsoft.walletlibrary.util.WalletLibraryLogger
 class VerifiedIdClient(
     internal val requestResolverFactory: RequestResolverFactory,
     internal val requestHandlerFactory: RequestHandlerFactory,
-    internal val logger: WalletLibraryLogger
+    internal val logger: WalletLibraryLogger,
+    internal val serializer: Json
 ) {
 
     // Creates an issuance or presentation request based on the provided input.
@@ -26,5 +31,21 @@ class VerifiedIdClient(
         val rawRequest = requestResolver.resolve(verifiedIdRequestInput)
         val requestHandler = requestHandlerFactory.getHandler(requestResolver)
         return requestHandler.handleRequest(rawRequest)
+    }
+
+    fun encode(verifiedId: VerifiedId): Result<String> {
+        return try {
+            Result.success(serializer.encodeToString(verifiedId))
+        } catch (exception: Exception) {
+            Result.failure(exception)
+        }
+    }
+
+    fun decodeVerifiedId(encodedVerifiedId: String): Result<VerifiedId> {
+        return try {
+            Result.success(serializer.decodeFromString(encodedVerifiedId))
+        } catch (exception: Exception) {
+            Result.failure(exception)
+        }
     }
 }

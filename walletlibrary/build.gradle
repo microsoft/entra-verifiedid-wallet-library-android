@@ -62,6 +62,7 @@ android {
 }
 
 dependencies {
+    implementation project(path: ':VerifiableCredential-SDK')
     localImplementation(project(":VerifiableCredential-SDK")) {
         transitive = false
     }
@@ -139,14 +140,17 @@ tasks.register('copySubmoduleAssets', Copy) {
 }
 
 tasks.whenTaskAdded { task ->
-    if (task.name.contains('assembleDistRelease')) {
+    if (task.name.contains('assembleDistRelease') || task.name.contains('assembleDistDebug')) {
+        dependsOn updateSubmodule
+        dependsOn copySubmoduleAssets
+        dependsOn copySubmoduleSource
         finalizedBy cleanSubmoduleFiles
     }
 }
 
-project.afterEvaluate {
+/*project.afterEvaluate {
     preBuild.dependsOn updateSubmodule, copySubmoduleSource, copySubmoduleAssets
-}
+}*/
 
 task cleanSubmoduleFiles(type: Delete) {
     delete "src/main/assets", "src/main/java/com/microsoft/did"
