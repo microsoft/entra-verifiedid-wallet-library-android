@@ -7,6 +7,9 @@ import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
+import com.microsoft.walletlibrary.util.AggregateException
+import com.microsoft.walletlibrary.util.IdTokenRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.SelfAttestedClaimRequirementNotFulfilledException
 import com.microsoft.walletlibrary.util.VerifiedIdResponseCompletionException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
@@ -45,7 +48,9 @@ class ManifestIssuanceRequestTest {
         val actualResult = manifestIssuanceRequest.isSatisfied()
 
         // Assert
-        assertThat(actualResult).isTrue
+        assertThat(actualResult.isSuccess).isTrue
+        assertThat(actualResult.getOrNull()).isNotNull
+        assertThat(actualResult.getOrNull()).isTrue
     }
 
     @Test
@@ -69,7 +74,9 @@ class ManifestIssuanceRequestTest {
         val actualResult = manifestIssuanceRequest.isSatisfied()
 
         // Assert
-        assertThat(actualResult).isFalse
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(SelfAttestedClaimRequirementNotFulfilledException::class.java)
     }
 
     @Test
@@ -82,7 +89,9 @@ class ManifestIssuanceRequestTest {
         val actualResult = manifestIssuanceRequest.isSatisfied()
 
         // Assert
-        assertThat(actualResult).isFalse
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(IdTokenRequirementNotFulfilledException::class.java)
     }
 
     @Test
@@ -95,7 +104,10 @@ class ManifestIssuanceRequestTest {
         val actualResult = manifestIssuanceRequest.isSatisfied()
 
         // Assert
-        assertThat(actualResult).isFalse
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(AggregateException::class.java)
+        assertThat((actualResult.exceptionOrNull() as AggregateException).exceptionsList.size).isEqualTo(2)
     }
 
     @Test
@@ -108,7 +120,9 @@ class ManifestIssuanceRequestTest {
         val actualResult = manifestIssuanceRequest.isSatisfied()
 
         // Assert
-        assertThat(actualResult).isTrue
+        assertThat(actualResult.isSuccess).isTrue
+        assertThat(actualResult.getOrNull()).isNotNull
+        assertThat(actualResult.getOrNull()).isTrue
     }
 
     @Test

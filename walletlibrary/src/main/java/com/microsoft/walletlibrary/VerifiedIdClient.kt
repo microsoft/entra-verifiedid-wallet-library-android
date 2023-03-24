@@ -22,15 +22,19 @@ class VerifiedIdClient(
     internal val requestResolverFactory: RequestResolverFactory,
     internal val requestHandlerFactory: RequestHandlerFactory,
     internal val logger: WalletLibraryLogger,
-    internal val serializer: Json
+    private val serializer: Json
 ) {
 
     // Creates an issuance or presentation request based on the provided input.
-    suspend fun createRequest(verifiedIdRequestInput: VerifiedIdRequestInput): VerifiedIdRequest<*> {
+    suspend fun createRequest(verifiedIdRequestInput: VerifiedIdRequestInput): Result<VerifiedIdRequest<*>> {
         val requestResolver = requestResolverFactory.getResolver(verifiedIdRequestInput)
         val rawRequest = requestResolver.resolve(verifiedIdRequestInput)
         val requestHandler = requestHandlerFactory.getHandler(requestResolver)
-        return requestHandler.handleRequest(rawRequest)
+        return try {
+            Result.success(requestHandler.handleRequest(rawRequest))
+        } catch (exception: Exception) {
+            Result.failure(exception)
+        }
     }
 
     fun encode(verifiedId: VerifiedId): Result<String> {

@@ -25,9 +25,10 @@ class PinRequirement(
     internal var pin: String? = null
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
-    override fun validate() {
+    override fun validate(): Result<Unit> {
         if (pin == null)
-            throw PinRequirementNotFulfilledException("PinRequirement has not been fulfilled.")
+            return Result.failure(PinRequirementNotFulfilledException("PinRequirement has not been fulfilled."))
+        return Result.success(Unit)
     }
 
     // Fulfills the requirement in the request with specified value.

@@ -132,12 +132,15 @@ class VerifiedIdClientTest {
             UnSupportedProtocolException()
         )
 
-        // Act and Assert
-        Assertions.assertThatThrownBy {
-            runBlocking {
-                verifiedIdClient.createRequest(verifiedIdRequestURL)
-            }
-        }.isInstanceOf(UnSupportedProtocolException::class.java)
+        runBlocking {
+            // Act
+            val actualResult = verifiedIdClient.createRequest(verifiedIdRequestURL)
+
+            // Assert
+            assertThat(actualResult.isFailure).isTrue
+            assertThat(actualResult.exceptionOrNull()).isNotNull
+            assertThat(actualResult.exceptionOrNull() as Exception).isEqualTo(UnSupportedProtocolException::class.java)
+        }
     }
 
     @Test

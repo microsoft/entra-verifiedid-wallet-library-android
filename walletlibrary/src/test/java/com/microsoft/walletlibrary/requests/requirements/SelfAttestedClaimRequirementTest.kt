@@ -1,7 +1,6 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.util.SelfAttestedClaimRequirementNotFulfilledException
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -37,9 +36,15 @@ class SelfAttestedClaimRequirementTest {
     @Test
     fun selfAttestedRequirement_validateUnFulfilledRequirement_ThrowsException() {
         // Act and Assert
-        Assertions.assertThatThrownBy {
+        val actualResult = selfAttestedClaimRequirement.validate()
+
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(
+            SelfAttestedClaimRequirementNotFulfilledException::class.java)
+/*        Assertions.assertThatThrownBy {
             selfAttestedClaimRequirement.validate()
-        }.isInstanceOf(SelfAttestedClaimRequirementNotFulfilledException::class.java)
+        }.isInstanceOf(SelfAttestedClaimRequirementNotFulfilledException::class.java)*/
     }
 
     @Test
