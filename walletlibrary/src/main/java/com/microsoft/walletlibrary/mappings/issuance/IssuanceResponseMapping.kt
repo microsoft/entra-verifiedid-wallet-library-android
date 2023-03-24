@@ -8,6 +8,8 @@ package com.microsoft.walletlibrary.mappings.issuance
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.models.pin.IssuancePin
 import com.microsoft.walletlibrary.requests.requirements.*
+import com.microsoft.walletlibrary.util.TypeInVerifiedIdRequirementDoesNotMatchRequestException
+import com.microsoft.walletlibrary.util.VerifiedIdRequirementTypeConflictException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 
 /**
@@ -60,11 +62,11 @@ private fun IssuanceResponse.addPinRequirement(pinRequirement: PinRequirement) {
 }
 
 private fun IssuanceResponse.addVerifiedIdRequirement(verifiedIdRequirement: VerifiedIdRequirement) {
-    val presentationAttestation = request.getAttestations().presentations.filter { it.credentialType == verifiedIdRequirement.types.first() }
-/*    if (presentationAttestation.isEmpty())
-        throw IdInVerifiedIdRequirementDoesNotMatchRequestException("Id in VerifiedId Requirement does not match the id in request.")
+    val presentationAttestation = request.getAttestations().presentations.filter { verifiedIdRequirement.types.contains(it.credentialType) }
+    if (presentationAttestation.isEmpty())
+        throw TypeInVerifiedIdRequirementDoesNotMatchRequestException("Id in VerifiedId Requirement does not match the id in request.")
     if (presentationAttestation.size > 1)
-        throw VerifiedIdRequirementIdConflictException("Multiple VerifiedId Requirements have the same Ids.")*/
+        throw VerifiedIdRequirementTypeConflictException("Multiple VerifiedId Requirements have the same Ids.")
     verifiedIdRequirement.validate()
     requestedVcMap[presentationAttestation.first()] = (verifiedIdRequirement.verifiedId as VerifiableCredential).raw
 }
