@@ -9,10 +9,10 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.RecyclerView
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrarydemo.R
-import com.microsoft.walletlibrarydemo.databinding.RequirementSelfattestedRowBinding
+import com.microsoft.walletlibrarydemo.databinding.RequirementTextRowBinding
 
 sealed class RequirementViewHolder(view: View): RecyclerView.ViewHolder(view)
-class SelfAttestedHolder(val binding: RequirementSelfattestedRowBinding): RequirementViewHolder(binding.root)
+class SelfAttestedHolder(val binding: RequirementTextRowBinding): RequirementViewHolder(binding.root)
 
 class RequirementsAdapter(
     private val context: Context,
@@ -23,7 +23,7 @@ class RequirementsAdapter(
         return when (viewType) {
             SelfAttestedClaimRequirement::class.java.name.hashCode() ->
                 SelfAttestedHolder(
-                    RequirementSelfattestedRowBinding.inflate(
+                    RequirementTextRowBinding.inflate(
                         LayoutInflater.from(parent.context),
                         parent,
                         false
