@@ -25,8 +25,12 @@ internal class OpenIdPresentationRequest(
     // Root of trust of the requester (eg. linked domains).
     override val rootOfTrust: RootOfTrust,
 
-    val request: OpenIdRawRequest
-) : VerifiedIdPresentationRequest {
+    val request: OpenIdRawRequest,
+
+    internal val issuanceCallbackUrl: String? = null,
+
+    internal val requestState: String? = null
+): VerifiedIdPresentationRequest {
     // Indicates whether presentation request is satisfied on client side.
     override fun isSatisfied(): Boolean {
         try {
@@ -48,7 +52,7 @@ internal class OpenIdPresentationRequest(
         }
     }
 
-    override fun cancel(message: String?): Result<Void> {
+    override suspend fun cancel(message: String?): Result<Unit> {
         TODO("Not yet implemented")
     }
 }

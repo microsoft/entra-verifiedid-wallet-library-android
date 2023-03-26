@@ -18,7 +18,7 @@ class SelfAttestedFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Co
         val verifiedIdClient = VerifiedIdClientBuilder(context).build()
         // Use the test uri here
         val verifiedIdRequestUrl =
-            VerifiedIdRequestURL(Uri.parse(""))
+            VerifiedIdRequestURL(Uri.parse("openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/9c59be8b-bd18-45d9-b9d9-082bc07c094f/verifiableCredentials/issuanceRequests/d65f5579-a03c-4ef1-9437-85d70cfb8c54"))
         verifiedIdRequest = verifiedIdClient.createRequest(verifiedIdRequestUrl)
     }
 

@@ -8,6 +8,8 @@ package com.microsoft.walletlibrary.wrapper
 import com.microsoft.did.sdk.VerifiableCredentialSdk
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
+import com.microsoft.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
+import com.microsoft.did.sdk.util.controlflow.NetworkException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.mappings.issuance.addRequirements
 import com.microsoft.walletlibrary.requests.requirements.Requirement
@@ -22,18 +24,54 @@ object VerifiedIdRequester {
     // sends the issuance response to VC SDK and returns a VerifiedId if successful.
     internal suspend fun sendIssuanceResponse(
         issuanceRequest: IssuanceRequest,
-        requirement: Requirement
+        requirement: Requirement,
+        requestState: String?,
+        issuanceCallbackUrl: String?
     ): VerifiedId {
         val issuanceResponse = IssuanceResponse(issuanceRequest)
         issuanceResponse.addRequirements(requirement)
         when (val result = VerifiableCredentialSdk.issuanceService.sendResponse(issuanceResponse)) {
-            is Result.Success -> return VerifiableCredential(result.payload, issuanceRequest.contract)
+            is Result.Success -> {
+                val issuanceCompletionResponse = requestState?.let {
+                    IssuanceCompletionResponse(
+                        IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_SUCCESSFUL,
+                        it,
+                        null
+                    )
+                }
+                sendIssuanceCallback(issuanceCompletionResponse, issuanceCallbackUrl)
+                return VerifiableCredential(result.payload, issuanceRequest.contract)
+            }
             is Result.Failure -> {
+                val details = when (result.payload) {
+                    is NetworkException -> IssuanceCompletionResponse.IssuanceCompletionErrorDetails.ISSUANCE_SERVICE_ERROR
+                    else -> IssuanceCompletionResponse.IssuanceCompletionErrorDetails.UNSPECIFIED_ERROR
+                }
+                val issuanceCompletionResponse = requestState?.let {
+                    IssuanceCompletionResponse(
+                        IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
+                        it,
+                        details
+                    )
+                }
+                sendIssuanceCallback(issuanceCompletionResponse, issuanceCallbackUrl)
                 throw VerifiedIdResponseCompletionException(
                     "Unable to complete issuance response",
                     result.payload
                 )
             }
+        }
+    }
+
+    internal suspend fun sendIssuanceCallback(
+        issuanceCompletionResponse: IssuanceCompletionResponse?,
+        issuanceCallbackUrl: String?
+    ) {
+        if (issuanceCompletionResponse != null && issuanceCallbackUrl != null) {
+            VerifiedIdCompletionCallBack.sendIssuanceCompletionResponse(
+                issuanceCompletionResponse,
+                issuanceCallbackUrl
+            )
         }
     }
 }

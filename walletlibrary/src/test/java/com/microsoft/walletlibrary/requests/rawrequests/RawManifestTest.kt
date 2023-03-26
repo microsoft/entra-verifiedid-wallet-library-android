@@ -98,7 +98,7 @@ class RawManifestTest {
         every { credentialAttestations.presentations } returns emptyList()
 
         // Act
-        val verifiedIdRequestContent = rawManifest.mapToRequestContent()
+        val verifiedIdRequestContent = rawManifest.mapToIssuanceRequestContent()
 
         // Assert
         assertThat(verifiedIdRequestContent).isInstanceOf(VerifiedIdRequestContent::class.java)
@@ -123,7 +123,7 @@ class RawManifestTest {
         every { credentialAttestations.presentations } returns emptyList()
 
         // Act
-        val verifiedIdRequestContent = rawManifest.mapToRequestContent()
+        val verifiedIdRequestContent = rawManifest.mapToIssuanceRequestContent()
 
         // Assert
         assertThat(verifiedIdRequestContent.requirement).isInstanceOf(IdTokenRequirement::class.java)
@@ -139,7 +139,7 @@ class RawManifestTest {
         every { credentialAttestations.presentations } returns emptyList()
 
         // Act
-        val verifiedIdRequestContent = rawManifest.mapToRequestContent()
+        val verifiedIdRequestContent = rawManifest.mapToIssuanceRequestContent()
 
         // Assert
         assertThat(verifiedIdRequestContent.requirement).isInstanceOf(AccessTokenRequirement::class.java)
@@ -156,7 +156,7 @@ class RawManifestTest {
         every { credentialAttestations.presentations } returns listOf(presentationAttestation)
 
         // Act
-        val verifiedIdRequestContent = rawManifest.mapToRequestContent()
+        val verifiedIdRequestContent = rawManifest.mapToIssuanceRequestContent()
 
         // Assert
         assertThat(verifiedIdRequestContent.requirement).isInstanceOf(GroupRequirement::class.java)
@@ -177,7 +177,7 @@ class RawManifestTest {
         every { credentialAttestations.presentations } returns emptyList()
 
         // Act
-        val verifiedIdRequestContent = rawManifest.mapToRequestContent()
+        val verifiedIdRequestContent = rawManifest.mapToIssuanceRequestContent()
 
         // Assert
         assertThat(verifiedIdRequestContent.rootOfTrust.verified).isEqualTo(true)

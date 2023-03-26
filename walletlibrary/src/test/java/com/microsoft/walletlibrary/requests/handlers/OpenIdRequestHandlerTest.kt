@@ -107,7 +107,7 @@ class OpenIdRequestHandlerTest {
         verifiedIdOpenIdJwtRawRequest = mockk()
         if (requestType == RequestType.PRESENTATION) {
             every { verifiedIdOpenIdJwtRawRequest.requestType } returns RequestType.PRESENTATION
-            every { verifiedIdOpenIdJwtRawRequest.mapToRequestContent() } returns verifiedIdRequestContent
+            every { verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent() } returns verifiedIdRequestContent
             mockRequestContent(selfAttestedClaimRequirement)
         } else if (requestType == RequestType.ISSUANCE) {
             mockForIssuanceType(requirement, logoPresent, emptyClaims)
@@ -126,7 +126,7 @@ class OpenIdRequestHandlerTest {
         emptyClaims: Boolean
     ) {
         every { verifiedIdOpenIdJwtRawRequest.requestType } returns RequestType.ISSUANCE
-        every { verifiedIdOpenIdJwtRawRequest.mapToRequestContent() } returns verifiedIdRequestContent
+        every { verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent() } returns verifiedIdRequestContent
         mockRequestContent(verifiedIdRequirement)
         mockRequestInput()
         mockManifestIssuanceRequest(logoPresent, emptyClaims)

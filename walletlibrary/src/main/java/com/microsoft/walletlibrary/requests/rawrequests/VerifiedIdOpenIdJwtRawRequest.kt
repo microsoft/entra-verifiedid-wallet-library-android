@@ -11,14 +11,14 @@ import com.microsoft.walletlibrary.mappings.presentation.getRequesterStyle
 import com.microsoft.walletlibrary.mappings.presentation.toRequirement
 import com.microsoft.walletlibrary.mappings.toRootOfTrust
 import com.microsoft.walletlibrary.requests.InjectedIdToken
-import com.microsoft.walletlibrary.requests.VerifiedIdRequestContent
+import com.microsoft.walletlibrary.requests.PresentationRequestContent
 
 internal class VerifiedIdOpenIdJwtRawRequest(
     override val rawRequest: PresentationRequest,
     override val requestType: RequestType = RequestType.PRESENTATION
 ): OpenIdRawRequest {
-    override fun mapToRequestContent(): VerifiedIdRequestContent {
-        return VerifiedIdRequestContent(
+    override fun mapToPresentationRequestContent(): PresentationRequestContent {
+        return PresentationRequestContent(
             rawRequest.getRequesterStyle(),
             rawRequest.getPresentationDefinition().toRequirement(),
             rawRequest.linkedDomainResult.toRootOfTrust(),
@@ -27,7 +27,9 @@ internal class VerifiedIdOpenIdJwtRawRequest(
                     it,
                     rawRequest.content.pinDetails?.toPinRequirement()
                 )
-            }
+            },
+            rawRequest.content.redirectUrl,
+            rawRequest.content.state
         )
     }
 }

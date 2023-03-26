@@ -99,7 +99,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
     @Test
     fun mapOpenIdJwtRawRequest_mapPresentationRequestWithLogoToRequestContent_ReturnsRequestContent() {
         // Act
-        val actualResult = verifiedIdOpenIdJwtRawRequest.mapToRequestContent()
+        val actualResult = verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
 
         // Assert
         assertThat(actualResult).isInstanceOf(VerifiedIdRequestContent::class.java)
@@ -119,7 +119,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         setupInput(listOf(mockInputDescriptor), logoPresent = false, isSchemaEmpty = false)
 
         // Act
-        val actualResult = verifiedIdOpenIdJwtRawRequest.mapToRequestContent()
+        val actualResult = verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
 
         // Assert
         assertThat(actualResult).isInstanceOf(VerifiedIdRequestContent::class.java)
@@ -140,7 +140,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
 
         // Act and Assert
         Assertions.assertThatThrownBy {
-            verifiedIdOpenIdJwtRawRequest.mapToRequestContent()
+            verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
         }.isInstanceOf(MissingVerifiedIdTypeException::class.java)
     }
 }

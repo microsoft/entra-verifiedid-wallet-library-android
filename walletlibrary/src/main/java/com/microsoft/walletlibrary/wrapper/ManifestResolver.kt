@@ -6,6 +6,7 @@
 package com.microsoft.walletlibrary.wrapper
 
 import com.microsoft.did.sdk.VerifiableCredentialSdk
+import com.microsoft.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
@@ -16,7 +17,7 @@ import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 internal object ManifestResolver {
 
     // Fetches the issuance request from VC SDK using the url and converts it to raw request.
-    suspend fun getIssuanceRequest(uri: String): RawManifest {
+    suspend fun getIssuanceRequest(uri: String, requestState: String?, issuanceCallbackUrl: String?): RawManifest {
         return when (val issuanceRequestResult =
             VerifiableCredentialSdk.issuanceService.getRequest(uri)) {
             is Result.Success -> {
@@ -24,6 +25,15 @@ internal object ManifestResolver {
                 RawManifest(request)
             }
             is Result.Failure -> {
+                val issuanceCompletionResponse = requestState?.let {
+                    IssuanceCompletionResponse(
+                        IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
+                        it,
+                        IssuanceCompletionResponse.IssuanceCompletionErrorDetails.FETCH_CONTRACT_ERROR,
+                    )
+                }
+                if (issuanceCompletionResponse != null && issuanceCallbackUrl != null)
+                    VerifiedIdCompletionCallBack.sendIssuanceCompletionResponse(issuanceCompletionResponse, issuanceCallbackUrl)
                 throw VerifiedIdRequestFetchException(
                     "Unable to fetch issuance request",
                     issuanceRequestResult.payload
