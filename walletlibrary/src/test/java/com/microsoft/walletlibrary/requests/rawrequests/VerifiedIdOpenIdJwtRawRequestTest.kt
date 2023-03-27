@@ -9,6 +9,8 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Pres
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
+import com.microsoft.walletlibrary.util.MissingCallbackUrlException
+import com.microsoft.walletlibrary.util.MissingRequestStateException
 import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
 import io.mockk.every
 import io.mockk.mockk
@@ -32,6 +34,8 @@ class VerifiedIdOpenIdJwtRawRequestTest {
     private val expectedLogoUri = "testLogoUri"
     private val expectedLogoImage = "testLogoImage"
     private val expectedPromptForIssuance = "create"
+    private val expectedCallbackUrl = "test.com"
+    private val expectedRequestState = "test state"
 
     init {
         setupInput(listOf(mockInputDescriptor), logoPresent = true, isSchemaEmpty = false)
@@ -59,8 +63,6 @@ class VerifiedIdOpenIdJwtRawRequestTest {
     private fun setupPresentationContent() {
         every { mockPresentationRequest.content.registration } returns mockRegistration
         every { mockPresentationRequest.content.idTokenHint } returns null
-        every { mockPresentationRequest.content.redirectUrl } returns ""
-        every { mockPresentationRequest.content.state } returns ""
     }
 
     private fun setupInputDescriptors(
@@ -99,6 +101,10 @@ class VerifiedIdOpenIdJwtRawRequestTest {
 
     @Test
     fun mapOpenIdJwtRawRequest_mapPresentationRequestWithLogoToRequestContent_ReturnsRequestContent() {
+        // Arrange
+        every { mockPresentationRequest.content.redirectUrl } returns expectedCallbackUrl
+        every { mockPresentationRequest.content.state } returns expectedRequestState
+
         // Act
         val actualResult = verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
 
@@ -118,6 +124,8 @@ class VerifiedIdOpenIdJwtRawRequestTest {
     fun mapOpenIdJwtRawRequest_mapPresentationRequestWithNoLogoToRequestContent_ReturnsRequestContent() {
         // Arrange
         setupInput(listOf(mockInputDescriptor), logoPresent = false, isSchemaEmpty = false)
+        every { mockPresentationRequest.content.redirectUrl } returns expectedCallbackUrl
+        every { mockPresentationRequest.content.state } returns expectedRequestState
 
         // Act
         val actualResult = verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
@@ -138,10 +146,36 @@ class VerifiedIdOpenIdJwtRawRequestTest {
     fun mapOpenIdJwtRawRequest_mapPresentationRequestWithNoSchemaToRequestContent_ThrowsException() {
         // Arrange
         setupInput(listOf(mockInputDescriptor), logoPresent = false, isSchemaEmpty = true)
+        every { mockPresentationRequest.content.redirectUrl } returns expectedCallbackUrl
+        every { mockPresentationRequest.content.state } returns expectedRequestState
 
         // Act and Assert
         Assertions.assertThatThrownBy {
             verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
         }.isInstanceOf(MissingVerifiedIdTypeException::class.java)
+    }
+
+    @Test
+    fun mapOpenIdJwtRawRequest_mapPresentationRequestWithEmptyRequestState_ThrowsException() {
+        // Arrange
+        every { mockPresentationRequest.content.redirectUrl } returns expectedCallbackUrl
+        every { mockPresentationRequest.content.state } returns ""
+
+        // Act and Assert
+        Assertions.assertThatThrownBy {
+            verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
+        }.isInstanceOf(MissingRequestStateException::class.java)
+    }
+
+    @Test
+    fun mapOpenIdJwtRawRequest_mapPresentationRequestWithEmptyCallbackUrl_ThrowsException() {
+        // Arrange
+        every { mockPresentationRequest.content.redirectUrl } returns ""
+        every { mockPresentationRequest.content.state } returns expectedRequestState
+
+        // Act and Assert
+        Assertions.assertThatThrownBy {
+            verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
+        }.isInstanceOf(MissingCallbackUrlException::class.java)
     }
 }

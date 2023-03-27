@@ -39,6 +39,14 @@ class InputCastingException(message: String = "", cause: Throwable? = null, retr
 
 class MissingRequirementException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
+class PresentationRequestCancelIsNotSupported(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
+open class ParameterMissingException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
+class MissingRequestStateException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : ParameterMissingException(message, cause, retryable)
+
+class MissingCallbackUrlException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : ParameterMissingException(message, cause, retryable)
+
 open class RequirementValidationException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
 class SelfAttestedClaimRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
@@ -58,5 +66,3 @@ class VerifiedIdRequirementIdConflictException(message: String = "", cause: Thro
 class IdInVerifiedIdRequirementDoesNotMatchRequestException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
 
 class PinRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
-
-class PresentationRequestCancelIsNotSupported(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
