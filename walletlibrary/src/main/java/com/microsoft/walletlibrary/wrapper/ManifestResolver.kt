@@ -17,7 +17,11 @@ import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 internal object ManifestResolver {
 
     // Fetches the issuance request from VC SDK using the url and converts it to raw request.
-    suspend fun getIssuanceRequest(uri: String, requestState: String?, issuanceCallbackUrl: String?): RawManifest {
+    suspend fun getIssuanceRequest(
+        uri: String,
+        requestState: String? = null,
+        issuanceCallbackUrl: String? = null
+    ): RawManifest {
         return when (val issuanceRequestResult =
             VerifiableCredentialSdk.issuanceService.getRequest(uri)) {
             is Result.Success -> {
@@ -33,7 +37,10 @@ internal object ManifestResolver {
                     )
                 }
                 if (issuanceCompletionResponse != null && issuanceCallbackUrl != null)
-                    VerifiedIdCompletionCallBack.sendIssuanceCompletionResponse(issuanceCompletionResponse, issuanceCallbackUrl)
+                    VerifiedIdCompletionCallBack.sendIssuanceCompletionResponse(
+                        issuanceCompletionResponse,
+                        issuanceCallbackUrl
+                    )
                 throw VerifiedIdRequestFetchException(
                     "Unable to fetch issuance request",
                     issuanceRequestResult.payload

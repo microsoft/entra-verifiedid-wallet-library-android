@@ -7,7 +7,6 @@ import com.microsoft.did.sdk.credential.service.models.oidc.Registration
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
-import com.microsoft.walletlibrary.requests.VerifiedIdRequestContent
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
 import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
@@ -60,6 +59,8 @@ class VerifiedIdOpenIdJwtRawRequestTest {
     private fun setupPresentationContent() {
         every { mockPresentationRequest.content.registration } returns mockRegistration
         every { mockPresentationRequest.content.idTokenHint } returns null
+        every { mockPresentationRequest.content.redirectUrl } returns ""
+        every { mockPresentationRequest.content.state } returns ""
     }
 
     private fun setupInputDescriptors(
@@ -102,7 +103,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         val actualResult = verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
 
         // Assert
-        assertThat(actualResult).isInstanceOf(VerifiedIdRequestContent::class.java)
+        assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
         assertThat(actualResult.requesterStyle.requester).isEqualTo(expectedEntityName)
         assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdRequesterStyle::class.java)
         assertThat((actualResult.requesterStyle as OpenIdRequesterStyle).logo).isNotNull
@@ -122,7 +123,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         val actualResult = verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
 
         // Assert
-        assertThat(actualResult).isInstanceOf(VerifiedIdRequestContent::class.java)
+        assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
         assertThat(actualResult.requesterStyle.requester).isEqualTo(expectedEntityName)
         assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdRequesterStyle::class.java)
         assertThat((actualResult.requesterStyle as OpenIdRequesterStyle).logo).isNotNull

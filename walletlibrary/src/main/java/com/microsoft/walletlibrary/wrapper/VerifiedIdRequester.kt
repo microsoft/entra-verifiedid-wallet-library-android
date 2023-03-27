@@ -25,8 +25,8 @@ object VerifiedIdRequester {
     internal suspend fun sendIssuanceResponse(
         issuanceRequest: IssuanceRequest,
         requirement: Requirement,
-        requestState: String?,
-        issuanceCallbackUrl: String?
+        requestState: String? = null,
+        issuanceCallbackUrl: String? = null
     ): VerifiedId {
         val issuanceResponse = IssuanceResponse(issuanceRequest)
         issuanceResponse.addRequirements(requirement)
