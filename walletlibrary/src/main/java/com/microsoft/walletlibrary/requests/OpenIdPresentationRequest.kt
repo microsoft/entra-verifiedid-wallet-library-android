@@ -8,6 +8,7 @@ package com.microsoft.walletlibrary.requests
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.util.PresentationRequestCancelIsNotSupported
 import com.microsoft.walletlibrary.util.RequirementValidationException
 import com.microsoft.walletlibrary.util.WalletLibraryException
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
@@ -25,11 +26,7 @@ internal class OpenIdPresentationRequest(
     // Root of trust of the requester (eg. linked domains).
     override val rootOfTrust: RootOfTrust,
 
-    val request: OpenIdRawRequest,
-
-    internal val issuanceCallbackUrl: String? = null,
-
-    internal val requestState: String? = null
+    val request: OpenIdRawRequest
 ): VerifiedIdPresentationRequest {
     // Indicates whether presentation request is satisfied on client side.
     override fun isSatisfied(): Boolean {
@@ -53,6 +50,6 @@ internal class OpenIdPresentationRequest(
     }
 
     override suspend fun cancel(message: String?): Result<Unit> {
-        TODO("Not yet implemented")
+        return Result.failure(PresentationRequestCancelIsNotSupported("Cancelling presentation request is not supported."))
     }
 }

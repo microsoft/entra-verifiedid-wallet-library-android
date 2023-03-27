@@ -44,9 +44,7 @@ internal class OpenIdRequestHandler: RequestHandler {
             presentationRequestContent.requesterStyle,
             presentationRequestContent.requirement,
             presentationRequestContent.rootOfTrust,
-            rawRequest,
-            presentationRequestContent.issuanceCallbackUrl,
-            presentationRequestContent.requestState
+            rawRequest
         )
     }
 

@@ -58,3 +58,5 @@ class VerifiedIdRequirementIdConflictException(message: String = "", cause: Thro
 class IdInVerifiedIdRequirementDoesNotMatchRequestException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
 
 class PinRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
+
+class PresentationRequestCancelIsNotSupported(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
