@@ -44,14 +44,14 @@ internal class ManifestIssuanceRequest(
     }
 
     // Indicates whether issuance request is satisfied on client side.
-    override fun isSatisfied(): Result<Boolean> {
-        val validationResult = requirement.validate()
-        //TODO("Add logging")
-        return if (validationResult.isFailure)
-            validationResult.exceptionOrNull()?.let { Result.failure(it) } ?: Result.failure(
-                RequirementValidationException("Requirement Validation failed")
-            )
-        else Result.success(true)
+    override fun isSatisfied(): Boolean {
+        try {
+            requirement.validate()
+        } catch (exception: RequirementValidationException) {
+            //TODO("log exception message")
+            return false
+        }
+        return true
     }
 
     override fun cancel(message: String?): Result<Void> {

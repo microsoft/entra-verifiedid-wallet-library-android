@@ -24,7 +24,7 @@ interface VerifiedIdRequest<out T> {
     val rootOfTrust: RootOfTrust
 
     // Indicates whether request is satisfied on client side.
-    fun isSatisfied(): Result<Boolean>
+    fun isSatisfied(): Boolean
 
     // Completes the request and returns a generic object if successful.
     suspend fun complete(): Result<T>

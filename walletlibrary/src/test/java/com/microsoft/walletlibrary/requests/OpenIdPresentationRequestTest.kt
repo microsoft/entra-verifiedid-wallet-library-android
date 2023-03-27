@@ -10,7 +10,6 @@ import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
-import com.microsoft.walletlibrary.util.AggregateException
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
 import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
@@ -58,9 +57,7 @@ class OpenIdPresentationRequestTest {
         val actualResult = openIdPresentationRequest.isSatisfied()
 
         // Assert
-        Assertions.assertThat(actualResult.isSuccess).isTrue
-        Assertions.assertThat(actualResult.getOrNull()).isNotNull
-        Assertions.assertThat(actualResult.getOrNull()).isTrue
+        Assertions.assertThat(actualResult).isTrue
     }
 
     @Test
@@ -85,9 +82,7 @@ class OpenIdPresentationRequestTest {
         val actualResult = openIdPresentationRequest.isSatisfied()
 
         // Assert
-        Assertions.assertThat(actualResult.isFailure).isTrue
-        Assertions.assertThat(actualResult.exceptionOrNull()).isNotNull
-        Assertions.assertThat(actualResult.exceptionOrNull()).isInstanceOf(VerifiedIdRequirementNotFulfilledException::class.java)
+        Assertions.assertThat(actualResult).isFalse
     }
 
     @Test
@@ -99,9 +94,7 @@ class OpenIdPresentationRequestTest {
         val actualResult = openIdPresentationRequest.isSatisfied()
 
         // Assert
-        Assertions.assertThat(actualResult.isFailure).isTrue
-        Assertions.assertThat(actualResult.exceptionOrNull()).isNotNull
-        Assertions.assertThat(actualResult.exceptionOrNull()).isInstanceOf(VerifiedIdRequirementNotFulfilledException::class.java)
+        Assertions.assertThat(actualResult).isFalse
     }
 
     @Test
@@ -113,10 +106,7 @@ class OpenIdPresentationRequestTest {
         val actualResult = openIdPresentationRequest.isSatisfied()
 
         // Assert
-        Assertions.assertThat(actualResult.isFailure).isTrue
-        Assertions.assertThat(actualResult.exceptionOrNull()).isNotNull
-        Assertions.assertThat(actualResult.exceptionOrNull()).isInstanceOf(AggregateException::class.java)
-        Assertions.assertThat((actualResult.exceptionOrNull() as AggregateException).exceptionsList.size).isEqualTo(2)
+        Assertions.assertThat(actualResult).isFalse
     }
 
     @Test
@@ -128,9 +118,7 @@ class OpenIdPresentationRequestTest {
         val actualResult = openIdPresentationRequest.isSatisfied()
 
         // Assert
-        Assertions.assertThat(actualResult.isSuccess).isTrue
-        Assertions.assertThat(actualResult.getOrNull()).isNotNull
-        Assertions.assertThat(actualResult.getOrNull()).isTrue
+        Assertions.assertThat(actualResult).isTrue
     }
 
     @Test

@@ -42,9 +42,6 @@ class SelfAttestedClaimRequirementTest {
         assertThat(actualResult.exceptionOrNull()).isNotNull
         assertThat(actualResult.exceptionOrNull()).isInstanceOf(
             SelfAttestedClaimRequirementNotFulfilledException::class.java)
-/*        Assertions.assertThatThrownBy {
-            selfAttestedClaimRequirement.validate()
-        }.isInstanceOf(SelfAttestedClaimRequirementNotFulfilledException::class.java)*/
     }
 
     @Test
