@@ -12,7 +12,7 @@ import com.microsoft.walletlibrary.requests.requirements.PinRequirement
 
 //TODO(Add dependency injection)
 class IdTokenFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Context): ViewModel() {
-    var verifiedIdRequest: VerifiedIdRequest<*>? = null
+    var verifiedIdRequestResult: Result<VerifiedIdRequest<*>>? = null
     var verifiedIdResult: Result<Any?>? = null
     var pin: String? = null
 
@@ -21,20 +21,22 @@ class IdTokenFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Context
         // Use the test uri here
         val verifiedIdRequestUrl =
             VerifiedIdRequestURL(Uri.parse(""))
-        verifiedIdRequest = verifiedIdClient.createRequest(verifiedIdRequestUrl)
+        verifiedIdRequestResult = verifiedIdClient.createRequest(verifiedIdRequestUrl)
     }
 
     suspend fun completeIssuance() {
-        when (val requirement = verifiedIdRequest?.requirement) {
-            is GroupRequirement -> {
-                val requirementsInGroup = requirement.requirements
-                for (requirementInGroup in requirementsInGroup) {
-                    if (requirementInGroup is PinRequirement)
-                        pin?.let { requirementInGroup.fulfill(it) }
+        if (verifiedIdRequestResult?.isSuccess == true) {
+            when (val requirement = verifiedIdRequestResult?.getOrNull()?.requirement) {
+                is GroupRequirement -> {
+                    val requirementsInGroup = requirement.requirements
+                    for (requirementInGroup in requirementsInGroup) {
+                        if (requirementInGroup is PinRequirement)
+                            pin?.let { requirementInGroup.fulfill(it) }
+                    }
+                    requirement.validate()
                 }
-                requirement.validate()
             }
+            verifiedIdResult = verifiedIdRequestResult?.getOrNull()?.complete()
         }
-        verifiedIdResult = verifiedIdRequest?.complete()
     }
 }
