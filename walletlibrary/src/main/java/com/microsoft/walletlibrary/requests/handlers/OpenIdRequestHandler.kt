@@ -52,7 +52,11 @@ internal class OpenIdRequestHandler: RequestHandler {
         validateRequirement(presentationRequestContent)
         val contractUrl =
             ((presentationRequestContent.requirement as VerifiedIdRequirement).issuanceOptions.first() as VerifiedIdRequestURL).url
-        val rawManifest = getIssuanceRequest(contractUrl.toString(), presentationRequestContent.requestState, presentationRequestContent.issuanceCallbackUrl)
+        val rawManifest = getIssuanceRequest(
+            contractUrl.toString(),
+            presentationRequestContent.requestState,
+            presentationRequestContent.issuanceCallbackUrl
+        )
         val issuanceRequestContent = rawManifest.mapToIssuanceRequestContent()
         presentationRequestContent.injectedIdToken?.let {
             issuanceRequestContent.addRequirementsForIdTokenHint(
@@ -77,7 +81,11 @@ internal class OpenIdRequestHandler: RequestHandler {
             throw InputCastingException("VerifiedId Input is not the expected VerifiedIdRequestURL type")
     }
 
-    private suspend fun getIssuanceRequest(contractUrl: String, requestState: String?, issuanceCallbackUrl: String?): RawManifest {
+    private suspend fun getIssuanceRequest(
+        contractUrl: String,
+        requestState: String?,
+        issuanceCallbackUrl: String?
+    ): RawManifest {
         return ManifestResolver.getIssuanceRequest(contractUrl, requestState, issuanceCallbackUrl)
     }
 }

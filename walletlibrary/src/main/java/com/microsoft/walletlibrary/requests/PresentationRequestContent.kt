@@ -24,7 +24,7 @@ internal class PresentationRequestContent(
 
     internal val injectedIdToken: InjectedIdToken? = null,
 
-    internal var issuanceCallbackUrl: String? = null,
+    internal val issuanceCallbackUrl: String? = null,
 
-    internal var requestState: String? = null
+    internal val requestState: String? = null
 )
