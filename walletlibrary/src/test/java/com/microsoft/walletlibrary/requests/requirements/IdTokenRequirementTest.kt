@@ -41,7 +41,7 @@ class IdTokenRequirementTest {
     }
 
     @Test
-    fun idTokenRequirement_validateUnFulfilledRequirement_ThrowsException() {
+    fun idTokenRequirement_validateUnFulfilledRequirement_ReturnsFailure() {
         // Act
         val actualResult = idTokenRequirement.validate()
 
@@ -54,7 +54,7 @@ class IdTokenRequirementTest {
     }
 
     @Test
-    fun idTokenRequirement_validateFulfilledRequirement_SucceedsWithNoException() {
+    fun idTokenRequirement_validateFulfilledRequirement_ReturnsSuccess() {
         // Arrange
         val expectedIdToken = "Test IdToken"
         idTokenRequirement.fulfill(expectedIdToken)

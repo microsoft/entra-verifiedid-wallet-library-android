@@ -66,7 +66,7 @@ class VerifiedIdClientTest {
     }
 
     @Test
-    fun createRequest_ExceptionFromResolverFactory_ThrowsException() {
+    fun createRequest_ExceptionFromResolverFactory_ReturnsFailure() {
         // Arrange
         requestHandlerFactory = mockk()
         requestResolverFactory = RequestResolverFactory()
@@ -94,7 +94,7 @@ class VerifiedIdClientTest {
     }
 
     @Test
-    fun createRequest_ExceptionFromHandlerFactory_ThrowsException() {
+    fun createRequest_ExceptionFromHandlerFactory_ReturnsFailure() {
         // Arrange
         requestHandlerFactory = RequestHandlerFactory()
         requestResolverFactory = mockk()
@@ -123,7 +123,7 @@ class VerifiedIdClientTest {
     }
 
     @Test
-    fun createRequest_ExceptionFromHandler_ThrowsException() {
+    fun createRequest_ExceptionFromHandler_ReturnsFailure() {
         // Arrange
         requestHandlerFactory = mockk()
         requestResolverFactory = mockk()
@@ -155,7 +155,7 @@ class VerifiedIdClientTest {
     }
 
     @Test
-    fun createRequest_ExceptionFromResolver_ThrowsException() {
+    fun createRequest_ExceptionFromResolver_ReturnsFailure() {
         // Arrange
         requestHandlerFactory = mockk()
         requestResolverFactory = mockk()

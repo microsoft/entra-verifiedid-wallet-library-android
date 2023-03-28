@@ -40,7 +40,7 @@ class GroupRequirementTest {
     }
 
     @Test
-    fun groupRequirement_validateUnFulfilledRequirement_ThrowsException() {
+    fun groupRequirement_validateUnFulfilledRequirement_ReturnsFailure() {
         // Act
         val actualResult = groupRequirement.validate()
 
@@ -52,7 +52,7 @@ class GroupRequirementTest {
     }
 
     @Test
-    fun groupRequirement_validateAllRequirementsFulfilled_SucceedsWithNoException() {
+    fun groupRequirement_validateAllRequirementsFulfilled_ReturnsSuccess() {
         // Arrange
         val expectedClaimValue = "Test"
         selfAttestedClaimRequirement.fulfill(expectedClaimValue)
@@ -73,7 +73,7 @@ class GroupRequirementTest {
     }
 
     @Test
-    fun groupRequirement_validateOneFulfilledAndOneUnFulfilledRequirement_ThrowsException() {
+    fun groupRequirement_validateOneFulfilledAndOneUnFulfilledRequirement_ReturnsFailure() {
         // Arrange
         val expectedClaimValue = "Test"
         selfAttestedClaimRequirement.fulfill(expectedClaimValue)

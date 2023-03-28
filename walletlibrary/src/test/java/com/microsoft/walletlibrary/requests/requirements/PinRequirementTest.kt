@@ -1,7 +1,6 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.util.PinRequirementNotFulfilledException
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -34,20 +33,19 @@ class PinRequirementTest {
     }
 
     @Test
-    fun pinRequirement_validateUnFulfilledRequirement_ThrowsException() {
+    fun pinRequirement_validateUnFulfilledRequirement_ReturnsFailure() {
         // Act
         val actualResult = pinRequirement.validate()
 
         // Assert
-        Assertions.assertThat(actualResult).isInstanceOf(Result::class.java)
-        Assertions.assertThat(actualResult.isFailure).isTrue
-        Assertions.assertThat(actualResult.exceptionOrNull()).isNotNull
-        Assertions.assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(PinRequirementNotFulfilledException::class.java)
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(PinRequirementNotFulfilledException::class.java)
     }
 
     @Test
-    fun pinRequirement_validateFulfilledRequirement_SucceedsWithNoException() {
+    fun pinRequirement_validateFulfilledRequirement_ReturnsSuccess() {
         // Arrange
         val expectedPin = "1234"
         pinRequirement.fulfill(expectedPin)

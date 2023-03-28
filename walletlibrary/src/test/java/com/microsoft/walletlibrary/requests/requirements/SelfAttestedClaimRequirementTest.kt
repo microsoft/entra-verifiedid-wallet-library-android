@@ -34,7 +34,7 @@ class SelfAttestedClaimRequirementTest {
     }
 
     @Test
-    fun selfAttestedRequirement_validateUnFulfilledRequirement_ThrowsException() {
+    fun selfAttestedRequirement_validateUnFulfilledRequirement_ReturnsFailure() {
         // Act and Assert
         val actualResult = selfAttestedClaimRequirement.validate()
 
@@ -44,7 +44,7 @@ class SelfAttestedClaimRequirementTest {
     }
 
     @Test
-    fun selfAttestedRequirement_validateFulfilledRequirement_SucceedsWithNoException() {
+    fun selfAttestedRequirement_validateFulfilledRequirement_ReturnsSuccess() {
         // Arrange
         val expectedClaimValue = "Test"
         selfAttestedClaimRequirement.fulfill(expectedClaimValue)

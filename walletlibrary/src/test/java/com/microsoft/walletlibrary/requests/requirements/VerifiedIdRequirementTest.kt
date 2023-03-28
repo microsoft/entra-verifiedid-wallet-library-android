@@ -43,7 +43,7 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun fulfillVerifiedIdRequirement_ConstraintDoesNotMatchVerifiedId_ThrowsException() {
+    fun fulfillVerifiedIdRequirement_ConstraintDoesNotMatchVerifiedId_ReturnsFailure() {
         // Arrange
         val expectedVerifiedId: VerifiableCredential = mockk()
         every { expectedVerifiedId.types } returns listOf("WrongVcType")
@@ -60,7 +60,7 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun validateVerifiedIdRequirement_ConstraintDoesNotMatch_ThrowsException() {
+    fun validateVerifiedIdRequirement_ConstraintDoesNotMatch_ReturnsFailure() {
         // Arrange
         val expectedVerifiedId: VerifiableCredential = mockk()
         every { expectedVerifiedId.types } returns listOf("WrongVcType")
@@ -78,7 +78,7 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun validateVerifiedIdRequirement_UnFulfilledRequirement_ThrowsException() {
+    fun validateVerifiedIdRequirement_UnFulfilledRequirement_ReturnsFailure() {
         // Act
         val actualResult = verifiedIdRequirement.validate()
 
@@ -91,7 +91,7 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun validateVerifiedIdRequirement_ValidVerifiedId_SucceedsWithNoException() {
+    fun validateVerifiedIdRequirement_ValidVerifiedId_ReturnsSuccess() {
         // Arrange
         val expectedVerifiedId: VerifiableCredential = mockk()
         every { expectedVerifiedId.types } returns listOf(expectedVcType)
