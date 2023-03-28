@@ -40,8 +40,7 @@ class SelfAttestedClaimRequirementTest {
 
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
-        assertThat(actualResult.exceptionOrNull()).isInstanceOf(
-            SelfAttestedClaimRequirementNotFulfilledException::class.java)
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(SelfAttestedClaimRequirementNotFulfilledException::class.java)
     }
 
     @Test
@@ -51,9 +50,11 @@ class SelfAttestedClaimRequirementTest {
         selfAttestedClaimRequirement.fulfill(expectedClaimValue)
 
         // Act
-        selfAttestedClaimRequirement.validate()
+        val actualResult = selfAttestedClaimRequirement.validate()
 
         // Assert
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isSuccess).isTrue
         assertThat(selfAttestedClaimRequirement.value).isNotNull
         assertThat(selfAttestedClaimRequirement.value).isEqualTo(expectedClaimValue)
     }

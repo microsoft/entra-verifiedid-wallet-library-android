@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.util.PinRequirementNotFulfilledException
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class PinRequirementTest {
@@ -28,16 +29,21 @@ class PinRequirementTest {
         pinRequirement.fulfill(expectedPin)
 
         // Assert
-        Assertions.assertThat(pinRequirement.pin).isNotNull
-        Assertions.assertThat(pinRequirement.pin).isEqualTo(expectedPin)
+        assertThat(pinRequirement.pin).isNotNull
+        assertThat(pinRequirement.pin).isEqualTo(expectedPin)
     }
 
     @Test
     fun pinRequirement_validateUnFulfilledRequirement_ThrowsException() {
-        // Act and Assert
-        Assertions.assertThatThrownBy {
-            pinRequirement.validate()
-        }.isInstanceOf(PinRequirementNotFulfilledException::class.java)
+        // Act
+        val actualResult = pinRequirement.validate()
+
+        // Assert
+        Assertions.assertThat(actualResult).isInstanceOf(Result::class.java)
+        Assertions.assertThat(actualResult.isFailure).isTrue
+        Assertions.assertThat(actualResult.exceptionOrNull()).isNotNull
+        Assertions.assertThat(actualResult.exceptionOrNull())
+            .isInstanceOf(PinRequirementNotFulfilledException::class.java)
     }
 
     @Test
@@ -47,10 +53,12 @@ class PinRequirementTest {
         pinRequirement.fulfill(expectedPin)
 
         // Act
-        pinRequirement.validate()
+        val actualResult = pinRequirement.validate()
 
         // Assert
-        Assertions.assertThat(pinRequirement.pin).isNotNull
-        Assertions.assertThat(pinRequirement.pin).isEqualTo(expectedPin)
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isSuccess).isTrue
+        assertThat(pinRequirement.pin).isNotNull
+        assertThat(pinRequirement.pin).isEqualTo(expectedPin)
     }
 }

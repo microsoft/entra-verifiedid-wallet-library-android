@@ -27,10 +27,10 @@ class VerifiedIdClient(
 
     // Creates an issuance or presentation request based on the provided input.
     suspend fun createRequest(verifiedIdRequestInput: VerifiedIdRequestInput): Result<VerifiedIdRequest<*>> {
-        val requestResolver = requestResolverFactory.getResolver(verifiedIdRequestInput)
-        val rawRequest = requestResolver.resolve(verifiedIdRequestInput)
-        val requestHandler = requestHandlerFactory.getHandler(requestResolver)
         return try {
+            val requestResolver = requestResolverFactory.getResolver(verifiedIdRequestInput)
+            val rawRequest = requestResolver.resolve(verifiedIdRequestInput)
+            val requestHandler = requestHandlerFactory.getHandler(requestResolver)
             Result.success(requestHandler.handleRequest(rawRequest))
         } catch (exception: Exception) {
             Result.failure(exception)

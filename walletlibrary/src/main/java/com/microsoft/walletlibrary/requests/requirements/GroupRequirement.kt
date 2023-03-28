@@ -5,7 +5,7 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
-import com.microsoft.walletlibrary.util.AggregateException
+import com.microsoft.walletlibrary.util.RequirementValidationException
 
 enum class GroupRequirementOperator {
     ANY,
@@ -23,19 +23,11 @@ class GroupRequirement(
 
     override fun validate(): Result<Unit> {
         //TODO("Not fully implemented yet")
-        val aggregateException = AggregateException()
         for (requirement in requirements) {
             val validationResult = requirement.validate()
-            if (validationResult.isFailure) {
-                validationResult.exceptionOrNull()
-                    ?.let { aggregateException.exceptionsList.add(it) }
-            }
+            if (validationResult.isFailure)
+                return Result.failure(RequirementValidationException("Validation failed for ${requirement::class.simpleName}"))
         }
-        return if (aggregateException.exceptionsList.isEmpty())
-            Result.success(Unit)
-        else if (aggregateException.exceptionsList.size == 1)
-            Result.failure(aggregateException.exceptionsList.first())
-        else
-            Result.failure(aggregateException)
+        return Result.success(Unit)
     }
 }

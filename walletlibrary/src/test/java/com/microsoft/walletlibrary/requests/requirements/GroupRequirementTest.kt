@@ -1,7 +1,7 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.util.RequirementValidationException
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class GroupRequirementTest {
@@ -41,10 +41,14 @@ class GroupRequirementTest {
 
     @Test
     fun groupRequirement_validateUnFulfilledRequirement_ThrowsException() {
-        // Act and Assert
-        Assertions.assertThatThrownBy {
-            groupRequirement.validate()
-        }.isInstanceOf(RequirementValidationException::class.java)
+        // Act
+        val actualResult = groupRequirement.validate()
+
+        // Assert
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(RequirementValidationException::class.java)
     }
 
     @Test
@@ -56,13 +60,15 @@ class GroupRequirementTest {
         idTokenRequirement.fulfill(expectedIdToken)
 
         // Act
-        groupRequirement.validate()
+        val actualResult = groupRequirement.validate()
 
         // Assert
-        Assertions.assertThat(groupRequirement.requirements.size).isEqualTo(2)
-        Assertions.assertThat((groupRequirement.requirements.first() as SelfAttestedClaimRequirement).value)
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isSuccess).isTrue
+        assertThat(groupRequirement.requirements.size).isEqualTo(2)
+        assertThat((groupRequirement.requirements.first() as SelfAttestedClaimRequirement).value)
             .isEqualTo(expectedClaimValue)
-        Assertions.assertThat((groupRequirement.requirements.last() as IdTokenRequirement).idToken)
+        assertThat((groupRequirement.requirements.last() as IdTokenRequirement).idToken)
             .isEqualTo(expectedIdToken)
     }
 
@@ -72,9 +78,13 @@ class GroupRequirementTest {
         val expectedClaimValue = "Test"
         selfAttestedClaimRequirement.fulfill(expectedClaimValue)
 
-        // Act and Assert
-        Assertions.assertThatThrownBy {
-            groupRequirement.validate()
-        }.isInstanceOf(RequirementValidationException::class.java)
+        // Act
+        val actualResult = groupRequirement.validate()
+
+        // Assert
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(RequirementValidationException::class.java)
     }
 }

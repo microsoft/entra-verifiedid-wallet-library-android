@@ -47,11 +47,12 @@ class VerifiedIdRequirement(
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(selectedVerifiedId: VerifiedId) {
-        if (constraint.doesMatch(selectedVerifiedId))
+    fun fulfill(selectedVerifiedId: VerifiedId): Result<Unit> {
+        return if (constraint.doesMatch(selectedVerifiedId)) {
             verifiedId = selectedVerifiedId
-        else
-            throw VerifiedIdRequirementDoesNotMatchConstraintsException("Provided VerifiedId does not match the constraints")
+            Result.success(Unit)
+        } else
+            Result.failure(VerifiedIdRequirementDoesNotMatchConstraintsException("Provided VerifiedId does not match the constraints"))
     }
 
     // Retrieves list of Verified IDs from the provided list that matches this requirement.

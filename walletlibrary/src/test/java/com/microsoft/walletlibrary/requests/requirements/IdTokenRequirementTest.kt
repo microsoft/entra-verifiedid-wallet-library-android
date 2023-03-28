@@ -1,7 +1,7 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.util.IdTokenRequirementNotFulfilledException
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class IdTokenRequirementTest {
@@ -36,16 +36,21 @@ class IdTokenRequirementTest {
         idTokenRequirement.fulfill(expectedIdToken)
 
         // Assert
-        Assertions.assertThat(idTokenRequirement.idToken).isNotNull
-        Assertions.assertThat(idTokenRequirement.idToken).isEqualTo(expectedIdToken)
+        assertThat(idTokenRequirement.idToken).isNotNull
+        assertThat(idTokenRequirement.idToken).isEqualTo(expectedIdToken)
     }
 
     @Test
     fun idTokenRequirement_validateUnFulfilledRequirement_ThrowsException() {
-        // Act and Assert
-        Assertions.assertThatThrownBy {
-            idTokenRequirement.validate()
-        }.isInstanceOf(IdTokenRequirementNotFulfilledException::class.java)
+        // Act
+        val actualResult = idTokenRequirement.validate()
+
+        // Assert
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull())
+            .isInstanceOf(IdTokenRequirementNotFulfilledException::class.java)
     }
 
     @Test
@@ -55,10 +60,12 @@ class IdTokenRequirementTest {
         idTokenRequirement.fulfill(expectedIdToken)
 
         // Act
-        idTokenRequirement.validate()
+        val actualResult = idTokenRequirement.validate()
 
         // Assert
-        Assertions.assertThat(idTokenRequirement.idToken).isNotNull
-        Assertions.assertThat(idTokenRequirement.idToken).isEqualTo(expectedIdToken)
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isSuccess).isTrue
+        assertThat(idTokenRequirement.idToken).isNotNull
+        assertThat(idTokenRequirement.idToken).isEqualTo(expectedIdToken)
     }
 }

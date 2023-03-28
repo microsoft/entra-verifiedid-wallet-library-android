@@ -7,8 +7,6 @@ package com.microsoft.walletlibrary.util
 
 open class WalletLibraryException(message: String? = null, cause: Throwable? = null, val retryable: Boolean = false): Exception(message, cause)
 
-class AggregateException: Exception() { val exceptionsList: MutableList<Throwable> = mutableListOf() }
-
 class HandlerMissingException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
 
 class UnSupportedResolverException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
