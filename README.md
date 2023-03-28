@@ -1,15 +1,17 @@
 # Microsoft Entra Wallet Library
 
 ## Introduction
-The Microsoft Entra Wallet Library for iOS gives your app the ability to begin using the Microsoft Entra Verified Id platform by supporting the issuance and presentation of Verified Ids in accordance with OpenID Connect, Presentation Exchange, Verifiable Credentials, and more up and coming industry standards.
+The Microsoft Entra Wallet Library for Android gives your app the ability to begin using the Microsoft Entra Verified Id platform by supporting the issuance and presentation of Verified Ids in accordance with OpenID Connect, Presentation Exchange, Verifiable Credentials, and more up and coming industry standards.
 
 ---
 ## Installation
 
 Add to your app's build.gradle to add Wallet Library as a dependency:
+```kotlin
 dependencies {
     implementation 'com.microsoft.entra.verifiedid:walletlibrary:0.0.1'
 }
+```
 
 ## Quick Start
 Here is a simple example of how to use the library. For more in-depth examples, check out the sample app.
@@ -92,7 +94,7 @@ val verifiedId = verifiedIdClient.decodeVerifiedId(encodedVerifiedIdString)
 
 ## Documentation
 
-* [External Architecture](Docs/LibraryArchitecture.md)
+* [External Architecture](https://github.com/microsoft/entra-verifiedid-wallet-library-ios/blob/dev/Docs/LibraryArchitecture.md)
 * [Microsoft Docs](https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/)
 
 ## Contributing
