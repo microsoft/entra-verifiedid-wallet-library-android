@@ -11,7 +11,7 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 /**
  * A Constraint that determines if a Verifiable Credential's type matches the requested value.
  */
-class VcTypeConstraint(private val vcType: String): VerifiedIdConstraint {
+class VcTypeConstraint(internal val vcType: String): VerifiedIdConstraint {
 
     override fun doesMatch(verifiedId: VerifiedId): Boolean {
         if (verifiedId !is VerifiableCredential)

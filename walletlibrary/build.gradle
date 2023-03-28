@@ -1,7 +1,11 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id "org.jetbrains.kotlin.plugin.serialization" version "$kotlin_version"
 }
+
+apply plugin: 'kotlin-kapt'
+apply plugin: 'maven-publish'
 
 repositories {
     google()
@@ -28,6 +32,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        pickFirst("META-INF/*.kotlin_module")
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -35,18 +42,153 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    lintOptions {
+        abortOnError false
+        warningsAsErrors false
+        textReport true
+        textOutput "stdout"
+        explainIssues true
+        showAll true
+    }
+
+    flavorDimensions "main"
+    productFlavors {
+        local {
+            dimension "main"
+        }
+        dist {
+            dimension "main"
+        }
+    }
 }
 
 dependencies {
+    localImplementation project(":VerifiableCredential-SDK")
     implementation "androidx.core:core-ktx:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0"
-    implementation project(':VerifiableCredential-SDK')
-    testImplementation "junit:junit:$junit_version"
-    testImplementation "org.assertj:assertj-core:$assertj_test_version"
-    testImplementation "io.mockk:mockk:$mockk_version"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1"
-    androidTestImplementation "androidx.test.ext:junit:$androidx_test_junit_version"
+    implementation "com.google.dagger:dagger:$dagger_version"
+    kapt "com.google.dagger:dagger-compiler:$dagger_version"
+
+    implementation "com.squareup.retrofit2:retrofit:$retrofit2_version"
+    implementation "com.squareup.retrofit2:converter-scalars:$retrofit2_version"
+    implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
+
+    implementation "androidx.room:room-runtime:$androidx_room_persistence_version"
+    implementation "androidx.room:room-ktx:$androidx_room_persistence_version"
+    kapt "androidx.room:room-compiler:$androidx_room_persistence_version"
+
+    implementation "com.squareup.okhttp3:okhttp:$com_squareup_okhttp3_okhttp_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$com_squareup_okhttp3_okhttp_version"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlin_serialization_version"
+
+    // KTX
+    implementation "androidx.collection:collection-ktx:$collections_ktx_version"
+    implementation "androidx.core:core-ktx:$core_ktx_version"
+
+    //other
+    implementation "androidx.preference:preference-ktx:$androidx_preference_version"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation "com.squareup.picasso:picasso:$picasso_version"
+
+    //noinspection GradleDependency
+    implementation "androidx.security:security-crypto:1.0.0-rc03"
+
+    api 'com.google.guava:guava:28.1-android'
+    // JWE/JWS
+    implementation "com.nimbusds:nimbus-jose-jwt:$nimbus_jose_jwt_version"
+    //Used for Json Canonicalization performed for ION
+    implementation "io.github.erdtman:java-json-canonicalization:1.1"
+    implementation "com.github.microsoft:CorrelationVector-Java:$correlation_vector_version"
+
+    // test dependencies
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidx_test_espresso_core_version"
+    androidTestImplementation "androidx.test.ext:junit:$androidx_test_junit_version"
+    androidTestImplementation "androidx.test:runner:$androidx_test_runner_version"
     androidTestImplementation "org.assertj:assertj-core:$assertj_test_version"
-    androidTestImplementation "io.mockk:mockk:$mockk_version"
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    androidTestImplementation "io.mockk:mockk-android:$mockk_version"
+
+    testImplementation project(":VerifiableCredential-SDK")
+    testImplementation "androidx.room:room-testing:$androidx_room_persistence_version"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    testImplementation "io.mockk:mockk:$mockk_version"
+    testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.21'
+    testImplementation "org.assertj:assertj-core:$assertj_test_version"
+    testImplementation "junit:junit:$junit_version"
+}
+
+task updateSubmodule(type: Exec) {
+    commandLine "git", "submodule", "update", "--init", "--recursive"
+    ignoreExitValue true
+}
+
+tasks.register('copySubmoduleSource', Copy) {
+    from "submodules/VerifiableCredential-SDK-Android/sdk/src/main/java"
+    into "src/main/java"
+}
+
+tasks.register('copySubmoduleAssets', Copy) {
+    from "submodules/VerifiableCredential-SDK-Android/sdk/src/main/assets"
+    into "src/main/assets"
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name.contains('DistRelease') || task.name.contains('DistDebug')) {
+        dependsOn updateSubmodule
+        dependsOn copySubmoduleAssets
+        dependsOn copySubmoduleSource
+        finalizedBy cleanSubmoduleFiles
+    }
+}
+
+task cleanSubmoduleFiles(type: Delete) {
+    delete "src/main/assets", "src/main/java/com/microsoft/did"
+}
+
+project.afterEvaluate {
+    publishing {
+        repositories {
+            maven {
+                name = "local"
+                url rootProject.buildDir.path + '/artifacts'
+            }
+        }
+        tasks.withType(PublishToMavenRepository) {
+            onlyIf {
+                (repository == publishing.repositories.local)
+            }
+        }
+        publications {
+            distRelease(MavenPublication) {
+                from components.distRelease
+                groupId = 'com.microsoft.entra.verifiedid'
+                artifactId = 'walletlibrary'
+                version = "0.0.1-alpha.0"
+                pom {
+                    name = 'walletlibrary'
+                    description = 'Entra VerifiedID WalletLibrary Android'
+                    url = 'https://github.com/microsoft/entra-verifiedid-wallet-library-android'
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'https://github.com/microsoft/entra-verifiedid-wallet-library-android/blob/dev/LICENSE'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'microsoft'
+                            name = 'Microsoft'
+                        }
+                    }
+                    scm {
+                        url = 'https://github.com/microsoft/entra-verifiedid-wallet-library-android/tree/dev'
+                    }
+                }
+            }
+        }
+    }
 }

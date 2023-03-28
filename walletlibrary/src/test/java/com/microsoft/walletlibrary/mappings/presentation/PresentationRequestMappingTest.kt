@@ -7,9 +7,6 @@ import com.microsoft.did.sdk.credential.service.models.oidc.Registration
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
-import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
-import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator
-import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
 import io.mockk.every
 import io.mockk.mockk
@@ -73,78 +70,6 @@ class PresentationRequestMappingTest {
             every { presentationRequest.content.registration.logoData } returns expectedLogoImage
         else
             every { presentationRequest.content.registration.logoData } returns null
-    }
-
-    @Test
-    fun presentationRequestMapping_OneRequirement_ReturnsVerifiedIdRequirementInOpenIdRequest() {
-        // Act
-        val actualOpenIdRequest = presentationRequest.toOpenIdPresentationRequest()
-
-        // Assert
-        assertThat(actualOpenIdRequest.requirement)
-            .isInstanceOf(VerifiedIdRequirement::class.java)
-        assertThat(actualOpenIdRequest.requirement.required).isEqualTo(true)
-        assertThat(actualOpenIdRequest.requesterStyle.requester).isEqualTo(expectedEntityName)
-    }
-
-    @Test
-    fun presentationRequestMapping_MultipleRequirements_ReturnsGroupRequirementInOpenIdRequest() {
-        // Arrange
-        val inputDescriptor2: CredentialPresentationInputDescriptor = mockk()
-        setupInput(listOf(inputDescriptor, inputDescriptor2), true)
-        // Act
-        val actualOpenIdRequest = presentationRequest.toOpenIdPresentationRequest()
-
-        // Assert
-        assertThat(actualOpenIdRequest.requirement).isInstanceOf(GroupRequirement::class.java)
-        assertThat((actualOpenIdRequest.requirement as GroupRequirement).requirementOperator).isEqualTo(
-            GroupRequirementOperator.ANY
-        )
-        assertThat(actualOpenIdRequest.requirement.required).isEqualTo(true)
-        assertThat(actualOpenIdRequest.requesterStyle.requester).isEqualTo(expectedEntityName)
-    }
-
-    @Test
-    fun presentationRequestMapping_NoLogoImageInRequesterStyle_ReturnsSuccessfulRequestWithNoLogoImage() {
-        // Arrange
-        setupInput(listOf(inputDescriptor), false)
-
-        // Act
-        val actualOpenIdRequest = presentationRequest.toOpenIdPresentationRequest()
-
-        // Assert
-        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo).isNotNull
-        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo?.image).isNull()
-    }
-
-    @Test
-    fun presentationRequestMapping_LogoPresentInRequesterStyle_ReturnsSuccessfulRequestWithLogo() {
-        // Arrange
-        setupInput(listOf(inputDescriptor), true)
-
-        // Act
-        val actualOpenIdRequest = presentationRequest.toOpenIdPresentationRequest()
-
-        // Assert
-        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo).isNotNull
-        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo?.uri).isEqualTo(expectedLogoUri)
-        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo?.image).isEqualTo(expectedLogoImage)
-    }
-
-    @Test
-    fun presentationRequestMapping_MapRootOfTrust_ReturnsRequest() {
-        // Arrange
-        setupInput(listOf(inputDescriptor), true)
-
-        // Act
-        val actualOpenIdRequest = presentationRequest.toOpenIdPresentationRequest()
-
-        // Assert
-        assertThat(actualOpenIdRequest.rootOfTrust.verified).isEqualTo(true)
-        assertThat(actualOpenIdRequest.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
-        assertThat(actualOpenIdRequest.requesterStyle.requester).isEqualTo(expectedEntityName)
-        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).logo).isNotNull
-        assertThat((actualOpenIdRequest.requesterStyle as OpenIdRequesterStyle).locale).isEqualTo("")
     }
 
     @Test

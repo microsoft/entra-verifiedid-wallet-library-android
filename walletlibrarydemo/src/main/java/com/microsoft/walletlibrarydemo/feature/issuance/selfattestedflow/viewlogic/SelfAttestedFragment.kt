@@ -88,11 +88,9 @@ class SelfAttestedFragment : Fragment() {
         binding.completeIssuance.isEnabled = false
         val response = viewModel.verifiedIdResult
         response?.let {
-            if (response.isSuccess) {
-                val verifiedId = response.getOrDefault("")
-                binding.textview.text = verifiedId.toString()
-                configureViewsForVerifiedIdClaims(verifiedId as VerifiableCredential)
-            } else
+            if (response.isSuccess)
+                binding.textview.text = (response.getOrDefault("") as VerifiableCredential).getClaims().toString()
+            else
                 binding.textview.text = response.exceptionOrNull().toString()
         }
         binding.requirementsList.visibility = View.GONE

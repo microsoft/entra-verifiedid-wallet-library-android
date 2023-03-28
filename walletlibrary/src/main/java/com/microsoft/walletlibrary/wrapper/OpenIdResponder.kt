@@ -13,27 +13,25 @@ import com.microsoft.walletlibrary.mappings.presentation.addRequirements
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
 
-
 /**
  * Wrapper class to wrap the send presentation response to VC SDK.
  */
 object OpenIdResponder {
 
+    // sends the presentation response to VC SDK and returns nothing if successful.
     internal suspend fun sendPresentationResponse(
         presentationRequest: PresentationRequest,
         requirement: Requirement
     ) {
         val presentationResponse = PresentationResponse(presentationRequest)
         presentationResponse.addRequirements(requirement)
-        when (val presentationResponseResult =
-            VerifiableCredentialSdk.presentationService.sendResponse(presentationResponse)) {
-            is Result.Success -> {}
-            is Result.Failure -> {
-                throw OpenIdResponseCompletionException(
-                    "Unable to send presentation response",
-                    presentationResponseResult.payload
-                )
-            }
+        val presentationResponseResult =
+            VerifiableCredentialSdk.presentationService.sendResponse(presentationResponse)
+        if (presentationResponseResult is Result.Failure) {
+            throw OpenIdResponseCompletionException(
+                "Unable to send presentation response",
+                presentationResponseResult.payload
+            )
         }
     }
 }

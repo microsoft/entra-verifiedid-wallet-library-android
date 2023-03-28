@@ -19,6 +19,7 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
  * Wrapper class to wrap the completion of Issuance Request via VC SDK, map the received VerifiableCredential to VerifiedId and return it.
  */
 object VerifiedIdRequester {
+    // sends the issuance response to VC SDK and returns a VerifiedId if successful.
     internal suspend fun sendIssuanceResponse(
         issuanceRequest: IssuanceRequest,
         requirement: Requirement

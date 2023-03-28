@@ -25,7 +25,7 @@ object OpenIdResolver {
             is Result.Success -> {
                 val request = presentationRequestResult.payload
                 val requestType = getRequestType(request)
-                return VerifiedIdOpenIdJwtRawRequest(requestType, request)
+                return VerifiedIdOpenIdJwtRawRequest(request, requestType)
             }
             is Result.Failure -> {
                 throw VerifiedIdRequestFetchException(

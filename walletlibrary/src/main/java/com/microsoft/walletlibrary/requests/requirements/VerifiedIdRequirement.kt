@@ -41,7 +41,7 @@ class VerifiedIdRequirement(
     override fun validate() {
         if (verifiedId == null)
             throw VerifiedIdRequirementNotFulfilledException("VerifiedIdRequirement has not been fulfilled.")
-        if (verifiedId?.let { constraint.doesMatch(it) } == true)
+        if (verifiedId?.let { constraint.doesMatch(it) } != true)
             throw VerifiedIdRequirementDoesNotMatchConstraintsException("Provided VerifiedId does not match the constraints")
     }
 
