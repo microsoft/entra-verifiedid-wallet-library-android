@@ -8,6 +8,7 @@ package com.microsoft.walletlibrary.requests
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.util.PresentationRequestCancelIsNotSupported
 import com.microsoft.walletlibrary.util.WalletLibraryException
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
 
@@ -25,7 +26,7 @@ internal class OpenIdPresentationRequest(
     override val rootOfTrust: RootOfTrust,
 
     val request: OpenIdRawRequest
-) : VerifiedIdPresentationRequest {
+): VerifiedIdPresentationRequest {
     // Indicates whether presentation request is satisfied on client side.
     override fun isSatisfied(): Boolean {
         val validationResult = requirement.validate()
@@ -43,7 +44,7 @@ internal class OpenIdPresentationRequest(
         }
     }
 
-    override fun cancel(message: String?): Result<Void> {
-        TODO("Not yet implemented")
+    override suspend fun cancel(message: String?): Result<Unit> {
+        return Result.failure(PresentationRequestCancelIsNotSupported("Cancelling presentation request is not supported."))
     }
 }

@@ -23,7 +23,9 @@ class VerifiedIdResponseCompletionException(message: String = "", cause: Throwab
 
 class OpenIdResponseCompletionException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
 
-class UnSupportedProtocolException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
+class VerifiedIdIssuanceCompletionCallbackException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
+
+class UnSupportedProtocolException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
 class UnSupportedRequirementException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
 
@@ -36,6 +38,14 @@ class RequirementCastingException(message: String = "", cause: Throwable? = null
 class InputCastingException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
 
 class MissingRequirementException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
+
+class PresentationRequestCancelIsNotSupported(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
+
+open class ParameterMissingException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
+
+class MissingRequestStateException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): ParameterMissingException(message, cause, retryable)
+
+class MissingCallbackUrlException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): ParameterMissingException(message, cause, retryable)
 
 open class RequirementValidationException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
 
