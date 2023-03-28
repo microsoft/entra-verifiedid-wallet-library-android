@@ -24,8 +24,10 @@ import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRe
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
-import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
-import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
+import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
+import com.microsoft.walletlibrary.requests.styles.OpenIdVerifierStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.RequirementCastingException
 import com.microsoft.walletlibrary.util.UnSupportedProtocolException
 import io.mockk.*
@@ -42,7 +44,7 @@ class OpenIdRequestHandlerTest {
     private val expectedRequesterName = "Test"
     private val expectedRequirementClaimName = "name"
     private val presentationRequestContent: PresentationRequestContent = mockk()
-    private val requesterStyle = OpenIdRequesterStyle(expectedRequesterName, "")
+    private val requesterStyle = OpenIdVerifierStyle(expectedRequesterName, "")
     private val rootOfTrust = RootOfTrust(expectedRootOfTrustSource, true)
     private val selfAttestedClaimRequirement = SelfAttestedClaimRequirement(
         "",
@@ -51,7 +53,7 @@ class OpenIdRequestHandlerTest {
         required = false
     )
     private val verifiedIdRequirement: VerifiedIdRequirement = mockk()
-    private val verifiedIdStyle: VerifiedIDStyle = mockk()
+    private val verifiedIdStyle: VerifiedIdStyle = mockk()
 
     // Issuance request test variables
     private val mockIssuanceService: IssuanceService = mockk()
@@ -123,7 +125,7 @@ class OpenIdRequestHandlerTest {
     }
 
     private fun createMockRawRequest() {
-        class MockRawRequest(override val requestType: RequestType, override val rawRequest: Any):
+        class MockRawRequest(override val requestType: RequestType, override val rawRequest: Any) :
             RawRequest
         mockRawRequest = MockRawRequest(RequestType.ISSUANCE, openIdRequestHandler)
     }
@@ -174,12 +176,26 @@ class OpenIdRequestHandlerTest {
             expectedLogoImage,
             expectedLogoDescription
         ) else null
-        cardDescriptor = CardDescriptor(expectedCardTitle, expectedCardIssuer, expectedBackgroundColor, expectedTextColor, logo, expectedCardDescription)
+        cardDescriptor = CardDescriptor(
+            expectedCardTitle,
+            expectedCardIssuer,
+            expectedBackgroundColor,
+            expectedTextColor,
+            logo,
+            expectedCardDescription
+        )
         val claimDescriptor = ClaimDescriptor("type", "label")
         displayContract = if (emptyClaims)
             DisplayContract("", expectedLocale, "", cardDescriptor, consentDescriptor, emptyMap())
         else
-            DisplayContract("", expectedLocale, "", cardDescriptor, consentDescriptor, mutableMapOf("" to claimDescriptor))
+            DisplayContract(
+                "",
+                expectedLocale,
+                "",
+                cardDescriptor,
+                consentDescriptor,
+                mutableMapOf("" to claimDescriptor)
+            )
         verifiableCredentialContract =
             VerifiableCredentialContract("", inputContract, displayContract)
         every { manifestIssuanceRequest.request } returns rawManifest
@@ -253,7 +269,8 @@ class OpenIdRequestHandlerTest {
 
         // Assert
         assertThat(request).isInstanceOf(ManifestIssuanceRequest::class.java)
-        assertThat(request.requesterStyle).isEqualTo(requesterStyle)
+        assertThat(request.requesterStyle).isInstanceOf(VerifiedIdManifestIssuerStyle::class.java)
+        assertThat(request.requesterStyle.requester).isEqualTo(expectedRequesterName)
         assertThat(request.rootOfTrust).isEqualTo(rootOfTrust)
         assertThat(request.requirement).isInstanceOf(SelfAttestedClaimRequirement::class.java)
         assertThat((request.requirement as SelfAttestedClaimRequirement).claim).isEqualTo(
@@ -292,7 +309,10 @@ class OpenIdRequestHandlerTest {
             runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
 
         // Assert
-        assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle.logo).isNotNull
+        assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle).isInstanceOf(
+            BasicVerifiedIdStyle::class.java
+        )
+        assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).logo).isNotNull
         assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.uri).isEqualTo(expectedLogoUri)
         assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.image).isEqualTo(expectedLogoImage)
         assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.description).isEqualTo(
@@ -315,7 +335,10 @@ class OpenIdRequestHandlerTest {
             runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
 
         // Assert
-        assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle.logo).isNull()
+        assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle).isInstanceOf(
+            BasicVerifiedIdStyle::class.java
+        )
+        assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).logo).isNull()
     }
 
     @Test
@@ -333,20 +356,19 @@ class OpenIdRequestHandlerTest {
             runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
 
         // Assert
-        assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle.locale).isEqualTo(
-            expectedLocale
+        assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle).isInstanceOf(
+            BasicVerifiedIdStyle::class.java
         )
-        assertThat(actualOpenIdRequest.verifiedIdStyle.backgroundColor).isEqualTo(
+        assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).backgroundColor).isEqualTo(
             expectedBackgroundColor
         )
         assertThat(actualOpenIdRequest.verifiedIdStyle.textColor).isEqualTo(expectedTextColor)
-        assertThat(actualOpenIdRequest.verifiedIdStyle.title).isEqualTo(expectedCardTitle)
+        assertThat(actualOpenIdRequest.verifiedIdStyle.name).isEqualTo(expectedCardTitle)
         assertThat(actualOpenIdRequest.verifiedIdStyle.description).isEqualTo(
             expectedCardDescription
         )
         assertThat(actualOpenIdRequest.verifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
         assertThat(actualOpenIdRequest.verifiedIdStyle.logo).isNull()
-        assertThat(actualOpenIdRequest.verifiedIdStyle.claimAttributes.size).isEqualTo(1)
     }
 
     @Test
@@ -364,19 +386,17 @@ class OpenIdRequestHandlerTest {
             runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
 
         // Assert
-        assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle.locale).isEqualTo(
-            expectedLocale
-        )
-        assertThat(actualOpenIdRequest.verifiedIdStyle.backgroundColor).isEqualTo(
+        assertThat(((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle as BasicVerifiedIdStyle).backgroundColor).isEqualTo(
             expectedBackgroundColor
         )
-        assertThat(actualOpenIdRequest.verifiedIdStyle.textColor).isEqualTo(expectedTextColor)
-        assertThat(actualOpenIdRequest.verifiedIdStyle.title).isEqualTo(expectedCardTitle)
+        assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).textColor).isEqualTo(
+            expectedTextColor
+        )
+        assertThat(actualOpenIdRequest.verifiedIdStyle.name).isEqualTo(expectedCardTitle)
         assertThat(actualOpenIdRequest.verifiedIdStyle.description).isEqualTo(
             expectedCardDescription
         )
         assertThat(actualOpenIdRequest.verifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
         assertThat(actualOpenIdRequest.verifiedIdStyle.logo).isNull()
-        assertThat(actualOpenIdRequest.verifiedIdStyle.claimAttributes.size).isEqualTo(0)
     }
 }

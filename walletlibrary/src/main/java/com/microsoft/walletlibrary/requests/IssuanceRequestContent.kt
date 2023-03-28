@@ -10,7 +10,7 @@ import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperato
 import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
-import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.Constants.IDTOKENHINT_CONFIGURATION
 
 /**
@@ -27,7 +27,7 @@ internal class IssuanceRequestContent(
     // Root of trust of the requester (eg. linked domains).
     internal val rootOfTrust: RootOfTrust,
 
-    internal val verifiedIDStyle: VerifiedIDStyle
+    internal val verifiedIDStyle: VerifiedIdStyle
 ) {
     internal fun addRequirementsForIdTokenHint(idToken: InjectedIdToken) {
         when (requirement) {
@@ -53,13 +53,12 @@ internal class IssuanceRequestContent(
         if (requirement is GroupRequirement) {
             val requirementsInGroup = (requirement as GroupRequirement).requirements
             for (requirementInGroup in requirementsInGroup) {
-                if (requirementInGroup is IdTokenRequirement) {
-                    if (requirementInGroup.configuration == IDTOKENHINT_CONFIGURATION)
-                        fulfillIdTokenRequirement(
-                            requirementInGroup,
-                            idToken,
-                            requirement as GroupRequirement
-                        )
+                if ((requirementInGroup is IdTokenRequirement) && (requirementInGroup.configuration == IDTOKENHINT_CONFIGURATION)) {
+                    fulfillIdTokenRequirement(
+                        requirementInGroup,
+                        idToken,
+                        requirement as GroupRequirement
+                    )
                 }
             }
         }

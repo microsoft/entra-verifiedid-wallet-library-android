@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.credential.service.models.contracts.display.Display
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.requests.IssuanceRequestContent
 import com.microsoft.walletlibrary.requests.requirements.*
-import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -224,8 +224,13 @@ class RawManifestTest {
         // Assert
         assertThat(verifiedIdRequestContent.rootOfTrust.verified).isEqualTo(true)
         assertThat(verifiedIdRequestContent.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
-        assertThat(verifiedIdRequestContent.requesterStyle.requester).isEqualTo(expectedIssuerInCard)
-        assertThat((verifiedIdRequestContent.requesterStyle as OpenIdRequesterStyle).logo).isNull()
+        assertThat(verifiedIdRequestContent.requesterStyle).isInstanceOf(
+            VerifiedIdManifestIssuerStyle::class.java
+        )
+        assertThat((verifiedIdRequestContent.requesterStyle as VerifiedIdManifestIssuerStyle).requester).isEqualTo(
+            expectedIssuerInCard
+        )
+        assertThat((verifiedIdRequestContent.requesterStyle).logo).isNull()
         assertThat(verifiedIdRequestContent.requesterStyle.locale).isEqualTo("")
     }
 }

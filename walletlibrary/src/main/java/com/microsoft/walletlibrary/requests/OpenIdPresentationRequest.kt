@@ -9,7 +9,6 @@ import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.util.PresentationRequestCancelIsNotSupported
-import com.microsoft.walletlibrary.util.RequirementValidationException
 import com.microsoft.walletlibrary.util.WalletLibraryException
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
 
@@ -30,13 +29,9 @@ internal class OpenIdPresentationRequest(
 ): VerifiedIdPresentationRequest {
     // Indicates whether presentation request is satisfied on client side.
     override fun isSatisfied(): Boolean {
-        try {
-            requirement.validate()
-        } catch (exception: RequirementValidationException) {
-            //TODO("log exception message")
-            return false
-        }
-        return true
+        val validationResult = requirement.validate()
+        //TODO("Add logging")
+        return !validationResult.isFailure
     }
 
     // Completes the presentation request and returns Result with success status if successful.

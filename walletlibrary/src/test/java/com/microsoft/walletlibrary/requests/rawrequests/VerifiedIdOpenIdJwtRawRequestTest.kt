@@ -8,7 +8,7 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Cred
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
-import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
+import com.microsoft.walletlibrary.requests.styles.OpenIdVerifierStyle
 import com.microsoft.walletlibrary.util.MissingCallbackUrlException
 import com.microsoft.walletlibrary.util.MissingRequestStateException
 import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
@@ -111,8 +111,8 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         // Assert
         assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
         assertThat(actualResult.requesterStyle.requester).isEqualTo(expectedEntityName)
-        assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdRequesterStyle::class.java)
-        assertThat((actualResult.requesterStyle as OpenIdRequesterStyle).logo).isNotNull
+        assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
+        assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).logo).isNotNull
         assertThat(actualResult.requesterStyle.logo?.uri).isEqualTo(expectedLogoUri)
         assertThat(actualResult.requesterStyle.logo?.image).isEqualTo(expectedLogoImage)
         assertThat(actualResult.requirement).isInstanceOf(VerifiedIdRequirement::class.java)
@@ -133,8 +133,8 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         // Assert
         assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
         assertThat(actualResult.requesterStyle.requester).isEqualTo(expectedEntityName)
-        assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdRequesterStyle::class.java)
-        assertThat((actualResult.requesterStyle as OpenIdRequesterStyle).logo).isNotNull
+        assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
+        assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).logo).isNotNull
         assertThat(actualResult.requesterStyle.logo?.uri).isEqualTo("")
         assertThat(actualResult.requesterStyle.logo?.image).isNull()
         assertThat(actualResult.requirement).isInstanceOf(VerifiedIdRequirement::class.java)
@@ -192,8 +192,8 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         // Assert
         assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
         assertThat(actualResult.requesterStyle.requester).isEqualTo(expectedEntityName)
-        assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdRequesterStyle::class.java)
-        assertThat((actualResult.requesterStyle as OpenIdRequesterStyle).logo).isNotNull
+        assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
+        assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).logo).isNotNull
         assertThat(actualResult.requesterStyle.logo?.uri).isEqualTo("")
         assertThat(actualResult.requesterStyle.logo?.image).isNull()
         assertThat(actualResult.requirement).isInstanceOf(VerifiedIdRequirement::class.java)

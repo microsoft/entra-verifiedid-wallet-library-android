@@ -9,8 +9,7 @@ import com.microsoft.did.sdk.credential.service.models.issuancecallback.Issuance
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
-import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
-import com.microsoft.walletlibrary.util.RequirementValidationException
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.WalletLibraryException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
@@ -29,7 +28,7 @@ internal class ManifestIssuanceRequest(
     override val rootOfTrust: RootOfTrust,
 
     // Attributes describing the Verified ID (eg. name, issuer, logo, background and text colors).
-    val verifiedIdStyle: VerifiedIDStyle,
+    val verifiedIdStyle: VerifiedIdStyle,
 
     val request: RawManifest,
 
@@ -55,13 +54,9 @@ internal class ManifestIssuanceRequest(
 
     // Indicates whether issuance request is satisfied on client side.
     override fun isSatisfied(): Boolean {
-        try {
-            requirement.validate()
-        } catch (exception: RequirementValidationException) {
-            //TODO("log exception message")
-            return false
-        }
-        return true
+        val validationResult = requirement.validate()
+        //TODO("Add logging")
+        return !validationResult.isFailure
     }
 
     override suspend fun cancel(message: String?): Result<Unit> {

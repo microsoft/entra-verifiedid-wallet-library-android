@@ -6,9 +6,15 @@
 package com.microsoft.walletlibrary.requests.styles
 
 /**
- * Holds information describing look and feel of a Verified Id.
+ * Holds information describing look and feel of a requester.
  */
-open class VerifiedIdStyle(
-    // The name of the Verified Id.
-    open val name: String
-)
+data class VerifiedIdManifestIssuerStyle(
+    // Name of the requester.
+    override val requester: String,
+
+    // Locale of the requester.
+    val locale: String,
+
+    // Logo of the requester. If a url is present in contract, it is fetched to this.
+    val logo: Logo? = null
+): RequesterStyle

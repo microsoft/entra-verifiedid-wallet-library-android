@@ -5,6 +5,8 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.walletlibrary.util.RequirementValidationException
+
 enum class GroupRequirementOperator {
     ANY,
     ALL
@@ -19,10 +21,13 @@ class GroupRequirement(
     val requirementOperator: GroupRequirementOperator
 ): Requirement {
 
-    override fun validate() {
+    override fun validate(): Result<Unit> {
         //TODO("Not fully implemented yet")
         for (requirement in requirements) {
-            requirement.validate()
+            val validationResult = requirement.validate()
+            if (validationResult.isFailure)
+                return Result.failure(RequirementValidationException("Validation failed for ${requirement::class.simpleName}"))
         }
+        return Result.success(Unit)
     }
 }

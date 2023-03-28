@@ -1,6 +1,7 @@
 package com.microsoft.walletlibrary.mappings.issuance
 
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -26,6 +27,7 @@ class IssuanceRequestMappingTest {
 
         // Assert
         assertThat(actualRequesterStyle.requester).isEqualTo(expectedEntityName)
-        assertThat(actualRequesterStyle.logo).isNull()
+        assertThat(actualRequesterStyle).isInstanceOf(VerifiedIdManifestIssuerStyle::class.java)
+        assertThat((actualRequesterStyle as VerifiedIdManifestIssuerStyle).logo).isNull()
     }
 }
