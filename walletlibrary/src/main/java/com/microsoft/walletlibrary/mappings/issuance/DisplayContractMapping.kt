@@ -6,18 +6,17 @@
 package com.microsoft.walletlibrary.mappings.issuance
 
 import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
-import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
+import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 
-internal fun DisplayContract.toVerifiedIdStyle(): VerifiedIDStyle {
+internal fun DisplayContract.toVerifiedIdStyle(): VerifiedIdStyle {
     val cardDescriptor = this.card
-    return VerifiedIDStyle(
-        this.locale,
+    return BasicVerifiedIdStyle(
         cardDescriptor.title,
         cardDescriptor.issuedBy,
         cardDescriptor.backgroundColor,
         cardDescriptor.textColor,
         cardDescriptor.description,
-        this.claims.mapValues { it.value.toClaimAttributes() },
         cardDescriptor.logo?.toLogo()
     )
 }

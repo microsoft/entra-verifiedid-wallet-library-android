@@ -8,7 +8,7 @@ package com.microsoft.walletlibrary.requests
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
-import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.WalletLibraryException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
@@ -27,7 +27,7 @@ internal class ManifestIssuanceRequest(
     override val rootOfTrust: RootOfTrust,
 
     // Attributes describing the Verified ID (eg. name, issuer, logo, background and text colors).
-    val verifiedIdStyle: VerifiedIDStyle,
+    val verifiedIdStyle: VerifiedIdStyle,
 
     val request: RawManifest
 ): VerifiedIdIssuanceRequest {

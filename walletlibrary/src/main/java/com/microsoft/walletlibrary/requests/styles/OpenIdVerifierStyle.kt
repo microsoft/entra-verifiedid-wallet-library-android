@@ -8,7 +8,7 @@ package com.microsoft.walletlibrary.requests.styles
 /**
  * Holds information describing look and feel of a requester.
  */
-data class OpenIdRequesterStyle(
+data class OpenIdVerifierStyle(
     // Name of the requester.
     override val requester: String,
 

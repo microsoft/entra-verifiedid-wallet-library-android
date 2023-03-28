@@ -1,6 +1,7 @@
 package com.microsoft.walletlibrary.mappings.issuance
 
 import com.microsoft.did.sdk.credential.service.models.contracts.display.*
+import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -76,13 +77,12 @@ class DisplayContractMappingTest {
         val actualVerifiedIdStyle = displayContract.toVerifiedIdStyle()
 
         // Assert
-        assertThat(actualVerifiedIdStyle.title).isEqualTo(expectedCardTitle)
-        assertThat(actualVerifiedIdStyle.locale).isEqualTo(expectedLocale)
+        assertThat(actualVerifiedIdStyle).isInstanceOf(BasicVerifiedIdStyle::class.java)
+        assertThat((actualVerifiedIdStyle as BasicVerifiedIdStyle).name).isEqualTo(expectedCardTitle)
         assertThat(actualVerifiedIdStyle.description).isEqualTo(expectedCardDescription)
         assertThat(actualVerifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
         assertThat(actualVerifiedIdStyle.backgroundColor).isEqualTo(expectedCardBackgroundColor)
         assertThat(actualVerifiedIdStyle.textColor).isEqualTo(expectedCardTextColor)
-        assertThat(actualVerifiedIdStyle.claimAttributes.isEmpty()).isFalse
         assertThat(actualVerifiedIdStyle.logo).isNotNull
         assertThat(actualVerifiedIdStyle.logo?.uri).isEqualTo(expectedLogoUri)
         assertThat(actualVerifiedIdStyle.logo?.image).isEqualTo(expectedLogoImage)
@@ -99,7 +99,8 @@ class DisplayContractMappingTest {
         val actualVerifiedIdStyle = displayContract.toVerifiedIdStyle()
 
         // Assert
-        assertThat(actualVerifiedIdStyle.title).isEqualTo(expectedCardTitle)
+        assertThat(actualVerifiedIdStyle).isInstanceOf(BasicVerifiedIdStyle::class.java)
+        assertThat((actualVerifiedIdStyle as BasicVerifiedIdStyle).name).isEqualTo(expectedCardTitle)
         assertThat(actualVerifiedIdStyle.description).isEqualTo(expectedCardDescription)
         assertThat(actualVerifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
         assertThat(actualVerifiedIdStyle.backgroundColor).isEqualTo(expectedCardBackgroundColor)
@@ -116,13 +117,13 @@ class DisplayContractMappingTest {
         val actualVerifiedIdStyle = displayContract.toVerifiedIdStyle()
 
         // Assert
-        assertThat(actualVerifiedIdStyle.title).isEqualTo(expectedCardTitle)
+        assertThat(actualVerifiedIdStyle).isInstanceOf(BasicVerifiedIdStyle::class.java)
+        assertThat((actualVerifiedIdStyle as BasicVerifiedIdStyle).name).isEqualTo(expectedCardTitle)
         assertThat(actualVerifiedIdStyle.description).isEqualTo(expectedCardDescription)
         assertThat(actualVerifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
         assertThat(actualVerifiedIdStyle.backgroundColor).isEqualTo(expectedCardBackgroundColor)
         assertThat(actualVerifiedIdStyle.textColor).isEqualTo(expectedCardTextColor)
         assertThat(actualVerifiedIdStyle.logo).isNull()
-        assertThat(actualVerifiedIdStyle.claimAttributes.isEmpty()).isTrue
     }
 
     @Test
@@ -135,16 +136,13 @@ class DisplayContractMappingTest {
         val actualVerifiedIdStyle = displayContract.toVerifiedIdStyle()
 
         // Assert
-        assertThat(actualVerifiedIdStyle.title).isEqualTo(expectedCardTitle)
+        assertThat(actualVerifiedIdStyle).isInstanceOf(BasicVerifiedIdStyle::class.java)
+        assertThat((actualVerifiedIdStyle as BasicVerifiedIdStyle).name).isEqualTo(expectedCardTitle)
         assertThat(actualVerifiedIdStyle.description).isEqualTo(expectedCardDescription)
         assertThat(actualVerifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
         assertThat(actualVerifiedIdStyle.backgroundColor).isEqualTo(expectedCardBackgroundColor)
         assertThat(actualVerifiedIdStyle.textColor).isEqualTo(expectedCardTextColor)
         assertThat(actualVerifiedIdStyle.logo).isNull()
-        assertThat(actualVerifiedIdStyle.claimAttributes.size).isEqualTo(1)
-        assertThat(actualVerifiedIdStyle.claimAttributes.keys.first()).isEqualTo(expectedClaimName1)
-        assertThat(actualVerifiedIdStyle.claimAttributes.values.first().type).isEqualTo(expectedClaimDescriptorType)
-        assertThat(actualVerifiedIdStyle.claimAttributes.values.first().label).isEqualTo(expectedClaimDescriptorLabel)
     }
 
     @Test
@@ -158,16 +156,12 @@ class DisplayContractMappingTest {
         val actualVerifiedIdStyle = displayContract.toVerifiedIdStyle()
 
         // Assert
-        assertThat(actualVerifiedIdStyle.title).isEqualTo(expectedCardTitle)
+        assertThat(actualVerifiedIdStyle).isInstanceOf(BasicVerifiedIdStyle::class.java)
+        assertThat((actualVerifiedIdStyle as BasicVerifiedIdStyle).name).isEqualTo(expectedCardTitle)
         assertThat(actualVerifiedIdStyle.description).isEqualTo(expectedCardDescription)
         assertThat(actualVerifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
         assertThat(actualVerifiedIdStyle.backgroundColor).isEqualTo(expectedCardBackgroundColor)
         assertThat(actualVerifiedIdStyle.textColor).isEqualTo(expectedCardTextColor)
         assertThat(actualVerifiedIdStyle.logo).isNull()
-        assertThat(actualVerifiedIdStyle.claimAttributes.size).isEqualTo(2)
-        assertThat(actualVerifiedIdStyle.claimAttributes.keys.first()).isEqualTo(expectedClaimName1)
-        assertThat(actualVerifiedIdStyle.claimAttributes.keys.last()).isEqualTo(expectedClaimName2)
-        assertThat(actualVerifiedIdStyle.claimAttributes.values.first().type).isEqualTo(expectedClaimDescriptorType)
-        assertThat(actualVerifiedIdStyle.claimAttributes.values.first().label).isEqualTo(expectedClaimDescriptorLabel)
     }
 }
