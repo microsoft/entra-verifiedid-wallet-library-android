@@ -14,6 +14,8 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.mappings.issuance.addRequirements
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.VerifiedIdResponseCompletionException
+import com.microsoft.walletlibrary.util.WalletLibraryException
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
@@ -32,14 +34,21 @@ object VerifiedIdRequester {
         issuanceResponse.addRequirements(requirement)
         when (val result = VerifiableCredentialSdk.issuanceService.sendResponse(issuanceResponse)) {
             is Result.Success -> {
-                val issuanceCompletionResponse = requestState?.let {
-                    IssuanceCompletionResponse(
-                        IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_SUCCESSFUL,
-                        it,
-                        null
+                try {
+                    val issuanceCompletionResponse = requestState?.let {
+                        IssuanceCompletionResponse(
+                            IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_SUCCESSFUL,
+                            it,
+                            null
+                        )
+                    }
+                    sendIssuanceCallback(issuanceCompletionResponse, issuanceCallbackUrl)
+                } catch (exception: WalletLibraryException) {
+                    WalletLibraryLogger.e(
+                        "Unable to send issuance callback after issuance completes",
+                        exception
                     )
                 }
-                sendIssuanceCallback(issuanceCompletionResponse, issuanceCallbackUrl)
                 return VerifiableCredential(result.payload, issuanceRequest.contract)
             }
             is Result.Failure -> {
@@ -47,14 +56,21 @@ object VerifiedIdRequester {
                     is NetworkException -> IssuanceCompletionResponse.IssuanceCompletionErrorDetails.ISSUANCE_SERVICE_ERROR
                     else -> IssuanceCompletionResponse.IssuanceCompletionErrorDetails.UNSPECIFIED_ERROR
                 }
-                val issuanceCompletionResponse = requestState?.let {
-                    IssuanceCompletionResponse(
-                        IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
-                        it,
-                        details
+                try {
+                    val issuanceCompletionResponse = requestState?.let {
+                        IssuanceCompletionResponse(
+                            IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
+                            it,
+                            details
+                        )
+                    }
+                    sendIssuanceCallback(issuanceCompletionResponse, issuanceCallbackUrl)
+                } catch (exception: WalletLibraryException) {
+                    WalletLibraryLogger.e(
+                        "Unable to send issuance callback after issuance fails",
+                        exception
                     )
                 }
-                sendIssuanceCallback(issuanceCompletionResponse, issuanceCallbackUrl)
                 throw VerifiedIdResponseCompletionException(
                     "Unable to complete issuance response",
                     result.payload

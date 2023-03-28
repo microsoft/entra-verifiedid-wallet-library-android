@@ -10,6 +10,8 @@ import com.microsoft.did.sdk.credential.service.models.issuancecallback.Issuance
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
+import com.microsoft.walletlibrary.util.WalletLibraryException
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 
 /**
  * Wrapper class to wrap the get Issuance Request from VC SDK and return a raw request.
@@ -36,11 +38,18 @@ internal object ManifestResolver {
                         IssuanceCompletionResponse.IssuanceCompletionErrorDetails.FETCH_CONTRACT_ERROR,
                     )
                 }
-                if (issuanceCompletionResponse != null && issuanceCallbackUrl != null)
-                    VerifiedIdCompletionCallBack.sendIssuanceCompletionResponse(
-                        issuanceCompletionResponse,
-                        issuanceCallbackUrl
+                try {
+                    if (issuanceCompletionResponse != null && issuanceCallbackUrl != null)
+                        VerifiedIdCompletionCallBack.sendIssuanceCompletionResponse(
+                            issuanceCompletionResponse,
+                            issuanceCallbackUrl
+                        )
+                } catch (exception: WalletLibraryException) {
+                    WalletLibraryLogger.e(
+                        "Unable to send issuance callback after fetching request",
+                        exception
                     )
+                }
                 throw VerifiedIdRequestFetchException(
                     "Unable to fetch issuance request",
                     issuanceRequestResult.payload
