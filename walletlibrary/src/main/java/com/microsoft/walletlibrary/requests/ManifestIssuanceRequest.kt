@@ -5,11 +5,11 @@
 
 package com.microsoft.walletlibrary.requests
 
+import com.microsoft.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
-import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
-import com.microsoft.walletlibrary.util.RequirementValidationException
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.WalletLibraryException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
@@ -28,15 +28,24 @@ internal class ManifestIssuanceRequest(
     override val rootOfTrust: RootOfTrust,
 
     // Attributes describing the Verified ID (eg. name, issuer, logo, background and text colors).
-    val verifiedIdStyle: VerifiedIDStyle,
+    val verifiedIdStyle: VerifiedIdStyle,
 
-    val request: RawManifest
+    val request: RawManifest,
+
+    private var issuanceCallbackUrl: String? = null,
+
+    private var requestState: String? = null
 ): VerifiedIdIssuanceRequest {
     // Completes the issuance request and returns a Result with VerifiedId if successful.
     override suspend fun complete(): Result<VerifiedId> {
         return try {
             val verifiedId =
-                VerifiedIdRequester.sendIssuanceResponse(request.rawRequest, requirement)
+                VerifiedIdRequester.sendIssuanceResponse(
+                    request.rawRequest,
+                    requirement,
+                    requestState,
+                    issuanceCallbackUrl
+                )
             Result.success(verifiedId)
         } catch (exception: WalletLibraryException) {
             Result.failure(exception)
@@ -45,16 +54,28 @@ internal class ManifestIssuanceRequest(
 
     // Indicates whether issuance request is satisfied on client side.
     override fun isSatisfied(): Boolean {
-        try {
-            requirement.validate()
-        } catch (exception: RequirementValidationException) {
-            //TODO("log exception message")
-            return false
-        }
-        return true
+        val validationResult = requirement.validate()
+        //TODO("Add logging")
+        return !validationResult.isFailure
     }
 
-    override fun cancel(message: String?): Result<Void> {
-        TODO("Not yet implemented")
+    override suspend fun cancel(message: String?): Result<Unit> {
+        return try {
+            val issuanceCompletionResponse = requestState?.let {
+                IssuanceCompletionResponse(
+                    IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
+                    it,
+                    IssuanceCompletionResponse.IssuanceCompletionErrorDetails.USER_CANCELED
+                )
+            }
+            val result = VerifiedIdRequester.sendIssuanceCallback(
+                issuanceCompletionResponse,
+                issuanceCallbackUrl
+            )
+            Result.success(result)
+        } catch (exception: WalletLibraryException) {
+            Result.failure(exception)
+        }
+
     }
 }

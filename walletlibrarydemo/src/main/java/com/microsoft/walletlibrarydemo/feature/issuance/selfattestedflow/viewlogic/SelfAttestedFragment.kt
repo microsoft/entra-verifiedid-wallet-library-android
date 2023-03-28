@@ -53,16 +53,21 @@ class SelfAttestedFragment : Fragment() {
         viewModel = SelfAttestedFlowViewModel(requireContext(), Uri.parse(binding.requestUrl.text.toString()))
         runBlocking {
             viewModel.initiateIssuance()
-            val verifiedIdRequest = viewModel.verifiedIdRequest
-            binding.initiateIssuance.isEnabled = false
-            if (verifiedIdRequest is VerifiedIdPresentationRequest)
-                binding.textview.text =
-                    "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
-            else if (verifiedIdRequest is VerifiedIdIssuanceRequest) {
-                binding.textview.text =
-                    "Issuance request from ${verifiedIdRequest.requesterStyle.requester}"
-                configureViewsForSelfAttestedRequirements(verifiedIdRequest.requirement)
-                binding.completeIssuance.isEnabled = true
+            val verifiedIdRequestResult = viewModel.verifiedIdRequestResult
+            verifiedIdRequestResult?.let {
+                if (verifiedIdRequestResult.isSuccess) {
+                    val verifiedIdRequest = verifiedIdRequestResult.getOrNull()
+                    binding.initiateIssuance.isEnabled = false
+                    if (verifiedIdRequest is VerifiedIdPresentationRequest)
+                        binding.textview.text =
+                            "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
+                    else if (verifiedIdRequest is VerifiedIdIssuanceRequest) {
+                        binding.textview.text =
+                            "Issuance request from ${verifiedIdRequest.requesterStyle.requester}"
+                        configureViewsForSelfAttestedRequirements(verifiedIdRequest.requirement)
+                        binding.completeIssuance.isEnabled = true
+                    }
+                }
             }
         }
     }

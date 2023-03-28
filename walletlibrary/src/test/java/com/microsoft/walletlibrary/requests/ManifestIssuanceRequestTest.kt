@@ -6,7 +6,7 @@ import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperato
 import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
-import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.VerifiedIdResponseCompletionException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
@@ -20,7 +20,7 @@ import org.junit.Test
 class ManifestIssuanceRequestTest {
     private val requesterStyle: RequesterStyle = mockk()
     private val rootOfTrust: RootOfTrust = mockk()
-    private val verifiedIdStyle: VerifiedIDStyle = mockk()
+    private val verifiedIdStyle: VerifiedIdStyle = mockk()
     private val rawManifest: RawManifest = mockk()
 
     @Test

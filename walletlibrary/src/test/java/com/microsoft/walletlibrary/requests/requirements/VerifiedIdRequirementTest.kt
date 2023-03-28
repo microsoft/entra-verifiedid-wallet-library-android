@@ -7,7 +7,6 @@ import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 
 class VerifiedIdRequirementTest {
@@ -44,49 +43,66 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun fulfillVerifiedIdRequirement_ConstraintDoesNotMatchVerifiedId_ThrowsException() {
+    fun fulfillVerifiedIdRequirement_ConstraintDoesNotMatchVerifiedId_ReturnsFailure() {
         // Arrange
         val expectedVerifiedId: VerifiableCredential = mockk()
         every { expectedVerifiedId.types } returns listOf("WrongVcType")
 
-        // Act and Assert
-        assertThatThrownBy {
-            verifiedIdRequirement.fulfill(expectedVerifiedId)
-        }.isInstanceOf(VerifiedIdRequirementDoesNotMatchConstraintsException::class.java)
+        // Act
+        val actualResult = verifiedIdRequirement.fulfill(expectedVerifiedId)
+
+        // Assert
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull())
+            .isInstanceOf(VerifiedIdRequirementDoesNotMatchConstraintsException::class.java)
     }
 
     @Test
-    fun validateVerifiedIdRequirement_ConstraintDoesNotMatch_ThrowsException() {
+    fun validateVerifiedIdRequirement_ConstraintDoesNotMatch_ReturnsFailure() {
         // Arrange
         val expectedVerifiedId: VerifiableCredential = mockk()
         every { expectedVerifiedId.types } returns listOf("WrongVcType")
         verifiedIdRequirement.verifiedId = expectedVerifiedId
 
-        // Act and Assert
-        assertThatThrownBy {
-            verifiedIdRequirement.validate()
-        }.isInstanceOf(VerifiedIdRequirementDoesNotMatchConstraintsException::class.java)
+        // Act
+        val actualResult = verifiedIdRequirement.validate()
+
+        // Assert
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull())
+            .isInstanceOf(VerifiedIdRequirementDoesNotMatchConstraintsException::class.java)
     }
 
     @Test
-    fun validateVerifiedIdRequirement_UnFulfilledRequirement_ThrowsException() {
-        // Act and Assert
-        assertThatThrownBy {
-            verifiedIdRequirement.validate()
-        }.isInstanceOf(VerifiedIdRequirementNotFulfilledException::class.java)
+    fun validateVerifiedIdRequirement_UnFulfilledRequirement_ReturnsFailure() {
+        // Act
+        val actualResult = verifiedIdRequirement.validate()
+
+        // Assert
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull())
+            .isInstanceOf(VerifiedIdRequirementNotFulfilledException::class.java)
     }
 
     @Test
-    fun validateVerifiedIdRequirement_ValidVerifiedId_SucceedsWithNoException() {
+    fun validateVerifiedIdRequirement_ValidVerifiedId_ReturnsSuccess() {
         // Arrange
         val expectedVerifiedId: VerifiableCredential = mockk()
         every { expectedVerifiedId.types } returns listOf(expectedVcType)
         verifiedIdRequirement.fulfill(expectedVerifiedId)
 
         // Act
-        verifiedIdRequirement.validate()
+        val actualResult = verifiedIdRequirement.validate()
 
         // Assert
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isSuccess).isTrue
         assertThat(verifiedIdRequirement.verifiedId).isNotNull
         assertThat(verifiedIdRequirement.verifiedId).isEqualTo(expectedVerifiedId)
     }

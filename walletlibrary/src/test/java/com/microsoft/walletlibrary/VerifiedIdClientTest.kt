@@ -23,7 +23,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -59,12 +58,15 @@ class VerifiedIdClientTest {
             val verifiedIdRequest = verifiedIdClient.createRequest(verifiedIdRequestURL)
 
             // Assert
-            assertThat(verifiedIdRequest).isInstanceOf(VerifiedIdPresentationRequest::class.java)
+            assertThat(verifiedIdRequest).isInstanceOf(Result::class.java)
+            assertThat(verifiedIdRequest.isSuccess).isTrue
+            assertThat(verifiedIdRequest.getOrNull()).isNotNull
+            assertThat(verifiedIdRequest.getOrNull()).isInstanceOf(VerifiedIdPresentationRequest::class.java)
         }
     }
 
     @Test
-    fun createRequest_ExceptionFromResolverFactory_ThrowsException() {
+    fun createRequest_ExceptionFromResolverFactory_ReturnsFailure() {
         // Arrange
         requestHandlerFactory = mockk()
         requestResolverFactory = RequestResolverFactory()
@@ -79,16 +81,20 @@ class VerifiedIdClientTest {
         every { requestHandlerFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) } returns openIdPresentationRequest
 
-        // Act and Assert
-        Assertions.assertThatThrownBy {
-            runBlocking {
-                verifiedIdClient.createRequest(verifiedIdRequestURL)
-            }
-        }.isInstanceOf(ResolverMissingException::class.java)
+        runBlocking {
+            // Act
+            val actualResult = verifiedIdClient.createRequest(verifiedIdRequestURL)
+
+            // Assert
+            assertThat(actualResult).isInstanceOf(Result::class.java)
+            assertThat(actualResult.isFailure).isTrue
+            assertThat(actualResult.exceptionOrNull()).isNotNull
+            assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverMissingException::class.java)
+        }
     }
 
     @Test
-    fun createRequest_ExceptionFromHandlerFactory_ThrowsException() {
+    fun createRequest_ExceptionFromHandlerFactory_ReturnsFailure() {
         // Arrange
         requestHandlerFactory = RequestHandlerFactory()
         requestResolverFactory = mockk()
@@ -104,16 +110,20 @@ class VerifiedIdClientTest {
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) } returns verifiedIdOpenIdJwtRawRequest
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) } returns openIdPresentationRequest
 
-        // Act and Assert
-        Assertions.assertThatThrownBy {
-            runBlocking {
-                verifiedIdClient.createRequest(verifiedIdRequestURL)
-            }
-        }.isInstanceOf(HandlerMissingException::class.java)
+        runBlocking {
+            // Act
+            val actualResult = verifiedIdClient.createRequest(verifiedIdRequestURL)
+
+            // Assert
+            assertThat(actualResult).isInstanceOf(Result::class.java)
+            assertThat(actualResult.isFailure).isTrue
+            assertThat(actualResult.exceptionOrNull()).isNotNull
+            assertThat(actualResult.exceptionOrNull()).isInstanceOf(HandlerMissingException::class.java)
+        }
     }
 
     @Test
-    fun createRequest_ExceptionFromHandler_ThrowsException() {
+    fun createRequest_ExceptionFromHandler_ReturnsFailure() {
         // Arrange
         requestHandlerFactory = mockk()
         requestResolverFactory = mockk()
@@ -132,16 +142,20 @@ class VerifiedIdClientTest {
             UnSupportedProtocolException()
         )
 
-        // Act and Assert
-        Assertions.assertThatThrownBy {
-            runBlocking {
-                verifiedIdClient.createRequest(verifiedIdRequestURL)
-            }
-        }.isInstanceOf(UnSupportedProtocolException::class.java)
+        runBlocking {
+            // Act
+            val actualResult = verifiedIdClient.createRequest(verifiedIdRequestURL)
+
+            // Assert
+            assertThat(actualResult).isInstanceOf(Result::class.java)
+            assertThat(actualResult.isFailure).isTrue
+            assertThat(actualResult.exceptionOrNull()).isNotNull
+            assertThat(actualResult.exceptionOrNull()).isInstanceOf(UnSupportedProtocolException::class.java)
+        }
     }
 
     @Test
-    fun createRequest_ExceptionFromResolver_ThrowsException() {
+    fun createRequest_ExceptionFromResolver_ReturnsFailure() {
         // Arrange
         requestHandlerFactory = mockk()
         requestResolverFactory = mockk()
@@ -160,12 +174,16 @@ class VerifiedIdClientTest {
         every { requestHandlerFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) } returns openIdPresentationRequest
 
-        // Act and Assert
-        Assertions.assertThatThrownBy {
-            runBlocking {
-                verifiedIdClient.createRequest(verifiedIdRequestURL)
-            }
-        }.isInstanceOf(UnSupportedVerifiedIdRequestInputException::class.java)
+        runBlocking {
+            // Act
+            val actualResult = verifiedIdClient.createRequest(verifiedIdRequestURL)
+
+            // Assert
+            assertThat(actualResult).isInstanceOf(Result::class.java)
+            assertThat(actualResult.isFailure).isTrue
+            assertThat(actualResult.exceptionOrNull()).isNotNull
+            assertThat(actualResult.exceptionOrNull()).isInstanceOf(UnSupportedVerifiedIdRequestInputException::class.java)
+        }
     }
 
     @Test
