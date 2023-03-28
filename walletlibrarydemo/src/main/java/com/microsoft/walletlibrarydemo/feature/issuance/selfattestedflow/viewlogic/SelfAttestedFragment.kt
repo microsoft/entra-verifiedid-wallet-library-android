@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrarydemo.feature.issuance.selfattestedflow.viewlogic
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -49,7 +50,7 @@ class SelfAttestedFragment : Fragment() {
     }
 
     private fun initiateIssuance() {
-        viewModel = SelfAttestedFlowViewModel(requireContext())
+        viewModel = SelfAttestedFlowViewModel(requireContext(), Uri.parse(binding.requestUrl.text.toString()))
         runBlocking {
             viewModel.initiateIssuance()
             val verifiedIdRequest = viewModel.verifiedIdRequest

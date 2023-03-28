@@ -11,7 +11,7 @@ import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 //TODO(Add dependency injection)
-class SelfAttestedFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Context):
+class SelfAttestedFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Context, val requestUrl: Uri):
     ViewModel() {
     var verifiedIdRequest: VerifiedIdRequest<*>? = null
     var verifiedIdResult: Result<Any?>? = null
@@ -19,8 +19,7 @@ class SelfAttestedFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Co
 
     suspend fun initiateIssuance() {
         // Use the test uri here
-        val verifiedIdRequestUrl =
-            VerifiedIdRequestURL(Uri.parse(""))
+        val verifiedIdRequestUrl = VerifiedIdRequestURL(Uri.parse(""))
         verifiedIdRequest = verifiedIdClient.createRequest(verifiedIdRequestUrl)
     }
 
