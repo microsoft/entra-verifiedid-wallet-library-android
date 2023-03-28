@@ -10,13 +10,14 @@ import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperato
 import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIDStyle
 import com.microsoft.walletlibrary.util.Constants.IDTOKENHINT_CONFIGURATION
 
 /**
  * Contents in a Verified Id Request.
  * It is used to map protocol specific requests in SDK to abstract request objects in library.
  */
-internal class VerifiedIdRequestContent(
+internal class IssuanceRequestContent(
     // Attributes describing the requester (eg. name, logo).
     internal val requesterStyle: RequesterStyle,
 
@@ -26,7 +27,7 @@ internal class VerifiedIdRequestContent(
     // Root of trust of the requester (eg. linked domains).
     internal val rootOfTrust: RootOfTrust,
 
-    internal val injectedIdToken: InjectedIdToken? = null
+    internal val verifiedIDStyle: VerifiedIDStyle
 ) {
     internal fun addRequirementsForIdTokenHint(idToken: InjectedIdToken) {
         when (requirement) {
@@ -54,11 +55,11 @@ internal class VerifiedIdRequestContent(
             for (requirementInGroup in requirementsInGroup) {
                 if (requirementInGroup is IdTokenRequirement) {
                     if (requirementInGroup.configuration == IDTOKENHINT_CONFIGURATION)
-                    fulfillIdTokenRequirement(
-                        requirementInGroup,
-                        idToken,
-                        requirement as GroupRequirement
-                    )
+                        fulfillIdTokenRequirement(
+                            requirementInGroup,
+                            idToken,
+                            requirement as GroupRequirement
+                        )
                 }
             }
         }

@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.requests
 
+import com.microsoft.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
@@ -30,13 +31,22 @@ internal class ManifestIssuanceRequest(
     // Attributes describing the Verified ID (eg. name, issuer, logo, background and text colors).
     val verifiedIdStyle: VerifiedIDStyle,
 
-    val request: RawManifest
+    val request: RawManifest,
+
+    private var issuanceCallbackUrl: String? = null,
+
+    private var requestState: String? = null
 ): VerifiedIdIssuanceRequest {
     // Completes the issuance request and returns a Result with VerifiedId if successful.
     override suspend fun complete(): Result<VerifiedId> {
         return try {
             val verifiedId =
-                VerifiedIdRequester.sendIssuanceResponse(request.rawRequest, requirement)
+                VerifiedIdRequester.sendIssuanceResponse(
+                    request.rawRequest,
+                    requirement,
+                    requestState,
+                    issuanceCallbackUrl
+                )
             Result.success(verifiedId)
         } catch (exception: WalletLibraryException) {
             Result.failure(exception)
@@ -54,7 +64,23 @@ internal class ManifestIssuanceRequest(
         return true
     }
 
-    override fun cancel(message: String?): Result<Void> {
-        TODO("Not yet implemented")
+    override suspend fun cancel(message: String?): Result<Unit> {
+        return try {
+            val issuanceCompletionResponse = requestState?.let {
+                IssuanceCompletionResponse(
+                    IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
+                    it,
+                    IssuanceCompletionResponse.IssuanceCompletionErrorDetails.USER_CANCELED
+                )
+            }
+            val result = VerifiedIdRequester.sendIssuanceCallback(
+                issuanceCompletionResponse,
+                issuanceCallbackUrl
+            )
+            Result.success(result)
+        } catch (exception: WalletLibraryException) {
+            Result.failure(exception)
+        }
+
     }
 }
