@@ -9,7 +9,7 @@ import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 
 class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context): ViewModel() {
-    var verifiedIdRequest: VerifiedIdRequest<*>? = null
+    var verifiedIdRequestResult: Result<VerifiedIdRequest<*>>? = null
     var verifiedIdResult: Result<Any?>? = null
 
     suspend fun initiateIssuance(requestUrl: String) {
@@ -17,10 +17,10 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context): Vi
         // Use the test uri here
         val verifiedIdRequestUrl =
             VerifiedIdRequestURL(Uri.parse(requestUrl))
-        verifiedIdRequest = verifiedIdClient.createRequest(verifiedIdRequestUrl)
+        verifiedIdRequestResult = verifiedIdClient.createRequest(verifiedIdRequestUrl)
     }
 
     suspend fun completeIssuance() {
-        verifiedIdResult = verifiedIdRequest?.complete()
+        verifiedIdResult = verifiedIdRequestResult?.getOrNull()?.complete()
     }
 }

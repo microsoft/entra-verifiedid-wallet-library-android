@@ -46,16 +46,21 @@ class RequirementsFragment : Fragment() {
         binding.requirementsList.isNestedScrollingEnabled = false
         runBlocking {
             viewModel.initiateIssuance(args.requestUrl)
-            val request = viewModel.verifiedIdRequest
-            request?.let { binding.requestTitle.text = if (it is VerifiedIdIssuanceRequest) "Issuance Request" else "Presentation Request" }
-            val requirement = request?.requirement
-            requirement?.let {
-                val requirementList = if (requirement !is GroupRequirement) listOf(requirement) else requirement.requirements
-                val adapter = RequirementsAdapter(
-                    requireContext(),
-                    requirementList
-                )
-                binding.requirementsList.adapter = adapter
+            val requestResult = viewModel.verifiedIdRequestResult
+            requestResult?.let {
+                if (requestResult.isSuccess) {
+                    val request = requestResult.getOrNull()
+                    request?.let { binding.requestTitle.text = if (it is VerifiedIdIssuanceRequest) "Issuance Request" else "Presentation Request" }
+                    val requirement = request?.requirement
+                    requirement?.let {
+                        val requirementList = if (requirement !is GroupRequirement) listOf(requirement) else requirement.requirements
+                        val adapter = RequirementsAdapter(
+                            requireContext(),
+                            requirementList
+                        )
+                        binding.requirementsList.adapter = adapter
+                    }
+                }
             }
         }
     }
