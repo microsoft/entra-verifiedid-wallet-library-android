@@ -7,13 +7,15 @@ import androidx.lifecycle.ViewModel
 import com.microsoft.walletlibrary.VerifiedIdClientBuilder
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
+import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context): ViewModel() {
     var verifiedIdRequestResult: Result<VerifiedIdRequest<*>>? = null
     var verifiedIdResult: Result<Any?>? = null
+    private val verifiedIdClient = VerifiedIdClientBuilder(context).build()
 
-    suspend fun initiateIssuance(requestUrl: String) {
-        val verifiedIdClient = VerifiedIdClientBuilder(context).build()
+    suspend fun initiateRequest(requestUrl: String) {
         // Use the test uri here
         val verifiedIdRequestUrl =
             VerifiedIdRequestURL(Uri.parse(requestUrl))
@@ -22,5 +24,16 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context): Vi
 
     suspend fun completeIssuance() {
         verifiedIdResult = verifiedIdRequestResult?.getOrNull()?.complete()
+    }
+
+    suspend fun completePresentation() {
+        if (verifiedIdRequestResult?.isSuccess == true) {
+            val verifiedIdRequest = verifiedIdRequestResult?.getOrNull()
+            if (verifiedIdResult?.isSuccess == true) {
+                val verifiedId = verifiedIdResult?.getOrNull() as VerifiedId
+                (verifiedIdRequest?.requirement as VerifiedIdRequirement).fulfill(verifiedId)
+                verifiedIdResult = verifiedIdRequest.complete()
+            }
+        }
     }
 }

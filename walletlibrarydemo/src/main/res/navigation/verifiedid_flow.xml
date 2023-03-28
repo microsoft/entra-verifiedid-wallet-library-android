@@ -6,9 +6,6 @@
     <fragment
         android:id="@+id/loadRequestFragment"
         android:name="com.microsoft.walletlibrarydemo.feature.issuance.viewlogic.LoadRequestFragment">
-        <argument
-            android:name="requestUrl"
-            app:argType="string" />
         <action
             android:id="@+id/action_loadRequestFragment_to_requirementsFragment"
             app:destination="@id/requirementsFragment"
@@ -23,8 +20,8 @@
             android:name="requestUrl"
             app:argType="string" />
         <action
-            android:id="@+id/action_requirementsFragment_to_verifiedIdViewFragment"
-            app:destination="@id/verifiedIdViewFragment"
+            android:id="@+id/action_requirementsFragment_to_loadRequestFragment"
+            app:destination="@id/loadRequestFragment"
             app:popUpTo="@id/requirementsFragment"
             app:popUpToInclusive="true" />
     </fragment>

@@ -134,8 +134,8 @@ class RequirementsAdapter(
         holder: VerifiedIdHolder,
         requirement: VerifiedIdRequirement
     ) {
-        holder.binding.title.text = requirement.types.first().toString()
-        holder.binding.subtitle.text = requirement.purpose
+        holder.binding.title.text = "Requesting ${requirement.types.first()}"
+        holder.binding.subtitle.text = "Purpose: ${requirement.purpose}"
     }
 
     private fun setupPinHolder(

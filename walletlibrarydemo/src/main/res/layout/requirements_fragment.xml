@@ -32,6 +32,25 @@
             tools:listitem="@layout/requirement_text_row" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/verifiedid_recycler_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/requestTitle"
+        android:layout_marginVertical="10dp"
+        android:orientation="vertical"
+        android:layout_gravity="center_horizontal">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/verifiedid_claims"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="10dp"
+            android:visibility="gone"
+            tools:listitem="@layout/requirement_idtoken_row" />
+    </LinearLayout>
+
     <Button
         android:id="@+id/requestCompletion"
         android:layout_width="wrap_content"
