@@ -8,7 +8,7 @@ The Microsoft Entra Wallet Library for iOS gives your app the ability to begin u
 
 Add to your app's build.gradle to add Wallet Library as a dependency:
 dependencies {
-implementation 'com.microsoft.entra.verifiedid:walletlibrary:0.0.1'
+    implementation 'com.microsoft.entra.verifiedid:walletlibrary:0.0.1'
 }
 
 ## Quick Start
@@ -29,8 +29,8 @@ if (verifiedIdRequestResult.isSuccess) {
         verifiedIdRequest as VerifiedIdPresentationRequest
     }
 } else {
-// If an exception occurs, its value can be accessed here.
-val exception = verifiedIdRequestResult.exceptionOrNull()
+    // If an exception occurs, its value can be accessed here.
+    val exception = verifiedIdRequestResult.exceptionOrNull()
 }
 ```
 
