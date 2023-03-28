@@ -19,6 +19,31 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <TextView
+        android:id="@+id/requestUrlLabel"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Input URL:"
+        android:textSize="20sp"
+        android:textAlignment="viewStart"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/flow_heading"/>
+
+    <EditText
+        android:id="@+id/requestUrl"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:imeOptions="flagNoExtractUi"
+        android:importantForAutofill="no"
+        android:inputType="textPersonName"
+        android:textSize="16sp"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginVertical="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/requestUrlLabel" />
+
     <Button
         android:id="@+id/initiate_issuance"
         android:layout_width="0dp"
@@ -26,10 +51,10 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="10dp"
         android:layout_marginVertical="20dp"
-        android:text="Initiate Request"
+        android:text="Initiate Issuance"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/completeIssuance"
-        app:layout_constraintTop_toBottomOf="@id/flow_heading"
+        app:layout_constraintTop_toBottomOf="@id/requestUrl"
         tools:layout_editor_absoluteX="148dp"
         tools:layout_editor_absoluteY="330dp" />
 
@@ -37,14 +62,14 @@
         android:id="@+id/completeIssuance"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Complete Request"
+        android:text="Complete Issuance"
         android:enabled="false"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="20dp"
         android:layout_marginVertical="20dp"
         app:layout_constraintStart_toEndOf="@id/initiate_issuance"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/flow_heading"
+        app:layout_constraintTop_toBottomOf="@id/requestUrl"
         tools:layout_editor_absoluteX="148dp"
         tools:layout_editor_absoluteY="330dp" />
 
@@ -65,6 +90,25 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textContainer"
             tools:listitem="@layout/requirement_selfattested_row" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/verifiedid_claims_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:layout_gravity="center_horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textContainer">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/claims_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textContainer"
+            tools:listitem="@layout/requirement_verifiedclaim_row" />
     </LinearLayout>
 
     <ScrollView

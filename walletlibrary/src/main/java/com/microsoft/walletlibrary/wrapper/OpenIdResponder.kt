@@ -33,6 +33,5 @@ object OpenIdResponder {
                 presentationResponseResult.payload
             )
         }
-
     }
 }

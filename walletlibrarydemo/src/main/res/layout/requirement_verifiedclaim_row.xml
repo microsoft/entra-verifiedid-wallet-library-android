@@ -5,11 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="88dp"
     android:paddingStart="18dp"
-    android:paddingVertical="2dp"
+    android:paddingVertical="8dp"
     tools:ignore="RtlSymmetry">
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/claimTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16sp"
@@ -21,16 +21,14 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Title" />
 
-    <EditText
+    <TextView
         android:id="@+id/claimValue"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:imeOptions="flagNoExtractUi"
         android:importantForAutofill="no"
-        android:inputType="textPersonName"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title" />
+        app:layout_constraintTop_toBottomOf="@id/claimTitle" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
