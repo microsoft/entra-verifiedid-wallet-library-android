@@ -1,10 +1,12 @@
 package com.microsoft.walletlibrarydemo.feature.issuance.idtokenhintflow.viewlogic
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdPresentationRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
@@ -12,8 +14,11 @@ import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.PinRequirement
 import com.microsoft.walletlibrary.util.WalletLibraryException
+import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
+import com.microsoft.walletlibrary.verifiedid.VerifiedIdClaim
 import com.microsoft.walletlibrarydemo.databinding.IdTokenHintFragmentBinding
 import com.microsoft.walletlibrarydemo.feature.issuance.idtokenhintflow.presentationlogic.IdTokenFlowViewModel
+import com.microsoft.walletlibrarydemo.feature.issuance.selfattestedflow.presentationlogic.VerifiableCredentialAdapter
 import kotlinx.coroutines.runBlocking
 
 class IdTokenHintFragment : Fragment() {
@@ -46,8 +51,11 @@ class IdTokenHintFragment : Fragment() {
     private fun initiateIssuance() {
         viewModel = IdTokenFlowViewModel(requireContext())
         runBlocking {
-            viewModel.initiateIssuance()
+            viewModel.initiateIssuance(Uri.parse(binding.requestUrl.text.toString()))
             val verifiedIdRequestResult = viewModel.verifiedIdRequestResult
+            binding.requestUrl.text.clear()
+            binding.requestUrl.visibility = View.GONE
+            binding.requestUrlLabel.visibility = View.GONE
             verifiedIdRequestResult?.let {
                 if (verifiedIdRequestResult.isSuccess) {
                     val verifiedIdRequest = verifiedIdRequestResult.getOrNull()
@@ -98,6 +106,7 @@ class IdTokenHintFragment : Fragment() {
         runBlocking {
             viewModel.completeIssuance()
             configureIssuanceCompletionView()
+            switchToPresentation()
         }
     }
 
@@ -106,9 +115,68 @@ class IdTokenHintFragment : Fragment() {
         binding.pin.visibility = View.GONE
         binding.completeIssuance.isEnabled = false
         val response = viewModel.verifiedIdResult
-        binding.textview.text = response?.let {
-            if (response.isSuccess) response.getOrDefault("").toString()
-            else response.exceptionOrNull().toString()
-        } ?: "Issuance completion failed"
+        response?.let {
+            if (response.isSuccess) {
+                configureViewsForVerifiedIdClaims((response.getOrDefault("") as VerifiableCredential))
+            } else
+                binding.textview.text = response.exceptionOrNull().toString()
+        }
+    }
+
+    private fun switchToPresentation() {
+        binding.initiateIssuance.text = "Initiate Presentation"
+        binding.completeIssuance.text = "Complete Presentation"
+        binding.initiateIssuance.isEnabled = true
+        binding.requestUrl.visibility = View.VISIBLE
+        binding.requestUrlLabel.visibility = View.VISIBLE
+        binding.initiateIssuance.setOnClickListener { initiatePresentation() }
+        binding.completeIssuance.setOnClickListener { completePresentation() }
+    }
+
+    private fun initiatePresentation() {
+        runBlocking {
+            viewModel.initiatePresentation(Uri.parse(binding.requestUrl.text.toString()))
+            val verifiedIdRequestResult = viewModel.verifiedIdRequestResult
+            binding.requestUrl.text.clear()
+            binding.requestUrl.visibility = View.GONE
+            binding.requestUrlLabel.visibility = View.GONE
+            verifiedIdRequestResult?.let {
+                if (verifiedIdRequestResult.isSuccess) {
+                    val verifiedIdRequest = verifiedIdRequestResult.getOrNull()
+                    binding.initiateIssuance.isEnabled = false
+                    if (verifiedIdRequest is VerifiedIdPresentationRequest) {
+                        binding.textview.text =
+                            "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
+                        binding.completeIssuance.text = "Complete Presentation"
+                    } else if (verifiedIdRequest is VerifiedIdIssuanceRequest) {
+                        binding.textview.text =
+                            "Issuance request from ${verifiedIdRequest.requesterStyle.requester}"
+                    }
+                    binding.completeIssuance.isEnabled = true
+                    binding.claimsList.visibility = View.GONE
+                }
+            }
+        }
+    }
+
+    private fun configureViewsForVerifiedIdClaims(verifiableCredential: VerifiableCredential) {
+        val claims = verifiableCredential.getClaims()
+        claims.add(VerifiedIdClaim("Issued On", verifiableCredential.issuedOn))
+        verifiableCredential.expiresOn?.let { claims.add(VerifiedIdClaim("Expiry", it)) }
+        claims.add(VerifiedIdClaim("Id", verifiableCredential.id))
+        val adapter =
+            VerifiableCredentialAdapter(requireContext(), claims)
+        binding.claimsList.layoutManager = LinearLayoutManager(context)
+        binding.claimsList.isNestedScrollingEnabled = false
+        binding.claimsList.adapter = adapter
+    }
+
+    private fun completePresentation() {
+        runBlocking {
+            viewModel.completePresentation()
+            binding.textview.text = "Presentation Complete!!"
+            binding.completeIssuance.isEnabled = false
+            binding.claimsList.visibility = View.VISIBLE
+        }
     }
 }
