@@ -38,19 +38,21 @@ class VerifiedIdRequirement(
     internal var verifiedId: VerifiedId? = null
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
-    override fun validate() {
+    override fun validate(): Result<Unit> {
         if (verifiedId == null)
-            throw VerifiedIdRequirementNotFulfilledException("VerifiedIdRequirement has not been fulfilled.")
+            return Result.failure(VerifiedIdRequirementNotFulfilledException("VerifiedIdRequirement has not been fulfilled."))
         if (verifiedId?.let { constraint.doesMatch(it) } != true)
-            throw VerifiedIdRequirementDoesNotMatchConstraintsException("Provided VerifiedId does not match the constraints")
+            return Result.failure(VerifiedIdRequirementDoesNotMatchConstraintsException("Provided VerifiedId does not match the constraints"))
+        return Result.success(Unit)
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(selectedVerifiedId: VerifiedId) {
-        if (constraint.doesMatch(selectedVerifiedId))
+    fun fulfill(selectedVerifiedId: VerifiedId): Result<Unit> {
+        return if (constraint.doesMatch(selectedVerifiedId)) {
             verifiedId = selectedVerifiedId
-        else
-            throw VerifiedIdRequirementDoesNotMatchConstraintsException("Provided VerifiedId does not match the constraints")
+            Result.success(Unit)
+        } else
+            Result.failure(VerifiedIdRequirementDoesNotMatchConstraintsException("Provided VerifiedId does not match the constraints"))
     }
 
     // Retrieves list of Verified IDs from the provided list that matches this requirement.

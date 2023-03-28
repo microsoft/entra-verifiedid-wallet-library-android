@@ -13,5 +13,5 @@ interface Requirement {
     val required: Boolean
 
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
-    fun validate()
+    fun validate(): Result<Unit>
 }

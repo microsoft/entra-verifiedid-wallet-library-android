@@ -35,9 +35,10 @@ class IdTokenRequirement(
 ): Requirement {
 
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
-    override fun validate() {
+    override fun validate(): Result<Unit> {
         if (idToken == null)
-            throw IdTokenRequirementNotFulfilledException("IdTokenRequirement has not been fulfilled.")
+            return Result.failure(IdTokenRequirementNotFulfilledException("IdTokenRequirement has not been fulfilled."))
+        return Result.success(Unit)
     }
 
     // Fulfills the requirement in the request with specified value.

@@ -16,16 +16,14 @@ import com.microsoft.walletlibrarydemo.databinding.IdTokenHintFragmentBinding
 import com.microsoft.walletlibrarydemo.feature.issuance.idtokenhintflow.presentationlogic.IdTokenFlowViewModel
 import kotlinx.coroutines.runBlocking
 
-class IdTokenHintFragment: Fragment() {
+class IdTokenHintFragment : Fragment() {
     private var _binding: IdTokenHintFragmentBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var viewModel: IdTokenFlowViewModel
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = IdTokenHintFragmentBinding.inflate(inflater, container, false)
         return binding.root
@@ -49,19 +47,25 @@ class IdTokenHintFragment: Fragment() {
         viewModel = IdTokenFlowViewModel(requireContext())
         runBlocking {
             viewModel.initiateIssuance()
-            val verifiedIdRequest = viewModel.verifiedIdRequest
-            binding.initiateIssuance.isEnabled = false
-            if (verifiedIdRequest is VerifiedIdPresentationRequest)
-                binding.textview.text =
-                    "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
-            else if (verifiedIdRequest is VerifiedIdIssuanceRequest) {
-                binding.textview.text =
-                    "Issuance request from ${verifiedIdRequest.requesterStyle.requester}"
-                when (verifiedIdRequest.requirement) {
-                    is GroupRequirement -> configureIdTokenHintWithPinView(verifiedIdRequest)
-                    is IdTokenRequirement -> configureIdTokenHintWithoutPinView(verifiedIdRequest)
-                }
-                binding.completeIssuance.isEnabled = true
+            val verifiedIdRequestResult = viewModel.verifiedIdRequestResult
+            verifiedIdRequestResult?.let {
+                if (verifiedIdRequestResult.isSuccess) {
+                    val verifiedIdRequest = verifiedIdRequestResult.getOrNull()
+                    binding.initiateIssuance.isEnabled = false
+                    if (verifiedIdRequest is VerifiedIdPresentationRequest) binding.textview.text =
+                        "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
+                    else if (verifiedIdRequest is VerifiedIdIssuanceRequest) {
+                        binding.textview.text =
+                            "Issuance request from ${verifiedIdRequest.requesterStyle.requester}"
+                        when (verifiedIdRequest.requirement) {
+                            is GroupRequirement -> configureIdTokenHintWithPinView(verifiedIdRequest)
+                            is IdTokenRequirement -> configureIdTokenHintWithoutPinView(
+                                verifiedIdRequest
+                            )
+                        }
+                        binding.completeIssuance.isEnabled = true
+                    }
+                } else binding.textview.text = verifiedIdRequestResult.exceptionOrNull().toString()
             }
         }
     }
@@ -90,8 +94,7 @@ class IdTokenHintFragment: Fragment() {
     }
 
     private fun completeIssuance() {
-        if (binding.pin.text.toString().isNotEmpty())
-            viewModel.pin = binding.pin.text.toString()
+        if (binding.pin.text.toString().isNotEmpty()) viewModel.pin = binding.pin.text.toString()
         runBlocking {
             viewModel.completeIssuance()
             configureIssuanceCompletionView()
@@ -103,11 +106,9 @@ class IdTokenHintFragment: Fragment() {
         binding.pin.visibility = View.GONE
         binding.completeIssuance.isEnabled = false
         val response = viewModel.verifiedIdResult
-        response?.let {
-            if (response.isSuccess)
-                binding.textview.text = response.getOrDefault("").toString()
-            else
-                binding.textview.text = response.exceptionOrNull().toString()
-        }
+        binding.textview.text = response?.let {
+            if (response.isSuccess) response.getOrDefault("").toString()
+            else response.exceptionOrNull().toString()
+        } ?: "Issuance completion failed"
     }
 }

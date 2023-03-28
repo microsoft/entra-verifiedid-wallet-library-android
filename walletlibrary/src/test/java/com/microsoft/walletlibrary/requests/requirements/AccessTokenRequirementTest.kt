@@ -1,7 +1,7 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.util.AccessTokenRequirementNotFulfilledException
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class AccessTokenRequirementTest {
@@ -35,28 +35,35 @@ class AccessTokenRequirementTest {
         accessTokenRequirement.fulfill(expectedAccessToken)
 
         // Assert
-        Assertions.assertThat(accessTokenRequirement.accessToken).isNotNull
-        Assertions.assertThat(accessTokenRequirement.accessToken).isEqualTo(expectedAccessToken)
+        assertThat(accessTokenRequirement.accessToken).isNotNull
+        assertThat(accessTokenRequirement.accessToken).isEqualTo(expectedAccessToken)
     }
 
     @Test
-    fun accessTokenRequirement_validateUnFulfilledRequirement_ThrowsException() {
-        Assertions.assertThatThrownBy {
-            accessTokenRequirement.validate()
-        }.isInstanceOf(AccessTokenRequirementNotFulfilledException::class.java)
+    fun accessTokenRequirement_validateUnFulfilledRequirement_ReturnsFailure() {
+        // Act
+        val actualResult = accessTokenRequirement.validate()
+
+        // Assert
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(AccessTokenRequirementNotFulfilledException::class.java)
     }
 
     @Test
-    fun accessTokenRequirement_validateFulfilledRequirement_SucceedsWithNoException() {
+    fun accessTokenRequirement_validateFulfilledRequirement_ReturnsSuccess() {
         // Arrange
         val expectedAccessToken = "Test AccessToken"
         accessTokenRequirement.fulfill(expectedAccessToken)
 
         // Act
-        accessTokenRequirement.validate()
+        val actualResult = accessTokenRequirement.validate()
 
         // Assert
-        Assertions.assertThat(accessTokenRequirement.accessToken).isNotNull
-        Assertions.assertThat(accessTokenRequirement.accessToken).isEqualTo(expectedAccessToken)
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isSuccess).isTrue
+        assertThat(accessTokenRequirement.accessToken).isNotNull
+        assertThat(accessTokenRequirement.accessToken).isEqualTo(expectedAccessToken)
     }
 }
