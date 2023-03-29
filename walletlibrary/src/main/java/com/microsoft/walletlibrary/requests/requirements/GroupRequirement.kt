@@ -23,11 +23,13 @@ class GroupRequirement(
 
     override fun validate(): Result<Unit> {
         //TODO("Not fully implemented yet")
+        val validationFailureRequirementTypes = mutableListOf<String>()
         for (requirement in requirements) {
-            val validationResult = requirement.validate()
-            if (validationResult.isFailure)
-                return Result.failure(RequirementValidationException("Validation failed for ${requirement::class.simpleName}"))
+            if (requirement.validate().isFailure)
+                validationFailureRequirementTypes.add("${requirement::class.simpleName}")
         }
+        if (validationFailureRequirementTypes.isNotEmpty())
+            return Result.failure(RequirementValidationException("Validation failed for the requirements $validationFailureRequirementTypes"))
         return Result.success(Unit)
     }
 }

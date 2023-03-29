@@ -1,5 +1,8 @@
 package com.microsoft.walletlibrary.requests.styles
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class BasicVerifiedIdStyle(
     // Name of Verified Id.
     override val name: String,
@@ -18,4 +21,4 @@ class BasicVerifiedIdStyle(
 
     // Logo that should be displayed on the Verified Id.
     val logo: Logo? = null
-): VerifiedIdStyle(name)
+): VerifiedIdStyle()

@@ -5,9 +5,12 @@
 
 package com.microsoft.walletlibrary.requests.styles
 
+import kotlinx.serialization.Serializable
+
 /**
  * Holds information describing a logo.
  */
+@Serializable
 data class Logo(
     // If image needs to be fetched, service will use this property.
     var uri: String? = null,
