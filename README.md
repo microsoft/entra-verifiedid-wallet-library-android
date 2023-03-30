@@ -1,4 +1,11 @@
 # Microsoft Entra Wallet Library
+![badge-privatepreview]
+![badge-packagemanagers-supported] 
+![badge-package-version] 
+![badge-languages] 
+![badge-platforms]
+![badge-license]
+![badge-azure-pipline]
 
 ## Introduction
 The Microsoft Entra Wallet Library for Android gives your app the ability to begin using the Microsoft Entra Verified Id platform by supporting the issuance and presentation of Verified Ids in accordance with OpenID Connect, Presentation Exchange, Verifiable Credentials, and more up and coming industry standards.
@@ -36,16 +43,15 @@ if (verifiedIdRequestResult.isSuccess) {
 }
 ```
 
-At the time of publish, we support the following requirements for an issuance request:
-* GroupRequirement
-* SelfAttestedClaimRequirement
-* IdTokenRequirement
-* AccessTokenRequirement
-* VerifiedIdRequirement
-* PinRequirement
-
-We support the following requirements for a presentation request:
-* VerifiedIdRequirement
+At the time of publish, we support the following requirements on a request:
+| Requirement                  	| Description 	| Supported on Request 	|
+|------------------------------	|-------------	|------------------------------	|
+| GroupRequirement             	| A verifier/issuer could request multiple requirements. If more than one requirement is requested, a GroupRequirement contains a list of the requirements.        	| Issuance/Presentation        	|
+| VerifiedIdRequirement        	| A verifier/issuer can request a VerifiedId. See below for helper methods to fulfill the requirement.       	| Issuance/Presentation        	|
+| SelfAttestedClaimRequirement 	| An issuer might require a self-attested claim that is simply a string value.        	| Issuance                     	|
+| PinRequirement               	| An issuer might require a pin from user.         	| Issuance                     	|
+| AccessTokenRequirement       	| An issuer might request an Access Token. An Access Token must be retrieved using an external library.        	| Issuance                     	|
+| IdTokenRequirement           	| An issuer might request an Id Token. If the Id Token is not already injected into the request, an Id Token must be retrieved using an external library.       	| Issuance                     	|
 
 To fulfill a requirement, cast it to the correct Requirement type and use the `fulfill` method.
 ```kotlin
@@ -92,6 +98,16 @@ val encodedVerifiedIdString = verifiedIdClient.encode(verifiedId)
 val verifiedId = verifiedIdClient.decodeVerifiedId(encodedVerifiedIdString)
 ```
 
+## Sample App
+1. Clone this repository.
+2. Open the WalletLibrary workspace in Android Studio.
+3. Run the following command from the location where repository was cloned. It initializes the git submodules. 
+```
+     git submodule update --init --recursive 
+```
+4. Create a test device. 
+5. Run the `walletlibarydemo` app. 
+
 ## Documentation
 
 * [External Architecture](https://github.com/microsoft/entra-verifiedid-wallet-library-ios/blob/dev/Docs/LibraryArchitecture.md)
@@ -118,3 +134,11 @@ trademarks or logos is subject to and must follow
 [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
+
+[badge-package-version]: https://img.shields.io/maven-central/v/com.microsoft.entra.verifiedid/walletlibrary
+[badge-packagemanagers-supported]: https://img.shields.io/badge/supports-Maven%20Central-yellow.svg
+[badge-languages]: https://img.shields.io/badge/languages-Kotlin%20Java-blue.svg
+[badge-platforms]: https://img.shields.io/badge/platforms-Android-lightgrey.svg
+[badge-license]: https://img.shields.io/github/license/microsoft/entra-verifiedid-wallet-library-android
+[badge-azure-pipline]: https://decentralized-identity.visualstudio.com/Core/_apis/build/status/Android%20Wallet%20Library?branchName=dev
+[badge-privatepreview]: https://img.shields.io/badge/status-Private%20Preview-red.svg
