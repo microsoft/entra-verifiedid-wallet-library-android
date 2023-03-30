@@ -230,7 +230,7 @@ class RawManifestTest {
         assertThat((verifiedIdRequestContent.requesterStyle as VerifiedIdManifestIssuerStyle).requester).isEqualTo(
             expectedIssuerInCard
         )
-        assertThat((verifiedIdRequestContent.requesterStyle).logo).isNull()
+        assertThat((verifiedIdRequestContent.requesterStyle).manifestIssuerLogo).isNull()
         assertThat(verifiedIdRequestContent.requesterStyle.locale).isEqualTo("")
     }
 }

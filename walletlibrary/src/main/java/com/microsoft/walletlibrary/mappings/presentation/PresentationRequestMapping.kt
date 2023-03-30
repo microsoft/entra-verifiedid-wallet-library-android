@@ -6,9 +6,9 @@
 package com.microsoft.walletlibrary.mappings.presentation
 
 import com.microsoft.did.sdk.credential.service.PresentationRequest
-import com.microsoft.walletlibrary.requests.styles.Logo
 import com.microsoft.walletlibrary.requests.styles.OpenIdVerifierStyle
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdLogo
 
 /**
  * Maps PresentationRequest object from VC SDK to RequesterStyle and OpenIdPresentationRequest in library.
@@ -18,6 +18,6 @@ internal fun PresentationRequest.getRequesterStyle(): RequesterStyle {
     return OpenIdVerifierStyle(
         this.entityName,
         "",
-        Logo(registration.logoUri, registration.logoData, "")
+        VerifiedIdLogo(registration.logoUri, "")
     )
 }

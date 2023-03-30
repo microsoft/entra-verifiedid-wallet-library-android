@@ -312,10 +312,9 @@ class OpenIdRequestHandlerTest {
         assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle).isInstanceOf(
             BasicVerifiedIdStyle::class.java
         )
-        assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).logo).isNotNull
-        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.uri).isEqualTo(expectedLogoUri)
-        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.image).isEqualTo(expectedLogoImage)
-        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.description).isEqualTo(
+        assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).verifiedIdLogo).isNotNull
+        assertThat(actualOpenIdRequest.verifiedIdStyle.verifiedIdLogo?.uri).isEqualTo(expectedLogoUri)
+        assertThat(actualOpenIdRequest.verifiedIdStyle.verifiedIdLogo?.description).isEqualTo(
             expectedLogoDescription
         )
     }
@@ -338,7 +337,7 @@ class OpenIdRequestHandlerTest {
         assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle).isInstanceOf(
             BasicVerifiedIdStyle::class.java
         )
-        assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).logo).isNull()
+        assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).verifiedIdLogo).isNull()
     }
 
     @Test
@@ -368,7 +367,7 @@ class OpenIdRequestHandlerTest {
             expectedCardDescription
         )
         assertThat(actualOpenIdRequest.verifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
-        assertThat(actualOpenIdRequest.verifiedIdStyle.logo).isNull()
+        assertThat(actualOpenIdRequest.verifiedIdStyle.verifiedIdLogo).isNull()
     }
 
     @Test
@@ -397,6 +396,6 @@ class OpenIdRequestHandlerTest {
             expectedCardDescription
         )
         assertThat(actualOpenIdRequest.verifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
-        assertThat(actualOpenIdRequest.verifiedIdStyle.logo).isNull()
+        assertThat(actualOpenIdRequest.verifiedIdStyle.verifiedIdLogo).isNull()
     }
 }

@@ -28,6 +28,6 @@ class IssuanceRequestMappingTest {
         // Assert
         assertThat(actualRequesterStyle.requester).isEqualTo(expectedEntityName)
         assertThat(actualRequesterStyle).isInstanceOf(VerifiedIdManifestIssuerStyle::class.java)
-        assertThat((actualRequesterStyle as VerifiedIdManifestIssuerStyle).logo).isNull()
+        assertThat((actualRequesterStyle as VerifiedIdManifestIssuerStyle).manifestIssuerLogo).isNull()
     }
 }
