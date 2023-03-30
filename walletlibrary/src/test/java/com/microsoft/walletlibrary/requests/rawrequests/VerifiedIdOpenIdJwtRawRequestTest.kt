@@ -113,7 +113,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         assertThat(actualResult.requesterStyle.name).isEqualTo(expectedEntityName)
         assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
         assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
-        assertThat(actualResult.requesterStyle.verifierLogo?.uri).isEqualTo(expectedLogoUri)
+        assertThat(actualResult.requesterStyle.verifierLogo?.url).isEqualTo(expectedLogoUri)
         assertThat(actualResult.requirement).isInstanceOf(VerifiedIdRequirement::class.java)
         assertThat(actualResult.rootOfTrust.verified).isEqualTo(true)
         assertThat(actualResult.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
@@ -134,7 +134,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         assertThat(actualResult.requesterStyle.name).isEqualTo(expectedEntityName)
         assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
         assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
-        assertThat(actualResult.requesterStyle.verifierLogo?.uri).isEqualTo("")
+        assertThat(actualResult.requesterStyle.verifierLogo?.url).isEqualTo("")
         assertThat(actualResult.requirement).isInstanceOf(VerifiedIdRequirement::class.java)
         assertThat(actualResult.rootOfTrust.verified).isEqualTo(true)
         assertThat(actualResult.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
@@ -192,7 +192,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         assertThat(actualResult.requesterStyle.name).isEqualTo(expectedEntityName)
         assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
         assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
-        assertThat(actualResult.requesterStyle.verifierLogo?.uri).isEqualTo("")
+        assertThat(actualResult.requesterStyle.verifierLogo?.url).isEqualTo("")
         assertThat(actualResult.requirement).isInstanceOf(VerifiedIdRequirement::class.java)
         assertThat(actualResult.rootOfTrust.verified).isEqualTo(true)
         assertThat(actualResult.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)

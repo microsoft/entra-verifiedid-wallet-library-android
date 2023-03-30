@@ -313,8 +313,8 @@ class OpenIdRequestHandlerTest {
             BasicVerifiedIdStyle::class.java
         )
         assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).logo).isNotNull
-        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.uri).isEqualTo(expectedLogoUri)
-        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.description).isEqualTo(
+        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.url).isEqualTo(expectedLogoUri)
+        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.altText).isEqualTo(
             expectedLogoDescription
         )
     }

@@ -9,5 +9,5 @@ import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdLogo
 
 internal fun Logo.toLogo(): VerifiedIdLogo {
-    return VerifiedIdLogo(this.uri, this.description)
+    return VerifiedIdLogo(uri, description)
 }

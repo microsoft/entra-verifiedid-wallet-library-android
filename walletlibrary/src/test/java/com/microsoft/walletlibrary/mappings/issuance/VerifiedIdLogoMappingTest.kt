@@ -24,8 +24,8 @@ class VerifiedIdLogoMappingTest {
         val actualLogo = logo.toLogo()
 
         // Assert
-        assertThat(actualLogo.uri).isEqualTo(expectedLogoUri)
-        assertThat(actualLogo.description).isEqualTo(expectedLogoDescription)
+        assertThat(actualLogo.url).isEqualTo(expectedLogoUri)
+        assertThat(actualLogo.altText).isEqualTo(expectedLogoDescription)
     }
 
     @Test
@@ -37,7 +37,7 @@ class VerifiedIdLogoMappingTest {
         val actualLogo = logo.toLogo()
 
         // Assert
-        assertThat(actualLogo.uri).isNull()
-        assertThat(actualLogo.description).isEqualTo(expectedLogoDescription)
+        assertThat(actualLogo.url).isNull()
+        assertThat(actualLogo.altText).isEqualTo(expectedLogoDescription)
     }
 }

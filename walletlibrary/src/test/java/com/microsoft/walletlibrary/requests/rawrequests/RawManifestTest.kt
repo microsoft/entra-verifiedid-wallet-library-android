@@ -28,7 +28,9 @@ class RawManifestTest {
     private val expectedCardIssuer = "test issuer"
     private val expectedCardBackgroundColor = "#FFFFFF"
     private val expectedCardTextColor = "#000000"
-    private val consentDescriptor: ConsentDescriptor = mockk()
+    private val expectedConsentTitle = "test consent title"
+    private val expectedConsentInstructions = "test consent instructions"
+    private val consentDescriptor: ConsentDescriptor = ConsentDescriptor(expectedConsentTitle, expectedConsentInstructions)
 
     private val credentialAttestations: CredentialAttestations = mockk()
     private val expectedClaimDescriptorType = "claimType"
