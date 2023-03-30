@@ -3,6 +3,7 @@ package com.microsoft.walletlibrary.verifiedid
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.did.sdk.credential.service.models.contracts.display.CardDescriptor
 import com.microsoft.did.sdk.credential.service.models.contracts.display.ClaimDescriptor
 import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import io.mockk.every
@@ -17,6 +18,13 @@ class VerifiableCredentialTest {
     private val verifiableCredentialContract: VerifiableCredentialContract = mockk()
     private val mockVcContent: VerifiableCredentialContent = mockk()
     private val mockDisplayContract: DisplayContract = mockk()
+    private val mockCardDescriptor: CardDescriptor = mockk()
+    private val expectedCardTitle = "Test VC"
+    private val expectedCardIssuer = "Test Issuer"
+    private val expectedCardBackgroundColor = "#000000"
+    private val expectedCardTextColor = "#ffffff"
+    private val expectedCardDescription = "VC issued for testing purposes"
+
     private lateinit var verifiableCredential: VerifiableCredential
     private val expectedClaim1Name = "name"
     private val expectedClaim1Value = "test"
@@ -33,6 +41,7 @@ class VerifiableCredentialTest {
         every { verifiableCredentialContract.display } returns mockDisplayContract
         every { mockDisplayContract.claims } returns emptyMap()
         setupVcContent()
+        setupDisplayContract()
         verifiableCredential =
             VerifiableCredential(verifiableCredentialFromSdk, verifiableCredentialContract)
 
@@ -59,6 +68,7 @@ class VerifiableCredentialTest {
         every { verifiableCredentialContract.display } returns mockDisplayContract
         every { mockDisplayContract.claims } returns displayContractClaims
         setupVcContent()
+        setupDisplayContract()
         verifiableCredential =
             VerifiableCredential(verifiableCredentialFromSdk, verifiableCredentialContract)
 
@@ -81,6 +91,7 @@ class VerifiableCredentialTest {
         every { verifiableCredentialContract.display } returns mockDisplayContract
         every { mockDisplayContract.claims } returns displayContractClaims
         setupVcContent()
+        setupDisplayContract()
         verifiableCredential =
             VerifiableCredential(verifiableCredentialFromSdk, verifiableCredentialContract)
 
@@ -101,6 +112,7 @@ class VerifiableCredentialTest {
         every { verifiableCredentialContract.display } returns mockDisplayContract
         every { mockDisplayContract.claims } returns emptyMap()
         setupVcContent()
+        setupDisplayContract()
         val expectedIssuedDate = Date(5 * 1000)
 
         // Act
@@ -117,6 +129,7 @@ class VerifiableCredentialTest {
         every { verifiableCredentialContract.display } returns mockDisplayContract
         every { mockDisplayContract.claims } returns emptyMap()
         setupVcContent()
+        setupDisplayContract()
         val expectedExpiryDate = Date(1000 * 1000)
 
         // Act
@@ -133,6 +146,7 @@ class VerifiableCredentialTest {
         every { verifiableCredentialContract.display } returns mockDisplayContract
         every { mockDisplayContract.claims } returns emptyMap()
         setupVcContent()
+        setupDisplayContract()
         every { mockVcContent.exp } returns null
 
         // Act
@@ -156,5 +170,15 @@ class VerifiableCredentialTest {
         every { mockVcContent.vc } returns mockVerifiableCredentialDescriptor
         every { mockVerifiableCredentialDescriptor.credentialSubject } returns credentialSubjectMap
         every { mockVerifiableCredentialDescriptor.type } returns listOf("TestCredential")
+    }
+
+    private fun setupDisplayContract() {
+        every { mockDisplayContract.card } returns mockCardDescriptor
+        every { mockCardDescriptor.title } returns expectedCardTitle
+        every { mockCardDescriptor.issuedBy } returns expectedCardIssuer
+        every { mockCardDescriptor.textColor } returns expectedCardTextColor
+        every { mockCardDescriptor.backgroundColor } returns expectedCardBackgroundColor
+        every { mockCardDescriptor.description } returns expectedCardDescription
+        every { mockCardDescriptor.logo } returns null
     }
 }
