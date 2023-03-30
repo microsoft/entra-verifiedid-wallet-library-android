@@ -17,7 +17,6 @@ internal fun PresentationRequest.getRequesterStyle(): RequesterStyle {
     val registration = this.content.registration
     return OpenIdVerifierStyle(
         this.entityName,
-        "",
         VerifiedIdLogo(registration.logoUri, "")
     )
 }

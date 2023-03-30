@@ -44,7 +44,7 @@ class OpenIdRequestHandlerTest {
     private val expectedRequesterName = "Test"
     private val expectedRequirementClaimName = "name"
     private val presentationRequestContent: PresentationRequestContent = mockk()
-    private val requesterStyle = OpenIdVerifierStyle(expectedRequesterName, "")
+    private val requesterStyle = OpenIdVerifierStyle(expectedRequesterName)
     private val rootOfTrust = RootOfTrust(expectedRootOfTrustSource, true)
     private val selfAttestedClaimRequirement = SelfAttestedClaimRequirement(
         "",
