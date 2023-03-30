@@ -246,7 +246,7 @@ class OpenIdRequestHandlerTest {
         assertThat(request).isInstanceOf(OpenIdPresentationRequest::class.java)
         assertThat(request.rootOfTrust.verified).isEqualTo(true)
         assertThat(request.rootOfTrust.source).isEqualTo(expectedRootOfTrustSource)
-        assertThat(request.requesterStyle.requester).isEqualTo(expectedRequesterName)
+        assertThat(request.requesterStyle.name).isEqualTo(expectedRequesterName)
         assertThat(request.requirement).isInstanceOf(SelfAttestedClaimRequirement::class.java)
         assertThat((request.requirement as SelfAttestedClaimRequirement).claim).isEqualTo(
             expectedRequirementClaimName
@@ -270,7 +270,7 @@ class OpenIdRequestHandlerTest {
         // Assert
         assertThat(request).isInstanceOf(ManifestIssuanceRequest::class.java)
         assertThat(request.requesterStyle).isInstanceOf(VerifiedIdManifestIssuerStyle::class.java)
-        assertThat(request.requesterStyle.requester).isEqualTo(expectedRequesterName)
+        assertThat(request.requesterStyle.name).isEqualTo(expectedRequesterName)
         assertThat(request.rootOfTrust).isEqualTo(rootOfTrust)
         assertThat(request.requirement).isInstanceOf(SelfAttestedClaimRequirement::class.java)
         assertThat((request.requirement as SelfAttestedClaimRequirement).claim).isEqualTo(
@@ -312,9 +312,9 @@ class OpenIdRequestHandlerTest {
         assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle).isInstanceOf(
             BasicVerifiedIdStyle::class.java
         )
-        assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).verifiedIdLogo).isNotNull
-        assertThat(actualOpenIdRequest.verifiedIdStyle.verifiedIdLogo?.uri).isEqualTo(expectedLogoUri)
-        assertThat(actualOpenIdRequest.verifiedIdStyle.verifiedIdLogo?.description).isEqualTo(
+        assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).logo).isNotNull
+        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.uri).isEqualTo(expectedLogoUri)
+        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.description).isEqualTo(
             expectedLogoDescription
         )
     }
@@ -337,7 +337,7 @@ class OpenIdRequestHandlerTest {
         assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle).isInstanceOf(
             BasicVerifiedIdStyle::class.java
         )
-        assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).verifiedIdLogo).isNull()
+        assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).logo).isNull()
     }
 
     @Test
@@ -367,7 +367,7 @@ class OpenIdRequestHandlerTest {
             expectedCardDescription
         )
         assertThat(actualOpenIdRequest.verifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
-        assertThat(actualOpenIdRequest.verifiedIdStyle.verifiedIdLogo).isNull()
+        assertThat(actualOpenIdRequest.verifiedIdStyle.logo).isNull()
     }
 
     @Test
@@ -396,6 +396,6 @@ class OpenIdRequestHandlerTest {
             expectedCardDescription
         )
         assertThat(actualOpenIdRequest.verifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
-        assertThat(actualOpenIdRequest.verifiedIdStyle.verifiedIdLogo).isNull()
+        assertThat(actualOpenIdRequest.verifiedIdStyle.logo).isNull()
     }
 }

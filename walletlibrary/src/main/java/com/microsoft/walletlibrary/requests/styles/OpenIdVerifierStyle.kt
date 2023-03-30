@@ -10,7 +10,7 @@ package com.microsoft.walletlibrary.requests.styles
  */
 data class OpenIdVerifierStyle(
     // Name of the requester.
-    override val requester: String,
+    override val name: String,
 
     // Logo of the requester.
     val verifierLogo: VerifiedIdLogo? = null

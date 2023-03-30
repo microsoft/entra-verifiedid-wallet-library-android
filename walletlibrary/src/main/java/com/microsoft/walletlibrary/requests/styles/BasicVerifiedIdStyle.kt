@@ -20,5 +20,5 @@ class BasicVerifiedIdStyle(
     val description: String,
 
     // Logo that should be displayed on the Verified Id.
-    val verifiedIdLogo: VerifiedIdLogo? = null
+    val logo: VerifiedIdLogo? = null
 ): VerifiedIdStyle()

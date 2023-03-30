@@ -150,7 +150,7 @@ class RawManifestTest {
             expectedClaimName
         )
         assertThat(issuanceRequestContent.requirement.required).isEqualTo(true)
-        assertThat(issuanceRequestContent.requesterStyle.requester).isEqualTo(expectedIssuerInCard)
+        assertThat(issuanceRequestContent.requesterStyle.name).isEqualTo(expectedIssuerInCard)
         assertThat(issuanceRequestContent.rootOfTrust.verified).isEqualTo(true)
         assertThat(issuanceRequestContent.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
     }
@@ -227,7 +227,7 @@ class RawManifestTest {
         assertThat(verifiedIdRequestContent.requesterStyle).isInstanceOf(
             VerifiedIdManifestIssuerStyle::class.java
         )
-        assertThat((verifiedIdRequestContent.requesterStyle as VerifiedIdManifestIssuerStyle).requester).isEqualTo(
+        assertThat((verifiedIdRequestContent.requesterStyle as VerifiedIdManifestIssuerStyle).name).isEqualTo(
             expectedIssuerInCard
         )
     }

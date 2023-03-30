@@ -26,7 +26,7 @@ class IssuanceRequestMappingTest {
         val actualRequesterStyle = issuanceRequest.getRequesterStyle()
 
         // Assert
-        assertThat(actualRequesterStyle.requester).isEqualTo(expectedEntityName)
+        assertThat(actualRequesterStyle.name).isEqualTo(expectedEntityName)
         assertThat(actualRequesterStyle).isInstanceOf(VerifiedIdManifestIssuerStyle::class.java)
     }
 }

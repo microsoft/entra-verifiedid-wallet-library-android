@@ -10,5 +10,5 @@ package com.microsoft.walletlibrary.requests.styles
  */
 data class VerifiedIdManifestIssuerStyle(
     // Name of the requester.
-    override val requester: String
+    override val name: String
 ): RequesterStyle

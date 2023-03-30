@@ -74,7 +74,7 @@ class PresentationRequestMappingTest {
 
         // Assert
         assertThat(actualRequesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
-        assertThat(actualRequesterStyle.requester).isEqualTo(expectedEntityName)
+        assertThat(actualRequesterStyle.name).isEqualTo(expectedEntityName)
         assertThat(actualRequesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
         assertThat((actualRequesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
         assertThat(actualRequesterStyle.verifierLogo?.uri).isEqualTo(expectedLogoUri)

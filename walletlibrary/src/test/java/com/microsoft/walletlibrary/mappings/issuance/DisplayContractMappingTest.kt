@@ -81,9 +81,9 @@ class DisplayContractMappingTest {
         assertThat(actualVerifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
         assertThat(actualVerifiedIdStyle.backgroundColor).isEqualTo(expectedCardBackgroundColor)
         assertThat(actualVerifiedIdStyle.textColor).isEqualTo(expectedCardTextColor)
-        assertThat(actualVerifiedIdStyle.verifiedIdLogo).isNotNull
-        assertThat(actualVerifiedIdStyle.verifiedIdLogo?.uri).isEqualTo(expectedLogoUri)
-        assertThat(actualVerifiedIdStyle.verifiedIdLogo?.description).isEqualTo(expectedLogoDescription)
+        assertThat(actualVerifiedIdStyle.logo).isNotNull
+        assertThat(actualVerifiedIdStyle.logo?.uri).isEqualTo(expectedLogoUri)
+        assertThat(actualVerifiedIdStyle.logo?.description).isEqualTo(expectedLogoDescription)
     }
 
     @Test
@@ -102,7 +102,7 @@ class DisplayContractMappingTest {
         assertThat(actualVerifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
         assertThat(actualVerifiedIdStyle.backgroundColor).isEqualTo(expectedCardBackgroundColor)
         assertThat(actualVerifiedIdStyle.textColor).isEqualTo(expectedCardTextColor)
-        assertThat(actualVerifiedIdStyle.verifiedIdLogo).isNull()
+        assertThat(actualVerifiedIdStyle.logo).isNull()
     }
 
     @Test
@@ -120,7 +120,7 @@ class DisplayContractMappingTest {
         assertThat(actualVerifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
         assertThat(actualVerifiedIdStyle.backgroundColor).isEqualTo(expectedCardBackgroundColor)
         assertThat(actualVerifiedIdStyle.textColor).isEqualTo(expectedCardTextColor)
-        assertThat(actualVerifiedIdStyle.verifiedIdLogo).isNull()
+        assertThat(actualVerifiedIdStyle.logo).isNull()
     }
 
     @Test
@@ -139,7 +139,7 @@ class DisplayContractMappingTest {
         assertThat(actualVerifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
         assertThat(actualVerifiedIdStyle.backgroundColor).isEqualTo(expectedCardBackgroundColor)
         assertThat(actualVerifiedIdStyle.textColor).isEqualTo(expectedCardTextColor)
-        assertThat(actualVerifiedIdStyle.verifiedIdLogo).isNull()
+        assertThat(actualVerifiedIdStyle.logo).isNull()
     }
 
     @Test
@@ -159,6 +159,6 @@ class DisplayContractMappingTest {
         assertThat(actualVerifiedIdStyle.issuer).isEqualTo(expectedCardIssuer)
         assertThat(actualVerifiedIdStyle.backgroundColor).isEqualTo(expectedCardBackgroundColor)
         assertThat(actualVerifiedIdStyle.textColor).isEqualTo(expectedCardTextColor)
-        assertThat(actualVerifiedIdStyle.verifiedIdLogo).isNull()
+        assertThat(actualVerifiedIdStyle.logo).isNull()
     }
 }

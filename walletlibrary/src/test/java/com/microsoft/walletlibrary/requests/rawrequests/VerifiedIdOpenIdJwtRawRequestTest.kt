@@ -110,7 +110,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
 
         // Assert
         assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
-        assertThat(actualResult.requesterStyle.requester).isEqualTo(expectedEntityName)
+        assertThat(actualResult.requesterStyle.name).isEqualTo(expectedEntityName)
         assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
         assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
         assertThat(actualResult.requesterStyle.verifierLogo?.uri).isEqualTo(expectedLogoUri)
@@ -131,7 +131,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
 
         // Assert
         assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
-        assertThat(actualResult.requesterStyle.requester).isEqualTo(expectedEntityName)
+        assertThat(actualResult.requesterStyle.name).isEqualTo(expectedEntityName)
         assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
         assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
         assertThat(actualResult.requesterStyle.verifierLogo?.uri).isEqualTo("")
@@ -189,7 +189,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
 
         // Assert
         assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
-        assertThat(actualResult.requesterStyle.requester).isEqualTo(expectedEntityName)
+        assertThat(actualResult.requesterStyle.name).isEqualTo(expectedEntityName)
         assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
         assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
         assertThat(actualResult.requesterStyle.verifierLogo?.uri).isEqualTo("")

@@ -10,5 +10,5 @@ package com.microsoft.walletlibrary.requests.styles
  */
 interface RequesterStyle {
     // Name of the requester.
-    val requester: String
+    val name: String
 }
