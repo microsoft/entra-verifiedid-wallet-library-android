@@ -10,11 +10,8 @@ package com.microsoft.walletlibrary.requests.styles
  */
 data class OpenIdVerifierStyle(
     // Name of the requester.
-    override val requester: String,
+    override val name: String,
 
-    // Locale of the requester.
-    val locale: String,
-
-    // Logo of the requester. If a url is present in contract, it is fetched to this.
-    val logo: Logo? = null
+    // Logo of the requester.
+    val verifierLogo: VerifiedIdLogo? = null
 ): RequesterStyle

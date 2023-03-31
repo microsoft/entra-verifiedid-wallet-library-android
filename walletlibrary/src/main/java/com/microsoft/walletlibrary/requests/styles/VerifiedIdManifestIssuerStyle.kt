@@ -10,11 +10,11 @@ package com.microsoft.walletlibrary.requests.styles
  */
 data class VerifiedIdManifestIssuerStyle(
     // Name of the requester.
-    override val requester: String,
+    override val name: String,
 
-    // Locale of the requester.
-    val locale: String,
+    // The title of the request.
+    val requestTitle: String? = null,
 
-    // Logo of the requester. If a url is present in contract, it is fetched to this.
-    val logo: Logo? = null
+    // The instructions on the request.
+    val requestInstructions: String? = null
 ): RequesterStyle

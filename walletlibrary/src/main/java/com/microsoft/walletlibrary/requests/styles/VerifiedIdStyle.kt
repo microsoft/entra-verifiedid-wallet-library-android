@@ -5,10 +5,13 @@
 
 package com.microsoft.walletlibrary.requests.styles
 
+import kotlinx.serialization.Serializable
+
 /**
  * Holds information describing look and feel of a Verified Id.
  */
-open class VerifiedIdStyle(
+@Serializable
+abstract class VerifiedIdStyle {
     // The name of the Verified Id.
-    open val name: String
-)
+    abstract val name: String
+}

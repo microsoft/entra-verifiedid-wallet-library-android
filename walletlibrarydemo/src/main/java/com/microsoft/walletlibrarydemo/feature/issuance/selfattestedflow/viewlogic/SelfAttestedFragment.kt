@@ -1,3 +1,4 @@
+/*
 package com.microsoft.walletlibrarydemo.feature.issuance.selfattestedflow.viewlogic
 
 import android.net.Uri
@@ -162,4 +163,4 @@ class SelfAttestedFragment : Fragment() {
             binding.claimsList.visibility = View.VISIBLE
         }
     }
-}
+}*/

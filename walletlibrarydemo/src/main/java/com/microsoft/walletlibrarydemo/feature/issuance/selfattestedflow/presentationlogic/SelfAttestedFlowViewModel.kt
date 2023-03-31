@@ -1,3 +1,4 @@
+/*
 package com.microsoft.walletlibrarydemo.feature.issuance.selfattestedflow.presentationlogic
 
 import android.annotation.SuppressLint
@@ -10,7 +11,6 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
-//TODO(Add dependency injection)
 class SelfAttestedFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Context):
     ViewModel() {
     var verifiedIdRequestResult: Result<VerifiedIdRequest<*>>? = null
@@ -42,4 +42,4 @@ class SelfAttestedFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Co
             verifiedIdResult = verifiedIdRequest.complete()
         }
     }
-}
+}*/

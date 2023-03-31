@@ -56,7 +56,7 @@ object WalletLibraryLogger {
         log(Level.FAILURE, message, throwable, tag)
     }
 
-    private fun log(logLevel: Level, message: String, throwable: Throwable? = null, tag: String) {
+    fun log(logLevel: Level, message: String, throwable: Throwable? = null, tag: String) {
         CONSUMERS.forEach { it.log(logLevel, message, throwable, tag) }
     }
 

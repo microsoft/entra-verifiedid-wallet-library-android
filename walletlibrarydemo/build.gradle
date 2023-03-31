@@ -40,15 +40,6 @@ android {
         jvmTarget = '1.8'
     }
 
-    flavorDimensions "main"
-    productFlavors {
-        local {
-            dimension "main"
-        }
-        dist {
-            dimension "main"
-        }
-    }
     buildFeatures.viewBinding = true
 }
 
@@ -64,8 +55,8 @@ dependencies {
     implementation "androidx.navigation:navigation-runtime-ktx:$androidx_navigation_version"
     implementation "androidx.navigation:navigation-fragment-ktx:$androidx_navigation_version"
     implementation "androidx.navigation:navigation-ui-ktx:$androidx_navigation_version"
-    distImplementation project(':walletlibrary')
-//    implementation "com.microsoft.entra.verifiedid:walletlibrary:0.0.1-alpha.0"
+//    implementation project(':walletlibrary')
+    implementation "com.microsoft.entra.verifiedid:walletlibrary:0.0.1-test.1"
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation "androidx.test.ext:junit:$androidx_test_junit_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidx_test_espresso_core_version"

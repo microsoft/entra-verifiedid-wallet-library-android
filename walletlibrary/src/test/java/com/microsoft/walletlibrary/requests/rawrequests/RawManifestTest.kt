@@ -28,7 +28,9 @@ class RawManifestTest {
     private val expectedCardIssuer = "test issuer"
     private val expectedCardBackgroundColor = "#FFFFFF"
     private val expectedCardTextColor = "#000000"
-    private val consentDescriptor: ConsentDescriptor = mockk()
+    private val expectedConsentTitle = "test consent title"
+    private val expectedConsentInstructions = "test consent instructions"
+    private val consentDescriptor: ConsentDescriptor = ConsentDescriptor(expectedConsentTitle, expectedConsentInstructions)
 
     private val credentialAttestations: CredentialAttestations = mockk()
     private val expectedClaimDescriptorType = "claimType"
@@ -150,7 +152,7 @@ class RawManifestTest {
             expectedClaimName
         )
         assertThat(issuanceRequestContent.requirement.required).isEqualTo(true)
-        assertThat(issuanceRequestContent.requesterStyle.requester).isEqualTo(expectedIssuerInCard)
+        assertThat(issuanceRequestContent.requesterStyle.name).isEqualTo(expectedIssuerInCard)
         assertThat(issuanceRequestContent.rootOfTrust.verified).isEqualTo(true)
         assertThat(issuanceRequestContent.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
     }
@@ -227,10 +229,8 @@ class RawManifestTest {
         assertThat(verifiedIdRequestContent.requesterStyle).isInstanceOf(
             VerifiedIdManifestIssuerStyle::class.java
         )
-        assertThat((verifiedIdRequestContent.requesterStyle as VerifiedIdManifestIssuerStyle).requester).isEqualTo(
+        assertThat((verifiedIdRequestContent.requesterStyle as VerifiedIdManifestIssuerStyle).name).isEqualTo(
             expectedIssuerInCard
         )
-        assertThat((verifiedIdRequestContent.requesterStyle).logo).isNull()
-        assertThat(verifiedIdRequestContent.requesterStyle.locale).isEqualTo("")
     }
 }

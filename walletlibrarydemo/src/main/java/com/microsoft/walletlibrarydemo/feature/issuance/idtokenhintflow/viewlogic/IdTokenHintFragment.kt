@@ -1,3 +1,4 @@
+/*
 package com.microsoft.walletlibrarydemo.feature.issuance.idtokenhintflow.viewlogic
 
 import android.net.Uri
@@ -179,4 +180,4 @@ class IdTokenHintFragment : Fragment() {
             binding.claimsList.visibility = View.VISIBLE
         }
     }
-}
+}*/

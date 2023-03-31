@@ -5,16 +5,19 @@
 
 package com.microsoft.walletlibrary.requests.styles
 
+import android.net.Uri
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
+
 /**
  * Holds information describing a logo.
  */
-data class Logo(
+@Serializable
+data class VerifiedIdLogo(
+    @Contextual
     // If image needs to be fetched, service will use this property.
-    var uri: String? = null,
-
-    // Else if image is in svg or base64 format, service will use this property.
-    var image: String? = null,
+    var url: String? = null,
 
     // Description used for alt text or voice over.
-    val description: String
+    val altText: String? = null
 )

@@ -29,12 +29,13 @@ private fun PresentationResponse.addVerifiedIdRequirement(verifiedIdRequirement:
         throw IdInVerifiedIdRequirementDoesNotMatchRequestException("Id in VerifiedId Requirement does not match the id in request.")
     if (credentialPresentationInputDescriptor.size > 1)
         throw VerifiedIdRequirementIdConflictException("Multiple VerifiedId Requirements have the same Ids.")
+    verifiedIdRequirement.validate().getOrThrow()
     requestedVcPresentationSubmissionMap[credentialPresentationInputDescriptor.first()] =
         (verifiedIdRequirement.verifiedId as VerifiableCredential).raw
 }
 
 private fun PresentationResponse.addGroupRequirement(groupRequirement: GroupRequirement) {
-    groupRequirement.validate()
+    groupRequirement.validate().getOrThrow()
     val requirements = groupRequirement.requirements
     for (requirement in requirements) {
         addRequirements(requirement)

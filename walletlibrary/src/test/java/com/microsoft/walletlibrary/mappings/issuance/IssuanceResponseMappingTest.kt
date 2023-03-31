@@ -5,9 +5,13 @@ import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.models.contracts.InputContract
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.walletlibrary.requests.requirements.*
+import com.microsoft.walletlibrary.util.IdTokenRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.PinRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.SelfAttestedClaimRequirementNotFulfilledException
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 
 class IssuanceResponseMappingTest {
@@ -18,7 +22,7 @@ class IssuanceResponseMappingTest {
     private val credentialIssuer = "Test Issuer"
     private val expectedClaim = "name"
     private val expectedClaimValue = "Test"
-    private val selfAttestedClaimRequirement = SelfAttestedClaimRequirement(
+    private var selfAttestedClaimRequirement = SelfAttestedClaimRequirement(
         "",
         expectedClaim,
         encrypted = false,
@@ -30,7 +34,7 @@ class IssuanceResponseMappingTest {
     private val expectedConfiguration = "configuration"
     private val expectedAccessTokenValue = "Test Access Token"
     private val expectedPinValue = "1234"
-    private val idTokenRequirement =
+    private var idTokenRequirement =
         IdTokenRequirement(
             "",
             expectedConfiguration,
@@ -43,7 +47,7 @@ class IssuanceResponseMappingTest {
             required = true,
             idToken = expectedIdTokenValue
         )
-    private val accessTokenRequirement =
+    private var accessTokenRequirement =
         AccessTokenRequirement(
             "",
             expectedConfiguration,
@@ -86,6 +90,22 @@ class IssuanceResponseMappingTest {
     }
 
     @Test
+    fun addRequirementToResponse_SelfAttestedRequirementNotFulfilled_ThrowsException() {
+        // Arrange
+        selfAttestedClaimRequirement = SelfAttestedClaimRequirement(
+            "",
+            expectedClaim,
+            encrypted = false,
+            required = true
+        )
+
+        // Act and Assert
+        assertThatThrownBy{
+            issuanceResponse.addRequirements(selfAttestedClaimRequirement)
+        }.isInstanceOf(SelfAttestedClaimRequirementNotFulfilledException::class.java)
+    }
+
+    @Test
     fun addRequirementToResponse_AddIdTokenRequirement_AddsRequirementToIssuanceResponse() {
         // Act
         issuanceResponse.addRequirements(idTokenRequirement)
@@ -95,6 +115,28 @@ class IssuanceResponseMappingTest {
         assertThat(issuanceResponse.requestedIdTokenMap[expectedConfiguration]).isEqualTo(
             expectedIdTokenValue
         )
+    }
+
+    @Test
+    fun addRequirementToResponse_IdTokenRequirementNotFulfilled_ThrowsException() {
+        // Arrange
+        idTokenRequirement =
+            IdTokenRequirement(
+                "",
+                expectedConfiguration,
+                "",
+                "",
+                "",
+                "",
+                listOf(expectedRequestedClaim),
+                encrypted = false,
+                required = true
+            )
+
+        // Act and Assert
+        assertThatThrownBy{
+            issuanceResponse.addRequirements(idTokenRequirement)
+        }.isInstanceOf(IdTokenRequirementNotFulfilledException::class.java)
     }
 
     @Test
@@ -137,6 +179,18 @@ class IssuanceResponseMappingTest {
             expectedPinValue
         )
         assertThat(issuanceResponse.issuancePin?.pinSalt).isEqualTo(expectedPinSalt)
+    }
+
+    @Test
+    fun addRequirementToResponse_PinRequirementNotFulfilled_ThrowsException() {
+        // Arrange
+        val expectedPinSalt = "abcdefg"
+        val pinRequirement = PinRequirement(4, "numeric", true, expectedPinSalt)
+
+        // Act and Assert
+        assertThatThrownBy{
+            issuanceResponse.addRequirements(pinRequirement)
+        }.isInstanceOf(PinRequirementNotFulfilledException::class.java)
     }
 
     @Test

@@ -1,3 +1,4 @@
+/*
 package com.microsoft.walletlibrarydemo.feature.issuance.idtokenhintflow.presentationlogic
 
 import android.annotation.SuppressLint
@@ -12,7 +13,6 @@ import com.microsoft.walletlibrary.requests.requirements.PinRequirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
-//TODO(Add dependency injection)
 class IdTokenFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Context): ViewModel() {
     var verifiedIdRequestResult: Result<VerifiedIdRequest<*>>? = null
     var verifiedIdResult: Result<Any?>? = null
@@ -55,4 +55,4 @@ class IdTokenFlowViewModel(@SuppressLint("StaticFieldLeak") val context: Context
             verifiedIdResult = verifiedIdRequest.complete()
         }
     }
-}
+}*/
