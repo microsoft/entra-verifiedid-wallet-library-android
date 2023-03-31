@@ -2,7 +2,7 @@ package com.microsoft.walletlibrary.util
 
 import com.microsoft.did.sdk.util.log.SdkLog
 
-class WalletLibraryVCSDKLogConsumer(private val logger: WalletLibraryLogger): SdkLog.Consumer {
+internal class WalletLibraryVCSDKLogConsumer(private val logger: WalletLibraryLogger): SdkLog.Consumer {
 
     override fun log(logLevel: SdkLog.Level, message: String, throwable: Throwable?, tag: String) {
         logger.log(mapVcLogLevelToWalletLibraryLogLevel(logLevel), message, throwable, tag)
