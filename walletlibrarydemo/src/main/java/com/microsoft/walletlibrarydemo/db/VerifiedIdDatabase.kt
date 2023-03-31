@@ -1,4 +1,3 @@
-/*
 package com.microsoft.walletlibrarydemo.db
 
 import android.content.Context
@@ -27,4 +26,4 @@ abstract class VerifiedIdDatabase : RoomDatabase() {
     }
 
     abstract fun verifiedIdDao(): VerifiedIdDao
-}*/
+}

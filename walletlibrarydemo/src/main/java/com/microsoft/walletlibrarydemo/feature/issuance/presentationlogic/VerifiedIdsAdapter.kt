@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
 import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedidRowBinding
 import com.microsoft.walletlibrarydemo.db.entities.VerifiedId
 
@@ -55,10 +56,10 @@ class VerifiedIdsAdapter(
         holder: VerifiedIdsViewHolder.VerifiedIdVc,
         vc: VerifiedId
     ) {
-        holder.binding.type.text = vc.verifiableCredential.types.last()
+        holder.binding.name.text = "Title: ${vc.verifiableCredential.style.name}"
+        holder.binding.type.text = "Type: ${vc.verifiableCredential.types.last()}"
         holder.binding.issuedOn.text = "Issued On: ${vc.verifiableCredential.issuedOn}"
-/*        holder.binding.name.text = vc.verifiableCredential.style.name
-        holder.binding.issuer.text = (vc.verifiableCredential.style as BasicVerifiedIdStyle).issuer*/
+        holder.binding.issuer.text = "Issuer: ${(vc.verifiableCredential.style as BasicVerifiedIdStyle).issuer}"
         holder.binding.root.setOnClickListener { fulfillVerifiedIdRequirement(vc, requirement) }
     }
 

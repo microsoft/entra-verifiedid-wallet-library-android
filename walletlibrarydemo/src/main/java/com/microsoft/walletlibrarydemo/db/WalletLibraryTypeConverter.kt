@@ -50,7 +50,7 @@ object WalletLibraryTypeConverter {
     fun stringToList(string: String) =
         serializer.decodeFromString<List<String>>(string)
 
-/*    @TypeConverter
+    @TypeConverter
     @JvmStatic
     fun styleToString(verifiedIdStyle: VerifiedIdStyle) =
         serializer.encodeToString(VerifiedIdStyle.serializer(), verifiedIdStyle)
@@ -58,7 +58,7 @@ object WalletLibraryTypeConverter {
     @TypeConverter
     @JvmStatic
     fun stringToStyle(string: String) =
-        serializer.decodeFromString(VerifiedIdStyle.serializer(), string)*/
+        serializer.decodeFromString(VerifiedIdStyle.serializer(), string)
 
     @TypeConverter
     @JvmStatic
