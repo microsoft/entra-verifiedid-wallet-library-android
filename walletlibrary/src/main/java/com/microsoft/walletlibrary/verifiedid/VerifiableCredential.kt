@@ -11,7 +11,7 @@ import java.util.*
 @Serializable
 class VerifiableCredential(
     internal val raw: com.microsoft.did.sdk.credential.models.VerifiableCredential,
-    private val contract: VerifiableCredentialContract
+    internal val contract: VerifiableCredentialContract
 ): VerifiedId {
     override val id = raw.jti
 
