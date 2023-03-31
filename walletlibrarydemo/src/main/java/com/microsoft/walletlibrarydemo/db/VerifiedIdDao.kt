@@ -1,3 +1,4 @@
+/*
 package com.microsoft.walletlibrarydemo.db
 
 import androidx.room.Dao
@@ -20,4 +21,4 @@ interface VerifiedIdDao {
 
     @Query("SELECT * FROM VerifiedId WHERE vcId = :id")
     suspend fun queryVerifiedIdById(id: String): VerifiedId
-}
+}*/

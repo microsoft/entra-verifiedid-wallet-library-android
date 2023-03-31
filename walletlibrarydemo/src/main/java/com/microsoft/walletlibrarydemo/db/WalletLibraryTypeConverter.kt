@@ -1,6 +1,9 @@
 package com.microsoft.walletlibrarydemo.db
 
 import androidx.room.TypeConverter
+import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.verifiedid.DateSerializer
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
@@ -19,50 +22,13 @@ object WalletLibraryTypeConverter {
             polymorphic(VerifiedId::class) {
                 subclass(VerifiableCredential::class)
             }
+            polymorphic(VerifiedIdStyle::class) {
+                subclass(BasicVerifiedIdStyle::class)
+            }
         }
         ignoreUnknownKeys = true
         encodeDefaults = true
     }
-
-    @TypeConverter
-    @JvmStatic
-    fun verifiableCredentialToString(verifiableCredential: VerifiableCredential) = serializer.encodeToString(
-        VerifiableCredential.serializer(), verifiableCredential)
-
-    @TypeConverter
-    @JvmStatic
-    fun stringToVerifiableCredential(serializedVc: String) =
-        serializer.decodeFromString(VerifiableCredential.serializer(), serializedVc)
-
-    @TypeConverter
-    @JvmStatic
-    fun vCInSdkToString(verifiableCredential: com.microsoft.did.sdk.credential.models.VerifiableCredential) = serializer.encodeToString(
-        com.microsoft.did.sdk.credential.models.VerifiableCredential.serializer(), verifiableCredential)
-
-    @TypeConverter
-    @JvmStatic
-    fun stringToVcInSdk(serializedVc: String) =
-        serializer.decodeFromString(com.microsoft.did.sdk.credential.models.VerifiableCredential.serializer(), serializedVc)
-
-    @TypeConverter
-    @JvmStatic
-    fun vCContractInSdkToString(verifiableCredential: com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract) = serializer.encodeToString(
-        com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract.serializer(), verifiableCredential)
-
-    @TypeConverter
-    @JvmStatic
-    fun stringToVcContractInSdk(serializedVc: String) =
-        serializer.decodeFromString(com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract.serializer(), serializedVc)
-
-    @TypeConverter
-    @JvmStatic
-    fun vcContentsToString(verifiableCredentialContent: com.microsoft.did.sdk.credential.models.VerifiableCredentialContent) =
-        serializer.encodeToString(com.microsoft.did.sdk.credential.models.VerifiableCredentialContent.serializer(), verifiableCredentialContent)
-
-    @TypeConverter
-    @JvmStatic
-    fun stringToVcContents(serializedVcContent: String) =
-        serializer.decodeFromString(com.microsoft.did.sdk.credential.models.VerifiableCredentialContent.serializer(), serializedVcContent)
 
     @TypeConverter
     @JvmStatic
@@ -71,8 +37,8 @@ object WalletLibraryTypeConverter {
 
     @TypeConverter
     @JvmStatic
-    fun stringToDate(date: String) =
-        serializer.decodeFromString(DateSerializer, date)
+    fun stringToDate(string: String) =
+        serializer.decodeFromString(DateSerializer, string)
 
     @TypeConverter
     @JvmStatic
@@ -81,6 +47,36 @@ object WalletLibraryTypeConverter {
 
     @TypeConverter
     @JvmStatic
-    fun stringToList(list: String) =
-        serializer.decodeFromString<List<String>>(list)
+    fun stringToList(string: String) =
+        serializer.decodeFromString<List<String>>(string)
+
+/*    @TypeConverter
+    @JvmStatic
+    fun styleToString(verifiedIdStyle: VerifiedIdStyle) =
+        serializer.encodeToString(VerifiedIdStyle.serializer(), verifiedIdStyle)
+
+    @TypeConverter
+    @JvmStatic
+    fun stringToStyle(string: String) =
+        serializer.decodeFromString(VerifiedIdStyle.serializer(), string)*/
+
+    @TypeConverter
+    @JvmStatic
+    fun contractToString(verifiableCredentialContract: VerifiableCredentialContract) =
+        serializer.encodeToString(VerifiableCredentialContract.serializer(), verifiableCredentialContract)
+
+    @TypeConverter
+    @JvmStatic
+    fun stringToContract(string: String) =
+        serializer.decodeFromString(VerifiableCredentialContract.serializer(), string)
+
+    @TypeConverter
+    @JvmStatic
+    fun vcInSdkToString(verifiableCredentialCredential: com.microsoft.did.sdk.credential.models.VerifiableCredential) =
+        serializer.encodeToString(com.microsoft.did.sdk.credential.models.VerifiableCredential.serializer(), verifiableCredentialCredential)
+
+    @TypeConverter
+    @JvmStatic
+    fun stringToVcInSdk(string: String) =
+        serializer.decodeFromString(com.microsoft.did.sdk.credential.models.VerifiableCredential.serializer(), string)
 }
