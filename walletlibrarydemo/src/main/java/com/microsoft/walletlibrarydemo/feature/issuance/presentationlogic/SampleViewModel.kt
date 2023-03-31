@@ -7,13 +7,15 @@ import androidx.lifecycle.ViewModel
 import com.microsoft.walletlibrary.VerifiedIdClientBuilder
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
-import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import com.microsoft.walletlibrarydemo.db.VerifiedIdDatabase
 
 class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context): ViewModel() {
     var verifiedIdRequestResult: Result<VerifiedIdRequest<*>>? = null
     var verifiedIdResult: Result<Any?>? = null
     private val verifiedIdClient = VerifiedIdClientBuilder(context).build()
+    private val verifiedIdDao = VerifiedIdDatabase.getInstance(context).verifiedIdDao()
 
     suspend fun initiateRequest(requestUrl: String) {
         // Use the test uri here
@@ -24,16 +26,21 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context): Vi
 
     suspend fun completeIssuance() {
         verifiedIdResult = verifiedIdRequestResult?.getOrNull()?.complete()
+        if (verifiedIdResult?.isSuccess == true) {
+            val verifiedId = verifiedIdResult?.getOrNull() as VerifiedId
+            val vc = com.microsoft.walletlibrarydemo.db.entities.VerifiedId(verifiedId.id, verifiedId as VerifiableCredential)
+            verifiedIdDao.insert(vc)
+        }
+    }
+
+    suspend fun getVerifiedIds(): ArrayList<com.microsoft.walletlibrarydemo.db.entities.VerifiedId> {
+        return verifiedIdDao.queryVerifiedIds() as ArrayList<com.microsoft.walletlibrarydemo.db.entities.VerifiedId>
     }
 
     suspend fun completePresentation() {
         if (verifiedIdRequestResult?.isSuccess == true) {
             val verifiedIdRequest = verifiedIdRequestResult?.getOrNull()
-            if (verifiedIdResult?.isSuccess == true) {
-                val verifiedId = verifiedIdResult?.getOrNull() as VerifiedId
-                (verifiedIdRequest?.requirement as VerifiedIdRequirement).fulfill(verifiedId)
-                verifiedIdResult = verifiedIdRequest.complete()
+                verifiedIdResult = verifiedIdRequest?.complete()
             }
-        }
     }
 }

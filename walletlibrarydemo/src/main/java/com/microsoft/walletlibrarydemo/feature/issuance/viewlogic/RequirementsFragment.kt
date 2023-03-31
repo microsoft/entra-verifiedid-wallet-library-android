@@ -12,17 +12,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdPresentationRequest
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
+import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdClaim
 import com.microsoft.walletlibrarydemo.databinding.RequirementsFragmentBinding
-import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.RequirementsAdapter
-import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.SampleViewModel
-import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.VerifiedIdAdapter
-import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.ViewModelFactory
+import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.*
 import kotlinx.coroutines.runBlocking
 
-class RequirementsFragment : Fragment() {
+class RequirementsFragment : Fragment(), ClickListener {
     private var _binding: RequirementsFragmentBinding? = null
     private val binding get() = _binding!!
 
@@ -47,7 +45,7 @@ class RequirementsFragment : Fragment() {
 
     private fun configureViews() {
         binding.requestCompletion.setOnClickListener { completeRequest() }
-        binding.cancel.setOnClickListener { goBackHome() }
+        binding.home.setOnClickListener { goBackHome() }
         binding.requirementsList.layoutManager = LinearLayoutManager(context)
         binding.requirementsList.isNestedScrollingEnabled = false
         runBlocking {
@@ -57,26 +55,23 @@ class RequirementsFragment : Fragment() {
                 if (requestResult.isSuccess) {
                     val request = requestResult.getOrNull()
                     request?.let {
-                        binding.requestTitle.text =
-                            if (it is VerifiedIdIssuanceRequest) "Issuance Request" else "Presentation Request"
+                        if (it is VerifiedIdIssuanceRequest) {
+                            binding.requestTitle.text = "Issuance Request"
+                        } else {
+                            binding.requestTitle.text = "Presentation Request"
+                            binding.requestCompletion.visibility = View.GONE
+                        }
                     }
                     val requirement = request?.requirement
                     requirement?.let {
                         val requirementList =
                             if (requirement !is GroupRequirement) listOf(requirement) else requirement.requirements
-                        val adapter = RequirementsAdapter(
-                            requireContext(),
-                            requirementList
-                        )
+                        val adapter = RequirementsAdapter(this@RequirementsFragment, requireContext(), requirementList)
                         binding.requirementsList.adapter = adapter
                     }
                 }
             }
         }
-    }
-
-    private fun configureIssuanceView() {
-
     }
 
     private fun completeRequest() {
@@ -86,21 +81,23 @@ class RequirementsFragment : Fragment() {
                 if (request is VerifiedIdIssuanceRequest) {
                     viewModel.completeIssuance()
                     binding.requirementsList.visibility = View.GONE
-                    binding.verifiedidClaims.visibility = View.VISIBLE
+                    binding.verifiedIdClaims.visibility = View.VISIBLE
                     if (viewModel.verifiedIdResult?.isSuccess == true) {
                         if (viewModel.verifiedIdResult?.getOrNull() != null)
                             configureVerifiedIdView()
                     } else
-                        binding.requestTitle.text = "Issuance Failed ${viewModel.verifiedIdResult?.exceptionOrNull()}"
+                        binding.requestTitle.text =
+                            "Issuance Failed ${viewModel.verifiedIdResult?.exceptionOrNull()}"
                 } else if (request is VerifiedIdPresentationRequest) {
                     viewModel.completePresentation()
                     binding.requirementsList.visibility = View.GONE
-                    binding.verifiedidClaims.visibility = View.GONE
+                    binding.verifiedIdClaims.visibility = View.GONE
                     if (viewModel.verifiedIdResult?.isSuccess == true) {
                         if (viewModel.verifiedIdResult?.getOrNull() != null)
                             binding.requestTitle.text = "Presentation Complete!!"
                     } else
-                        binding.requestTitle.text = "Presentation Failed ${viewModel.verifiedIdResult?.exceptionOrNull()}"
+                        binding.requestTitle.text =
+                            "Presentation Failed ${viewModel.verifiedIdResult?.exceptionOrNull()}"
                 }
             }
         }
@@ -118,26 +115,39 @@ class RequirementsFragment : Fragment() {
                 verifiedId = it.getOrNull() as VerifiedId
         }
         verifiedId?.let {
-            binding.requestTitle.text = "Verified Id"
             val verifiableCredential = verifiedId as VerifiableCredential
+            binding.requestTitle.text = verifiableCredential.types.last()
             val claims = verifiableCredential.getClaims()
             claims.add(VerifiedIdClaim("Issued On", verifiableCredential.issuedOn))
             verifiableCredential.expiresOn?.let { claims.add(VerifiedIdClaim("Expiry", it)) }
             claims.add(VerifiedIdClaim("Id", verifiableCredential.id))
             val adapter = VerifiedIdAdapter(claims)
-            binding.verifiedidClaims.layoutManager = LinearLayoutManager(context)
-            binding.verifiedidClaims.isNestedScrollingEnabled = false
-            binding.verifiedidClaims.adapter = adapter
-            binding.requestCompletion.text = "Present"
-            binding.requestCompletion.setOnClickListener { navigateToPresentation() }
+            binding.verifiedIdClaims.layoutManager = LinearLayoutManager(context)
+            binding.verifiedIdClaims.isNestedScrollingEnabled = false
+            binding.verifiedIdClaims.adapter = adapter
+            binding.requestCompletion.visibility = View.GONE
         }
-    }
-
-    private fun navigateToPresentation() {
-        findNavController().navigate(RequirementsFragmentDirections.actionRequirementsFragmentToLoadRequestFragment())
     }
 
     private fun goBackHome() {
         findNavController().navigate(RequirementsFragmentDirections.actionRequirementsFragmentToLoadRequestFragment())
+    }
+
+    override fun navigateToVerifiedId(requirement: VerifiedIdRequirement) {
+        runBlocking {
+            binding.requirementsList.visibility = View.GONE
+            binding.verifiedIdClaims.visibility = View.GONE
+            binding.verifiedIds.visibility = View.VISIBLE
+            val verifiedIds = viewModel.getVerifiedIds().filter { it.verifiableCredential.types.contains(requirement.types.last()) }
+            val adapter = VerifiedIdsAdapter(this@RequirementsFragment, verifiedIds as ArrayList<com.microsoft.walletlibrarydemo.db.entities.VerifiedId>, requirement)
+            binding.verifiedIds.layoutManager = LinearLayoutManager(context)
+            binding.verifiedIds.isNestedScrollingEnabled = false
+            binding.verifiedIds.adapter = adapter
+        }
+    }
+
+    override fun fulfillVerifiedIdRequirement(verifiedId: com.microsoft.walletlibrarydemo.db.entities.VerifiedId, requirement: VerifiedIdRequirement) {
+        requirement.fulfill(verifiedId.verifiableCredential)
+        binding.requestCompletion.visibility = View.VISIBLE
     }
 }

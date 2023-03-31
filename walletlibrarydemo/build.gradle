@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+apply plugin: 'kotlin-kapt'
 apply plugin: "androidx.navigation.safeargs"
 
 repositories {
@@ -55,6 +56,9 @@ dependencies {
     implementation "androidx.navigation:navigation-runtime-ktx:$androidx_navigation_version"
     implementation "androidx.navigation:navigation-fragment-ktx:$androidx_navigation_version"
     implementation "androidx.navigation:navigation-ui-ktx:$androidx_navigation_version"
+    implementation "androidx.room:room-runtime:$androidx_room_persistence_version"
+    implementation "androidx.room:room-ktx:$androidx_room_persistence_version"
+    kapt "androidx.room:room-compiler:$androidx_room_persistence_version"
 //    implementation project(':walletlibrary')
     implementation "com.microsoft.entra.verifiedid:walletlibrary:0.0.1-test.1"
     testImplementation "junit:junit:$junit_version"

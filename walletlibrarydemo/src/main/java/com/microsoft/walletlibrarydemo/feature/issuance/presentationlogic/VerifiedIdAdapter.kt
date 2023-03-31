@@ -7,20 +7,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdClaim
-import com.microsoft.walletlibrarydemo.databinding.RequirementIdtokenRowBinding
+import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedclaimRowBinding
 
 class VerifiedIdAdapter(private val verifiedIdClaims: ArrayList<VerifiedIdClaim>) :
     RecyclerView.Adapter<VerifiedIdAdapter.VerifiedIdClaimsViewHolder>() {
 
     sealed class VerifiedIdClaimsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        class VcClaim(val binding: RequirementIdtokenRowBinding) :
+        class VcClaim(val binding: RequirementVerifiedclaimRowBinding) :
             VerifiedIdClaimsViewHolder(binding.root)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerifiedIdClaimsViewHolder {
         return when (viewType) {
             VerifiedIdClaim::class.java.name.hashCode() -> VerifiedIdClaimsViewHolder.VcClaim(
-                RequirementIdtokenRowBinding.inflate(
+                RequirementVerifiedclaimRowBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
@@ -50,7 +50,7 @@ class VerifiedIdAdapter(private val verifiedIdClaims: ArrayList<VerifiedIdClaim>
         holder: VerifiedIdClaimsViewHolder.VcClaim,
         claim: VerifiedIdClaim
     ) {
-        holder.binding.title.text = claim.id
-        holder.binding.subtitle.text = claim.value.toString()
+        holder.binding.claimTitle.text = claim.id
+        holder.binding.claimValue.text = claim.value.toString()
     }
 }

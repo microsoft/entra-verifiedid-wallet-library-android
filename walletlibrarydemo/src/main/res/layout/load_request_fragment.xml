@@ -8,7 +8,7 @@
         android:id="@+id/requestLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sample Request URL"
+        android:text="Request URL"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/request"
         app:layout_constraintTop_toTopOf="parent"

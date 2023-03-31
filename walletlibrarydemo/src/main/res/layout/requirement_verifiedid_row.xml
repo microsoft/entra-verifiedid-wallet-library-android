@@ -9,37 +9,53 @@
     tools:ignore="RtlSymmetry">
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constrainedWidth="true"
-        app:layout_constraintBottom_toTopOf="@id/subtitle"
-        app:layout_constraintEnd_toStartOf="@id/chevron"
+        app:layout_constraintBottom_toTopOf="@id/type"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
-        tools:text="Title" />
+        tools:text="Id" />
 
     <TextView
-        android:id="@+id/subtitle"
+        android:id="@+id/type"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintBottom_toTopOf="@id/issuer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/id"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="type" />
+
+    <TextView
+        android:id="@+id/issuer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintBottom_toTopOf="@id/issuedOn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/type"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="Issuer" />
+
+    <TextView
+        android:id="@+id/issuedOn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/chevron"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title"
-        app:layout_constraintVertical_chainStyle="packed"
-        tools:text="Subtitle" />
-
-    <ImageView
-        android:id="@+id/chevron"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/issuer"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="Issued On" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

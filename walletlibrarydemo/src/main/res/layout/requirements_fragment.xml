@@ -33,6 +33,25 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/verifiedidclaims_recycler_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/requestTitle"
+        android:layout_marginVertical="10dp"
+        android:orientation="vertical"
+        android:layout_gravity="center_horizontal">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/verifiedIdClaims"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="10dp"
+            android:visibility="gone"
+            tools:listitem="@layout/requirement_verifiedclaim_row" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/verifiedid_recycler_view_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,12 +62,12 @@
         android:layout_gravity="center_horizontal">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/verifiedid_claims"
+            android:id="@+id/verifiedIds"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginBottom="10dp"
             android:visibility="gone"
-            tools:listitem="@layout/requirement_idtoken_row" />
+            tools:listitem="@layout/requirement_verifiedid_row" />
     </LinearLayout>
 
     <Button
@@ -58,16 +77,16 @@
         android:minWidth="44dp"
         android:text="Complete"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/cancel"
+        app:layout_constraintEnd_toStartOf="@id/home"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginVertical="10dp"/>
 
     <Button
-        android:id="@+id/cancel"
+        android:id="@+id/home"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minWidth="44dp"
-        android:text="Cancel"
+        android:text="Home"
         app:layout_constraintStart_toEndOf="@id/requestCompletion"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"

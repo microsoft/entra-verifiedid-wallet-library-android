@@ -1,26 +1,27 @@
 package com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic
 
 import android.content.Context
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.RecyclerView
-import com.microsoft.walletlibrary.requests.requirements.PinRequirement
-import com.microsoft.walletlibrary.requests.requirements.Requirement
-import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
-import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.requests.requirements.*
 import com.microsoft.walletlibrarydemo.R
-import com.microsoft.walletlibrarydemo.databinding.RequirementIdtokenRowBinding
 import com.microsoft.walletlibrarydemo.databinding.RequirementTextRowBinding
+import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedclaimRowBinding
+import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedidBinding
 
 sealed class RequirementViewHolder(view: View): RecyclerView.ViewHolder(view)
 class SelfAttestedHolder(val binding: RequirementTextRowBinding): RequirementViewHolder(binding.root)
 class PinHolder(val binding: RequirementTextRowBinding): RequirementViewHolder(binding.root)
-class VerifiedIdHolder(val binding: RequirementIdtokenRowBinding): RequirementViewHolder(binding.root)
+class VerifiedIdHolder(val binding: RequirementVerifiedidBinding): RequirementViewHolder(binding.root)
+class IdTokenHolder(val binding: RequirementVerifiedclaimRowBinding): RequirementViewHolder(binding.root)
 
 class RequirementsAdapter(
+    private val clickListener: ClickListener,
     private val context: Context,
     private val requirements: List<Requirement>
 ): RecyclerView.Adapter<RequirementViewHolder>() {
@@ -45,7 +46,15 @@ class RequirementsAdapter(
                 )
             VerifiedIdRequirement::class.java.name.hashCode() ->
                 VerifiedIdHolder(
-                    RequirementIdtokenRowBinding.inflate(
+                    RequirementVerifiedidBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                    )
+                )
+            IdTokenRequirement::class.java.name.hashCode() ->
+                IdTokenHolder(
+                    RequirementVerifiedclaimRowBinding.inflate(
                         LayoutInflater.from(parent.context),
                         parent,
                         false
@@ -73,6 +82,10 @@ class RequirementsAdapter(
                 holder,
                 requirements[position] as VerifiedIdRequirement
             )
+            is IdTokenHolder -> setupIdTokenRow(
+                holder,
+                requirements[position] as IdTokenRequirement
+            )
         }
     }
 
@@ -90,12 +103,21 @@ class RequirementsAdapter(
         }
     }
 
+    private fun setupIdTokenRow(
+        holder: IdTokenHolder,
+        requirement: IdTokenRequirement
+    ) {
+        holder.binding.claimTitle.text = "Sign in"
+        holder.binding.claimValue.text = Uri.parse(requirement.configuration).host
+    }
+
     private fun setupVerifiedIdRow(
         holder: VerifiedIdHolder,
         requirement: VerifiedIdRequirement
     ) {
-        holder.binding.title.text = "Requesting ${requirement.types.first()}"
-        holder.binding.subtitle.text = "Purpose: ${requirement.purpose}"
+        holder.binding.type.text = "Requesting ${requirement.types.first()}"
+        holder.binding.purpose.text = "Purpose: ${requirement.purpose}"
+        holder.binding.root.setOnClickListener { credentialClickListener(requirement) }
     }
 
     private fun setupPinHolder(
@@ -110,5 +132,9 @@ class RequirementsAdapter(
                 requirement.fulfill(holder.binding.claimValue.text.toString())
             }
         }
+    }
+
+    private fun credentialClickListener(requirement: VerifiedIdRequirement) {
+        clickListener.navigateToVerifiedId(requirement)
     }
 }

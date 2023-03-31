@@ -26,8 +26,4 @@
             app:popUpToInclusive="true" />
     </fragment>
 
-    <fragment
-        android:id="@+id/verifiedIdViewFragment"
-        android:name="com.microsoft.walletlibrarydemo.feature.issuance.viewlogic.VerifiedIdViewFragment">
-    </fragment>
 </navigation>
