@@ -1,10 +1,7 @@
-import org.jetbrains.dokka.gradle.DokkaTask
-
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id "org.jetbrains.kotlin.plugin.serialization" version "$kotlin_version"
-    id 'org.jetbrains.dokka'
 }
 
 apply plugin: 'kotlin-kapt'
@@ -134,28 +131,11 @@ tasks.whenTaskAdded { task ->
         dependsOn copySubmoduleAssets
         dependsOn copySubmoduleSource
         finalizedBy cleanSubmoduleFiles
-        dependsOn sourcesJar
     }
 }
 
 task cleanSubmoduleFiles(type: Delete) {
     delete "src/main/assets", "src/main/java/com/microsoft/did"
-}
-
-tasks.dokkaJavadoc.configure {
-    outputDirectory.set(file("$buildDir/javadoc"))
-}
-
-task dokkaJavadocJar(type: Jar, dependsOn: dokkaJavadoc) {
-    classifier = 'javadoc'
-    from "$buildDir/javadoc"
-    destinationDirectory = reporting.file("$project.buildDir/outputs/jar/")
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier 'sources'
-    destinationDirectory = reporting.file("$project.buildDir/outputs/jar/")
 }
 
 project.afterEvaluate {
@@ -173,6 +153,7 @@ project.afterEvaluate {
         }
         publications {
             release(MavenPublication) {
+                from components.release
                 groupId = 'com.microsoft.entra.verifiedid'
                 artifactId = 'walletlibrary'
                 version = "0.0.1-beta.1"
@@ -196,9 +177,6 @@ project.afterEvaluate {
                         url = 'https://github.com/microsoft/entra-verifiedid-wallet-library-android/tree/dev'
                     }
                 }
-                artifact(dokkaJavadocJar)
-                artifact(sourcesJar)
-                artifact("$buildDir/outputs/aar/walletlibrary-release.aar")
             }
         }
     }
