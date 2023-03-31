@@ -64,10 +64,10 @@ class SelfAttestedFragment : Fragment() {
                     binding.initiateIssuance.isEnabled = false
                     if (verifiedIdRequest is VerifiedIdPresentationRequest)
                         binding.textview.text =
-                            "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
+                            "Presentation request from ${verifiedIdRequest.requesterStyle.name}"
                     else if (verifiedIdRequest is VerifiedIdIssuanceRequest) {
                         binding.textview.text =
-                            "Issuance request from ${verifiedIdRequest.requesterStyle.requester}"
+                            "Issuance request from ${verifiedIdRequest.requesterStyle.name}"
                         configureViewsForSelfAttestedRequirements(verifiedIdRequest.requirement)
                         binding.completeIssuance.isEnabled = true
                     }
@@ -129,11 +129,11 @@ class SelfAttestedFragment : Fragment() {
                     binding.initiateIssuance.isEnabled = false
                     if (verifiedIdRequest is VerifiedIdPresentationRequest) {
                         binding.textview.text =
-                            "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
+                            "Presentation request from ${verifiedIdRequest.requesterStyle.name}"
                         binding.completeIssuance.text = "Complete Presentation"
                     } else if (verifiedIdRequest is VerifiedIdIssuanceRequest) {
                         binding.textview.text =
-                            "Issuance request from ${verifiedIdRequest.requesterStyle.requester}"
+                            "Issuance request from ${verifiedIdRequest.requesterStyle.name}"
                     }
                     binding.completeIssuance.isEnabled = true
                     binding.claimsList.visibility = View.GONE
