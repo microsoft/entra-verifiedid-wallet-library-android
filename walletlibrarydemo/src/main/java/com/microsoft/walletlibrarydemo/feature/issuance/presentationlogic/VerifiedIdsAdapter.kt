@@ -56,8 +56,9 @@ class VerifiedIdsAdapter(
         vc: VerifiedId
     ) {
         holder.binding.type.text = vc.verifiableCredential.types.last()
-        holder.binding.issuedOn.text = vc.verifiableCredential.issuedOn.toString()
-        holder.binding.id.text = vc.vcId
+        holder.binding.issuedOn.text = "Issued On: ${vc.verifiableCredential.issuedOn}"
+/*        holder.binding.name.text = vc.verifiableCredential.style.name
+        holder.binding.issuer.text = (vc.verifiableCredential.style as BasicVerifiedIdStyle).issuer*/
         holder.binding.root.setOnClickListener { fulfillVerifiedIdRequirement(vc, requirement) }
     }
 

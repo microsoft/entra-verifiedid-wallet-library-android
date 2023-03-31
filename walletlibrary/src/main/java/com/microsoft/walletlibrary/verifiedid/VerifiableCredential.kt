@@ -11,19 +11,19 @@ import java.util.*
 @Serializable
 class VerifiableCredential(
     internal val raw: com.microsoft.did.sdk.credential.models.VerifiableCredential,
-    private val contract: VerifiableCredentialContract
+    internal val contract: VerifiableCredentialContract
 ): VerifiedId {
-    override val id = raw.jti
+    override var id = raw.jti
 
     @Serializable(with = DateSerializer::class)
-    override val issuedOn = Date(raw.contents.iat * 1000L)
+    override var issuedOn = Date(raw.contents.iat * 1000L)
 
     @Serializable(with = DateSerializer::class)
-    override val expiresOn = raw.contents.exp?.let { Date(it * 1000L) }
+    override var expiresOn = raw.contents.exp?.let { Date(it * 1000L) }
 
-    val types = raw.contents.vc.type
+    var types = raw.contents.vc.type
 
-    override val style = contract.display.toVerifiedIdStyle()
+    override var style = contract.display.toVerifiedIdStyle()
 
     override fun getClaims(): ArrayList<VerifiedIdClaim> {
         val claimDescriptors = contract.display.claims
