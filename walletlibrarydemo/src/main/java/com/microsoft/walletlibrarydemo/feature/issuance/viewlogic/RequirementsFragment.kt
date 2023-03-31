@@ -139,10 +139,16 @@ class RequirementsFragment : Fragment(), ClickListener {
             binding.verifiedIdClaims.visibility = View.GONE
             binding.verifiedIds.visibility = View.VISIBLE
             val verifiedIds = viewModel.getVerifiedIds().filter { it.verifiableCredential.types.contains(requirement.types.last()) }
-            val adapter = VerifiedIdsAdapter(this@RequirementsFragment, verifiedIds as ArrayList<com.microsoft.walletlibrarydemo.db.entities.VerifiedId>, requirement)
-            binding.verifiedIds.layoutManager = LinearLayoutManager(context)
-            binding.verifiedIds.isNestedScrollingEnabled = false
-            binding.verifiedIds.adapter = adapter
+            if (verifiedIds.isNotEmpty()) {
+                val adapter = VerifiedIdsAdapter(
+                    this@RequirementsFragment,
+                    verifiedIds as ArrayList<com.microsoft.walletlibrarydemo.db.entities.VerifiedId>,
+                    requirement
+                )
+                binding.verifiedIds.layoutManager = LinearLayoutManager(context)
+                binding.verifiedIds.isNestedScrollingEnabled = false
+                binding.verifiedIds.adapter = adapter
+            }
         }
     }
 

@@ -14,7 +14,7 @@ import com.microsoft.walletlibrarydemo.db.entities.VerifiedId
 class VerifiedIdsAdapter(
     private val clickListener: ClickListener,
     private val verifiedIds: ArrayList<VerifiedId>,
-    private val requirement: VerifiedIdRequirement
+    private val requirement: VerifiedIdRequirement?
 ) :
     RecyclerView.Adapter<VerifiedIdsAdapter.VerifiedIdsViewHolder>() {
 
@@ -60,7 +60,7 @@ class VerifiedIdsAdapter(
         holder.binding.type.text = "Type: ${vc.verifiableCredential.types.last()}"
         holder.binding.issuedOn.text = "Issued On: ${vc.verifiableCredential.issuedOn}"
         holder.binding.issuer.text = "Issuer: ${(vc.verifiableCredential.style as BasicVerifiedIdStyle).issuer}"
-        holder.binding.root.setOnClickListener { fulfillVerifiedIdRequirement(vc, requirement) }
+        requirement?.let { req -> holder.binding.root.setOnClickListener { fulfillVerifiedIdRequirement(vc, req) } }
     }
 
     private fun fulfillVerifiedIdRequirement(verifiedId: VerifiedId, requirement: VerifiedIdRequirement) {
