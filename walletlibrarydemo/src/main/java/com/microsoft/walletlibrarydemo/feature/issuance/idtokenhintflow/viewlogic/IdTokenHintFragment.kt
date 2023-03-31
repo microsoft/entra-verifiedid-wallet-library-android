@@ -61,10 +61,10 @@ class IdTokenHintFragment : Fragment() {
                     val verifiedIdRequest = verifiedIdRequestResult.getOrNull()
                     binding.initiateIssuance.isEnabled = false
                     if (verifiedIdRequest is VerifiedIdPresentationRequest) binding.textview.text =
-                        "Presentation request from ${verifiedIdRequest.requesterStyle.name}"
+                        "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
                     else if (verifiedIdRequest is VerifiedIdIssuanceRequest) {
                         binding.textview.text =
-                            "Issuance request from ${verifiedIdRequest.requesterStyle.name}"
+                            "Issuance request from ${verifiedIdRequest.requesterStyle.requester}"
                         when (verifiedIdRequest.requirement) {
                             is GroupRequirement -> configureIdTokenHintWithPinView(verifiedIdRequest)
                             is IdTokenRequirement -> configureIdTokenHintWithoutPinView(
@@ -146,11 +146,11 @@ class IdTokenHintFragment : Fragment() {
                     binding.initiateIssuance.isEnabled = false
                     if (verifiedIdRequest is VerifiedIdPresentationRequest) {
                         binding.textview.text =
-                            "Presentation request from ${verifiedIdRequest.requesterStyle.name}"
+                            "Presentation request from ${verifiedIdRequest.requesterStyle.requester}"
                         binding.completeIssuance.text = "Complete Presentation"
                     } else if (verifiedIdRequest is VerifiedIdIssuanceRequest) {
                         binding.textview.text =
-                            "Issuance request from ${verifiedIdRequest.requesterStyle.name}"
+                            "Issuance request from ${verifiedIdRequest.requesterStyle.requester}"
                     }
                     binding.completeIssuance.isEnabled = true
                     binding.claimsList.visibility = View.GONE
