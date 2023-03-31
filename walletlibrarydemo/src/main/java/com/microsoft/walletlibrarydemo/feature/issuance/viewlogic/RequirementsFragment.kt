@@ -47,6 +47,7 @@ class RequirementsFragment : Fragment() {
 
     private fun configureViews() {
         binding.requestCompletion.setOnClickListener { completeRequest() }
+        binding.cancel.setOnClickListener { goBackHome() }
         binding.requirementsList.layoutManager = LinearLayoutManager(context)
         binding.requirementsList.isNestedScrollingEnabled = false
         runBlocking {
@@ -72,6 +73,10 @@ class RequirementsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun configureIssuanceView() {
+
     }
 
     private fun completeRequest() {
@@ -123,12 +128,16 @@ class RequirementsFragment : Fragment() {
             binding.verifiedidClaims.layoutManager = LinearLayoutManager(context)
             binding.verifiedidClaims.isNestedScrollingEnabled = false
             binding.verifiedidClaims.adapter = adapter
-            binding.requestCompletion.text = "Complete Presentation"
+            binding.requestCompletion.text = "Present"
             binding.requestCompletion.setOnClickListener { navigateToPresentation() }
         }
     }
 
     private fun navigateToPresentation() {
+        findNavController().navigate(RequirementsFragmentDirections.actionRequirementsFragmentToLoadRequestFragment())
+    }
+
+    private fun goBackHome() {
         findNavController().navigate(RequirementsFragmentDirections.actionRequirementsFragmentToLoadRequestFragment())
     }
 }

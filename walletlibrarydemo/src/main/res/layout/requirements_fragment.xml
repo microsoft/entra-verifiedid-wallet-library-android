@@ -55,8 +55,20 @@
         android:id="@+id/requestCompletion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Complete Request"
+        android:minWidth="44dp"
+        android:text="Complete"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginVertical="10dp"/>
+
+    <Button
+        android:id="@+id/cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="44dp"
+        android:text="Cancel"
+        app:layout_constraintStart_toEndOf="@id/requestCompletion"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginVertical="10dp"/>

@@ -37,7 +37,14 @@ class LoadRequestFragment : Fragment() {
 
     private fun initiateIssuance() {
         runBlocking {
-            findNavController().navigate(LoadRequestFragmentDirections.actionLoadRequestFragmentToRequirementsFragment(binding.request.text.toString()))
+            if (binding.request.text.toString().isNotEmpty()) {
+                findNavController().navigate(
+                    LoadRequestFragmentDirections.actionLoadRequestFragmentToRequirementsFragment(
+                        binding.request.text.toString()
+                    )
+                )
+            } else
+                binding.request.error = "You need to provide a URL"
         }
     }
 }
