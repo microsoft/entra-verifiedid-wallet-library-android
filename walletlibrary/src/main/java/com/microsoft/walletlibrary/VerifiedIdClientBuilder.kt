@@ -14,6 +14,7 @@ import com.microsoft.walletlibrary.requests.handlers.RequestHandler
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.requests.resolvers.RequestResolver
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
+import com.microsoft.walletlibrary.util.WalletLibraryVCSDKLogConsumer
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.json.Json
@@ -54,7 +55,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
         registerRequestHandler(OpenIdRequestHandler())
         requestHandlerFactory.requestHandlers.addAll(requestHandlers)
 
-        VerifiableCredentialSdk.init(context)
+        val vcSdkLogConsumer = WalletLibraryVCSDKLogConsumer(logger)
+        VerifiableCredentialSdk.init(context, logConsumer = vcSdkLogConsumer)
         return VerifiedIdClient(requestResolverFactory, requestHandlerFactory, logger, jsonSerializer)
     }
 
