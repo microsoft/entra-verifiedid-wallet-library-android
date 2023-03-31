@@ -44,7 +44,7 @@ class OpenIdRequestHandlerTest {
     private val expectedRequesterName = "Test"
     private val expectedRequirementClaimName = "name"
     private val presentationRequestContent: PresentationRequestContent = mockk()
-    private val requesterStyle = OpenIdVerifierStyle(expectedRequesterName, "")
+    private val requesterStyle = OpenIdVerifierStyle(expectedRequesterName)
     private val rootOfTrust = RootOfTrust(expectedRootOfTrustSource, true)
     private val selfAttestedClaimRequirement = SelfAttestedClaimRequirement(
         "",
@@ -246,7 +246,7 @@ class OpenIdRequestHandlerTest {
         assertThat(request).isInstanceOf(OpenIdPresentationRequest::class.java)
         assertThat(request.rootOfTrust.verified).isEqualTo(true)
         assertThat(request.rootOfTrust.source).isEqualTo(expectedRootOfTrustSource)
-        assertThat(request.requesterStyle.requester).isEqualTo(expectedRequesterName)
+        assertThat(request.requesterStyle.name).isEqualTo(expectedRequesterName)
         assertThat(request.requirement).isInstanceOf(SelfAttestedClaimRequirement::class.java)
         assertThat((request.requirement as SelfAttestedClaimRequirement).claim).isEqualTo(
             expectedRequirementClaimName
@@ -270,7 +270,7 @@ class OpenIdRequestHandlerTest {
         // Assert
         assertThat(request).isInstanceOf(ManifestIssuanceRequest::class.java)
         assertThat(request.requesterStyle).isInstanceOf(VerifiedIdManifestIssuerStyle::class.java)
-        assertThat(request.requesterStyle.requester).isEqualTo(expectedRequesterName)
+        assertThat(request.requesterStyle.name).isEqualTo(expectedRequesterName)
         assertThat(request.rootOfTrust).isEqualTo(rootOfTrust)
         assertThat(request.requirement).isInstanceOf(SelfAttestedClaimRequirement::class.java)
         assertThat((request.requirement as SelfAttestedClaimRequirement).claim).isEqualTo(
@@ -313,9 +313,8 @@ class OpenIdRequestHandlerTest {
             BasicVerifiedIdStyle::class.java
         )
         assertThat((actualOpenIdRequest.verifiedIdStyle as BasicVerifiedIdStyle).logo).isNotNull
-        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.uri).isEqualTo(expectedLogoUri)
-        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.image).isEqualTo(expectedLogoImage)
-        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.description).isEqualTo(
+        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.url).isEqualTo(expectedLogoUri)
+        assertThat(actualOpenIdRequest.verifiedIdStyle.logo?.altText).isEqualTo(
             expectedLogoDescription
         )
     }

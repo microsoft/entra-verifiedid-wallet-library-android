@@ -110,11 +110,10 @@ class VerifiedIdOpenIdJwtRawRequestTest {
 
         // Assert
         assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
-        assertThat(actualResult.requesterStyle.requester).isEqualTo(expectedEntityName)
+        assertThat(actualResult.requesterStyle.name).isEqualTo(expectedEntityName)
         assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
-        assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).logo).isNotNull
-        assertThat(actualResult.requesterStyle.logo?.uri).isEqualTo(expectedLogoUri)
-        assertThat(actualResult.requesterStyle.logo?.image).isEqualTo(expectedLogoImage)
+        assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
+        assertThat(actualResult.requesterStyle.verifierLogo?.url).isEqualTo(expectedLogoUri)
         assertThat(actualResult.requirement).isInstanceOf(VerifiedIdRequirement::class.java)
         assertThat(actualResult.rootOfTrust.verified).isEqualTo(true)
         assertThat(actualResult.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
@@ -132,11 +131,10 @@ class VerifiedIdOpenIdJwtRawRequestTest {
 
         // Assert
         assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
-        assertThat(actualResult.requesterStyle.requester).isEqualTo(expectedEntityName)
+        assertThat(actualResult.requesterStyle.name).isEqualTo(expectedEntityName)
         assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
-        assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).logo).isNotNull
-        assertThat(actualResult.requesterStyle.logo?.uri).isEqualTo("")
-        assertThat(actualResult.requesterStyle.logo?.image).isNull()
+        assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
+        assertThat(actualResult.requesterStyle.verifierLogo?.url).isEqualTo("")
         assertThat(actualResult.requirement).isInstanceOf(VerifiedIdRequirement::class.java)
         assertThat(actualResult.rootOfTrust.verified).isEqualTo(true)
         assertThat(actualResult.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
@@ -191,11 +189,10 @@ class VerifiedIdOpenIdJwtRawRequestTest {
 
         // Assert
         assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
-        assertThat(actualResult.requesterStyle.requester).isEqualTo(expectedEntityName)
+        assertThat(actualResult.requesterStyle.name).isEqualTo(expectedEntityName)
         assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
-        assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).logo).isNotNull
-        assertThat(actualResult.requesterStyle.logo?.uri).isEqualTo("")
-        assertThat(actualResult.requesterStyle.logo?.image).isNull()
+        assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
+        assertThat(actualResult.requesterStyle.verifierLogo?.url).isEqualTo("")
         assertThat(actualResult.requirement).isInstanceOf(VerifiedIdRequirement::class.java)
         assertThat(actualResult.rootOfTrust.verified).isEqualTo(true)
         assertThat(actualResult.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)

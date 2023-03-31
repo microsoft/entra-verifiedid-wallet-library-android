@@ -1,6 +1,7 @@
 package com.microsoft.walletlibrary.verifiedid
 
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
 import kotlinx.serialization.Serializable
 import java.util.*
 
@@ -21,6 +22,8 @@ class VerifiableCredential(
     override val expiresOn = raw.contents.exp?.let { Date(it * 1000L) }
 
     val types = raw.contents.vc.type
+
+    override val style = contract.display.toVerifiedIdStyle()
 
     override fun getClaims(): ArrayList<VerifiedIdClaim> {
         val claimDescriptors = contract.display.claims
