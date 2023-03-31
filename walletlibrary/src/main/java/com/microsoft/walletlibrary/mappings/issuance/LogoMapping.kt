@@ -5,8 +5,9 @@
 
 package com.microsoft.walletlibrary.mappings.issuance
 
-import com.microsoft.walletlibrary.requests.styles.Logo
+import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdLogo
 
-internal fun com.microsoft.did.sdk.credential.service.models.contracts.display.Logo.toLogo(): Logo {
-    return Logo(this.uri, this.image, this.description)
+internal fun Logo.toLogo(): VerifiedIdLogo {
+    return VerifiedIdLogo(uri, description)
 }

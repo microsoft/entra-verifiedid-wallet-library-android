@@ -13,6 +13,8 @@ import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
 import com.microsoft.walletlibrary.requests.handlers.RequestHandler
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.requests.resolvers.RequestResolver
+import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.WalletLibraryVCSDKLogConsumer
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
@@ -34,6 +36,9 @@ class VerifiedIdClientBuilder(private val context: Context) {
         serializersModule = SerializersModule {
             polymorphic(VerifiedId::class) {
                 subclass(VerifiableCredential::class)
+            }
+            polymorphic(VerifiedIdStyle::class) {
+                subclass(BasicVerifiedIdStyle::class)
             }
         }
         ignoreUnknownKeys = true
