@@ -7,7 +7,6 @@ apply plugin: 'kotlin-kapt'
 apply plugin: "androidx.navigation.safeargs"
 
 repositories {
-    mavenLocal()
     google()
     mavenCentral()
     maven { url "https://jitpack.io" }
@@ -59,8 +58,7 @@ dependencies {
     implementation "androidx.room:room-runtime:$androidx_room_persistence_version"
     implementation "androidx.room:room-ktx:$androidx_room_persistence_version"
     kapt "androidx.room:room-compiler:$androidx_room_persistence_version"
-//    implementation project(':walletlibrary')
-    implementation "com.microsoft.entra.verifiedid:walletlibrary:0.0.1-local.5"
+    implementation "com.microsoft.entra.verifiedid:walletlibrary:0.0.1-beta.1"
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation "androidx.test.ext:junit:$androidx_test_junit_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidx_test_espresso_core_version"
