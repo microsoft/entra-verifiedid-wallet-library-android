@@ -71,7 +71,7 @@ class LoadRequestFragment : Fragment(), ClickListener {
         }
     }
 
-    override fun navigateToVerifiedId(requirement: VerifiedIdRequirement) {}
+    override fun navigateToVerifiedIds(requirement: VerifiedIdRequirement) {}
 
     override fun fulfillVerifiedIdRequirement(
         verifiedId: VerifiedId,

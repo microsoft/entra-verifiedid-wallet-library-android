@@ -17,7 +17,6 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context): Vi
     private val verifiedIdDao = VerifiedIdDatabase.getInstance(context).verifiedIdDao()
 
     suspend fun initiateRequest(requestUrl: String) {
-        // Use the test uri here
         val verifiedIdRequestUrl =
             VerifiedIdRequestURL(Uri.parse(requestUrl))
         verifiedIdRequestResult = verifiedIdClient.createRequest(verifiedIdRequestUrl)
