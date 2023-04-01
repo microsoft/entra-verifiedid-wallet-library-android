@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import com.microsoft.walletlibrarydemo.R
 import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedidRowBinding
 
 class VerifiedIdsAdapter(
@@ -18,6 +19,7 @@ class VerifiedIdsAdapter(
     private val requirement: VerifiedIdRequirement?
 ) :
     RecyclerView.Adapter<VerifiedIdsAdapter.VerifiedIdsViewHolder>() {
+    private var selected = false
 
     sealed class VerifiedIdsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         class VerifiedIdVc(val binding: RequirementVerifiedidRowBinding) :
@@ -63,7 +65,20 @@ class VerifiedIdsAdapter(
         if (vc is VerifiableCredential) {
             holder.binding.type.text = "Type: ${vc.types.last()}"
         }
-        requirement?.let { req -> holder.binding.root.setOnClickListener { fulfillVerifiedIdRequirement(vc, req) } }
+        requirement?.let { req ->
+            holder.binding.root.setOnClickListener {
+                if (!selected) {
+                    holder.binding.name.setCompoundDrawablesWithIntrinsicBounds(
+                        0,
+                        0,
+                        R.drawable.checkmark,
+                        0
+                    )
+                    fulfillVerifiedIdRequirement(vc, req)
+                    selected = true
+                }
+            }
+        }
     }
 
     private fun fulfillVerifiedIdRequirement(verifiedId: VerifiedId, requirement: VerifiedIdRequirement) {

@@ -93,8 +93,10 @@ class RequirementsFragment : Fragment(), ClickListener {
                     binding.requirementsList.visibility = View.GONE
                     binding.verifiedIdClaims.visibility = View.GONE
                     if (viewModel.verifiedIdResult?.isSuccess == true) {
-                        if (viewModel.verifiedIdResult?.getOrNull() != null)
+                        if (viewModel.verifiedIdResult?.getOrNull() != null) {
                             binding.requestTitle.text = "Presentation Complete!!"
+                            binding.requestCompletion.visibility = View.GONE
+                        }
                     } else
                         binding.requestTitle.text =
                             "Presentation Failed ${viewModel.verifiedIdResult?.exceptionOrNull()}"
