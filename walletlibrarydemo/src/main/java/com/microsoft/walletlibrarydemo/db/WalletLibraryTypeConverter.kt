@@ -79,4 +79,15 @@ object WalletLibraryTypeConverter {
     @JvmStatic
     fun stringToVcInSdk(string: String) =
         serializer.decodeFromString(com.microsoft.did.sdk.credential.models.VerifiableCredential.serializer(), string)
+
+
+    @TypeConverter
+    @JvmStatic
+    fun vcToString(verifiableCredentialCredential: VerifiableCredential) =
+        serializer.encodeToString(VerifiableCredential.serializer(), verifiableCredentialCredential)
+
+    @TypeConverter
+    @JvmStatic
+    fun stringToVc(string: String) =
+        serializer.decodeFromString(VerifiableCredential.serializer(), string)
 }
