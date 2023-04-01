@@ -138,11 +138,16 @@ class RequirementsFragment : Fragment(), ClickListener {
             binding.requirementsList.visibility = View.GONE
             binding.verifiedIdClaims.visibility = View.GONE
             binding.verifiedIds.visibility = View.VISIBLE
-            val verifiedIds = viewModel.getVerifiedIds().filter { it.verifiableCredential.types.contains(requirement.types.last()) }
-            if (verifiedIds.isNotEmpty()) {
+            val decodedVerifiedIds = ArrayList<VerifiedId>()
+            viewModel.getVerifiedIds().forEach {
+                if ((it is VerifiableCredential) && it.types.contains(requirement.types.last())) {
+                    decodedVerifiedIds.add(it)
+                }
+            }
+            if (decodedVerifiedIds.isNotEmpty()) {
                 val adapter = VerifiedIdsAdapter(
                     this@RequirementsFragment,
-                    verifiedIds as ArrayList<com.microsoft.walletlibrarydemo.db.entities.VerifiedId>,
+                    decodedVerifiedIds,
                     requirement
                 )
                 binding.verifiedIds.layoutManager = LinearLayoutManager(context)
@@ -152,8 +157,8 @@ class RequirementsFragment : Fragment(), ClickListener {
         }
     }
 
-    override fun fulfillVerifiedIdRequirement(verifiedId: com.microsoft.walletlibrarydemo.db.entities.VerifiedId, requirement: VerifiedIdRequirement) {
-        requirement.fulfill(verifiedId.verifiableCredential)
+    override fun fulfillVerifiedIdRequirement(verifiedId: VerifiedId, requirement: VerifiedIdRequirement) {
+        requirement.fulfill(verifiedId)
         binding.requestCompletion.visibility = View.VISIBLE
     }
 }

@@ -8,8 +8,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
+import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
+import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedidRowBinding
-import com.microsoft.walletlibrarydemo.db.entities.VerifiedId
 
 class VerifiedIdsAdapter(
     private val clickListener: ClickListener,
@@ -25,7 +26,7 @@ class VerifiedIdsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerifiedIdsViewHolder {
         return when (viewType) {
-            VerifiedId::class.java.name.hashCode() -> VerifiedIdsViewHolder.VerifiedIdVc(
+            VerifiableCredential::class.java.name.hashCode() -> VerifiedIdsViewHolder.VerifiedIdVc(
                 RequirementVerifiedidRowBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
@@ -56,10 +57,12 @@ class VerifiedIdsAdapter(
         holder: VerifiedIdsViewHolder.VerifiedIdVc,
         vc: VerifiedId
     ) {
-        holder.binding.name.text = "Title: ${vc.verifiableCredential.style.name}"
-        holder.binding.type.text = "Type: ${vc.verifiableCredential.types.last()}"
-        holder.binding.issuedOn.text = "Issued On: ${vc.verifiableCredential.issuedOn}"
-        holder.binding.issuer.text = "Issuer: ${(vc.verifiableCredential.style as BasicVerifiedIdStyle).issuer}"
+        holder.binding.name.text = "Title: ${vc.style.name}"
+        holder.binding.issuedOn.text = "Issued On: ${vc.issuedOn}"
+        holder.binding.issuer.text = "Issuer: ${(vc.style as BasicVerifiedIdStyle).issuer}"
+        if (vc is VerifiableCredential) {
+            holder.binding.type.text = "Type: ${vc.types.last()}"
+        }
         requirement?.let { req -> holder.binding.root.setOnClickListener { fulfillVerifiedIdRequirement(vc, req) } }
     }
 

@@ -9,8 +9,8 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrarydemo.databinding.LoadRequestFragmentBinding
-import com.microsoft.walletlibrarydemo.db.entities.VerifiedId
 import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.ClickListener
 import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.SampleViewModel
 import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.VerifiedIdsAdapter

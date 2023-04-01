@@ -4,11 +4,9 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
 import com.microsoft.walletlibrarydemo.db.entities.VerifiedId
 
 @Database(entities = [VerifiedId::class], version = 1)
-@TypeConverters(WalletLibraryTypeConverter::class)
 abstract class VerifiedIdDatabase : RoomDatabase() {
 
     companion object {
