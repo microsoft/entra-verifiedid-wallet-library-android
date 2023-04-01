@@ -138,6 +138,7 @@ class RequirementsFragment : Fragment(), ClickListener {
             binding.requirementsList.visibility = View.GONE
             binding.verifiedIdClaims.visibility = View.GONE
             binding.verifiedIds.visibility = View.VISIBLE
+            binding.matchingIds.visibility = View.VISIBLE
             val decodedVerifiedIds = ArrayList<VerifiedId>()
             viewModel.getVerifiedIds().forEach {
                 if ((it is VerifiableCredential) && it.types.contains(requirement.types.last())) {
@@ -145,6 +146,7 @@ class RequirementsFragment : Fragment(), ClickListener {
                 }
             }
             if (decodedVerifiedIds.isNotEmpty()) {
+                binding.matchingIds.text = "Matching Verified Ids:"
                 val adapter = VerifiedIdsAdapter(
                     this@RequirementsFragment,
                     decodedVerifiedIds,
