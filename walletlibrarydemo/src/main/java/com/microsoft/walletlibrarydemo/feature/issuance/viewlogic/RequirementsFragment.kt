@@ -17,7 +17,6 @@ import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdClaim
-import com.microsoft.walletlibrarydemo.R
 import com.microsoft.walletlibrarydemo.databinding.RequirementsFragmentBinding
 import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.*
 import kotlinx.coroutines.runBlocking
@@ -55,7 +54,7 @@ class RequirementsFragment : Fragment(), ClickListener {
             val requestResult = viewModel.verifiedIdRequestResult
             requestResult?.let {
                 if (requestResult.isSuccess) {
-                    requestResult.getOrNull()?.let { successfulRequest(it) }
+                    requestResult.getOrNull()?.let { loadRequirements(it) }
                 } else
                     showError("Failed: ${requestResult.exceptionOrNull()?.message}")
             }
@@ -67,7 +66,7 @@ class RequirementsFragment : Fragment(), ClickListener {
         binding.requestCompletion.isEnabled = false
     }
 
-    private fun successfulRequest(request: VerifiedIdRequest<*>) {
+    private fun loadRequirements(request: VerifiedIdRequest<*>) {
         request.let {
             if (it is VerifiedIdIssuanceRequest) {
                 binding.requestTitle.text = "Issuance Request"
