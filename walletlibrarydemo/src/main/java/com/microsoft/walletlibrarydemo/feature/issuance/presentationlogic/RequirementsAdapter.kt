@@ -99,6 +99,12 @@ class RequirementsAdapter(
         holder.binding.claimValue.apply {
             doAfterTextChanged {
                 requirement.fulfill(holder.binding.claimValue.text.toString())
+                holder.binding.title.setCompoundDrawablesWithIntrinsicBounds(
+                    0,
+                    0,
+                    R.drawable.checkmark,
+                    0
+                )
             }
         }
     }
@@ -107,8 +113,14 @@ class RequirementsAdapter(
         holder: IdTokenHolder,
         requirement: IdTokenRequirement
     ) {
-        holder.binding.claimTitle.text = "Sign in"
+        holder.binding.claimTitle.text = "Signed in"
         holder.binding.claimValue.text = Uri.parse(requirement.configuration).host
+        holder.binding.claimTitle.setCompoundDrawablesWithIntrinsicBounds(
+            0,
+            0,
+            R.drawable.checkmark,
+            0
+        )
     }
 
     private fun setupVerifiedIdRow(
@@ -130,6 +142,12 @@ class RequirementsAdapter(
         holder.binding.claimValue.apply {
             doAfterTextChanged {
                 requirement.fulfill(holder.binding.claimValue.text.toString())
+                holder.binding.title.setCompoundDrawablesWithIntrinsicBounds(
+                    0,
+                    0,
+                    R.drawable.checkmark,
+                    0
+                )
             }
         }
     }
