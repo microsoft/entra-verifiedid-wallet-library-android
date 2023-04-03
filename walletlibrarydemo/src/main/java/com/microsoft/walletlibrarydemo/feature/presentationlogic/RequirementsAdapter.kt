@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic
+package com.microsoft.walletlibrarydemo.feature.presentationlogic
 
 import android.content.Context
 import android.net.Uri
@@ -155,6 +155,6 @@ class RequirementsAdapter(
     }
 
     private fun credentialClickListener(requirement: VerifiedIdRequirement) {
-        clickListener.navigateToVerifiedIds(requirement)
+        clickListener.listMatchingVerifiedIds(requirement)
     }
 }

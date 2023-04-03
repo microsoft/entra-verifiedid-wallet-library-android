@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic
+package com.microsoft.walletlibrarydemo.feature.presentationlogic
 
 import android.content.Context
 import androidx.lifecycle.ViewModel

@@ -5,7 +5,7 @@
     app:startDestination="@id/loadRequestFragment">
     <fragment
         android:id="@+id/loadRequestFragment"
-        android:name="com.microsoft.walletlibrarydemo.feature.issuance.viewlogic.LoadRequestFragment">
+        android:name="com.microsoft.walletlibrarydemo.feature.viewlogic.LoadRequestFragment">
         <action
             android:id="@+id/action_loadRequestFragment_to_requirementsFragment"
             app:destination="@id/requirementsFragment"
@@ -15,7 +15,7 @@
 
     <fragment
         android:id="@+id/requirementsFragment"
-        android:name="com.microsoft.walletlibrarydemo.feature.issuance.viewlogic.RequirementsFragment">
+        android:name="com.microsoft.walletlibrarydemo.feature.viewlogic.RequirementsFragment">
         <argument
             android:name="requestUrl"
             app:argType="string" />

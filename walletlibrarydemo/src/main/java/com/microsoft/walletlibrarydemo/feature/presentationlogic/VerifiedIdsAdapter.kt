@@ -1,6 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
-
-package com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic
+package com.microsoft.walletlibrarydemo.feature.presentationlogic
 
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +13,7 @@ import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedidRowBindi
 
 class VerifiedIdsAdapter(
     private val clickListener: ClickListener,
-    private val verifiedIds: ArrayList<VerifiedId>,
+    private val verifiedIds: List<VerifiedId>,
     private val requirement: VerifiedIdRequirement?
 ) :
     RecyclerView.Adapter<VerifiedIdsAdapter.VerifiedIdsViewHolder>() {
@@ -62,9 +60,7 @@ class VerifiedIdsAdapter(
         holder.binding.name.text = "Title: ${vc.style.name}"
         holder.binding.issuedOn.text = "Issued On: ${vc.issuedOn}"
         holder.binding.issuer.text = "Issuer: ${(vc.style as BasicVerifiedIdStyle).issuer}"
-        if (vc is VerifiableCredential) {
-            holder.binding.type.text = "Type: ${vc.types.last()}"
-        }
+        holder.binding.expiry.text = "Expiry: ${vc.expiresOn}"
         requirement?.let { req ->
             holder.binding.root.setOnClickListener {
                 if (!selected) {

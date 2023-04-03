@@ -1,6 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
-
-package com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic
+package com.microsoft.walletlibrarydemo.feature.presentationlogic
 
 import android.view.LayoutInflater
 import android.view.View

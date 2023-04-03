@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-data class VerifiedId(
+data class EncodedVerifiedId(
     @PrimaryKey
     val vcId: String,
 

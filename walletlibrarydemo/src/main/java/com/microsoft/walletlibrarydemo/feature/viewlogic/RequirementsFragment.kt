@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrarydemo.feature.issuance.viewlogic
+package com.microsoft.walletlibrarydemo.feature.viewlogic
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,12 +13,12 @@ import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdPresentationRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
+import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
-import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdClaim
 import com.microsoft.walletlibrarydemo.databinding.RequirementsFragmentBinding
-import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.*
+import com.microsoft.walletlibrarydemo.feature.presentationlogic.*
 import kotlinx.coroutines.runBlocking
 
 class RequirementsFragment : Fragment(), ClickListener {
@@ -50,14 +50,12 @@ class RequirementsFragment : Fragment(), ClickListener {
         binding.requirementsList.layoutManager = LinearLayoutManager(context)
         binding.requirementsList.isNestedScrollingEnabled = false
         runBlocking {
-            viewModel.initiateRequest(args.requestUrl)
-            val requestResult = viewModel.verifiedIdRequestResult
-            requestResult?.let {
-                if (requestResult.isSuccess) {
-                    requestResult.getOrNull()?.let { loadRequirements(it) }
-                } else
-                    showError("Failed: ${requestResult.exceptionOrNull()?.message}")
-            }
+            val status = viewModel.initiateRequest(args.requestUrl)
+            if (status) {
+                val verifiedIdRequest = viewModel.verifiedIdRequest
+                verifiedIdRequest?.let { loadRequirements(it) }
+            } else
+                showError("Failed: ${viewModel.state.value}")
         }
     }
 
@@ -76,25 +74,29 @@ class RequirementsFragment : Fragment(), ClickListener {
             }
         }
         val requirement = request.requirement
-        requirement.let {
-            val requirementList =
-                if (requirement !is GroupRequirement) listOf(requirement) else requirement.requirements
-            val adapter =
-                RequirementsAdapter(this@RequirementsFragment, requireContext(), requirementList)
-            binding.requirementsList.adapter = adapter
-        }
+        configureRequirement(requirement)
     }
 
+    private fun configureRequirement(requirement: Requirement) {
+        // If request has more than one requirement, they are listed in a GroupRequirement.
+        val requirementList =
+            if (requirement !is GroupRequirement) listOf(requirement) else requirement.requirements
+        // Get the list of requirements and configure them in the UI.
+        val adapter =
+            RequirementsAdapter(this@RequirementsFragment, requireContext(), requirementList)
+        binding.requirementsList.adapter = adapter
+    }
+
+    // Completes the request after all its requirements are fulfilled.
     private fun completeRequest() {
         runBlocking {
-            if (viewModel.verifiedIdRequestResult?.isSuccess == true && viewModel.verifiedIdRequestResult?.getOrNull() != null) {
-                val request = viewModel.verifiedIdRequestResult?.getOrNull()
+            viewModel.verifiedIdRequest?.let {
+                val request = it
                 if (request is VerifiedIdIssuanceRequest)
                     completeIssuanceRequest()
                 else if (request is VerifiedIdPresentationRequest)
                     completePresentationRequest()
-            } else
-                binding.errorMessage.text = "Request not loaded"
+            } ?: { binding.errorMessage.text = "Request not loaded" }
         }
     }
 
@@ -102,24 +104,21 @@ class RequirementsFragment : Fragment(), ClickListener {
         viewModel.completeIssuance()
         binding.requirementsList.visibility = View.GONE
         binding.verifiedIdClaims.visibility = View.VISIBLE
-        if (viewModel.verifiedIdResult?.isSuccess == true) {
-            if (viewModel.verifiedIdResult?.getOrNull() != null)
-                configureVerifiedIdView()
-        } else
-            showError("Issuance Failed: ${viewModel.verifiedIdResult?.exceptionOrNull()}")
+        if (viewModel.state == SampleViewModel.State.ISSUANCE_SUCCESS) {
+            configureVerifiedIdView()
+        } else if (viewModel.state == SampleViewModel.State.ERROR)
+            showError("Issuance Failed: ${viewModel.state.value}")
     }
 
     private suspend fun completePresentationRequest() {
         viewModel.completePresentation()
         binding.requirementsList.visibility = View.GONE
         binding.verifiedIdClaims.visibility = View.GONE
-        if (viewModel.verifiedIdResult?.isSuccess == true) {
-            if (viewModel.verifiedIdResult?.getOrNull() != null) {
-                binding.requestTitle.text = "Presentation Complete!!"
-                binding.requestCompletion.visibility = View.GONE
-            }
-        } else
-            showError("Presentation Failed: ${viewModel.verifiedIdResult?.exceptionOrNull()}")
+        if (viewModel.state == SampleViewModel.State.PRESENTATION_SUCCESS) {
+            binding.requestTitle.text = "Presentation Complete!!"
+            binding.requestCompletion.visibility = View.GONE
+        } else if (viewModel.state == SampleViewModel.State.ERROR)
+            showError("Presentation Failed: ${viewModel.state.value}")
     }
 
     override fun onDestroyView() {
@@ -128,18 +127,13 @@ class RequirementsFragment : Fragment(), ClickListener {
     }
 
     private fun configureVerifiedIdView() {
-        var verifiedId: VerifiedId? = null
-        viewModel.verifiedIdResult?.let {
-            if (it.isSuccess)
-                verifiedId = it.getOrNull() as VerifiedId
-        }
+        binding.requestTitle.text = "Issuance Complete!!"
+        val verifiedId = viewModel.verifiedId
         verifiedId?.let {
-            val verifiableCredential = verifiedId as VerifiableCredential
-            binding.requestTitle.text = verifiableCredential.types.last()
-            val claims = verifiableCredential.getClaims()
-            claims.add(VerifiedIdClaim("Issued On", verifiableCredential.issuedOn))
-            verifiableCredential.expiresOn?.let { claims.add(VerifiedIdClaim("Expiry", it)) }
-            claims.add(VerifiedIdClaim("Id", verifiableCredential.id))
+            val claims = it.getClaims()
+            claims.add(VerifiedIdClaim("Issued On", it.issuedOn))
+            it.expiresOn?.let { expiry -> claims.add(VerifiedIdClaim("Expiry", expiry)) }
+            claims.add(VerifiedIdClaim("Id", it.id))
             val adapter = VerifiedIdAdapter(claims)
             binding.verifiedIdClaims.layoutManager = LinearLayoutManager(context)
             binding.verifiedIdClaims.isNestedScrollingEnabled = false
@@ -152,13 +146,13 @@ class RequirementsFragment : Fragment(), ClickListener {
         findNavController().navigate(RequirementsFragmentDirections.actionRequirementsFragmentToLoadRequestFragment())
     }
 
-    override fun navigateToVerifiedIds(requirement: VerifiedIdRequirement) {
+    override fun listMatchingVerifiedIds(requirement: VerifiedIdRequirement) {
+        binding.requirementsList.visibility = View.GONE
+        binding.verifiedIdClaims.visibility = View.GONE
+        binding.verifiedIds.visibility = View.VISIBLE
+        binding.matchingIds.visibility = View.VISIBLE
         runBlocking {
-            binding.requirementsList.visibility = View.GONE
-            binding.verifiedIdClaims.visibility = View.GONE
-            binding.verifiedIds.visibility = View.VISIBLE
-            binding.matchingIds.visibility = View.VISIBLE
-            val decodedVerifiedIds = filterVerifiedIdsByType(requirement)
+            val decodedVerifiedIds = viewModel.getMatchingVerifiedIds(requirement)
             if (decodedVerifiedIds.isNotEmpty()) {
                 binding.matchingIds.text = "Matching Verified Ids:"
                 val adapter = VerifiedIdsAdapter(
@@ -173,20 +167,11 @@ class RequirementsFragment : Fragment(), ClickListener {
         }
     }
 
-    private suspend fun filterVerifiedIdsByType(requirement: VerifiedIdRequirement): ArrayList<VerifiedId> {
-        val decodedVerifiedIds = ArrayList<VerifiedId>()
-        viewModel.getVerifiedIds().forEach {
-            if ((it is VerifiableCredential) && it.types.contains(requirement.types.last())) {
-                decodedVerifiedIds.add(it)
-            }
-        }
-        return decodedVerifiedIds
-    }
-
     override fun fulfillVerifiedIdRequirement(
         verifiedId: VerifiedId,
         requirement: VerifiedIdRequirement
     ) {
+        // The fulfill methods fulfills the requirement with the provided VerifiedId value.
         requirement.fulfill(verifiedId)
         binding.requestCompletion.visibility = View.VISIBLE
     }

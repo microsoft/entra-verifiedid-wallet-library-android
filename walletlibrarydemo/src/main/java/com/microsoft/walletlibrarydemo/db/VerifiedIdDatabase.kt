@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.microsoft.walletlibrarydemo.db.entities.VerifiedId
+import com.microsoft.walletlibrarydemo.db.entities.EncodedVerifiedId
 
-@Database(entities = [VerifiedId::class], version = 1)
+@Database(entities = [EncodedVerifiedId::class], version = 1)
 abstract class VerifiedIdDatabase : RoomDatabase() {
 
     companion object {

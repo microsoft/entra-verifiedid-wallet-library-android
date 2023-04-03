@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrarydemo.feature.issuance.viewlogic
+package com.microsoft.walletlibrarydemo.feature.viewlogic
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,10 +11,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrarydemo.databinding.LoadRequestFragmentBinding
-import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.ClickListener
-import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.SampleViewModel
-import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.VerifiedIdsAdapter
-import com.microsoft.walletlibrarydemo.feature.issuance.presentationlogic.ViewModelFactory
+import com.microsoft.walletlibrarydemo.feature.presentationlogic.ClickListener
+import com.microsoft.walletlibrarydemo.feature.presentationlogic.SampleViewModel
+import com.microsoft.walletlibrarydemo.feature.presentationlogic.VerifiedIdsAdapter
+import com.microsoft.walletlibrarydemo.feature.presentationlogic.ViewModelFactory
 import kotlinx.coroutines.runBlocking
 
 class LoadRequestFragment : Fragment(), ClickListener {
@@ -71,7 +71,7 @@ class LoadRequestFragment : Fragment(), ClickListener {
         }
     }
 
-    override fun navigateToVerifiedIds(requirement: VerifiedIdRequirement) {}
+    override fun listMatchingVerifiedIds(requirement: VerifiedIdRequirement) {}
 
     override fun fulfillVerifiedIdRequirement(
         verifiedId: VerifiedId,

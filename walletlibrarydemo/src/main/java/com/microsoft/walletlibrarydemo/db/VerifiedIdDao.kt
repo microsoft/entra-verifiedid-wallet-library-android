@@ -4,20 +4,20 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.microsoft.walletlibrarydemo.db.entities.VerifiedId
+import com.microsoft.walletlibrarydemo.db.entities.EncodedVerifiedId
 
 @Dao
 interface VerifiedIdDao {
 
     @Insert
-    suspend fun insert(verifiedId: VerifiedId)
+    suspend fun insert(encodedVerifiedId: EncodedVerifiedId)
 
     @Delete
-    suspend fun delete(verifiedId: VerifiedId)
+    suspend fun delete(encodedVerifiedId: EncodedVerifiedId)
 
-    @Query("SELECT * FROM VerifiedId")
-    suspend fun queryVerifiedIds(): List<VerifiedId>
+    @Query("SELECT * FROM EncodedVerifiedId")
+    suspend fun queryVerifiedIds(): List<EncodedVerifiedId>
 
-    @Query("SELECT * FROM VerifiedId WHERE vcId = :id")
-    suspend fun queryVerifiedIdById(id: String): VerifiedId
+    @Query("SELECT * FROM EncodedVerifiedId WHERE vcId = :id")
+    suspend fun queryVerifiedIdById(id: String): EncodedVerifiedId
 }
