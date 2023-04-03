@@ -20,6 +20,7 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdClaim
 import com.microsoft.walletlibrarydemo.databinding.RequirementsFragmentBinding
 import com.microsoft.walletlibrarydemo.feature.presentationlogic.*
+import com.microsoft.walletlibrarydemo.feature.presentationlogic.model.VerifiedIdDisplay
 import kotlinx.coroutines.launch
 
 class RequirementsFragment : Fragment(), ClickListener {
@@ -165,7 +166,7 @@ class RequirementsFragment : Fragment(), ClickListener {
                 binding.matchingIds.text = "Matching Verified Ids:"
                 val adapter = VerifiedIdsAdapter(
                     this@RequirementsFragment,
-                    decodedVerifiedIds,
+                    decodedVerifiedIds.map { VerifiedIdDisplay(it) },
                     requirement
                 )
                 binding.verifiedIds.layoutManager = LinearLayoutManager(context)

@@ -6,14 +6,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
-import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrarydemo.R
 import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedidRowBinding
+import com.microsoft.walletlibrarydemo.feature.presentationlogic.model.VerifiedIdDisplay
 
 class VerifiedIdsAdapter(
     private val clickListener: ClickListener,
-    private val verifiedIds: List<VerifiedId>,
+    private val verifiedIds: List<VerifiedIdDisplay>,
     private val requirement: VerifiedIdRequirement?
 ) :
     RecyclerView.Adapter<VerifiedIdsAdapter.VerifiedIdsViewHolder>() {
@@ -26,7 +26,7 @@ class VerifiedIdsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerifiedIdsViewHolder {
         return when (viewType) {
-            VerifiableCredential::class.java.name.hashCode() -> VerifiedIdsViewHolder.VerifiedIdVc(
+            VerifiedIdDisplay::class.java.name.hashCode() -> VerifiedIdsViewHolder.VerifiedIdVc(
                 RequirementVerifiedidRowBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
@@ -55,12 +55,12 @@ class VerifiedIdsAdapter(
 
     private fun configureVerifiedIdClaim(
         holder: VerifiedIdsViewHolder.VerifiedIdVc,
-        vc: VerifiedId
+        verifiedIdDisplay: VerifiedIdDisplay
     ) {
-        holder.binding.name.text = "Title: ${vc.style.name}"
-        holder.binding.issuedOn.text = "Issued On: ${vc.issuedOn}"
-        holder.binding.issuer.text = "Issuer: ${(vc.style as BasicVerifiedIdStyle).issuer}"
-        holder.binding.expiry.text = "Expiry: ${vc.expiresOn}"
+        holder.binding.name.text = "Title: ${verifiedIdDisplay.verifiedId.style.name}"
+        holder.binding.issuedOn.text = "Issued On: ${verifiedIdDisplay.verifiedId.issuedOn}"
+        holder.binding.issuer.text = "Issuer: ${(verifiedIdDisplay.verifiedId.style as BasicVerifiedIdStyle).issuer}"
+        holder.binding.expiry.text = "Expiry: ${verifiedIdDisplay.verifiedId.expiresOn}"
         requirement?.let { req ->
             holder.binding.root.setOnClickListener {
                 if (!selected) {
@@ -70,7 +70,7 @@ class VerifiedIdsAdapter(
                         R.drawable.checkmark,
                         0
                     )
-                    fulfillVerifiedIdRequirement(vc, req)
+                    fulfillVerifiedIdRequirement(verifiedIdDisplay.verifiedId, req)
                     selected = true
                 }
             }

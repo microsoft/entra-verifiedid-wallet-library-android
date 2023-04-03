@@ -15,6 +15,7 @@ import com.microsoft.walletlibrarydemo.feature.presentationlogic.ClickListener
 import com.microsoft.walletlibrarydemo.feature.presentationlogic.SampleViewModel
 import com.microsoft.walletlibrarydemo.feature.presentationlogic.VerifiedIdsAdapter
 import com.microsoft.walletlibrarydemo.feature.presentationlogic.ViewModelFactory
+import com.microsoft.walletlibrarydemo.feature.presentationlogic.model.VerifiedIdDisplay
 import kotlinx.coroutines.runBlocking
 
 class LoadRequestFragment : Fragment(), ClickListener {
@@ -41,7 +42,7 @@ class LoadRequestFragment : Fragment(), ClickListener {
     private fun configureViews() {
         binding.createRequest.setOnClickListener { initiateIssuance() }
         runBlocking {
-            val verifiedIds = viewModel.getVerifiedIds()
+            val verifiedIds = viewModel.getVerifiedIds().map { VerifiedIdDisplay(it)  }
             if (verifiedIds.isNotEmpty()) {
                 binding.issuedVerifiedIds.visibility = View.VISIBLE
                 val adapter = VerifiedIdsAdapter(this@LoadRequestFragment, verifiedIds, null)
