@@ -22,7 +22,7 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : V
 
     enum class State(var value: String? = null) {
         INITIALIZED,
-        CREATE_REQUEST,
+        CREATE_REQUEST_SUCCESS,
         ISSUANCE_SUCCESS,
         PRESENTATION_SUCCESS,
         ERROR
@@ -31,13 +31,13 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : V
     var state = State.INITIALIZED
 
     suspend fun initiateRequest(requestUrl: String) {
-        state = State.CREATE_REQUEST
         val verifiedIdRequestUrl = VerifiedIdRequestURL(Uri.parse(requestUrl))
 
         // VerifiedIdClient creates a VerifiedIdRequest using the input provided above (VerifiedIdRequestURL).
         val requestResult = verifiedIdClient.createRequest(verifiedIdRequestUrl)
         requestResult.fold(
             onSuccess = {
+                state = State.CREATE_REQUEST_SUCCESS
                 verifiedIdRequest = it
             },
             onFailure = {

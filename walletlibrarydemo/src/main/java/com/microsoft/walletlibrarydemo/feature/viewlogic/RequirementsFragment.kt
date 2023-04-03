@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,7 +20,7 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdClaim
 import com.microsoft.walletlibrarydemo.databinding.RequirementsFragmentBinding
 import com.microsoft.walletlibrarydemo.feature.presentationlogic.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 
 class RequirementsFragment : Fragment(), ClickListener {
     private var _binding: RequirementsFragmentBinding? = null
@@ -49,10 +50,11 @@ class RequirementsFragment : Fragment(), ClickListener {
         binding.home.setOnClickListener { goBackHome() }
         binding.requirementsList.layoutManager = LinearLayoutManager(context)
         binding.requirementsList.isNestedScrollingEnabled = false
-        runBlocking {
+        lifecycleScope.launch {
             // Creates a VerifiedIdRequest using the input provided which initiates the flow whether it is an issuance or presentation.
             viewModel.initiateRequest(args.requestUrl)
-            if (viewModel.state != SampleViewModel.State.ERROR) {
+            binding.progress.visibility = View.GONE
+            if (viewModel.state == SampleViewModel.State.CREATE_REQUEST_SUCCESS) {
                 val verifiedIdRequest = viewModel.verifiedIdRequest
                 verifiedIdRequest?.let { loadRequirements(it) }
             } else
@@ -90,21 +92,24 @@ class RequirementsFragment : Fragment(), ClickListener {
 
     // Completes the request after all its requirements are fulfilled.
     private fun completeRequest() {
-        runBlocking {
+        binding.progress.visibility = View.VISIBLE
+        binding.requirementsList.visibility = View.GONE
+        lifecycleScope.launch {
             viewModel.verifiedIdRequest?.let {
                 val request = it
                 if (request is VerifiedIdIssuanceRequest)
                     completeIssuanceRequest()
                 else if (request is VerifiedIdPresentationRequest)
                     completePresentationRequest()
-            } ?: { binding.errorMessage.text = "Request not loaded" }
+            }
         }
+            viewModel.verifiedIdRequest ?: run { binding.errorMessage.text = "Request not loaded" }
     }
 
     private suspend fun completeIssuanceRequest() {
         viewModel.completeIssuance()
-        binding.requirementsList.visibility = View.GONE
         binding.verifiedIdClaims.visibility = View.VISIBLE
+        binding.progress.visibility = View.GONE
         if (viewModel.state == SampleViewModel.State.ISSUANCE_SUCCESS) {
             configureVerifiedIdView()
         } else if (viewModel.state == SampleViewModel.State.ERROR)
@@ -113,8 +118,8 @@ class RequirementsFragment : Fragment(), ClickListener {
 
     private suspend fun completePresentationRequest() {
         viewModel.completePresentation()
-        binding.requirementsList.visibility = View.GONE
         binding.verifiedIdClaims.visibility = View.GONE
+        binding.progress.visibility = View.GONE
         if (viewModel.state == SampleViewModel.State.PRESENTATION_SUCCESS) {
             binding.requestTitle.text = "Presentation Complete!!"
             binding.requestCompletion.visibility = View.GONE
@@ -152,8 +157,10 @@ class RequirementsFragment : Fragment(), ClickListener {
         binding.verifiedIdClaims.visibility = View.GONE
         binding.verifiedIds.visibility = View.VISIBLE
         binding.matchingIds.visibility = View.VISIBLE
-        runBlocking {
+        binding.progress.visibility = View.VISIBLE
+        lifecycleScope.launch {
             val decodedVerifiedIds = viewModel.getMatchingVerifiedIds(requirement)
+            binding.progress.visibility = View.GONE
             if (decodedVerifiedIds.isNotEmpty()) {
                 binding.matchingIds.text = "Matching Verified Ids:"
                 val adapter = VerifiedIdsAdapter(
