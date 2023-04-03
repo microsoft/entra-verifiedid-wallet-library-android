@@ -51,10 +51,12 @@ class RequirementsFragment : Fragment(), ClickListener {
         binding.home.setOnClickListener { goBackHome() }
         binding.requirementsList.layoutManager = LinearLayoutManager(context)
         binding.requirementsList.isNestedScrollingEnabled = false
+        binding.requestCompletion.isEnabled = false
         lifecycleScope.launch {
             // Creates a VerifiedIdRequest using the input provided which initiates the flow whether it is an issuance or presentation.
             viewModel.initiateRequest(args.requestUrl)
             binding.progress.visibility = View.GONE
+            binding.requestCompletion.isEnabled = true
             if (viewModel.state == SampleViewModel.State.CREATE_REQUEST_SUCCESS) {
                 val verifiedIdRequest = viewModel.verifiedIdRequest
                 verifiedIdRequest?.let { loadRequirements(it) }
@@ -95,6 +97,7 @@ class RequirementsFragment : Fragment(), ClickListener {
     private fun completeRequest() {
         binding.progress.visibility = View.VISIBLE
         binding.requirementsList.visibility = View.GONE
+        binding.requestCompletion.isEnabled = false
         lifecycleScope.launch {
             viewModel.verifiedIdRequest?.let {
                 val request = it
@@ -111,6 +114,7 @@ class RequirementsFragment : Fragment(), ClickListener {
         viewModel.completeIssuance()
         binding.verifiedIdClaims.visibility = View.VISIBLE
         binding.progress.visibility = View.GONE
+        binding.requestCompletion.isEnabled = true
         if (viewModel.state == SampleViewModel.State.ISSUANCE_SUCCESS) {
             configureVerifiedIdView()
         } else if (viewModel.state == SampleViewModel.State.ERROR)
@@ -121,6 +125,7 @@ class RequirementsFragment : Fragment(), ClickListener {
         viewModel.completePresentation()
         binding.verifiedIdClaims.visibility = View.GONE
         binding.progress.visibility = View.GONE
+        binding.requestCompletion.isEnabled = true
         if (viewModel.state == SampleViewModel.State.PRESENTATION_SUCCESS) {
             binding.requestTitle.text = "Presentation Complete!!"
             binding.requestCompletion.visibility = View.GONE
@@ -159,9 +164,11 @@ class RequirementsFragment : Fragment(), ClickListener {
         binding.verifiedIds.visibility = View.VISIBLE
         binding.matchingIds.visibility = View.VISIBLE
         binding.progress.visibility = View.VISIBLE
+        binding.requestCompletion.isEnabled = false
         lifecycleScope.launch {
             val decodedVerifiedIds = viewModel.getMatchingVerifiedIds(requirement)
             binding.progress.visibility = View.GONE
+            binding.requestCompletion.isEnabled = true
             if (decodedVerifiedIds.isNotEmpty()) {
                 binding.matchingIds.text = "Matching Verified Ids:"
                 val adapter = VerifiedIdsAdapter(
