@@ -30,7 +30,7 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : V
 
     var state = State.INITIALIZED
 
-    suspend fun initiateRequest(requestUrl: String): Boolean {
+    suspend fun initiateRequest(requestUrl: String) {
         state = State.CREATE_REQUEST
         val verifiedIdRequestUrl = VerifiedIdRequestURL(Uri.parse(requestUrl))
 
@@ -39,11 +39,9 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : V
         requestResult.fold(
             onSuccess = {
                 verifiedIdRequest = it
-                return true
             },
             onFailure = {
                 populateErrorState(it.message)
-                return false
             })
     }
 

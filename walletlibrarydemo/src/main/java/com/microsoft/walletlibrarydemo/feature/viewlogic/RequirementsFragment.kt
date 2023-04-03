@@ -50,8 +50,9 @@ class RequirementsFragment : Fragment(), ClickListener {
         binding.requirementsList.layoutManager = LinearLayoutManager(context)
         binding.requirementsList.isNestedScrollingEnabled = false
         runBlocking {
-            val status = viewModel.initiateRequest(args.requestUrl)
-            if (status) {
+            // Creates a VerifiedIdRequest using the input provided which initiates the flow whether it is an issuance or presentation.
+            viewModel.initiateRequest(args.requestUrl)
+            if (viewModel.state != SampleViewModel.State.ERROR) {
                 val verifiedIdRequest = viewModel.verifiedIdRequest
                 verifiedIdRequest?.let { loadRequirements(it) }
             } else
