@@ -108,6 +108,15 @@ val verifiedId = verifiedIdClient.decodeVerifiedId(encodedVerifiedIdString)
 4. Create a test device. 
 5. Run the `walletlibarydemo` app. 
 
+## Log Injection
+You can inject your own log consumer into the Wallet Library by creating a class that conforms to the [Wallet Library Log Consumer Protocol](./walletlibrary/src/main/java/com/microsoft/walletlibrary/util/WalletLibraryLogger.kt) and injecting it into the `VerifiedIdClientBuilder`.
+
+```Kotlin
+val client = VerifiedIdClientBuilder(context)
+    .with(<Your Log Consumer>)
+    .build()
+```
+
 ## Documentation
 
 * [External Architecture](https://github.com/microsoft/entra-verifiedid-wallet-library-ios/blob/dev/Docs/LibraryArchitecture.md)
