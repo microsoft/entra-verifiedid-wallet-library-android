@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.verifiedid
 
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import java.util.*
 
 /**
@@ -18,6 +19,9 @@ interface VerifiedId {
 
     // Time when Verified ID expires.
     val expiresOn: Date?
+
+    // Information needed to style a Verified ID.
+    val style: VerifiedIdStyle
 
     // Return list of claims in the Verified ID.
     fun getClaims(): ArrayList<VerifiedIdClaim>

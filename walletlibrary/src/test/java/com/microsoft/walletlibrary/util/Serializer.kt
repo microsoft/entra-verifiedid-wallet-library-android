@@ -1,5 +1,7 @@
 package com.microsoft.walletlibrary.util
 
+import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.json.Json
@@ -11,6 +13,9 @@ val defaultTestSerializer = Json {
     serializersModule = SerializersModule {
         polymorphic(VerifiedId::class) {
             subclass(VerifiableCredential::class)
+        }
+        polymorphic(VerifiedIdStyle::class) {
+            subclass(BasicVerifiedIdStyle::class)
         }
     }
     ignoreUnknownKeys = true

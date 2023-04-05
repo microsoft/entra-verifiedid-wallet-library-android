@@ -30,7 +30,6 @@ class DisplayContractMappingTest {
 
     private val logo: Logo = mockk()
     private val expectedLogoUri = "testLogoUri"
-    private val expectedLogoImage = "testLogoImage"
     private val expectedLogoDescription = "testLogoDescription"
 
     init {
@@ -67,7 +66,6 @@ class DisplayContractMappingTest {
     private fun setupLogo() {
         every { cardDescriptor.logo } returns logo
         every { logo.uri } returns expectedLogoUri
-        every { logo.image } returns expectedLogoImage
         every { logo.description } returns expectedLogoDescription
     }
 
@@ -84,9 +82,8 @@ class DisplayContractMappingTest {
         assertThat(actualVerifiedIdStyle.backgroundColor).isEqualTo(expectedCardBackgroundColor)
         assertThat(actualVerifiedIdStyle.textColor).isEqualTo(expectedCardTextColor)
         assertThat(actualVerifiedIdStyle.logo).isNotNull
-        assertThat(actualVerifiedIdStyle.logo?.uri).isEqualTo(expectedLogoUri)
-        assertThat(actualVerifiedIdStyle.logo?.image).isEqualTo(expectedLogoImage)
-        assertThat(actualVerifiedIdStyle.logo?.description).isEqualTo(expectedLogoDescription)
+        assertThat(actualVerifiedIdStyle.logo?.url).isEqualTo(expectedLogoUri)
+        assertThat(actualVerifiedIdStyle.logo?.altText).isEqualTo(expectedLogoDescription)
     }
 
     @Test

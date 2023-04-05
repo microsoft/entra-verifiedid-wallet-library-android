@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/verifiedid_flow"
+    app:startDestination="@id/loadRequestFragment">
+    <fragment
+        android:id="@+id/loadRequestFragment"
+        android:name="com.microsoft.walletlibrarydemo.feature.viewlogic.LoadRequestFragment">
+        <action
+            android:id="@+id/action_loadRequestFragment_to_requirementsFragment"
+            app:destination="@id/requirementsFragment"
+            app:popUpTo="@id/loadRequestFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/requirementsFragment"
+        android:name="com.microsoft.walletlibrarydemo.feature.viewlogic.RequirementsFragment">
+        <argument
+            android:name="requestUrl"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_requirementsFragment_to_loadRequestFragment"
+            app:destination="@id/loadRequestFragment"
+            app:popUpTo="@id/requirementsFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+</navigation>
