@@ -16,9 +16,11 @@ The Microsoft Entra Wallet Library for Android gives your app the ability to beg
 Add to your app's build.gradle to add Wallet Library as a dependency:
 ```kotlin
 dependencies {
-    implementation 'com.microsoft.entra.verifiedid:walletlibrary:0.0.1'
+    implementation 'com.microsoft.entra.verifiedid:walletlibrary:0.0.1-beta.3'
 }
 ```
+The library runs on a minimum sdk version 26. The app consuming the library should have minsdk version set to at least 26.
+In settings.gradle of the app which consumes the library, add maven { url "https://jitpack.io" }.
 
 ## Quick Start
 Here is a simple example of how to use the library. For more in-depth examples, check out the sample app.
