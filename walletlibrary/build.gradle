@@ -110,11 +110,6 @@ dependencies {
     testImplementation "junit:junit:$junit_version"
 }
 
-task updateSubmodule(type: Exec) {
-    commandLine "git", "submodule", "update", "--init", "--recursive"
-    ignoreExitValue true
-}
-
 tasks.register('copySubmoduleSource', Copy) {
     from "submodules/VerifiableCredential-SDK-Android/sdk/src/main/java"
     into "src/main/java"
@@ -127,7 +122,6 @@ tasks.register('copySubmoduleAssets', Copy) {
 
 tasks.whenTaskAdded { task ->
     if (task.name.contains('Release')) {
-        dependsOn updateSubmodule
         dependsOn copySubmoduleAssets
         dependsOn copySubmoduleSource
         finalizedBy cleanSubmoduleFiles
