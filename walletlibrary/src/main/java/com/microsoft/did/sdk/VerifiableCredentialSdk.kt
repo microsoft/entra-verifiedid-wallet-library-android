@@ -31,22 +31,22 @@ import kotlinx.serialization.modules.SerializersModule
 object VerifiableCredentialSdk {
 
     @JvmStatic
-    internal lateinit var issuanceService: IssuanceService
+    lateinit var issuanceService: IssuanceService
 
     @JvmStatic
-    internal lateinit var presentationService: PresentationService
+    lateinit var presentationService: PresentationService
 
     @JvmStatic
-    internal lateinit var revocationService: RevocationService
+    lateinit var revocationService: RevocationService
 
     @JvmStatic
-    internal lateinit var correlationVectorService: CorrelationVectorService
+    lateinit var correlationVectorService: CorrelationVectorService
 
     @JvmStatic
-    internal lateinit var backupService: BackupService
+    lateinit var backupService: BackupService
 
     @JvmStatic
-    internal lateinit var identifierService: IdentifierService
+    lateinit var identifierService: IdentifierService
 
 
     /**
@@ -61,7 +61,7 @@ object VerifiableCredentialSdk {
      */
     @JvmOverloads
     @JvmStatic
-    internal fun init(
+    fun init(
         context: Context,
         userAgentInfo: String = "",
         logConsumer: SdkLog.Consumer = DefaultLogConsumer(),

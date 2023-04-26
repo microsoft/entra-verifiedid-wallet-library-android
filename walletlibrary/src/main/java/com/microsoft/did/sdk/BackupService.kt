@@ -15,7 +15,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class BackupService @Inject constructor(
+class BackupService @Inject constructor(
     private val backupParser: BackupParser,
     private val backupProcessorFactory: BackupProcessorFactory,
     private val identityRepository: IdentifierRepository,

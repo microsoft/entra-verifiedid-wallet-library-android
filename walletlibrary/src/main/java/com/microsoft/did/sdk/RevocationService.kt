@@ -16,7 +16,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class RevocationService @Inject constructor(
+class RevocationService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val identifierService: IdentifierService,
     private val revocationResponseFormatter: RevocationResponseFormatter,

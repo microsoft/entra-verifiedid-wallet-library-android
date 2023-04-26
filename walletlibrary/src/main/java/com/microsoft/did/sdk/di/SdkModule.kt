@@ -55,7 +55,7 @@ class SdkModule {
 
     @Provides
     @Singleton
-    internal fun defaultOkHttpClient(
+    fun defaultOkHttpClient(
         @Named("userAgentInfo") userAgentInfo: String,
         correlationVectorService: CorrelationVectorService
     ): OkHttpClient {

@@ -34,7 +34,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class IssuanceService @Inject constructor(
+class IssuanceService @Inject constructor(
     private val identifierService: IdentifierService,
     private val linkedDomainsService: LinkedDomainsService,
     private val apiProvider: ApiProvider,

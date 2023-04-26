@@ -20,7 +20,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class Microsoft2020BackupProcessor @Inject constructor(
+class Microsoft2020BackupProcessor @Inject constructor(
     private val identifierService: IdentifierService,
     private val identityRepository: IdentifierRepository,
     private val keyStore: EncryptedKeyStore,

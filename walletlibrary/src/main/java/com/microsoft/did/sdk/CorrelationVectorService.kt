@@ -13,7 +13,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class CorrelationVectorService @Inject constructor(private val sharedPreferences: SharedPreferences) {
+class CorrelationVectorService @Inject constructor(private val sharedPreferences: SharedPreferences) {
 
     fun startNewFlowAndSave(): String {
         val correlationId = CorrelationVector(CorrelationVectorVersion.V2).value

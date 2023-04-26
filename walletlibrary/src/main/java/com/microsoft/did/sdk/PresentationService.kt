@@ -28,7 +28,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class PresentationService @Inject constructor(
+class PresentationService @Inject constructor(
     private val identifierService: IdentifierService,
     private val linkedDomainsService: LinkedDomainsService,
     private val serializer: Json,
