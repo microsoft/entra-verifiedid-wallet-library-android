@@ -44,9 +44,9 @@ class ClaimFormatterTest {
         assertThat(actualFormattedClaim).isEqualTo(expectedFormattedDate)
     }
 
-/*    @Test
+    @Test
     fun `test formatting date and time successfully`() {
         val actualFormattedClaim = ClaimFormatter.formatDateAndTimeInMillis(suppliedClaimValueForDateInMills)
         assertThat(actualFormattedClaim).isIn(expectedFormattedDateTimeInDifferentTimeZone)
-    }*/
+    }
 }
