@@ -5,6 +5,6 @@ package com.microsoft.did.sdk.credential.service.models.serviceResponses
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ContractServiceResponse(
+internal data class ContractServiceResponse(
     val token: String
 )

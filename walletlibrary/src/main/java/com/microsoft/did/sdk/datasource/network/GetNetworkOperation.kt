@@ -5,4 +5,4 @@
 
 package com.microsoft.did.sdk.datasource.network
 
-abstract class GetNetworkOperation<S, T> : BaseNetworkOperation<S, T>()
+internal abstract class GetNetworkOperation<S, T> : BaseNetworkOperation<S, T>()

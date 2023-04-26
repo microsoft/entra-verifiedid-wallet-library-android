@@ -9,7 +9,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PresentationDefinition(
+internal data class PresentationDefinition(
     val id: String,
 
     @SerialName("input_descriptors")

@@ -10,7 +10,7 @@ import com.nimbusds.jose.jwk.JWK
 import org.erdtman.jcs.JsonCanonicalizer
 import javax.inject.Inject
 
-class SideTreeHelper @Inject constructor() {
+internal class SideTreeHelper @Inject constructor() {
 
     fun canonicalizeMultiHashEncode(json: String): String {
         val jsonCanonicalizer = JsonCanonicalizer(json)

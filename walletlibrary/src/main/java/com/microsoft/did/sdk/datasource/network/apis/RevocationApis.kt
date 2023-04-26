@@ -8,7 +8,7 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.Url
 
-interface RevocationApis {
+internal interface RevocationApis {
 
     @POST
     suspend fun sendResponse(@Url overrideUrl: String, @Body body: String): Response<RevocationServiceResponse>

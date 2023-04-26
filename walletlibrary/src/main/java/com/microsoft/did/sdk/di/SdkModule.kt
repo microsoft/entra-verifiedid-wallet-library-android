@@ -51,7 +51,7 @@ import javax.inject.Singleton
  * https://developer.android.com/training/dependency-injection
  */
 @Module
-class SdkModule {
+internal class SdkModule {
 
     @Provides
     @Singleton

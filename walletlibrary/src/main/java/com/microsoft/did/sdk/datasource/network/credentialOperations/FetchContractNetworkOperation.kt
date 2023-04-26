@@ -18,7 +18,7 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import kotlinx.serialization.json.Json
 import retrofit2.Response
 
-class FetchContractNetworkOperation(
+internal class FetchContractNetworkOperation(
     val url: String,
     apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,

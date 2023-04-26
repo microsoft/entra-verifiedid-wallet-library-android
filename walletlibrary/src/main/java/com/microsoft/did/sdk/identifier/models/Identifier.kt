@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
  */
 @Entity
 @Serializable
-data class Identifier(
+internal data class Identifier(
     @PrimaryKey
     val id: String,
     val signatureKeyReference: String,

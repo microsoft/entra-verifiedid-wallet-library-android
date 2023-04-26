@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  * @see [OpenID Spec](https://openid.net/specs/openid-connect-core-1_0.html#JWTRequests)
  */
 @Serializable
-data class PresentationRequestContent(
+internal data class PresentationRequestContent(
     @SerialName("response_type")
     val responseType: String,
 

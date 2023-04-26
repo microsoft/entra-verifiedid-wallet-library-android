@@ -6,14 +6,8 @@ import com.microsoft.did.sdk.credential.service.models.oidc.Registration
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.MILLISECONDS_IN_A_SECOND
 import com.microsoft.did.sdk.util.Constants.SECONDS_IN_A_MINUTE
-import com.microsoft.did.sdk.util.controlflow.InvalidPinDetailsException
-import com.microsoft.did.sdk.util.controlflow.InvalidResponseModeException
-import com.microsoft.did.sdk.util.controlflow.InvalidResponseTypeException
-import com.microsoft.did.sdk.util.controlflow.InvalidScopeException
-import com.microsoft.did.sdk.util.controlflow.MissingInputInRequestException
-import com.microsoft.did.sdk.util.controlflow.SubjectIdentifierTypeNotSupported
-import com.microsoft.did.sdk.util.controlflow.VpFormatNotSupported
-import java.util.Date
+import com.microsoft.did.sdk.util.controlflow.*
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,7 +15,7 @@ import javax.inject.Singleton
  * Validates an OpenID Connect Request.
  */
 @Singleton
-class OidcPresentationRequestValidator @Inject constructor(private val jwtValidator: JwtValidator) : PresentationRequestValidator {
+internal class OidcPresentationRequestValidator @Inject constructor(private val jwtValidator: JwtValidator) : PresentationRequestValidator {
 
     override suspend fun validate(request: PresentationRequest) {
         checkResponseMode(request.content.responseMode)

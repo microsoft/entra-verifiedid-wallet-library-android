@@ -6,11 +6,7 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
 import android.util.Base64
-import com.microsoft.did.sdk.credential.service.IssuanceResponse
-import com.microsoft.did.sdk.credential.service.RequestedAccessTokenMap
-import com.microsoft.did.sdk.credential.service.RequestedIdTokenMap
-import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
-import com.microsoft.did.sdk.credential.service.RequestedVcMap
+import com.microsoft.did.sdk.credential.service.*
 import com.microsoft.did.sdk.credential.service.models.oidc.AttestationClaimModel
 import com.microsoft.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
 import com.microsoft.did.sdk.crypto.CryptoOperations
@@ -18,12 +14,12 @@ import com.microsoft.did.sdk.crypto.DigestAlgorithm
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.identifier.models.Identifier
 import kotlinx.serialization.json.Json
-import java.util.UUID
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class IssuanceResponseFormatter @Inject constructor(
+internal class IssuanceResponseFormatter @Inject constructor(
     private val serializer: Json,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
     private val signer: TokenSigner,

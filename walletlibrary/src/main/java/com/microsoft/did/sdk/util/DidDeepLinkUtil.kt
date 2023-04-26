@@ -4,7 +4,7 @@ package com.microsoft.did.sdk.util
 
 import android.net.Uri
 
-object DidDeepLinkUtil {
+internal object DidDeepLinkUtil {
 
     private const val DEEP_LINK_SCHEME = "openid"
     private const val DEEP_LINK_HOST = "vc"

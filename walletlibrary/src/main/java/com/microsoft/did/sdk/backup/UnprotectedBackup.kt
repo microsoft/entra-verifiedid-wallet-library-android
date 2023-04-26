@@ -9,4 +9,4 @@ package com.microsoft.did.sdk.backup
  * This class serves as the parent class for any kind of backup that may hold any kind of data.
  * This way the implementations of backups can evolve without the APIs changing.
  */
-abstract class UnprotectedBackup
+internal abstract class UnprotectedBackup

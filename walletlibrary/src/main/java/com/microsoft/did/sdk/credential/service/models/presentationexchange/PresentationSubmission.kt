@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PresentationSubmission(
+internal data class PresentationSubmission(
     val id: String,
 
     @SerialName("definition_id")

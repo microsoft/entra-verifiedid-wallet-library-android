@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  * Refer to https://www.w3.org/TR/did-core/#core-properties for more details on identifier document
  */
 @Serializable
-data class IdentifierDocument(
+internal data class IdentifierDocument(
     val verificationMethod: List<IdentifierDocumentPublicKey>? = null,
     val id: String
 ) {

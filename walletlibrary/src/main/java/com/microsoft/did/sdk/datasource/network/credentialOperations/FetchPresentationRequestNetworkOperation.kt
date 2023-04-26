@@ -10,17 +10,12 @@ import com.microsoft.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
-import com.microsoft.did.sdk.util.controlflow.DidInHeaderAndPayloadNotMatching
-import com.microsoft.did.sdk.util.controlflow.ExpiredTokenException
-import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
-import com.microsoft.did.sdk.util.controlflow.NotFoundException
-import com.microsoft.did.sdk.util.controlflow.PresentationException
-import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.*
 import kotlinx.serialization.json.Json
 import retrofit2.Response
 
 //TODO("improve onSuccess method to create receipt when this is spec'd out")
-class FetchPresentationRequestNetworkOperation(
+internal class FetchPresentationRequestNetworkOperation(
     private val url: String,
     private val apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,

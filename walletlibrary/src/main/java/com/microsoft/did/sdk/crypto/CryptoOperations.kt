@@ -6,22 +6,14 @@
 package com.microsoft.did.sdk.crypto
 
 import com.microsoft.did.sdk.util.Constants.SEED_BYTES
-import java.security.Key
-import java.security.KeyFactory
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.security.MessageDigest
-import java.security.PrivateKey
-import java.security.PublicKey
-import java.security.SecureRandom
-import java.security.Signature
+import java.security.*
 import javax.crypto.Cipher
 import javax.crypto.Cipher.DECRYPT_MODE
 import javax.crypto.Cipher.ENCRYPT_MODE
 import javax.crypto.Mac
 import javax.crypto.SecretKey
 
-object CryptoOperations {
+internal object CryptoOperations {
 
     fun sign(digest: ByteArray, signingKey: PrivateKey, alg: SigningAlgorithm): ByteArray {
         val signer = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)

@@ -8,7 +8,7 @@ import android.util.Base64
 import com.microsoft.did.sdk.util.log.SdkLog
 import java.io.ByteArrayOutputStream
 
-object ImageUtil {
+internal object ImageUtil {
     fun parse(base64Str: String?): Bitmap? {
         if (base64Str.isNullOrBlank()) return null
         return try {

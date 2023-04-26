@@ -20,7 +20,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class LinkedDomainsService @Inject constructor(
+internal class LinkedDomainsService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val resolver: Resolver,
     private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator

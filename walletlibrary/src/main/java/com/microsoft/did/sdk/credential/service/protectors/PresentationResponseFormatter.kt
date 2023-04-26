@@ -14,14 +14,13 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Pres
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
-import com.microsoft.did.sdk.util.controlflow.ValidatorException
 import kotlinx.serialization.json.Json
-import java.util.UUID
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class PresentationResponseFormatter @Inject constructor(
+internal class PresentationResponseFormatter @Inject constructor(
     private val serializer: Json,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
     private val signer: TokenSigner

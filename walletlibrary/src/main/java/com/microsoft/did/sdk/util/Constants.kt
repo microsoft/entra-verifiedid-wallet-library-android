@@ -7,7 +7,7 @@ package com.microsoft.did.sdk.util
 
 import android.util.Base64
 
-object Constants {
+internal object Constants {
 
     // OIDC Protocol Constants
     const val SELF_ISSUED_V1 = "https://self-issued.me"

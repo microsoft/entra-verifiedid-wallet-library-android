@@ -8,7 +8,7 @@ import okhttp3.Interceptor.Chain
 import okhttp3.Response
 import java.io.IOException
 
-class UserAgentInterceptor(private val userAgentInfo: String) : Interceptor {
+internal class UserAgentInterceptor(private val userAgentInfo: String) : Interceptor {
 
     @Throws(IOException::class)
     override fun intercept(chain: Chain): Response {

@@ -2,7 +2,7 @@
 
 package com.microsoft.did.sdk.credential.service.models.issuancecallback
 
-class IssuanceCompletionCallbackParams(
+internal class IssuanceCompletionCallbackParams(
     val url: String,
     val state: String
 )

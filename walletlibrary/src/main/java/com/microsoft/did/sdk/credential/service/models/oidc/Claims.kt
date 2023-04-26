@@ -9,7 +9,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Claims(
+internal data class Claims(
     @SerialName("vp_token")
     val vpTokenInRequest: VpTokenInRequest,
 )

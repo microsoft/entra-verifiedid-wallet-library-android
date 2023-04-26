@@ -16,7 +16,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import javax.crypto.spec.SecretKeySpec
 
-class JwePasswordProtectionMethod(
+internal class JwePasswordProtectionMethod(
     val password: String
 ) : ProtectionMethod() {
 

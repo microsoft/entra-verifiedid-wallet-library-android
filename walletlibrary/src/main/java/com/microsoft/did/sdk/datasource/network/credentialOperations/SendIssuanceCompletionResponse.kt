@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.util.controlflow.Result
 import retrofit2.Response
 
-class SendIssuanceCompletionResponse(
+internal class SendIssuanceCompletionResponse(
     url: String,
     serializedResponse: String,
     apiProvider: ApiProvider

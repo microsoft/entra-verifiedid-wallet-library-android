@@ -24,7 +24,7 @@ import kotlinx.serialization.json.JsonPrimitive
  * @see [Well Known DID Configuration] (https://identity.foundation/.well-known/resources/did-configuration/#linked-domain-service-endpoint)
  */
 @Serializer(forClass = List::class)
-class IdentifierDocLinkedDomainsServiceEndpointSerializer(@Suppress("UNUSED_PARAMETER") dataSerializer: KSerializer<String>) :
+internal class IdentifierDocLinkedDomainsServiceEndpointSerializer(@Suppress("UNUSED_PARAMETER") dataSerializer: KSerializer<String>) :
     KSerializer<List<String>> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("serviceEndpoint", PrimitiveKind.STRING)
 

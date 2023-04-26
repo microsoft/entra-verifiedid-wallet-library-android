@@ -28,7 +28,7 @@ import kotlinx.serialization.modules.SerializersModule
  *     return VerifiableCredentialSdk.issuanceService
  * }
  */
-object VerifiableCredentialSdk {
+internal object VerifiableCredentialSdk {
 
     @JvmStatic
     internal lateinit var issuanceService: IssuanceService

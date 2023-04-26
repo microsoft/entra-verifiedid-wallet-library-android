@@ -6,12 +6,12 @@ import com.microsoft.did.sdk.credential.service.models.verifiablePresentation.Ve
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import kotlinx.serialization.json.Json
-import java.util.UUID
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class VerifiablePresentationFormatter @Inject constructor(
+internal class VerifiablePresentationFormatter @Inject constructor(
     private val serializer: Json,
     private val signer: TokenSigner
 ) {

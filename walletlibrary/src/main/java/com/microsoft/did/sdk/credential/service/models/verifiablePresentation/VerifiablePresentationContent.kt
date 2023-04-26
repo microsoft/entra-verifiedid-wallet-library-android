@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  * @see [Verifiable Credential Spec](https://www.w3.org/TR/vc-data-model/#basic-concepts)
  */
 @Serializable
-data class VerifiablePresentationContent(
+internal data class VerifiablePresentationContent(
 
     @SerialName("jti")
     val vpId: String,

@@ -13,7 +13,7 @@ import com.microsoft.did.sdk.util.controlflow.runResultTry
 import javax.inject.Inject
 import javax.inject.Named
 
-class Resolver @Inject constructor(
+internal class Resolver @Inject constructor(
     @Named("resolverUrl") private val baseUrl: String,
     private val identifierRepository: IdentifierRepository
 ) {

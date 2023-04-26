@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("document")
-data class IdentifierResponse(
+internal data class IdentifierResponse(
     @SerialName("didDocument")
     val didDocument: IdentifierDocument,
     @SerialName("@context")

@@ -8,7 +8,7 @@ package com.microsoft.did.sdk.credential.service.models.oidc
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AttestationClaimModel(
+internal data class AttestationClaimModel(
     val selfIssued: Map<String, String> = emptyMap(),
 
     val idTokens: Map<String, String> = emptyMap(),

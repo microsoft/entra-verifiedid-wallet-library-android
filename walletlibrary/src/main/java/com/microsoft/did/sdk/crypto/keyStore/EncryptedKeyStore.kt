@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.util.controlflow.KeyStoreException
 import com.nimbusds.jose.jwk.JWK
 import javax.inject.Inject
 
-class EncryptedKeyStore @Inject constructor(context: Context) {
+internal class EncryptedKeyStore @Inject constructor(context: Context) {
 
     companion object {
         private const val KEY_PREFIX = "DID_KEY_"

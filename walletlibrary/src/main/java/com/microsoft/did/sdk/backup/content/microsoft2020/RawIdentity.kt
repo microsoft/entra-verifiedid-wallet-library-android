@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
 @Serializable
-data class RawIdentity(
+internal data class RawIdentity(
     val id: String,
     val name: String,
     val keys: List<JWK>,

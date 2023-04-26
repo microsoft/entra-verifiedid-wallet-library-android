@@ -18,7 +18,7 @@ import javax.inject.Singleton
  * Class that can be used to validate JwsTokens.
  */
 @Singleton
-class JwtValidator @Inject constructor(
+internal class JwtValidator @Inject constructor(
     private val resolver: Resolver
 ) {
 

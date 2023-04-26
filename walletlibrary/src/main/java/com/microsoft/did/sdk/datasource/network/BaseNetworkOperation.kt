@@ -8,15 +8,7 @@ package com.microsoft.did.sdk.datasource.network
 import com.microsoft.did.sdk.util.Constants.CORRELATION_VECTOR_HEADER
 import com.microsoft.did.sdk.util.Constants.REQUEST_ID_HEADER
 import com.microsoft.did.sdk.util.NetworkErrorParser
-import com.microsoft.did.sdk.util.controlflow.ClientException
-import com.microsoft.did.sdk.util.controlflow.ForbiddenException
-import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
-import com.microsoft.did.sdk.util.controlflow.NetworkException
-import com.microsoft.did.sdk.util.controlflow.NotFoundException
-import com.microsoft.did.sdk.util.controlflow.RedirectException
-import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.ServiceUnreachableException
-import com.microsoft.did.sdk.util.controlflow.UnauthorizedException
+import com.microsoft.did.sdk.util.controlflow.*
 import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.logNetworkTime
 import retrofit2.Response
@@ -29,7 +21,7 @@ import java.io.IOException
  * In default methods, S == T, for no transformation takes place.
  * fire method will just return Result.Success(responseBody: S)
  */
-abstract class BaseNetworkOperation<S, T> {
+internal abstract class BaseNetworkOperation<S, T> {
 
     abstract val call: suspend () -> Response<S>
 

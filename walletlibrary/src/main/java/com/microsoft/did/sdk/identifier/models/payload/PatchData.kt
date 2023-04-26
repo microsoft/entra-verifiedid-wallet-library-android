@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  * to be used during the next update operation
  */
 @Serializable
-data class PatchData(
+internal data class PatchData(
     @SerialName("updateCommitment")
     val nextUpdateCommitmentHash: String,
     @SerialName("patches")

@@ -7,7 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class VpTokenInResponse(
+internal data class VpTokenInResponse(
 
     @SerialName("presentation_submission")
     val presentationSubmission: PresentationSubmission

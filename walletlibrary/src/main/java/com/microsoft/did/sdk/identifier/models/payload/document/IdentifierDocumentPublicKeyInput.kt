@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  * Data Class for defining public key used for encryption/signing inside document payload sent to Sidetree operation
  */
 @Serializable
-data class IdentifierDocumentPublicKeyInput(
+internal data class IdentifierDocumentPublicKeyInput(
     /**
      * The id of the public key in the format
      * {keyIdentifier}

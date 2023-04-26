@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
 
-class ImageLoader @Inject constructor() {
+internal class ImageLoader @Inject constructor() {
 
     companion object {
         const val MAX_IMAGE_SIZE_BYTES = 1000000 // 1 MB

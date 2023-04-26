@@ -13,7 +13,7 @@ import retrofit2.Response
 import java.net.URL
 import javax.inject.Inject
 
-class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(val url: String, apiProvider: ApiProvider) :
+internal class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(val url: String, apiProvider: ApiProvider) :
     GetNetworkOperation<LinkedDomainsResponse, LinkedDomainsResponse>() {
 
     override val call: suspend () -> Response<LinkedDomainsResponse> =

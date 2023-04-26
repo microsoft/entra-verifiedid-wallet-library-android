@@ -19,13 +19,13 @@ import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyUse
 import kotlinx.serialization.json.Json
 import org.erdtman.jcs.JsonCanonicalizer
-import java.util.UUID
+import java.util.*
 import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class IdentifierCreator @Inject constructor(
+internal class IdentifierCreator @Inject constructor(
     private val payloadProcessor: SidetreePayloadProcessor,
     private val sideTreeHelper: SideTreeHelper,
     private val serializer: Json,

@@ -12,7 +12,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class BackupParser @Inject constructor() {
+internal class BackupParser @Inject constructor() {
     fun parseBackup(jweString: String): ProtectedBackupData {
         val token = JweToken.deserialize(jweString)
         val cty = token.contentType

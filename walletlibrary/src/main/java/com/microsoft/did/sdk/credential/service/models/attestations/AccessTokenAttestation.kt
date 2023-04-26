@@ -8,7 +8,7 @@ package com.microsoft.did.sdk.credential.service.models.attestations
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AccessTokenAttestation(
+internal data class AccessTokenAttestation(
 
     val claims: List<ClaimAttestation>,
 

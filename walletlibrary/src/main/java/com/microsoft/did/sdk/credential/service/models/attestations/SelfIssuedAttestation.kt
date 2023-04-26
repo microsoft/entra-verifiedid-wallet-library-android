@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
  * EXPERIMENTAL
  */
 @Serializable
-data class SelfIssuedAttestation(
+internal data class SelfIssuedAttestation(
     val claims: List<ClaimAttestation> = emptyList(),
 
     // True, if presentation is required.

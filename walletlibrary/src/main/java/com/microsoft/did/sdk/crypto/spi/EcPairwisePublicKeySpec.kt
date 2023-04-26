@@ -5,6 +5,6 @@ package com.microsoft.did.sdk.crypto.spi
 import java.security.interfaces.ECPrivateKey
 import java.security.spec.KeySpec
 
-class EcPairwisePublicKeySpec(
+internal class EcPairwisePublicKeySpec(
     val privateKey: ECPrivateKey
 ) : KeySpec

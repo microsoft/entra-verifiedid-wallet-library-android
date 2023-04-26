@@ -10,7 +10,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-abstract class OidcResponseClaims {
+internal abstract class OidcResponseClaims {
     @SerialName("sub")
     var subject: String = ""
 

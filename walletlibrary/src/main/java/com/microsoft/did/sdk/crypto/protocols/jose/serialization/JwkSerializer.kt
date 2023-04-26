@@ -2,11 +2,7 @@
 
 package com.microsoft.did.sdk.crypto.protocols.jose.serialization
 
-import com.nimbusds.jose.jwk.ECKey
-import com.nimbusds.jose.jwk.JWK
-import com.nimbusds.jose.jwk.OctetKeyPair
-import com.nimbusds.jose.jwk.OctetSequenceKey
-import com.nimbusds.jose.jwk.RSAKey
+import com.nimbusds.jose.jwk.*
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -22,7 +18,7 @@ import kotlinx.serialization.json.Json
  * Please refer to kotlin serialization docs for more info:
  * https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/serializers.md#composite-serializer-via-surrogate
  */
-object JwkSerializer : KSerializer<JWK> {
+internal object JwkSerializer : KSerializer<JWK> {
     override val descriptor: SerialDescriptor = JwkSurrogate.serializer().descriptor
     override fun serialize(encoder: Encoder, value: JWK) {
         val ecJwk = value as? ECKey

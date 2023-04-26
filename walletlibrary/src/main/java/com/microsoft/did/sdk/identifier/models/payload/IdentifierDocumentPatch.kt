@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  * It is always replacing a document in our case presently.
  */
 @Serializable
-data class IdentifierDocumentPatch(
+internal data class IdentifierDocumentPatch(
     val action: String,
     @SerialName("document")
     val document: IdentifierDocumentPayload

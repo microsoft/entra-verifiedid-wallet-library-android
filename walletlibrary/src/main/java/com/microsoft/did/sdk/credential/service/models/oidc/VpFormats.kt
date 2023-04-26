@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
  * Defines the formats supported by the verifier.
  */
 @Serializable
-data class VpFormats(
+internal data class VpFormats(
     @Serializable(with = PresentationRequestFormatSerializer::class)
     @SerialName("jwt_vp")
     val jwtVp: List<String> = emptyList(),

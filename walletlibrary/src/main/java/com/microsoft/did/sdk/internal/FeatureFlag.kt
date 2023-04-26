@@ -6,6 +6,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FeatureFlag @Inject constructor() {
+internal class FeatureFlag @Inject constructor() {
     var linkedDomains: Boolean = true
 }

@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  * Data Class for defining a Public Key in Identifier Document in Jwk format which can be used for signing/encryption
  */
 @Serializable
-data class IdentifierDocumentPublicKey(
+internal data class IdentifierDocumentPublicKey(
     /**
      * The id of the public key in the format
      * {keyIdentifier}

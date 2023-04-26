@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  * Error Object get back from Issuance Service if Error occurred.
  */
 @Serializable
-data class IssuanceServiceError(
+internal data class IssuanceServiceError(
     val httpStatusCode: Int? = null,
     val expose: Boolean? = false,
     val code: String = "Issuance Service Error"

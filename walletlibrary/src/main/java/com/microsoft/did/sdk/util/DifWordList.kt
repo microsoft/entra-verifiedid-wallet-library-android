@@ -6,10 +6,10 @@ import android.content.Context
 import android.content.res.AssetManager
 import java.io.InputStreamReader
 import java.security.SecureRandom
-import java.util.Locale
+import java.util.*
 import java.util.regex.Pattern
 
-object DifWordList {
+internal object DifWordList {
     lateinit var wordList: List<String>
 
     fun initialize(context: Context) {

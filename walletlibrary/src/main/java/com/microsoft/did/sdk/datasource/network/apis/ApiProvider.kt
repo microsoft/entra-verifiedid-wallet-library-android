@@ -10,7 +10,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ApiProvider @Inject constructor(retrofit: Retrofit) {
+internal class ApiProvider @Inject constructor(retrofit: Retrofit) {
 
     // maybe refactor these into different interface apis?
     val presentationApis: PresentationApis = retrofit.create(PresentationApis::class.java)

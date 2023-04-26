@@ -7,7 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class VerifiablePresentationDescriptor(
+internal data class VerifiablePresentationDescriptor(
     @SerialName(CONTEXT)
     val context: List<String>,
 

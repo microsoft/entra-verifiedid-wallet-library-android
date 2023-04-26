@@ -38,7 +38,7 @@ object BackupTestUtil {
     val updateKey: ECKey = ECKeyGenerator(Curve.P_256).keyID("update").keyUse(KeyUse.SIGNATURE).generate()
     val recoverKey: ECKey = ECKeyGenerator(Curve.P_256).keyID("recover").keyUse(KeyUse.SIGNATURE).generate()
     val encryptKey: RSAKey = RSAKeyGenerator(4096).keyID("encrypt").keyUse(KeyUse.ENCRYPTION).generate()
-    val testDisplayContract = DisplayContract(
+    internal val testDisplayContract = DisplayContract(
         locale = "en-US",
         contract = "http://localhost/contract",
         card = CardDescriptor("Test", "n/a", "#f64ded", "#a80aa5", Logo(description = "test"), "test card"),
@@ -59,7 +59,7 @@ object BackupTestUtil {
         0,
         "INVALID: FOR TESTING USE ONLY"
     )
-    val testVerifiedCredential: VerifiableCredential by lazy {
+    internal val testVerifiedCredential: VerifiableCredential by lazy {
         val jws = JwsToken(
             JWSObject(
                 JWSHeader(JWSAlgorithm.ES256),
@@ -77,7 +77,7 @@ object BackupTestUtil {
             testVerifiableCredentialContent
         )
     }
-    val testIdentifer = Identifier(
+    internal val testIdentifer = Identifier(
         testDid,
         "sign",
         "encrypt",
@@ -85,7 +85,7 @@ object BackupTestUtil {
         "update",
         "testIdentifier"
     )
-    val rawIdentifier = RawIdentity(
+    internal val rawIdentifier = RawIdentity(
         testDid,
         "testIdentifier",
         listOf(signKey, encryptKey, recoverKey, updateKey),
@@ -93,7 +93,7 @@ object BackupTestUtil {
         "update"
     )
 
-    fun getMockKeyStore(): EncryptedKeyStore {
+    internal fun getMockKeyStore(): EncryptedKeyStore {
         val keyStore = mockk<EncryptedKeyStore>();
         every { keyStore.getKey(recoverKey.keyID) } returns (recoverKey)
         every { keyStore.containsKey(recoverKey.keyID) } returns true
@@ -108,7 +108,7 @@ object BackupTestUtil {
         return keyStore
     }
 
-    fun getMockIdentifierRepository(): IdentifierRepository {
+    internal fun getMockIdentifierRepository(): IdentifierRepository {
         val identifierRepository = mockk<IdentifierRepository>()
         coEvery { identifierRepository.queryByIdentifier(testDid) } returns (testIdentifer)
         coEvery { identifierRepository.queryAllLocal() } returns (listOf(testIdentifer))

@@ -15,7 +15,7 @@ import com.microsoft.did.sdk.util.controlflow.RevocationException
 import kotlinx.serialization.json.Json
 import retrofit2.Response
 
-class SendVerifiablePresentationRevocationRequestNetworkOperation(
+internal class SendVerifiablePresentationRevocationRequestNetworkOperation(
     url: String,
     serializedResponse: String,
     apiProvider: ApiProvider,
