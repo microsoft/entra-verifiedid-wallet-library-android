@@ -109,28 +109,6 @@ dependencies {
     testImplementation "junit:junit:$junit_version"
 }
 
-tasks.register('copySubmoduleSource', Copy) {
-    from "submodules/VerifiableCredential-SDK-Android/sdk/src/main/java"
-    into "src/main/java"
-}
-
-tasks.register('copySubmoduleAssets', Copy) {
-    from "submodules/VerifiableCredential-SDK-Android/sdk/src/main/assets"
-    into "src/main/assets"
-}
-
-tasks.whenTaskAdded { task ->
-    if (task.name.contains('Release')) {
-        dependsOn copySubmoduleAssets
-        dependsOn copySubmoduleSource
-        finalizedBy cleanSubmoduleFiles
-    }
-}
-
-task cleanSubmoduleFiles(type: Delete) {
-    delete "src/main/assets", "src/main/java/com/microsoft/did"
-}
-
 project.afterEvaluate {
     publishing {
         repositories {
