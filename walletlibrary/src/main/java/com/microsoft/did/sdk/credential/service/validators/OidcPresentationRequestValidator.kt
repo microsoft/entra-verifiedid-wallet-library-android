@@ -6,7 +6,13 @@ import com.microsoft.did.sdk.credential.service.models.oidc.Registration
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.MILLISECONDS_IN_A_SECOND
 import com.microsoft.did.sdk.util.Constants.SECONDS_IN_A_MINUTE
-import com.microsoft.did.sdk.util.controlflow.*
+import com.microsoft.did.sdk.util.controlflow.InvalidPinDetailsException
+import com.microsoft.did.sdk.util.controlflow.InvalidResponseModeException
+import com.microsoft.did.sdk.util.controlflow.InvalidResponseTypeException
+import com.microsoft.did.sdk.util.controlflow.InvalidScopeException
+import com.microsoft.did.sdk.util.controlflow.MissingInputInRequestException
+import com.microsoft.did.sdk.util.controlflow.SubjectIdentifierTypeNotSupported
+import com.microsoft.did.sdk.util.controlflow.VpFormatNotSupported
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
