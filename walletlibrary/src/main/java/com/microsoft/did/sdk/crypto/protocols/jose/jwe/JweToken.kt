@@ -5,13 +5,25 @@ import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.FailedDecryptException
 import com.microsoft.did.sdk.util.controlflow.KeyException
-import com.nimbusds.jose.*
+import com.nimbusds.jose.EncryptionMethod
+import com.nimbusds.jose.JOSEException
+import com.nimbusds.jose.JWEAlgorithm
+import com.nimbusds.jose.JWEDecrypter
+import com.nimbusds.jose.JWEEncrypter
+import com.nimbusds.jose.JWEHeader
+import com.nimbusds.jose.JWEObject
+import com.nimbusds.jose.Payload
 import com.nimbusds.jose.crypto.ECDHEncrypter
 import com.nimbusds.jose.crypto.PasswordBasedEncrypter
 import com.nimbusds.jose.crypto.RSAEncrypter
 import com.nimbusds.jose.crypto.X25519Encrypter
 import com.nimbusds.jose.crypto.factories.DefaultJWEDecrypterFactory
-import com.nimbusds.jose.jwk.*
+import com.nimbusds.jose.jwk.ECKey
+import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.KeyConverter
+import com.nimbusds.jose.jwk.OctetKeyPair
+import com.nimbusds.jose.jwk.OctetSequenceKey
+import com.nimbusds.jose.jwk.RSAKey
 import java.security.Key
 
 internal class JweToken private constructor(

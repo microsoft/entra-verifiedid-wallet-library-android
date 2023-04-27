@@ -15,7 +15,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
 import kotlinx.serialization.json.Json
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 

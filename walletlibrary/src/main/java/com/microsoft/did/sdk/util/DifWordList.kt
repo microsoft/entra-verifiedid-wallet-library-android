@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.res.AssetManager
 import java.io.InputStreamReader
 import java.security.SecureRandom
-import java.util.*
+import java.util.Locale
 import java.util.regex.Pattern
 
 internal object DifWordList {

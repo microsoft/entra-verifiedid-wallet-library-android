@@ -6,7 +6,7 @@ import com.microsoft.did.sdk.credential.service.models.verifiablePresentation.Ve
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import kotlinx.serialization.json.Json
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 

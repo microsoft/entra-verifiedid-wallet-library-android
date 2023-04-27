@@ -7,7 +7,7 @@ import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.MILLISECONDS_IN_A_SECOND
 import com.microsoft.did.sdk.util.Constants.SECONDS_IN_A_MINUTE
 import com.microsoft.did.sdk.util.controlflow.*
-import java.util.*
+import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 

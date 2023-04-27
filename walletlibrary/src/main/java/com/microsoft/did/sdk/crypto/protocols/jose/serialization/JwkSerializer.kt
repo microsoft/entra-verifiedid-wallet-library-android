@@ -2,7 +2,11 @@
 
 package com.microsoft.did.sdk.crypto.protocols.jose.serialization
 
-import com.nimbusds.jose.jwk.*
+import com.nimbusds.jose.jwk.ECKey
+import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.OctetKeyPair
+import com.nimbusds.jose.jwk.OctetSequenceKey
+import com.nimbusds.jose.jwk.RSAKey
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor

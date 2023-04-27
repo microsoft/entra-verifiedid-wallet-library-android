@@ -6,7 +6,11 @@ import com.microsoft.did.sdk.crypto.spi.EcPairwisePrivateKeySpec
 import com.microsoft.did.sdk.crypto.spi.EcPairwisePublicKeySpec
 import com.nimbusds.jose.jwk.Curve
 import java.math.BigInteger
-import java.security.spec.*
+import java.security.spec.AlgorithmParameterSpec
+import java.security.spec.ECPoint
+import java.security.spec.ECPrivateKeySpec
+import java.security.spec.ECPublicKeySpec
+import java.security.spec.KeySpec
 
 internal abstract class SigningAlgorithm(val name: String, val provider: String?, val spec: AlgorithmParameterSpec? = null) {
     object ES256K : SigningAlgorithm("SHA256withECDSA", null) // EXAMPLE

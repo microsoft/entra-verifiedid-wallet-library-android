@@ -6,7 +6,15 @@
 package com.microsoft.did.sdk.crypto
 
 import com.microsoft.did.sdk.util.Constants.SEED_BYTES
-import java.security.*
+import java.security.Key
+import java.security.KeyFactory
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.MessageDigest
+import java.security.PrivateKey
+import java.security.PublicKey
+import java.security.SecureRandom
+import java.security.Signature
 import javax.crypto.Cipher
 import javax.crypto.Cipher.DECRYPT_MODE
 import javax.crypto.Cipher.ENCRYPT_MODE
