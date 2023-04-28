@@ -15,7 +15,7 @@ import com.microsoft.walletlibrary.requests.IssuanceRequestContent
 /**
  * Represents the raw issuance request from VC SDK.
  */
-class RawManifest(
+internal class RawManifest(
     override val rawRequest: IssuanceRequest,
     override val requestType: RequestType = RequestType.ISSUANCE
 ): RawRequest {
