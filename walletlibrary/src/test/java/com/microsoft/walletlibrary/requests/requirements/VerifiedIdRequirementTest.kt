@@ -1,8 +1,8 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
-import com.microsoft.walletlibrary.util.VerifiedIdRequirementDoesNotMatchConstraintsException
 import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.VerifiedIdTypeIsNotRequestedTypeException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.every
 import io.mockk.mockk
@@ -56,7 +56,7 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
         assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(VerifiedIdRequirementDoesNotMatchConstraintsException::class.java)
+            .isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
     }
 
     @Test
@@ -74,7 +74,7 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
         assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(VerifiedIdRequirementDoesNotMatchConstraintsException::class.java)
+            .isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
     }
 
     @Test
