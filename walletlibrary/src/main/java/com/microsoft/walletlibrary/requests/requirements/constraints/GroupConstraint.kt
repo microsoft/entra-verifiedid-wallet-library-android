@@ -21,7 +21,7 @@ enum class GroupConstraintOperator {
 class GroupConstraint(
     internal val constraints: List<VerifiedIdConstraint>,
     internal val constraintOperator: GroupConstraintOperator
-) : VerifiedIdConstraint {
+): VerifiedIdConstraint {
     override fun doesMatch(verifiedId: VerifiedId): Boolean {
         when (constraintOperator) {
             GroupConstraintOperator.ANY -> {
