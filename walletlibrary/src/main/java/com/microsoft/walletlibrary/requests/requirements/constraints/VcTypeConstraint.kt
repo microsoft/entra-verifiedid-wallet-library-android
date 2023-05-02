@@ -22,6 +22,6 @@ class VcTypeConstraint(internal val vcType: String): VerifiedIdConstraint {
 
     override fun matches(verifiedId: VerifiedId) {
         if (!doesMatch(verifiedId))
-            throw VerifiedIdTypeIsNotRequestedTypeException("Provided Verified Id type does not match requested type.")
+            throw VerifiedIdTypeIsNotRequestedTypeException("Provided Verified Id type does not match requested type $vcType.")
     }
 }

@@ -41,19 +41,18 @@ class GroupConstraint(
             try {
                 constraint.matches(verifiedId)
             } catch (exception: WalletLibraryException) {
-                exception.message?.let { validationExceptions.add(it) }
+                validationExceptions.add("$exception")
             }
         }
 
         when (constraintOperator) {
             GroupConstraintOperator.ANY -> {
                 if (constraints.size == validationExceptions.size)
-                    throw NoMatchForAnyConstraintsException("None of the constraints match.")
+                    throw NoMatchForAnyConstraintsException("None of the constraints match $validationExceptions.")
             }
             GroupConstraintOperator.ALL -> {
-                if (validationExceptions.isNotEmpty()) {
-                    throw NoMatchForAtLeastOneConstraintException("At least one of the constraints doesn't match.")
-                }
+                if (validationExceptions.isNotEmpty())
+                    throw NoMatchForAtLeastOneConstraintException("At least one of the constraints doesn't match $validationExceptions.")
             }
         }
     }
