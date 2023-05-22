@@ -67,11 +67,13 @@ internal object VerifiableCredentialSdk {
         logConsumer: SdkLog.Consumer = DefaultLogConsumer(),
         polymorphicJsonSerializers: SerializersModule = Json.serializersModule,
         registrationUrl: String = "",
-        resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers"
+        resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers",
+        walletLibraryVersionInfo: String = ""
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
             .userAgentInfo(userAgentInfo)
+            .walletLibraryVersionInfo(walletLibraryVersionInfo)
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
             .polymorphicJsonSerializer(polymorphicJsonSerializers)

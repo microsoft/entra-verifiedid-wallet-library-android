@@ -6,13 +6,7 @@
 package com.microsoft.did.sdk.di
 
 import android.content.Context
-import com.microsoft.did.sdk.BackupService
-import com.microsoft.did.sdk.CorrelationVectorService
-import com.microsoft.did.sdk.IdentifierService
-import com.microsoft.did.sdk.IssuanceService
-import com.microsoft.did.sdk.LinkedDomainsService
-import com.microsoft.did.sdk.PresentationService
-import com.microsoft.did.sdk.RevocationService
+import com.microsoft.did.sdk.*
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.serialization.modules.SerializersModule
@@ -60,6 +54,9 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun userAgentInfo(@Named("userAgentInfo") userAgentInfo: String): Builder
+
+        @BindsInstance
+        fun walletLibraryVersionInfo(@Named("walletLibraryVersionInfo") walletLibraryVersionInfo: String): Builder
 
         @BindsInstance
         fun polymorphicJsonSerializer(@Named("polymorphicJsonSerializer") jsonSerializer: SerializersModule): Builder
