@@ -36,23 +36,23 @@ class GroupConstraint(
     }
 
     override fun matches(verifiedId: VerifiedId) {
-        val validationExceptions = mutableListOf<String>()
+        val validationExceptions = mutableListOf<Throwable>()
         constraints.forEach { constraint ->
             try {
                 constraint.matches(verifiedId)
             } catch (exception: WalletLibraryException) {
-                validationExceptions.add("$exception")
+                validationExceptions.add(exception)
             }
         }
 
         when (constraintOperator) {
             GroupConstraintOperator.ANY -> {
                 if (constraints.size == validationExceptions.size)
-                    throw NoMatchForAnyConstraintsException("None of the constraints match $validationExceptions.")
+                    throw NoMatchForAnyConstraintsException("None of the constraints match.", validationExceptions)
             }
             GroupConstraintOperator.ALL -> {
                 if (validationExceptions.isNotEmpty())
-                    throw NoMatchForAtLeastOneConstraintException("At least one of the constraints doesn't match $validationExceptions.")
+                    throw NoMatchForAtLeastOneConstraintException("At least one of the constraints doesn't match.", validationExceptions)
             }
         }
     }

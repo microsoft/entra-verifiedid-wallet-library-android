@@ -59,9 +59,9 @@ class VerifiedIdRequirementNotFulfilledException(message: String = "", cause: Th
 
 class VerifiedIdTypeIsNotRequestedTypeException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
 
-class NoMatchForAnyConstraintsException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
+class NoMatchForAnyConstraintsException(message: String = "", val exceptions: List<Throwable> = emptyList(), retryable: Boolean = false) : RequirementValidationException(message, retryable = retryable)
 
-class NoMatchForAtLeastOneConstraintException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
+class NoMatchForAtLeastOneConstraintException(message: String = "", val exceptions: List<Throwable> = emptyList(), retryable: Boolean = false): RequirementValidationException(message, retryable = retryable)
 
 class VerifiedIdRequirementMissingIdException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
 
