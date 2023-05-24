@@ -7,7 +7,7 @@ package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.requirements.constraints.VerifiedIdConstraint
-import com.microsoft.walletlibrary.util.VerifiedIdRequirementDoesNotMatchConstraintsException
+import com.microsoft.walletlibrary.util.RequirementValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
@@ -41,18 +41,25 @@ class VerifiedIdRequirement(
     override fun validate(): Result<Unit> {
         if (verifiedId == null)
             return Result.failure(VerifiedIdRequirementNotFulfilledException("VerifiedIdRequirement has not been fulfilled."))
-        if (verifiedId?.let { constraint.doesMatch(it) } != true)
-            return Result.failure(VerifiedIdRequirementDoesNotMatchConstraintsException("Provided VerifiedId does not match the constraints"))
+        verifiedId?.let {
+            try {
+                constraint.matches(it)
+            } catch (constraintException: RequirementValidationException) {
+                return Result.failure(constraintException)
+            }
+        }
         return Result.success(Unit)
     }
 
     // Fulfills the requirement in the request with specified value.
     fun fulfill(selectedVerifiedId: VerifiedId): Result<Unit> {
-        return if (constraint.doesMatch(selectedVerifiedId)) {
-            verifiedId = selectedVerifiedId
-            Result.success(Unit)
-        } else
-            Result.failure(VerifiedIdRequirementDoesNotMatchConstraintsException("Provided VerifiedId does not match the constraints"))
+        try {
+            constraint.matches(selectedVerifiedId)
+        } catch (constraintException: RequirementValidationException) {
+            return Result.failure(constraintException)
+        }
+        verifiedId = selectedVerifiedId
+        return Result.success(Unit)
     }
 
     // Retrieves list of Verified IDs from the provided list that matches this requirement.
