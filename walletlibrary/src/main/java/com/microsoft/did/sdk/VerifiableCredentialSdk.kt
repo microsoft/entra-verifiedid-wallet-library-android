@@ -59,6 +59,7 @@ internal object VerifiableCredentialSdk {
      * @param registrationUrl url used to register DID
      * @param resolverUrl url used to resolve DID
      */
+    // TODO(Change how version numbers are passed for headers when HTTP client layer is refactored)
     @JvmOverloads
     @JvmStatic
     internal fun init(
