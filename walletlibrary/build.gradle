@@ -127,7 +127,7 @@ project.afterEvaluate {
                 from components.release
                 groupId = 'com.microsoft.entra.verifiedid'
                 artifactId = 'walletlibrary'
-                version = "0.0.1-beta.4"
+                version = "0.0.1-beta.3"
                 pom {
                     name = 'walletlibrary'
                     description = 'Entra VerifiedID WalletLibrary Android'
