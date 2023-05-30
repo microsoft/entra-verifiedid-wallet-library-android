@@ -55,7 +55,7 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : V
                     verifiedId = issuedVerifiedId as VerifiedId
                     verifiedId?.let { it -> encodeVerifiedId(it) }
                 },
-                onFailure = { exception -> populateErrorState(exception.message) })
+                onFailure = { exception -> populateErrorState(exception.cause?.message ?: exception.message) })
         }
     }
 
@@ -101,7 +101,7 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : V
             val presentationResult = it.complete()
             presentationResult.fold(
                 onSuccess = { state = State.PRESENTATION_SUCCESS },
-                onFailure = { exception -> populateErrorState(exception.message) })
+                onFailure = { exception -> populateErrorState(exception.cause?.message ?: exception.message) })
         }
     }
 
