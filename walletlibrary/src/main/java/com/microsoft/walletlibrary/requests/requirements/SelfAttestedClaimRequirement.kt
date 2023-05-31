@@ -25,10 +25,11 @@ class SelfAttestedClaimRequirement(
     internal var value: String? = null
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
-    override fun validate() {
+    override fun validate(): Result<Unit> {
         //TODO("should required field be checked?")
         if (value == null)
-            throw SelfAttestedClaimRequirementNotFulfilledException("SelfAttestedClaimRequirement has not been fulfilled.")
+            return Result.failure(SelfAttestedClaimRequirementNotFulfilledException("SelfAttestedClaimRequirement has not been fulfilled."))
+        return Result.success(Unit)
     }
 
     // Fulfills the requirement in the request with specified value.

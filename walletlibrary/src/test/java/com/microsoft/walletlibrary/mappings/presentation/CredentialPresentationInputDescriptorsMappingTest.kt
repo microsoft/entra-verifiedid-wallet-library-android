@@ -136,8 +136,10 @@ class CredentialPresentationInputDescriptorsMappingTest {
 
     @Test
     fun constraintMapping_WithMultipleValidSchemaUri_ReturnsGroupConstraint() {
-        // Act
+        // Arrange
         val expectedVcTypes = listOf("BusinessCard1", "BusinessCard2")
+
+        // Act
         val actualConstraint = toVcTypeConstraint(expectedVcTypes)
 
         // Assert

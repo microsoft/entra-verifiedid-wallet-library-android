@@ -30,5 +30,5 @@ interface VerifiedIdRequest<out T> {
     suspend fun complete(): Result<T>
 
     // Cancels the request with an optional message.
-    fun cancel(message: String?): Result<Void>
+    suspend fun cancel(message: String?): Result<Unit>
 }

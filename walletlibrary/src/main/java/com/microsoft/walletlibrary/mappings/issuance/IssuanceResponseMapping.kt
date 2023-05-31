@@ -27,7 +27,7 @@ internal fun IssuanceResponse.addRequirements(requirement: Requirement) {
 }
 
 private fun IssuanceResponse.addSelfAttestedClaimRequirement(selfAttestedClaimRequirement: SelfAttestedClaimRequirement) {
-    selfAttestedClaimRequirement.validate()
+    selfAttestedClaimRequirement.validate().getOrThrow()
     selfAttestedClaimRequirement.value?.let {
         requestedSelfAttestedClaimMap[selfAttestedClaimRequirement.claim] =
             it
@@ -35,7 +35,7 @@ private fun IssuanceResponse.addSelfAttestedClaimRequirement(selfAttestedClaimRe
 }
 
 private fun IssuanceResponse.addIdTokenRequirement(idTokenRequirement: IdTokenRequirement) {
-    idTokenRequirement.validate()
+    idTokenRequirement.validate().getOrThrow()
     idTokenRequirement.idToken?.let {
         requestedIdTokenMap[idTokenRequirement.configuration] =
             it
@@ -43,7 +43,7 @@ private fun IssuanceResponse.addIdTokenRequirement(idTokenRequirement: IdTokenRe
 }
 
 private fun IssuanceResponse.addAccessTokenRequirement(accessTokenRequirement: AccessTokenRequirement) {
-    accessTokenRequirement.validate()
+    accessTokenRequirement.validate().getOrThrow()
     accessTokenRequirement.accessToken?.let {
         requestedAccessTokenMap[accessTokenRequirement.configuration] =
             it
@@ -51,7 +51,7 @@ private fun IssuanceResponse.addAccessTokenRequirement(accessTokenRequirement: A
 }
 
 private fun IssuanceResponse.addPinRequirement(pinRequirement: PinRequirement) {
-    pinRequirement.validate()
+    pinRequirement.validate().getOrThrow()
     pinRequirement.pin?.let {
         issuancePin = IssuancePin(it)
         issuancePin?.pinSalt = pinRequirement.salt
@@ -72,7 +72,7 @@ private fun IssuanceResponse.addVerifiedIdRequirement(verifiedIdRequirement: Ver
 }
 
 private fun IssuanceResponse.addGroupRequirement(groupRequirement: GroupRequirement) {
-    groupRequirement.validate()
+    groupRequirement.validate().getOrThrow()
     val requirements = groupRequirement.requirements
     for (requirement in requirements) {
         addRequirements(requirement)

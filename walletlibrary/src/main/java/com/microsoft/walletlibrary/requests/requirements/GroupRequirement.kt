@@ -5,6 +5,8 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.walletlibrary.util.RequirementValidationException
+
 enum class GroupRequirementOperator {
     ANY,
     ALL
@@ -19,10 +21,14 @@ class GroupRequirement(
     val requirementOperator: GroupRequirementOperator
 ): Requirement {
 
-    override fun validate() {
-        //TODO("Not fully implemented yet")
+    override fun validate(): Result<Unit> {
+        val validationExceptions = mutableListOf<String>()
         for (requirement in requirements) {
-            requirement.validate()
+            if (requirement.validate().isFailure)
+                validationExceptions.add("${requirement.validate().exceptionOrNull()}")
         }
+        if (validationExceptions.isNotEmpty())
+            return Result.failure(RequirementValidationException("Validation failed with following exceptions: $validationExceptions"))
+        return Result.success(Unit)
     }
 }

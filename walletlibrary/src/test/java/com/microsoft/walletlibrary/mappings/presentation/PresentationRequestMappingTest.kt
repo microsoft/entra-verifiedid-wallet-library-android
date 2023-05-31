@@ -7,7 +7,7 @@ import com.microsoft.did.sdk.credential.service.models.oidc.Registration
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
-import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
+import com.microsoft.walletlibrary.requests.styles.OpenIdVerifierStyle
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -26,13 +26,12 @@ class PresentationRequestMappingTest {
     private val schema: Schema = mockk()
     private val expectedSchemaUri = "testSchemaUri"
     private val expectedLogoUri = "testLogoUri"
-    private val expectedLogoImage = "testLogoImage"
 
     init {
-        setupInput(listOf(inputDescriptor), true)
+        setupInput(listOf(inputDescriptor))
     }
 
-    private fun setupInput(inputDescriptors: List<CredentialPresentationInputDescriptor>, logoPresent: Boolean) {
+    private fun setupInput(inputDescriptors: List<CredentialPresentationInputDescriptor>) {
         presentationRequest = mockk()
         every { presentationRequest.content } returns presentationRequestContent
         every { presentationRequest.getPresentationDefinition() } returns presentationDefinition
@@ -42,7 +41,7 @@ class PresentationRequestMappingTest {
         )
         setupPresentationContent()
         setupInputDescriptors(inputDescriptors)
-        setupLogo(logoPresent)
+        setupLogo()
     }
 
     private fun setupPresentationContent() {
@@ -64,12 +63,8 @@ class PresentationRequestMappingTest {
         every { schema.uri } returns expectedSchemaUri
     }
 
-    private fun setupLogo(logoPresent: Boolean) {
+    private fun setupLogo() {
         every { presentationRequest.content.registration.logoUri } returns expectedLogoUri
-        if (logoPresent)
-            every { presentationRequest.content.registration.logoData } returns expectedLogoImage
-        else
-            every { presentationRequest.content.registration.logoData } returns null
     }
 
     @Test
@@ -78,10 +73,10 @@ class PresentationRequestMappingTest {
         val actualRequesterStyle = presentationRequest.getRequesterStyle()
 
         // Assert
-        assertThat(actualRequesterStyle).isInstanceOf(OpenIdRequesterStyle::class.java)
-        assertThat(actualRequesterStyle.requester).isEqualTo(expectedEntityName)
-        assertThat(actualRequesterStyle.logo).isNotNull
-        assertThat(actualRequesterStyle.logo?.uri).isEqualTo(expectedLogoUri)
-        assertThat(actualRequesterStyle.logo?.image).isEqualTo(expectedLogoImage)
+        assertThat(actualRequesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
+        assertThat(actualRequesterStyle.name).isEqualTo(expectedEntityName)
+        assertThat(actualRequesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
+        assertThat((actualRequesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
+        assertThat(actualRequesterStyle.verifierLogo?.url).isEqualTo(expectedLogoUri)
     }
 }

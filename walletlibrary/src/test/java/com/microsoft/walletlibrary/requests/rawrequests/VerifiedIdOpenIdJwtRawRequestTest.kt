@@ -7,9 +7,10 @@ import com.microsoft.did.sdk.credential.service.models.oidc.Registration
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
-import com.microsoft.walletlibrary.requests.VerifiedIdRequestContent
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
-import com.microsoft.walletlibrary.requests.styles.OpenIdRequesterStyle
+import com.microsoft.walletlibrary.requests.styles.OpenIdVerifierStyle
+import com.microsoft.walletlibrary.util.MissingCallbackUrlException
+import com.microsoft.walletlibrary.util.MissingRequestStateException
 import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
 import io.mockk.every
 import io.mockk.mockk
@@ -33,6 +34,8 @@ class VerifiedIdOpenIdJwtRawRequestTest {
     private val expectedLogoUri = "testLogoUri"
     private val expectedLogoImage = "testLogoImage"
     private val expectedPromptForIssuance = "create"
+    private val expectedCallbackUrl = "test.com"
+    private val expectedRequestState = "test state"
 
     init {
         setupInput(listOf(mockInputDescriptor), logoPresent = true, isSchemaEmpty = false)
@@ -98,16 +101,19 @@ class VerifiedIdOpenIdJwtRawRequestTest {
 
     @Test
     fun mapOpenIdJwtRawRequest_mapPresentationRequestWithLogoToRequestContent_ReturnsRequestContent() {
+        // Arrange
+        every { mockPresentationRequest.content.redirectUrl } returns expectedCallbackUrl
+        every { mockPresentationRequest.content.state } returns expectedRequestState
+
         // Act
-        val actualResult = verifiedIdOpenIdJwtRawRequest.mapToRequestContent()
+        val actualResult = verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
 
         // Assert
-        assertThat(actualResult).isInstanceOf(VerifiedIdRequestContent::class.java)
-        assertThat(actualResult.requesterStyle.requester).isEqualTo(expectedEntityName)
-        assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdRequesterStyle::class.java)
-        assertThat((actualResult.requesterStyle as OpenIdRequesterStyle).logo).isNotNull
-        assertThat(actualResult.requesterStyle.logo?.uri).isEqualTo(expectedLogoUri)
-        assertThat(actualResult.requesterStyle.logo?.image).isEqualTo(expectedLogoImage)
+        assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
+        assertThat(actualResult.requesterStyle.name).isEqualTo(expectedEntityName)
+        assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
+        assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
+        assertThat(actualResult.requesterStyle.verifierLogo?.url).isEqualTo(expectedLogoUri)
         assertThat(actualResult.requirement).isInstanceOf(VerifiedIdRequirement::class.java)
         assertThat(actualResult.rootOfTrust.verified).isEqualTo(true)
         assertThat(actualResult.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
@@ -117,17 +123,18 @@ class VerifiedIdOpenIdJwtRawRequestTest {
     fun mapOpenIdJwtRawRequest_mapPresentationRequestWithNoLogoToRequestContent_ReturnsRequestContent() {
         // Arrange
         setupInput(listOf(mockInputDescriptor), logoPresent = false, isSchemaEmpty = false)
+        every { mockPresentationRequest.content.redirectUrl } returns expectedCallbackUrl
+        every { mockPresentationRequest.content.state } returns expectedRequestState
 
         // Act
-        val actualResult = verifiedIdOpenIdJwtRawRequest.mapToRequestContent()
+        val actualResult = verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
 
         // Assert
-        assertThat(actualResult).isInstanceOf(VerifiedIdRequestContent::class.java)
-        assertThat(actualResult.requesterStyle.requester).isEqualTo(expectedEntityName)
-        assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdRequesterStyle::class.java)
-        assertThat((actualResult.requesterStyle as OpenIdRequesterStyle).logo).isNotNull
-        assertThat(actualResult.requesterStyle.logo?.uri).isEqualTo("")
-        assertThat(actualResult.requesterStyle.logo?.image).isNull()
+        assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
+        assertThat(actualResult.requesterStyle.name).isEqualTo(expectedEntityName)
+        assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
+        assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
+        assertThat(actualResult.requesterStyle.verifierLogo?.url).isEqualTo("")
         assertThat(actualResult.requirement).isInstanceOf(VerifiedIdRequirement::class.java)
         assertThat(actualResult.rootOfTrust.verified).isEqualTo(true)
         assertThat(actualResult.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
@@ -137,10 +144,60 @@ class VerifiedIdOpenIdJwtRawRequestTest {
     fun mapOpenIdJwtRawRequest_mapPresentationRequestWithNoSchemaToRequestContent_ThrowsException() {
         // Arrange
         setupInput(listOf(mockInputDescriptor), logoPresent = false, isSchemaEmpty = true)
+        every { mockPresentationRequest.content.redirectUrl } returns expectedCallbackUrl
+        every { mockPresentationRequest.content.state } returns expectedRequestState
 
         // Act and Assert
         Assertions.assertThatThrownBy {
-            verifiedIdOpenIdJwtRawRequest.mapToRequestContent()
+            verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
         }.isInstanceOf(MissingVerifiedIdTypeException::class.java)
+    }
+
+    @Test
+    fun mapOpenIdJwtRawRequest_mapPresentationRequestWithEmptyRequestState_ThrowsException() {
+        // Arrange
+        every { mockPresentationRequest.content.redirectUrl } returns expectedCallbackUrl
+        every { mockPresentationRequest.content.state } returns ""
+
+        // Act and Assert
+        Assertions.assertThatThrownBy {
+            verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
+        }.isInstanceOf(MissingRequestStateException::class.java)
+    }
+
+    @Test
+    fun mapOpenIdJwtRawRequest_mapPresentationRequestWithEmptyCallbackUrl_ThrowsException() {
+        // Arrange
+        every { mockPresentationRequest.content.redirectUrl } returns ""
+        every { mockPresentationRequest.content.state } returns expectedRequestState
+
+        // Act and Assert
+        Assertions.assertThatThrownBy {
+            verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
+        }.isInstanceOf(MissingCallbackUrlException::class.java)
+    }
+
+    @Test
+    fun mapOpenIdJwtRawRequest_mapPresentationRequestWithValidStateAndUrlToRequestContent_ReturnsRequestContent() {
+        // Arrange
+        setupInput(listOf(mockInputDescriptor), logoPresent = false, isSchemaEmpty = false)
+        every { mockPresentationRequest.content.redirectUrl } returns expectedCallbackUrl
+        every { mockPresentationRequest.content.state } returns expectedRequestState
+
+        // Act
+        val actualResult = verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
+
+        // Assert
+        assertThat(actualResult).isInstanceOf(com.microsoft.walletlibrary.requests.PresentationRequestContent::class.java)
+        assertThat(actualResult.requesterStyle.name).isEqualTo(expectedEntityName)
+        assertThat(actualResult.requesterStyle).isInstanceOf(OpenIdVerifierStyle::class.java)
+        assertThat((actualResult.requesterStyle as OpenIdVerifierStyle).verifierLogo).isNotNull
+        assertThat(actualResult.requesterStyle.verifierLogo?.url).isEqualTo("")
+        assertThat(actualResult.requirement).isInstanceOf(VerifiedIdRequirement::class.java)
+        assertThat(actualResult.rootOfTrust.verified).isEqualTo(true)
+        assertThat(actualResult.rootOfTrust.source).isEqualTo(expectedLinkedDomainSource)
+        assertThat(actualResult.requestState).isEqualTo(expectedRequestState)
+        assertThat(actualResult.issuanceCallbackUrl).isNotNull
+        assertThat(actualResult.issuanceCallbackUrl).isEqualTo(expectedCallbackUrl)
     }
 }
