@@ -1,8 +1,12 @@
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
+import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
-import com.microsoft.walletlibrary.util.VerifiedIdRequirementDoesNotMatchConstraintsException
+import com.microsoft.walletlibrary.util.NoMatchForAnyConstraintsException
+import com.microsoft.walletlibrary.util.NoMatchForAtLeastOneConstraintException
 import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.VerifiedIdTypeIsNotRequestedTypeException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.every
 import io.mockk.mockk
@@ -56,7 +60,80 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
         assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(VerifiedIdRequirementDoesNotMatchConstraintsException::class.java)
+            .isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
+    }
+
+    @Test
+    fun fulfillVerifiedIdRequirement_GroupConstraintWithAnyOperatorAndNoVcTypeMatches_ThrowsException() {
+        // Arrange
+        val expectedVcType1 = "TestVC1"
+        val firstVcTypeConstraint = VcTypeConstraint(expectedVcType1)
+        val expectedVcType2 = "TestVC2"
+        val secondVcTypeConstraint = VcTypeConstraint(expectedVcType2)
+        val groupConstraint = GroupConstraint(
+            listOf(firstVcTypeConstraint, secondVcTypeConstraint),
+            GroupConstraintOperator.ANY
+        )
+        verifiedIdRequirement = VerifiedIdRequirement(
+            "id",
+            listOf("TestCredential"),
+            groupConstraint,
+            encrypted = false,
+            required = true,
+            "testing purposes"
+        )
+        val mockVerifiableCredential: VerifiableCredential = mockk()
+        every { mockVerifiableCredential.types } returns listOf("TestVC")
+
+        // Act
+        val actualResult = verifiedIdRequirement.fulfill(mockVerifiableCredential)
+
+        // Assert
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull())
+            .isInstanceOf(NoMatchForAnyConstraintsException::class.java)
+        (actualResult.exceptionOrNull() as NoMatchForAnyConstraintsException).exceptions.forEach {
+            assertThat(it).isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
+        }
+    }
+
+    @Test
+    fun fulfillVerifiedIdRequirement_GroupConstraintWithAllOperatorAndOneVcTypeDoesNotMatch_ThrowsException() {
+        // Arrange
+        val expectedVcType1 = "TestVC1"
+        val firstVcTypeConstraint = VcTypeConstraint(expectedVcType1)
+        val expectedVcType2 = "TestVC2"
+        val secondVcTypeConstraint = VcTypeConstraint(expectedVcType2)
+        val groupConstraint = GroupConstraint(
+            listOf(firstVcTypeConstraint, secondVcTypeConstraint),
+            GroupConstraintOperator.ALL
+        )
+        verifiedIdRequirement = VerifiedIdRequirement(
+            "id",
+            listOf("TestCredential"),
+            groupConstraint,
+            encrypted = false,
+            required = true,
+            "testing purposes"
+        )
+
+        val mockVerifiableCredential: VerifiableCredential = mockk()
+        every { mockVerifiableCredential.types } returns listOf(expectedVcType1)
+
+        // Act
+        val actualResult = verifiedIdRequirement.fulfill(mockVerifiableCredential)
+
+        // Assert
+        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult.isFailure).isTrue
+        assertThat(actualResult.exceptionOrNull()).isNotNull
+        assertThat(actualResult.exceptionOrNull())
+            .isInstanceOf(NoMatchForAtLeastOneConstraintException::class.java)
+        (actualResult.exceptionOrNull() as NoMatchForAtLeastOneConstraintException).exceptions.forEach {
+            assertThat(it).isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
+        }
     }
 
     @Test
@@ -74,7 +151,7 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
         assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(VerifiedIdRequirementDoesNotMatchConstraintsException::class.java)
+            .isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
     }
 
     @Test

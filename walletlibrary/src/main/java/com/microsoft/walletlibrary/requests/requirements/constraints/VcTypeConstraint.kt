@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.requests.requirements.constraints
 
+import com.microsoft.walletlibrary.util.VerifiedIdTypeIsNotRequestedTypeException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
@@ -17,5 +18,10 @@ class VcTypeConstraint(internal val vcType: String): VerifiedIdConstraint {
         if (verifiedId !is VerifiableCredential)
             return false
         return verifiedId.types.contains(vcType)
+    }
+
+    override fun matches(verifiedId: VerifiedId) {
+        if (!doesMatch(verifiedId))
+            throw VerifiedIdTypeIsNotRequestedTypeException("Provided Verified Id type does not match requested type $vcType.")
     }
 }

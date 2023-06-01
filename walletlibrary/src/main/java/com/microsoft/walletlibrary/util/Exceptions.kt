@@ -57,7 +57,11 @@ class AccessTokenRequirementNotFulfilledException(message: String = "", cause: T
 
 class VerifiedIdRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
 
-class VerifiedIdRequirementDoesNotMatchConstraintsException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
+class VerifiedIdTypeIsNotRequestedTypeException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
+
+class NoMatchForAnyConstraintsException(message: String = "", val exceptions: List<Throwable> = emptyList(), retryable: Boolean = false) : RequirementValidationException(message, retryable = retryable)
+
+class NoMatchForAtLeastOneConstraintException(message: String = "", val exceptions: List<Throwable> = emptyList(), retryable: Boolean = false): RequirementValidationException(message, retryable = retryable)
 
 class VerifiedIdRequirementMissingIdException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
 
