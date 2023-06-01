@@ -23,7 +23,7 @@ dependencies {
     implementation 'com.microsoft.entra.verifiedid:walletlibrary:0.0.1-beta.3'
 }
 ```
-Add to your app's settings.gradle.
+Add to repositories section of your app's settings.gradle.
 ```kotlin
 maven { url "https://jitpack.io" }
 ```
