@@ -20,7 +20,7 @@ The library runs on a minimum sdk version 26. The app consuming the library shou
 Add to your app's build.gradle to add Wallet Library as a dependency:
 ```kotlin
 dependencies {
-    implementation 'com.microsoft.entra.verifiedid:walletlibrary:0.0.1-beta.4'
+    implementation 'com.microsoft.entra.verifiedid:walletlibrary:0.0.1-beta.3'
 }
 ```
 In settings.gradle of the app which consumes the library, add maven { url "https://jitpack.io" }.
