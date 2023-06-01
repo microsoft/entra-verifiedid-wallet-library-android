@@ -23,7 +23,10 @@ dependencies {
     implementation 'com.microsoft.entra.verifiedid:walletlibrary:0.0.1-beta.3'
 }
 ```
-In settings.gradle of the app which consumes the library, add maven { url "https://jitpack.io" }.
+Add to your app's settings.gradle.
+```kotlin
+add maven { url "https://jitpack.io" }
+```
 
 ## Quick Start
 Here is a simple example of how to use the library. For more in-depth examples, check out the sample app.
