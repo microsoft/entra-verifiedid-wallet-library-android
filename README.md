@@ -25,7 +25,7 @@ dependencies {
 ```
 Add to your app's settings.gradle.
 ```kotlin
-add maven { url "https://jitpack.io" }
+maven { url "https://jitpack.io" }
 ```
 
 ## Quick Start
