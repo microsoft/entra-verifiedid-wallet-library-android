@@ -20,6 +20,7 @@ import com.microsoft.did.sdk.credential.service.validators.PresentationRequestVa
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.datasource.network.interceptors.CorrelationVectorInterceptor
 import com.microsoft.did.sdk.datasource.network.interceptors.UserAgentInterceptor
+import com.microsoft.did.sdk.datasource.network.interceptors.WalletLibraryHeaderInterceptor
 import com.microsoft.did.sdk.identifier.registrars.Registrar
 import com.microsoft.did.sdk.identifier.registrars.SidetreeRegistrar
 import com.microsoft.did.sdk.util.log.SdkLog
@@ -57,6 +58,7 @@ internal class SdkModule {
     @Singleton
     internal fun defaultOkHttpClient(
         @Named("userAgentInfo") userAgentInfo: String,
+        @Named("walletLibraryVersionInfo") walletLibraryVersionInfo: String,
         correlationVectorService: CorrelationVectorService
     ): OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.d(it) }
@@ -65,6 +67,7 @@ internal class SdkModule {
             .followRedirects(false)
             .addInterceptor(httpLoggingInterceptor)
             .addInterceptor(UserAgentInterceptor(userAgentInfo))
+            .addInterceptor(WalletLibraryHeaderInterceptor(walletLibraryVersionInfo))
             .addInterceptor(CorrelationVectorInterceptor(correlationVectorService))
             .build()
     }

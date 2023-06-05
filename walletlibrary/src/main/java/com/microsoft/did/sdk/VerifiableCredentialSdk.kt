@@ -59,6 +59,7 @@ internal object VerifiableCredentialSdk {
      * @param registrationUrl url used to register DID
      * @param resolverUrl url used to resolve DID
      */
+    // TODO(Change how version numbers are passed for headers when HTTP client layer is refactored)
     @JvmOverloads
     @JvmStatic
     internal fun init(
@@ -67,11 +68,13 @@ internal object VerifiableCredentialSdk {
         logConsumer: SdkLog.Consumer = DefaultLogConsumer(),
         polymorphicJsonSerializers: SerializersModule = Json.serializersModule,
         registrationUrl: String = "",
-        resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers"
+        resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers",
+        walletLibraryVersionInfo: String = ""
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
             .userAgentInfo(userAgentInfo)
+            .walletLibraryVersionInfo(walletLibraryVersionInfo)
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
             .polymorphicJsonSerializer(polymorphicJsonSerializers)
