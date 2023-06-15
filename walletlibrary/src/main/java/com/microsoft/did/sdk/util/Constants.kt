@@ -57,6 +57,7 @@ internal object Constants {
     const val USER_AGENT_HEADER = "User-Agent"
     const val CORRELATION_VECTOR_HEADER = "ms-cv"
     const val REQUEST_ID_HEADER = "request-id"
+    const val WALLET_LIBRARY_VERSION_HEADER = "x-ms-entra-verifiedid-wallet-library"
 
     // Error Codes for network calls
     const val INVALID_PIN = "token_validation.invalid_openid_token_hint_pin"
