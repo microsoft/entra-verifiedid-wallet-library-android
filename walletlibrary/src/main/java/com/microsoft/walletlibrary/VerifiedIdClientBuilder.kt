@@ -6,6 +6,7 @@
 package com.microsoft.walletlibrary
 
 import android.content.Context
+import android.content.pm.PackageManager
 import com.microsoft.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
@@ -61,8 +62,18 @@ class VerifiedIdClientBuilder(private val context: Context) {
         requestHandlerFactory.requestHandlers.addAll(requestHandlers)
 
         val vcSdkLogConsumer = WalletLibraryVCSDKLogConsumer(logger)
-        VerifiableCredentialSdk.init(context, logConsumer = vcSdkLogConsumer, walletLibraryVersionInfo = getWalletLibraryVersionInfo())
-        return VerifiedIdClient(requestResolverFactory, requestHandlerFactory, logger, jsonSerializer)
+        VerifiableCredentialSdk.init(
+            context,
+            logConsumer = vcSdkLogConsumer,
+            userAgentInfo = getUserAgent(context),
+            walletLibraryVersionInfo = getWalletLibraryVersionInfo()
+        )
+        return VerifiedIdClient(
+            requestResolverFactory,
+            requestHandlerFactory,
+            logger,
+            jsonSerializer
+        )
     }
 
     private fun registerRequestHandler(requestHandler: RequestHandler) {
@@ -75,5 +86,18 @@ class VerifiedIdClientBuilder(private val context: Context) {
 
     private fun getWalletLibraryVersionInfo(): String {
         return "Android/${BuildConfig.WalletLibraryVersion}"
+    }
+
+    private fun getUserAgent(applicationContext: Context): String {
+        return try {
+            val packageManager = applicationContext.packageManager
+            val applicationInfo = packageManager.getApplicationInfo(applicationContext.packageName, 0)
+            val appName = packageManager.getApplicationLabel(applicationInfo).toString()
+            val packageInfo = packageManager.getPackageInfo(applicationContext.packageName, 0)
+            appName + "/" + packageInfo.versionName
+        } catch (e: PackageManager.NameNotFoundException) {
+            WalletLibraryLogger.e("Error getting version name.", e)
+            ""
+        }
     }
 }
