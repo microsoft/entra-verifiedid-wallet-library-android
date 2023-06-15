@@ -8,7 +8,6 @@ package com.microsoft.walletlibrary
 import android.content.Context
 import android.content.pm.PackageManager
 import com.microsoft.did.sdk.VerifiableCredentialSdk
-import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
@@ -97,7 +96,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
             val packageInfo = packageManager.getPackageInfo(applicationContext.packageName, 0)
             appName + "/" + packageInfo.versionName
         } catch (e: PackageManager.NameNotFoundException) {
-            SdkLog.e("Error getting version name.", e)
+            WalletLibraryLogger.e("Error getting version name.", e)
             ""
         }
     }
