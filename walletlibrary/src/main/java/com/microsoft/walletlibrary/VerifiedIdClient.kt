@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary
 
+import com.microsoft.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
@@ -28,6 +29,7 @@ class VerifiedIdClient(
     // Creates an issuance or presentation request based on the provided input.
     suspend fun createRequest(verifiedIdRequestInput: VerifiedIdRequestInput): Result<VerifiedIdRequest<*>> {
         return try {
+            VerifiableCredentialSdk.correlationVectorService.startNewFlowAndSave()
             val requestResolver = requestResolverFactory.getResolver(verifiedIdRequestInput)
             val rawRequest = requestResolver.resolve(verifiedIdRequestInput)
             val requestHandler = requestHandlerFactory.getHandler(requestResolver)

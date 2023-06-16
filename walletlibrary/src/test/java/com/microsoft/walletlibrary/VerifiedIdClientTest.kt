@@ -1,11 +1,17 @@
 package com.microsoft.walletlibrary
 
+import com.microsoft.did.sdk.CorrelationVectorService
+import com.microsoft.did.sdk.VerifiableCredentialSdk
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.models.contracts.InputContract
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.did.sdk.credential.service.models.contracts.display.*
+import com.microsoft.did.sdk.credential.service.models.contracts.display.CardDescriptor
+import com.microsoft.did.sdk.credential.service.models.contracts.display.ClaimDescriptor
+import com.microsoft.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
+import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
+import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
@@ -15,16 +21,23 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
-import com.microsoft.walletlibrary.util.*
+import com.microsoft.walletlibrary.util.HandlerMissingException
+import com.microsoft.walletlibrary.util.ResolverMissingException
+import com.microsoft.walletlibrary.util.UnSupportedProtocolException
+import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
+import com.microsoft.walletlibrary.util.defaultTestSerializer
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class VerifiedIdClientTest {
+    private val mockCorrelationVectorService: CorrelationVectorService = mockk()
     private val openIdRequestHandler: OpenIdRequestHandler = mockk()
     private val openIdURLRequestResolver: OpenIdURLRequestResolver = mockk()
     private val presentationRequest: PresentationRequest = mockk()
@@ -32,6 +45,16 @@ class VerifiedIdClientTest {
     private val verifiedIdOpenIdJwtRawRequest = VerifiedIdOpenIdJwtRawRequest(presentationRequest)
     private lateinit var requestHandlerFactory: RequestHandlerFactory
     private lateinit var requestResolverFactory: RequestResolverFactory
+
+    init {
+        setupInput()
+    }
+
+    private fun setupInput() {
+        mockkStatic(VerifiableCredentialSdk::class)
+        every { VerifiableCredentialSdk.correlationVectorService } returns mockCorrelationVectorService
+        every { mockCorrelationVectorService.startNewFlowAndSave() } returns ""
+    }
 
     @Test
     fun createRequest_SuccessFromResolverAndHandler_ReturnsVerifiedIdRequest() {
