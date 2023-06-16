@@ -20,7 +20,7 @@ The library runs on a minimum sdk version 26. The app consuming the library shou
 Add to your app's build.gradle to add Wallet Library as a dependency:
 ```kotlin
 dependencies {
-    implementation 'com.microsoft.entra.verifiedid:walletlibrary:0.0.1'
+    implementation 'com.microsoft.entra.verifiedid:walletlibrary:1.0.0'
 }
 ```
 Add to repositories section of your app's settings.gradle.
