@@ -13,7 +13,7 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
-def _version = "0.0.1-beta.4"
+def _version = "1.0.0"
 
 android {
     namespace 'com.microsoft.walletlibrary'
