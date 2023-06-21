@@ -13,6 +13,8 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
+def _version = "1.0.0"
+
 android {
     namespace 'com.microsoft.walletlibrary'
     compileSdkVersion compile_sdk_version as Integer
@@ -21,7 +23,8 @@ android {
         minSdkVersion min_sdk_version as Integer
         targetSdkVersion target_sdk_version as Integer
         versionCode 1
-        versionName "1.0"
+        versionName _version
+        buildConfigField 'String', 'WalletLibraryVersion', "\"$_version\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -30,6 +33,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+            minifyEnabled false
         }
     }
     packagingOptions {
@@ -49,6 +56,23 @@ android {
         textOutput "stdout"
         explainIssues true
         showAll true
+    }
+    sourceSets {
+        main {
+            java.srcDirs 'src/main/java'
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier 'sources'
+    destinationDirectory = reporting.file("$project.buildDir/outputs/jar/")
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name.contains("assemble")) {
+        task.dependsOn 'sourcesJar'
     }
 }
 
@@ -123,11 +147,12 @@ project.afterEvaluate {
             }
         }
         publications {
-            release(MavenPublication) {
+            walletlibrary(MavenPublication) {
                 from components.release
+                artifact(sourcesJar)
                 groupId = 'com.microsoft.entra.verifiedid'
                 artifactId = 'walletlibrary'
-                version = "0.0.1-beta.4"
+                version = _version
                 pom {
                     name = 'walletlibrary'
                     description = 'Entra VerifiedID WalletLibrary Android'
