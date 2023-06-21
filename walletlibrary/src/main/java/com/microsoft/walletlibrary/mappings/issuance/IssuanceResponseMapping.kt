@@ -7,7 +7,13 @@ package com.microsoft.walletlibrary.mappings.issuance
 
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.models.pin.IssuancePin
-import com.microsoft.walletlibrary.requests.requirements.*
+import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
+import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
+import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
+import com.microsoft.walletlibrary.requests.requirements.PinRequirement
+import com.microsoft.walletlibrary.requests.requirements.Requirement
+import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
+import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.util.TypeInVerifiedIdRequirementDoesNotMatchRequestException
 import com.microsoft.walletlibrary.util.VerifiedIdRequirementTypeConflictException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
