@@ -107,16 +107,17 @@ class VerifiedIdClientTest {
         runBlocking {
             // Act
             val actualResult = verifiedIdClient.createRequest(verifiedIdRequestURL)
+            val actualException = actualResult.exceptionOrNull()
 
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
             assertThat(actualResult.isFailure).isTrue
-            assertThat(actualResult.exceptionOrNull()).isNotNull
-            assertThat(actualResult.exceptionOrNull()).isInstanceOf(UnspecifiedException::class.java)
-            assertThat((actualResult.exceptionOrNull() as UnspecifiedException).code).isEqualTo("UnspecifiedException")
-            assertThat(actualResult.exceptionOrNull() as UnspecifiedException).hasMessage("Unspecified Exception")
-            assertThat((actualResult.exceptionOrNull() as UnspecifiedException).correlationId).isNull()
-            assertThat((actualResult.exceptionOrNull() as UnspecifiedException).innerError).isInstanceOf(ResolverMissingException::class.java)
+            assertThat(actualException).isNotNull
+            assertThat(actualException).isInstanceOf(UnspecifiedException::class.java)
+            assertThat((actualException as UnspecifiedException).code).isEqualTo("UnspecifiedException")
+            assertThat(actualException).hasMessage("Unspecified Exception")
+            assertThat(actualException.correlationId).isNull()
+            assertThat(actualException.innerError).isInstanceOf(ResolverMissingException::class.java)
         }
     }
 
@@ -140,16 +141,17 @@ class VerifiedIdClientTest {
         runBlocking {
             // Act
             val actualResult = verifiedIdClient.createRequest(verifiedIdRequestURL)
+            val actualException = actualResult.exceptionOrNull()
 
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
             assertThat(actualResult.isFailure).isTrue
-            assertThat(actualResult.exceptionOrNull()).isNotNull
-            assertThat(actualResult.exceptionOrNull()).isInstanceOf(UnspecifiedException::class.java)
-            assertThat((actualResult.exceptionOrNull() as UnspecifiedException).code).isEqualTo("UnspecifiedException")
-            assertThat(actualResult.exceptionOrNull() as UnspecifiedException).hasMessage("Unspecified Exception")
-            assertThat((actualResult.exceptionOrNull() as UnspecifiedException).correlationId).isNull()
-            assertThat((actualResult.exceptionOrNull() as UnspecifiedException).innerError).isInstanceOf(HandlerMissingException::class.java)
+            assertThat(actualException).isNotNull
+            assertThat(actualException).isInstanceOf(UnspecifiedException::class.java)
+            assertThat((actualException as UnspecifiedException).code).isEqualTo("UnspecifiedException")
+            assertThat(actualException).hasMessage("Unspecified Exception")
+            assertThat(actualException.correlationId).isNull()
+            assertThat(actualException.innerError).isInstanceOf(HandlerMissingException::class.java)
         }
     }
 
@@ -176,16 +178,17 @@ class VerifiedIdClientTest {
         runBlocking {
             // Act
             val actualResult = verifiedIdClient.createRequest(verifiedIdRequestURL)
+            val actualException = actualResult.exceptionOrNull()
 
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
             assertThat(actualResult.isFailure).isTrue
-            assertThat(actualResult.exceptionOrNull()).isNotNull
-            assertThat(actualResult.exceptionOrNull()).isInstanceOf(UnspecifiedException::class.java)
-            assertThat((actualResult.exceptionOrNull() as UnspecifiedException).code).isEqualTo("UnspecifiedException")
-            assertThat(actualResult.exceptionOrNull() as UnspecifiedException).hasMessage("Unspecified Exception")
-            assertThat((actualResult.exceptionOrNull() as UnspecifiedException).correlationId).isNull()
-            assertThat((actualResult.exceptionOrNull() as UnspecifiedException).innerError).isInstanceOf(UnSupportedProtocolException::class.java)
+            assertThat(actualException).isNotNull
+            assertThat(actualException).isInstanceOf(UnspecifiedException::class.java)
+            assertThat((actualException as UnspecifiedException).code).isEqualTo("UnspecifiedException")
+            assertThat(actualException).hasMessage("Unspecified Exception")
+            assertThat(actualException.correlationId).isNull()
+            assertThat(actualException.innerError).isInstanceOf(UnSupportedProtocolException::class.java)
         }
     }
 
@@ -212,16 +215,17 @@ class VerifiedIdClientTest {
         runBlocking {
             // Act
             val actualResult = verifiedIdClient.createRequest(verifiedIdRequestURL)
+            val actualException = actualResult.exceptionOrNull()
 
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
             assertThat(actualResult.isFailure).isTrue
-            assertThat(actualResult.exceptionOrNull()).isNotNull
-            assertThat(actualResult.exceptionOrNull()).isInstanceOf(UnspecifiedException::class.java)
-            assertThat((actualResult.exceptionOrNull() as UnspecifiedException).code).isEqualTo("UnspecifiedException")
-            assertThat(actualResult.exceptionOrNull() as UnspecifiedException).hasMessage("Unspecified Exception")
-            assertThat((actualResult.exceptionOrNull() as UnspecifiedException).correlationId).isNull()
-            assertThat((actualResult.exceptionOrNull() as UnspecifiedException).innerError).isInstanceOf(UnSupportedVerifiedIdRequestInputException::class.java)
+            assertThat(actualException).isNotNull
+            assertThat(actualException).isInstanceOf(UnspecifiedException::class.java)
+            assertThat((actualException as UnspecifiedException).code).isEqualTo("UnspecifiedException")
+            assertThat(actualException).hasMessage("Unspecified Exception")
+            assertThat(actualException.correlationId).isNull()
+            assertThat(actualException.innerError).isInstanceOf(UnSupportedVerifiedIdRequestInputException::class.java)
         }
     }
 
@@ -313,19 +317,20 @@ class VerifiedIdClientTest {
 
         // Act
         val actualDecodedVc = verifiedIdClient.decodeVerifiedId(encodedVc)
+        val actualVc = actualDecodedVc.getOrNull()
 
         // Assert
         assertThat(actualDecodedVc).isInstanceOf(VerifiedIdResult::class.java)
         assertThat(actualDecodedVc.isSuccess).isTrue
-        assertThat(actualDecodedVc.getOrNull()).isNotNull
-        assertThat(actualDecodedVc.getOrNull()).isInstanceOf(VerifiableCredential::class.java)
-        assertThat((actualDecodedVc.getOrNull() as VerifiableCredential).getClaims().size).isEqualTo(1)
-        assertThat((actualDecodedVc.getOrNull() as VerifiableCredential).getClaims().first().id).isEqualTo("name 1")
-        assertThat((actualDecodedVc.getOrNull() as VerifiableCredential).getClaims().first().value).isEqualTo("\"value1\"")
-        assertThat((actualDecodedVc.getOrNull() as VerifiableCredential).style).isInstanceOf(BasicVerifiedIdStyle::class.java)
-        assertThat((actualDecodedVc.getOrNull() as VerifiableCredential).style.name).isEqualTo("Test VC")
-        assertThat(((actualDecodedVc.getOrNull() as VerifiableCredential).style as BasicVerifiedIdStyle).backgroundColor).isEqualTo("#000000")
-        assertThat(((actualDecodedVc.getOrNull() as VerifiableCredential).style as BasicVerifiedIdStyle).textColor).isEqualTo("#ffffff")
-        assertThat(((actualDecodedVc.getOrNull() as VerifiableCredential).style as BasicVerifiedIdStyle).issuer).isEqualTo("Test Issuer")
+        assertThat(actualVc).isNotNull
+        assertThat(actualVc).isInstanceOf(VerifiableCredential::class.java)
+        assertThat((actualVc as VerifiableCredential).getClaims().size).isEqualTo(1)
+        assertThat(actualVc.getClaims().first().id).isEqualTo("name 1")
+        assertThat(actualVc.getClaims().first().value).isEqualTo("\"value1\"")
+        assertThat(actualVc.style).isInstanceOf(BasicVerifiedIdStyle::class.java)
+        assertThat(actualVc.style.name).isEqualTo("Test VC")
+        assertThat((actualVc.style as BasicVerifiedIdStyle).backgroundColor).isEqualTo("#000000")
+        assertThat((actualVc.style as BasicVerifiedIdStyle).textColor).isEqualTo("#ffffff")
+        assertThat((actualVc.style as BasicVerifiedIdStyle).issuer).isEqualTo("Test Issuer")
     }
 }
