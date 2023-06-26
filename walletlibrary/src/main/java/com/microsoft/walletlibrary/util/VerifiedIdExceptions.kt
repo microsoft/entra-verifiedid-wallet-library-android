@@ -1,9 +1,9 @@
 package com.microsoft.walletlibrary.util
 
 enum class VerifiedIdExceptions(val value: String) {
-    NETWORKING_EXCEPTION("NetworkingException"),
-    REQUIREMENT_NOT_MET_EXCEPTION("RequirementNotMet"),
-    UNSPECIFIED_EXCEPTION("UnspecifiedException")
+    NETWORKING_EXCEPTION("networking_error"),
+    REQUIREMENT_NOT_MET_EXCEPTION("requirement_not_met"),
+    UNSPECIFIED_EXCEPTION("unspecified_error")
 }
 
 typealias VerifiedIdResult<T> = Result<T>

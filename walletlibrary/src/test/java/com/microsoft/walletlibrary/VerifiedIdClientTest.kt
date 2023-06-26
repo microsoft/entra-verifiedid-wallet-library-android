@@ -25,7 +25,7 @@ import com.microsoft.walletlibrary.util.HandlerMissingException
 import com.microsoft.walletlibrary.util.ResolverMissingException
 import com.microsoft.walletlibrary.util.UnSupportedProtocolException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
-import com.microsoft.walletlibrary.util.UnspecifiedException
+import com.microsoft.walletlibrary.util.UnspecifiedVerifiedIdException
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.defaultTestSerializer
@@ -113,8 +113,8 @@ class VerifiedIdClientTest {
             assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
             assertThat(actualResult.isFailure).isTrue
             assertThat(actualException).isNotNull
-            assertThat(actualException).isInstanceOf(UnspecifiedException::class.java)
-            assertThat((actualException as UnspecifiedException).code).isEqualTo("UnspecifiedException")
+            assertThat(actualException).isInstanceOf(UnspecifiedVerifiedIdException::class.java)
+            assertThat((actualException as UnspecifiedVerifiedIdException).code).isEqualTo("unspecified_error")
             assertThat(actualException).hasMessage("Unspecified Exception")
             assertThat(actualException.correlationId).isNull()
             assertThat(actualException.innerError).isInstanceOf(ResolverMissingException::class.java)
@@ -147,8 +147,8 @@ class VerifiedIdClientTest {
             assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
             assertThat(actualResult.isFailure).isTrue
             assertThat(actualException).isNotNull
-            assertThat(actualException).isInstanceOf(UnspecifiedException::class.java)
-            assertThat((actualException as UnspecifiedException).code).isEqualTo("UnspecifiedException")
+            assertThat(actualException).isInstanceOf(UnspecifiedVerifiedIdException::class.java)
+            assertThat((actualException as UnspecifiedVerifiedIdException).code).isEqualTo("unspecified_error")
             assertThat(actualException).hasMessage("Unspecified Exception")
             assertThat(actualException.correlationId).isNull()
             assertThat(actualException.innerError).isInstanceOf(HandlerMissingException::class.java)
@@ -184,8 +184,8 @@ class VerifiedIdClientTest {
             assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
             assertThat(actualResult.isFailure).isTrue
             assertThat(actualException).isNotNull
-            assertThat(actualException).isInstanceOf(UnspecifiedException::class.java)
-            assertThat((actualException as UnspecifiedException).code).isEqualTo("UnspecifiedException")
+            assertThat(actualException).isInstanceOf(UnspecifiedVerifiedIdException::class.java)
+            assertThat((actualException as UnspecifiedVerifiedIdException).code).isEqualTo("unspecified_error")
             assertThat(actualException).hasMessage("Unspecified Exception")
             assertThat(actualException.correlationId).isNull()
             assertThat(actualException.innerError).isInstanceOf(UnSupportedProtocolException::class.java)
@@ -221,8 +221,8 @@ class VerifiedIdClientTest {
             assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
             assertThat(actualResult.isFailure).isTrue
             assertThat(actualException).isNotNull
-            assertThat(actualException).isInstanceOf(UnspecifiedException::class.java)
-            assertThat((actualException as UnspecifiedException).code).isEqualTo("UnspecifiedException")
+            assertThat(actualException).isInstanceOf(UnspecifiedVerifiedIdException::class.java)
+            assertThat((actualException as UnspecifiedVerifiedIdException).code).isEqualTo("unspecified_error")
             assertThat(actualException).hasMessage("Unspecified Exception")
             assertThat(actualException.correlationId).isNull()
             assertThat(actualException.innerError).isInstanceOf(UnSupportedVerifiedIdRequestInputException::class.java)

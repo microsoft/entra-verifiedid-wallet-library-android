@@ -43,7 +43,7 @@ class PinRequirementTest {
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
         assertThat(actualResult.exceptionOrNull()).isInstanceOf(RequirementNotMetException::class.java)
-        assertThat((actualResult.exceptionOrNull() as RequirementNotMetException).code).isEqualTo("RequirementNotMet")
+        assertThat((actualResult.exceptionOrNull() as RequirementNotMetException).code).isEqualTo("requirement_not_met")
         assertThat(actualResult.exceptionOrNull() as RequirementNotMetException).hasMessage("Pin has not been set.")
         assertThat((actualResult.exceptionOrNull() as RequirementNotMetException).correlationId).isNull()
     }

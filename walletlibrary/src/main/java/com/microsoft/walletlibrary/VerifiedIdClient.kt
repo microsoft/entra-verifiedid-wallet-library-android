@@ -10,7 +10,7 @@ import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
-import com.microsoft.walletlibrary.util.UnspecifiedException
+import com.microsoft.walletlibrary.util.UnspecifiedVerifiedIdException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
@@ -38,7 +38,7 @@ class VerifiedIdClient(
             val requestHandler = requestHandlerFactory.getHandler(requestResolver)
             VerifiedIdResult.success(requestHandler.handleRequest(rawRequest))
         } catch (exception: Exception) {
-            UnspecifiedException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
+            UnspecifiedVerifiedIdException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
         }
     }
 
@@ -46,7 +46,7 @@ class VerifiedIdClient(
         return try {
             VerifiedIdResult.success(serializer.encodeToString(verifiedId))
         } catch (exception: Exception) {
-            UnspecifiedException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
+            UnspecifiedVerifiedIdException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
         }
     }
 
@@ -54,7 +54,7 @@ class VerifiedIdClient(
         return try {
             VerifiedIdResult.success(serializer.decodeFromString(encodedVerifiedId))
         } catch (exception: Exception) {
-            UnspecifiedException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
+            UnspecifiedVerifiedIdException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
         }
     }
 }

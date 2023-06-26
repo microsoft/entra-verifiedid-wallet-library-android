@@ -17,5 +17,5 @@ class NetworkingException(
 class RequirementNotMetException(message: String, code: String, correlationId: String? = null) :
     VerifiedIdException(message, code, correlationId)
 
-class UnspecifiedException(message: String, code: String, val innerError: Exception? = null, correlationId: String? = null) :
+class UnspecifiedVerifiedIdException(message: String, code: String, val innerError: Exception? = null, correlationId: String? = null) :
     VerifiedIdException(message, code, correlationId)
