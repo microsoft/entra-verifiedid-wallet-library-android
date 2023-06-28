@@ -10,20 +10,20 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-class ClaimConstraintTest {
+class ClaimRegexConstraintTest {
 
     @Test
     fun doesMatch_VcIssuerMatches_ReturnsTrue() {
         // Arrange
         val expectedIssuer = "did:web:test"
-        val claimConstraint =
-            ClaimConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
+        val claimRegexConstraint =
+            ClaimRegexConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
         val mockVerifiableCredential: VerifiableCredential = mockk()
         val verifiableCredentialContent = VerifiableCredentialContent("urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(listOf("https://www.w3.org/2018/credentials/v1"), listOf("VerifiableCredential", "BusinessCard"), mapOf("name" to "n", "company" to "m"), null, null), "did:ion:testsubject", "did:web:test", 1686870564, 1689462564)
         every { mockVerifiableCredential.raw.contents } returns verifiableCredentialContent
 
         // Act
-        val actualResult = claimConstraint.doesMatch(mockVerifiableCredential)
+        val actualResult = claimRegexConstraint.doesMatch(mockVerifiableCredential)
 
         // Assert
         assertThat(actualResult).isTrue
@@ -34,14 +34,14 @@ class ClaimConstraintTest {
         // Arrange
         val expectedIssuer = "did:web:test"
         val actualIssuer = "did:web:invalid"
-        val claimConstraint =
-            ClaimConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
+        val claimRegexConstraint =
+            ClaimRegexConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
         val mockVerifiableCredential: VerifiableCredential = mockk()
         val verifiableCredentialContent = VerifiableCredentialContent("urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(listOf("https://www.w3.org/2018/credentials/v1"), listOf("VerifiableCredential", "BusinessCard"), mapOf("name" to "n", "company" to "m"), null, null), "did:ion:testsubject", actualIssuer, 1686870564, 1689462564)
         every { mockVerifiableCredential.raw.contents } returns verifiableCredentialContent
 
         // Act
-        val actualResult = claimConstraint.doesMatch(mockVerifiableCredential)
+        val actualResult = claimRegexConstraint.doesMatch(mockVerifiableCredential)
 
         // Assert
         assertThat(actualResult).isFalse
@@ -51,14 +51,14 @@ class ClaimConstraintTest {
     fun doesMatch_VcIssuerEmpty_ReturnsFalse() {
         // Arrange
         val expectedIssuer = "did:web:test"
-        val claimConstraint =
-            ClaimConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
+        val claimRegexConstraint =
+            ClaimRegexConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
         val mockVerifiableCredential: VerifiableCredential = mockk()
         val verifiableCredentialContent = VerifiableCredentialContent("urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(listOf("https://www.w3.org/2018/credentials/v1"), listOf("VerifiableCredential", "BusinessCard"), mapOf("name" to "n", "company" to "m"), null, null), "did:ion:testsubject", "", 1686870564, 1689462564)
         every { mockVerifiableCredential.raw.contents } returns verifiableCredentialContent
 
         // Act
-        val actualResult = claimConstraint.doesMatch(mockVerifiableCredential)
+        val actualResult = claimRegexConstraint.doesMatch(mockVerifiableCredential)
 
         // Assert
         assertThat(actualResult).isFalse
@@ -69,15 +69,15 @@ class ClaimConstraintTest {
         // Arrange
         val expectedIssuer = "did:web:test"
         val actualIssuer = "did:web:invalid"
-        val claimConstraint =
-            ClaimConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
+        val claimRegexConstraint =
+            ClaimRegexConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
         val mockVerifiableCredential: VerifiableCredential = mockk()
         val verifiableCredentialContent = VerifiableCredentialContent("urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(listOf("https://www.w3.org/2018/credentials/v1"), listOf("VerifiableCredential", "BusinessCard"), mapOf("name" to "n", "company" to "m"), null, null), "did:ion:testsubject", actualIssuer, 1686870564, 1689462564)
         every { mockVerifiableCredential.raw.contents } returns verifiableCredentialContent
 
         // Act and Assert
         Assertions.assertThatThrownBy {
-            claimConstraint.matches(mockVerifiableCredential)
+            claimRegexConstraint.matches(mockVerifiableCredential)
         }.isInstanceOf(VerifiedIdIssuerIsNotRequestedException::class.java)
     }
 
@@ -85,14 +85,14 @@ class ClaimConstraintTest {
     fun matches_VcIssuerMatchesConstraint_DoesNotThrow() {
         // Arrange
         val expectedIssuer = "did:web:test"
-        val claimConstraint =
-            ClaimConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
+        val claimRegexConstraint =
+            ClaimRegexConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
         val mockVerifiableCredential: VerifiableCredential = mockk()
         val verifiableCredentialContent = VerifiableCredentialContent("urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(listOf("https://www.w3.org/2018/credentials/v1"), listOf("VerifiableCredential", "BusinessCard"), mapOf("name" to "n", "company" to "m"), null, null), "did:ion:testsubject", "did:web:test", 1686870564, 1689462564)
         every { mockVerifiableCredential.raw.contents } returns verifiableCredentialContent
 
         // Act
-        claimConstraint.matches(mockVerifiableCredential)
+        claimRegexConstraint.matches(mockVerifiableCredential)
     }
 
     @Test
@@ -102,7 +102,7 @@ class ClaimConstraintTest {
         val value = "test purposes"
 
         // Act
-        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+        val actualResult = ClaimRegexConstraint(emptyList(), "").matchPattern(pattern, value)
 
         // Assert
         assertThat(actualResult).isTrue
@@ -115,7 +115,7 @@ class ClaimConstraintTest {
         val value = "unit test purposes"
 
         // Act
-        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+        val actualResult = ClaimRegexConstraint(emptyList(), "").matchPattern(pattern, value)
 
         // Assert
         assertThat(actualResult).isFalse
@@ -128,7 +128,7 @@ class ClaimConstraintTest {
         val value = "unit test purposes"
 
         // Act
-        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+        val actualResult = ClaimRegexConstraint(emptyList(), "").matchPattern(pattern, value)
 
         // Assert
         assertThat(actualResult).isTrue
@@ -141,7 +141,7 @@ class ClaimConstraintTest {
         val value = "purposes"
 
         // Act
-        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+        val actualResult = ClaimRegexConstraint(emptyList(), "").matchPattern(pattern, value)
 
         // Assert
         assertThat(actualResult).isFalse
@@ -154,7 +154,7 @@ class ClaimConstraintTest {
         val value = "test"
 
         // Act
-        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+        val actualResult = ClaimRegexConstraint(emptyList(), "").matchPattern(pattern, value)
 
         // Assert
         assertThat(actualResult).isTrue
@@ -167,7 +167,7 @@ class ClaimConstraintTest {
         val value = "test purposes"
 
         // Act
-        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+        val actualResult = ClaimRegexConstraint(emptyList(), "").matchPattern(pattern, value)
 
         // Assert
         assertThat(actualResult).isFalse
@@ -180,7 +180,7 @@ class ClaimConstraintTest {
         val value = "test"
 
         // Act
-        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+        val actualResult = ClaimRegexConstraint(emptyList(), "").matchPattern(pattern, value)
 
         // Assert
         assertThat(actualResult).isTrue
@@ -193,7 +193,7 @@ class ClaimConstraintTest {
         val value = "purposes"
 
         // Act
-        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+        val actualResult = ClaimRegexConstraint(emptyList(), "").matchPattern(pattern, value)
 
         // Assert
         assertThat(actualResult).isTrue
@@ -206,7 +206,7 @@ class ClaimConstraintTest {
         val value = "did:web:test1"
 
         // Act
-        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+        val actualResult = ClaimRegexConstraint(emptyList(), "").matchPattern(pattern, value)
 
         // Assert
         assertThat(actualResult).isTrue

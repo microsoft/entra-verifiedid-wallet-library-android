@@ -11,7 +11,7 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.json.Json
 import java.util.regex.Pattern
 
-class ClaimConstraint(private val path: List<String>, private val pattern: String): VerifiedIdConstraint {
+class ClaimRegexConstraint(private val path: List<String>, private val pattern: String): VerifiedIdConstraint {
     override fun doesMatch(verifiedId: VerifiedId): Boolean {
         if (verifiedId !is VerifiableCredential)
             return false

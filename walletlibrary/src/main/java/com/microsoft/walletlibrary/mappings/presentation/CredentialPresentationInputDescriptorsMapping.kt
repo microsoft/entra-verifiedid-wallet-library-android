@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Cred
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Fields
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
-import com.microsoft.walletlibrary.requests.requirements.constraints.ClaimConstraint
+import com.microsoft.walletlibrary.requests.requirements.constraints.ClaimRegexConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
@@ -38,7 +38,7 @@ internal fun CredentialPresentationInputDescriptor.toConstraint(): VerifiedIdCon
     val vcTypeConstraint = if (schemas.isNotEmpty()) toVcTypeConstraint(schemas.map { it.uri }) else null
     val claimConstraint = toClaimConstraint(constraints?.fields ?: emptyList())
     if (vcTypeConstraint != null) {
-        return if (claimConstraint is ClaimConstraint) GroupConstraint(listOf(vcTypeConstraint, claimConstraint), GroupConstraintOperator.ALL)
+        return if (claimConstraint is ClaimRegexConstraint) GroupConstraint(listOf(vcTypeConstraint, claimConstraint), GroupConstraintOperator.ALL)
         else {
             val groupConstraint: MutableList<VerifiedIdConstraint> = (claimConstraint as GroupConstraint).constraints.toMutableList()
             groupConstraint.add(vcTypeConstraint)
@@ -49,10 +49,10 @@ internal fun CredentialPresentationInputDescriptor.toConstraint(): VerifiedIdCon
 }
 
 internal fun toClaimConstraint(fields: List<Fields>): VerifiedIdConstraint {
-    if (fields.size == 1) return ClaimConstraint(fields.first().path, fields.first().filter?.pattern ?: "")
-    val claimConstraints = mutableListOf<ClaimConstraint>()
-    fields.forEach { claimConstraints.add(ClaimConstraint(it.path, it.filter?.pattern ?: "")) }
-    return GroupConstraint(claimConstraints, GroupConstraintOperator.ALL)
+    if (fields.size == 1) return ClaimRegexConstraint(fields.first().path, fields.first().filter?.pattern ?: "")
+    val claimRegexConstraints = mutableListOf<ClaimRegexConstraint>()
+    fields.forEach { claimRegexConstraints.add(ClaimRegexConstraint(it.path, it.filter?.pattern ?: "")) }
+    return GroupConstraint(claimRegexConstraints, GroupConstraintOperator.ALL)
 }
 
 internal fun toVcTypeConstraint(vcTypes: List<String>): VerifiedIdConstraint {
