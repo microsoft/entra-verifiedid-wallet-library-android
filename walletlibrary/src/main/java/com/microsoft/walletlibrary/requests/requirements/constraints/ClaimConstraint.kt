@@ -32,8 +32,7 @@ class ClaimConstraint(private val path: List<String>, private val pattern: Strin
 
     internal fun matchPattern(pattern: String, value: String): Boolean {
         val sanitizedPattern = sanitizePattern(pattern)
-        val matched = Pattern.compile(sanitizedPattern, Pattern.CASE_INSENSITIVE).matcher(value).find()
-        return matched
+        return Pattern.compile(sanitizedPattern, Pattern.CASE_INSENSITIVE).matcher(value).find()
     }
 
     private fun sanitizePattern(pattern: String): String {

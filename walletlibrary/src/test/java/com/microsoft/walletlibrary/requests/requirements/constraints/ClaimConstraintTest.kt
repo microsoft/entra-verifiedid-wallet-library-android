@@ -7,6 +7,7 @@ import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class ClaimConstraintTest {
@@ -25,7 +26,7 @@ class ClaimConstraintTest {
         val actualResult = claimConstraint.doesMatch(mockVerifiableCredential)
 
         // Assert
-        Assertions.assertThat(actualResult).isTrue
+        assertThat(actualResult).isTrue
     }
 
     @Test
@@ -43,7 +44,7 @@ class ClaimConstraintTest {
         val actualResult = claimConstraint.doesMatch(mockVerifiableCredential)
 
         // Assert
-        Assertions.assertThat(actualResult).isFalse
+        assertThat(actualResult).isFalse
     }
 
     @Test
@@ -60,7 +61,7 @@ class ClaimConstraintTest {
         val actualResult = claimConstraint.doesMatch(mockVerifiableCredential)
 
         // Assert
-        Assertions.assertThat(actualResult).isFalse
+        assertThat(actualResult).isFalse
     }
 
     @Test
@@ -92,5 +93,122 @@ class ClaimConstraintTest {
 
         // Act
         claimConstraint.matches(mockVerifiableCredential)
+    }
+
+    @Test
+    fun matchPattern_StartsWithMatching_ReturnsTrue() {
+        // Arrange
+        val pattern = """/^test/gi"""
+        val value = "test purposes"
+
+        // Act
+        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+
+        // Assert
+        assertThat(actualResult).isTrue
+    }
+
+    @Test
+    fun matchPattern_StartsWithNotMatching_ReturnsFalse() {
+        // Arrange
+        val pattern = """/^test/gi"""
+        val value = "unit test purposes"
+
+        // Act
+        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+
+        // Assert
+        assertThat(actualResult).isFalse
+    }
+
+    @Test
+    fun matchPattern_ContainsMatching_ReturnsTrue() {
+        // Arrange
+        val pattern = "/test/gi"
+        val value = "unit test purposes"
+
+        // Act
+        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+
+        // Assert
+        assertThat(actualResult).isTrue
+    }
+
+    @Test
+    fun matchPattern_ContainsNotMatching_ReturnsFalse() {
+        // Arrange
+        val pattern = "/test/gi"
+        val value = "purposes"
+
+        // Act
+        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+
+        // Assert
+        assertThat(actualResult).isFalse
+    }
+
+    @Test
+    fun matchPattern_ValuesMatching_ReturnsTrue() {
+        // Arrange
+        val pattern = """/^test${'$'}/gi"""
+        val value = "test"
+
+        // Act
+        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+
+        // Assert
+        assertThat(actualResult).isTrue
+    }
+
+    @Test
+    fun matchPattern_ValueNotMatching_ReturnsFalse() {
+        // Arrange
+        val pattern = """/^test${'$'}/gi"""
+        val value = "test purposes"
+
+        // Act
+        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+
+        // Assert
+        assertThat(actualResult).isFalse
+    }
+
+    @Test
+    fun matchPattern_EnumValuesMatchingFirst_ReturnsTrue() {
+        // Arrange
+        val pattern = """/^purpose${'$'}|^test${'$'}/gi"""
+        val value = "test"
+
+        // Act
+        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+
+        // Assert
+        assertThat(actualResult).isTrue
+    }
+
+    @Test
+    fun matchPattern_EnumValueNotMatchingLast_ReturnsTrue() {
+        // Arrange
+        val pattern = """/^purposes${'$'}|^test${'$'}/gi"""
+        val value = "purposes"
+
+        // Act
+        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+
+        // Assert
+        assertThat(actualResult).isTrue
+    }
+
+    @Test
+    fun matchPattern_EnumValueNotMatchingLast1_ReturnsTrue() {
+        // Arrange
+        val pattern = """did:web:test"""
+        val value = "did:web:test1"
+
+        // Act
+        val actualResult = ClaimConstraint(emptyList(), "").matchPattern(pattern, value)
+
+        // Assert
+        assertThat(actualResult).isTrue
     }
 }
