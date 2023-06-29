@@ -1,5 +1,8 @@
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
+import com.microsoft.walletlibrary.requests.requirements.constraints.ClaimRegexConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
@@ -28,7 +31,7 @@ class VerifiedIdRequirementTest {
             VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true,
-            "testing purposes"
+            "testing purposes",
         )
     }
 
@@ -47,7 +50,7 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun fulfillVerifiedIdRequirement_ConstraintDoesNotMatchVerifiedId_ReturnsFailure() {
+    fun fulfillVerifiedIdRequirement_VcTypeConstraintDoesNotMatchVerifiedId_ReturnsFailure() {
         // Arrange
         val expectedVerifiedId: VerifiableCredential = mockk()
         every { expectedVerifiedId.types } returns listOf("WrongVcType")
@@ -59,8 +62,9 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult).isInstanceOf(Result::class.java)
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
-        assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(
+            VerifiedIdTypeIsNotRequestedTypeException::class.java
+        )
     }
 
     @Test
@@ -71,8 +75,7 @@ class VerifiedIdRequirementTest {
         val expectedVcType2 = "TestVC2"
         val secondVcTypeConstraint = VcTypeConstraint(expectedVcType2)
         val groupConstraint = GroupConstraint(
-            listOf(firstVcTypeConstraint, secondVcTypeConstraint),
-            GroupConstraintOperator.ANY
+            listOf(firstVcTypeConstraint, secondVcTypeConstraint), GroupConstraintOperator.ANY
         )
         verifiedIdRequirement = VerifiedIdRequirement(
             "id",
@@ -92,8 +95,7 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult).isInstanceOf(Result::class.java)
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
-        assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(NoMatchForAnyConstraintsException::class.java)
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(NoMatchForAnyConstraintsException::class.java)
         (actualResult.exceptionOrNull() as NoMatchForAnyConstraintsException).exceptions.forEach {
             assertThat(it).isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
         }
@@ -107,8 +109,7 @@ class VerifiedIdRequirementTest {
         val expectedVcType2 = "TestVC2"
         val secondVcTypeConstraint = VcTypeConstraint(expectedVcType2)
         val groupConstraint = GroupConstraint(
-            listOf(firstVcTypeConstraint, secondVcTypeConstraint),
-            GroupConstraintOperator.ALL
+            listOf(firstVcTypeConstraint, secondVcTypeConstraint), GroupConstraintOperator.ALL
         )
         verifiedIdRequirement = VerifiedIdRequirement(
             "id",
@@ -129,15 +130,16 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult).isInstanceOf(Result::class.java)
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
-        assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(NoMatchForAtLeastOneConstraintException::class.java)
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(
+            NoMatchForAtLeastOneConstraintException::class.java
+        )
         (actualResult.exceptionOrNull() as NoMatchForAtLeastOneConstraintException).exceptions.forEach {
             assertThat(it).isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
         }
     }
 
     @Test
-    fun validateVerifiedIdRequirement_ConstraintDoesNotMatch_ReturnsFailure() {
+    fun validateVerifiedIdRequirement_VcTypeConstraintDoesNotMatch_ReturnsFailure() {
         // Arrange
         val expectedVerifiedId: VerifiableCredential = mockk()
         every { expectedVerifiedId.types } returns listOf("WrongVcType")
@@ -150,8 +152,9 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult).isInstanceOf(Result::class.java)
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
-        assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(
+            VerifiedIdTypeIsNotRequestedTypeException::class.java
+        )
     }
 
     @Test
@@ -163,8 +166,9 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult).isInstanceOf(Result::class.java)
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
-        assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(VerifiedIdRequirementNotFulfilledException::class.java)
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(
+            VerifiedIdRequirementNotFulfilledException::class.java
+        )
     }
 
     @Test
@@ -185,7 +189,7 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun getMatches_DoesNotMatchVerifiedId_ReturnsEmptyList() {
+    fun getMatches_VcTypeConstraintDoesNotMatchVerifiedId_ReturnsEmptyList() {
         // Arrange
         val mockVerifiedId1: VerifiableCredential = mockk()
         every { mockVerifiedId1.types } returns listOf("VcType1")
@@ -193,14 +197,15 @@ class VerifiedIdRequirementTest {
         every { mockVerifiedId2.types } returns listOf("VcType2")
 
         // Act
-        val actualResult = verifiedIdRequirement.getMatches(listOf(mockVerifiedId1, mockVerifiedId2))
+        val actualResult =
+            verifiedIdRequirement.getMatches(listOf(mockVerifiedId1, mockVerifiedId2))
 
         // Assert
         assertThat(actualResult.size).isEqualTo(0)
     }
 
     @Test
-    fun getMatches_OneVerifiedIdMatches_ReturnsList() {
+    fun getMatches_OneVerifiedIdMatchesVcTypeConstraint_ReturnsListWithMatchingVc() {
         // Arrange
         val mockVerifiedId1: VerifiableCredential = mockk()
         every { mockVerifiedId1.types } returns listOf(expectedVcType)
@@ -208,7 +213,8 @@ class VerifiedIdRequirementTest {
         every { mockVerifiedId2.types } returns listOf("VcType2")
 
         // Act
-        val actualResult = verifiedIdRequirement.getMatches(listOf(mockVerifiedId1, mockVerifiedId2))
+        val actualResult =
+            verifiedIdRequirement.getMatches(listOf(mockVerifiedId1, mockVerifiedId2))
 
         // Assert
         assertThat(actualResult.size).isEqualTo(1)
@@ -216,7 +222,7 @@ class VerifiedIdRequirementTest {
     }
 
     @Test
-    fun getMatches_MultipleVerifiedIdsMatch_ReturnsList() {
+    fun getMatches_MultipleVerifiedIdsMatchVcTypeConstraint_ReturnsListOfMatchingVcs() {
         // Arrange
         val mockVerifiedId1: VerifiableCredential = mockk()
         every { mockVerifiedId1.types } returns listOf(expectedVcType)
@@ -224,11 +230,316 @@ class VerifiedIdRequirementTest {
         every { mockVerifiedId2.types } returns listOf(expectedVcType)
 
         // Act
-        val actualResult = verifiedIdRequirement.getMatches(listOf(mockVerifiedId1, mockVerifiedId2))
+        val actualResult =
+            verifiedIdRequirement.getMatches(listOf(mockVerifiedId1, mockVerifiedId2))
 
         // Assert
         assertThat(actualResult.size).isEqualTo(2)
         assertThat(actualResult.contains(mockVerifiedId1)).isTrue
         assertThat(actualResult.contains(mockVerifiedId2)).isTrue
+    }
+
+    @Test
+    fun getMatches_ClaimConstraintDoesNotMatchVerifiedId_ReturnsEmptyList() {
+        // Arrange
+        val expectedVcTypes = listOf("VerifiableCredential", "BusinessCard")
+        val mockVerifiedId: VerifiableCredential = mockk()
+        val verifiableCredentialContent = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                expectedVcTypes,
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ), "did:ion:testsubject", "TestIssuer", 1686870564, 1689462564
+        )
+        every { mockVerifiedId.raw.contents } returns verifiableCredentialContent
+        verifiedIdRequirement = VerifiedIdRequirement(
+            "id",
+            expectedVcTypes,
+            ClaimRegexConstraint(listOf("$.iss"), "WrongIssuer"),
+            encrypted = false,
+            required = true,
+            "testing purposes",
+        )
+
+        // Act
+        val actualResult = verifiedIdRequirement.getMatches(listOf(mockVerifiedId))
+
+        // Assert
+        assertThat(actualResult.size).isEqualTo(0)
+    }
+
+    @Test
+    fun getMatches_OneVerifiedIdMatchesClaimConstraint_ReturnsListWithMatchingVc() {
+        // Arrange
+        val expectedVcTypes = listOf("VerifiableCredential", "BusinessCard")
+        val mockVerifiedId: VerifiableCredential = mockk()
+        val verifiableCredentialContent = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                expectedVcTypes,
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ), "did:ion:testsubject", "TestIssuer", 1686870564, 1689462564
+        )
+        every { mockVerifiedId.raw.contents } returns verifiableCredentialContent
+        verifiedIdRequirement = VerifiedIdRequirement(
+            "id",
+            expectedVcTypes,
+            ClaimRegexConstraint(listOf("$.iss"), "TestIssuer"),
+            encrypted = false,
+            required = true,
+            "testing purposes",
+        )
+
+        // Act
+        val actualResult = verifiedIdRequirement.getMatches(listOf(mockVerifiedId))
+
+        // Assert
+        assertThat(actualResult.size).isEqualTo(1)
+        assertThat(actualResult.first()).isEqualTo(mockVerifiedId)
+    }
+
+    @Test
+    fun getMatches_MultipleVerifiedIdsMatchClaimConstraint_ReturnsListOfMatchingVcs() {
+        // Arrange
+        val expectedVcTypes = listOf("VerifiableCredential", "BusinessCard")
+        val mockVerifiedId1: VerifiableCredential = mockk()
+        val verifiableCredentialContent1 = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                expectedVcTypes,
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ), "did:ion:testsubject", "TestIssuer", 1686870564, 1689462564
+        )
+        every { mockVerifiedId1.raw.contents } returns verifiableCredentialContent1
+        val mockVerifiedId2: VerifiableCredential = mockk()
+        val verifiableCredentialContent2 = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                expectedVcTypes,
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ), "did:ion:testsubject", "TestIssuer", 1686870564, 1689462564
+        )
+        every { mockVerifiedId2.raw.contents } returns verifiableCredentialContent2
+        verifiedIdRequirement = VerifiedIdRequirement(
+            "id",
+            expectedVcTypes,
+            ClaimRegexConstraint(listOf("$.iss"), "TestIssuer"),
+            encrypted = false,
+            required = true,
+            "testing purposes",
+        )
+
+        // Act
+        val actualResult =
+            verifiedIdRequirement.getMatches(listOf(mockVerifiedId1, mockVerifiedId2))
+
+        // Assert
+        assertThat(actualResult.size).isEqualTo(2)
+        assertThat(actualResult.contains(mockVerifiedId1)).isTrue
+        assertThat(actualResult.contains(mockVerifiedId2)).isTrue
+    }
+
+    @Test
+    fun getMatches_MatchingVcTypeConstraintAndNonMatchingClaimConstraint_ReturnsEmptyList() {
+        // Arrange
+        val expectedVcTypes = listOf("VerifiableCredential", "BusinessCard")
+        val mockVerifiedId: VerifiableCredential = mockk()
+        val verifiableCredentialContent = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                expectedVcTypes,
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ), "did:ion:testsubject", "TestIssuer", 1686870564, 1689462564
+        )
+        every { mockVerifiedId.raw.contents } returns verifiableCredentialContent
+        every { mockVerifiedId.types } returns expectedVcTypes
+        verifiedIdRequirement = VerifiedIdRequirement(
+            "id",
+            expectedVcTypes,
+            GroupConstraint(
+                listOf(
+                    ClaimRegexConstraint(listOf("$.iss"), "WrongIssuer"),
+                    VcTypeConstraint("BusinessCard")
+                ), GroupConstraintOperator.ALL
+            ),
+            encrypted = false,
+            required = true,
+            "testing purposes",
+        )
+
+        // Act
+        val actualResult = verifiedIdRequirement.getMatches(listOf(mockVerifiedId))
+
+        // Assert
+        assertThat(actualResult.size).isEqualTo(0)
+    }
+
+    @Test
+    fun getMatches_MatchingClaimConstraintAndNonMatchingVcTypeConstraint_ReturnsEmptyList() {
+        // Arrange
+        val expectedVcTypes = listOf("VerifiableCredential", "BusinessCard")
+        val mockVerifiedId: VerifiableCredential = mockk()
+        val verifiableCredentialContent = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                expectedVcTypes,
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ), "did:ion:testsubject", "TestIssuer", 1686870564, 1689462564
+        )
+        every { mockVerifiedId.raw.contents } returns verifiableCredentialContent
+        every { mockVerifiedId.types } returns expectedVcTypes
+        verifiedIdRequirement = VerifiedIdRequirement(
+            "id",
+            expectedVcTypes,
+            GroupConstraint(
+                listOf(
+                    ClaimRegexConstraint(listOf("$.iss"), "TestIssuer"),
+                    VcTypeConstraint("TestCredential")
+                ), GroupConstraintOperator.ALL
+            ),
+            encrypted = false,
+            required = true,
+            "testing purposes",
+        )
+
+        // Act
+        val actualResult = verifiedIdRequirement.getMatches(listOf(mockVerifiedId))
+
+        // Assert
+        assertThat(actualResult.size).isEqualTo(0)
+    }
+
+    @Test
+    fun getMatches_MatchingClaimConstraintAndMatchingVcTypeConstraint_ReturnsMatchingVc() {
+        // Arrange
+        val expectedVcTypes = listOf("VerifiableCredential", "BusinessCard")
+        val mockVerifiedId: VerifiableCredential = mockk()
+        val verifiableCredentialContent = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                expectedVcTypes,
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ), "did:ion:testsubject", "TestIssuer", 1686870564, 1689462564
+        )
+        every { mockVerifiedId.raw.contents } returns verifiableCredentialContent
+        every { mockVerifiedId.types } returns expectedVcTypes
+        verifiedIdRequirement = VerifiedIdRequirement(
+            "id",
+            expectedVcTypes,
+            GroupConstraint(
+                listOf(
+                    ClaimRegexConstraint(listOf("$.iss"), "TestIssuer"),
+                    VcTypeConstraint("BusinessCard")
+                ), GroupConstraintOperator.ALL
+            ),
+            encrypted = false,
+            required = true,
+            "testing purposes",
+        )
+
+        // Act
+        val actualResult = verifiedIdRequirement.getMatches(listOf(mockVerifiedId))
+
+        // Assert
+        assertThat(actualResult.size).isEqualTo(1)
+    }
+
+    @Test
+    fun getMatches_MatchingMultipleClaimConstraintsAndMatchingVcTypeConstraint_ReturnsMatchingVc() {
+        // Arrange
+        val expectedVcTypes = listOf("VerifiableCredential", "BusinessCard")
+        val mockVerifiedId: VerifiableCredential = mockk()
+        val verifiableCredentialContent = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                expectedVcTypes,
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ), "did:ion:testsubject", "TestIssuer", 1686870564, 1689462564
+        )
+        every { mockVerifiedId.raw.contents } returns verifiableCredentialContent
+        every { mockVerifiedId.types } returns expectedVcTypes
+        verifiedIdRequirement = VerifiedIdRequirement(
+            "id",
+            expectedVcTypes,
+            GroupConstraint(
+                listOf(
+                    GroupConstraint(
+                        listOf(
+                            ClaimRegexConstraint(listOf("$.iss"), "TestIssuer"),
+                            ClaimRegexConstraint(listOf("$.vc.credentialSubject.name"), "/n/gi")
+                        ), GroupConstraintOperator.ALL
+                    ),
+                    VcTypeConstraint("BusinessCard")
+                ), GroupConstraintOperator.ALL
+            ),
+            encrypted = false,
+            required = true,
+            "testing purposes",
+        )
+
+        // Act
+        val actualResult = verifiedIdRequirement.getMatches(listOf(mockVerifiedId))
+
+        // Assert
+        assertThat(actualResult.size).isEqualTo(1)
+    }
+
+    @Test
+    fun getMatches_MatchingClaimConstraintAndMatchingMultipleVcTypeConstraints_ReturnsMatchingVc() {
+        // Arrange
+        val expectedVcTypes = listOf("VerifiableCredential", "BusinessCard")
+        val mockVerifiedId: VerifiableCredential = mockk()
+        val verifiableCredentialContent = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                expectedVcTypes,
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ), "did:ion:testsubject", "TestIssuer", 1686870564, 1689462564
+        )
+        every { mockVerifiedId.raw.contents } returns verifiableCredentialContent
+        every { mockVerifiedId.types } returns expectedVcTypes
+        verifiedIdRequirement = VerifiedIdRequirement(
+            "id",
+            expectedVcTypes,
+            GroupConstraint(
+                listOf(
+                    ClaimRegexConstraint(listOf("$.vc.credentialSubject.name"), "/n/gi"),
+                    GroupConstraint(
+                        listOf(
+                            VcTypeConstraint("BusinessCard"),
+                            VcTypeConstraint("VerifiableCredential")
+                        ),
+                        GroupConstraintOperator.ANY
+                    )
+                ), GroupConstraintOperator.ALL
+            ),
+            encrypted = false,
+            required = true,
+            "testing purposes",
+        )
+
+        // Act
+        val actualResult = verifiedIdRequirement.getMatches(listOf(mockVerifiedId))
+
+        // Assert
+        assertThat(actualResult.size).isEqualTo(1)
     }
 }

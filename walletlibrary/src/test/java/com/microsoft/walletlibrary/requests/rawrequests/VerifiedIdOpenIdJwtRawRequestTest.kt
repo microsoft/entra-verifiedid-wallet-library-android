@@ -74,6 +74,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
             every { inputDescriptor.id } returns expectedInputDescriptorId
             every { inputDescriptor.purpose } returns expectedPurpose
             every { inputDescriptor.issuanceMetadataList } returns emptyList()
+            every { inputDescriptor.constraints } returns null
             setupSchema(inputDescriptor, isSchemaEmpty)
         }
     }

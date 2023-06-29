@@ -34,28 +34,42 @@ internal fun CredentialPresentationInputDescriptor.toVerifiedIdRequirement(): Ve
     )
 }
 
-internal fun CredentialPresentationInputDescriptor.toConstraint(): VerifiedIdConstraint {
-    val vcTypeConstraint = if (schemas.isNotEmpty()) toVcTypeConstraint(schemas.map { it.uri }) else null
-    val claimConstraint = toClaimConstraint(constraints?.fields ?: emptyList())
+internal fun CredentialPresentationInputDescriptor.toConstraint(): VerifiedIdConstraint? {
+    val vcTypeConstraint =
+        if (schemas.isNotEmpty()) toVcTypeConstraint(schemas.map { it.uri }) else null
+    val claimConstraint = constraints?.fields?.let { toClaimRegexConstraint(it) }
+    if (claimConstraint == null && vcTypeConstraint == null) return null
     if (vcTypeConstraint != null) {
-        return if (claimConstraint is ClaimRegexConstraint) GroupConstraint(listOf(vcTypeConstraint, claimConstraint), GroupConstraintOperator.ALL)
-        else {
-            val groupConstraint: MutableList<VerifiedIdConstraint> = (claimConstraint as GroupConstraint).constraints.toMutableList()
-            groupConstraint.add(vcTypeConstraint)
-            GroupConstraint(groupConstraint, GroupConstraintOperator.ALL)
-        }
+        claimConstraint?.let {
+            return GroupConstraint(
+                listOf(vcTypeConstraint, claimConstraint),
+                GroupConstraintOperator.ALL
+            )
+        } ?: return vcTypeConstraint
     }
     return claimConstraint
 }
 
-internal fun toClaimConstraint(fields: List<Fields>): VerifiedIdConstraint {
-    if (fields.size == 1) return ClaimRegexConstraint(fields.first().path, fields.first().filter?.pattern ?: "")
+internal fun toClaimRegexConstraint(fields: List<Fields>): VerifiedIdConstraint? {
+    if (fields.isEmpty()) return null
+    if (fields.size == 1) return ClaimRegexConstraint(
+        fields.first().path,
+        fields.first().filter?.pattern ?: ""
+    )
     val claimRegexConstraints = mutableListOf<ClaimRegexConstraint>()
-    fields.forEach { claimRegexConstraints.add(ClaimRegexConstraint(it.path, it.filter?.pattern ?: "")) }
+    fields.forEach {
+        claimRegexConstraints.add(
+            ClaimRegexConstraint(
+                it.path,
+                it.filter?.pattern ?: ""
+            )
+        )
+    }
     return GroupConstraint(claimRegexConstraints, GroupConstraintOperator.ALL)
 }
 
-internal fun toVcTypeConstraint(vcTypes: List<String>): VerifiedIdConstraint {
+internal fun toVcTypeConstraint(vcTypes: List<String>): VerifiedIdConstraint? {
+    if (vcTypes.isEmpty()) return null
     if (vcTypes.size == 1) return VcTypeConstraint(vcTypes.first())
     val vcTypeConstraints = mutableListOf<VcTypeConstraint>()
     vcTypes.forEach { vcTypeConstraints.add(VcTypeConstraint(it)) }

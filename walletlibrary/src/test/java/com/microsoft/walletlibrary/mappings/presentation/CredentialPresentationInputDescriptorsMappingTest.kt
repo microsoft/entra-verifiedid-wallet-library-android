@@ -1,7 +1,11 @@
 package com.microsoft.walletlibrary.mappings.presentation
 
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.Constraints
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.Fields
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.Filter
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
+import com.microsoft.walletlibrary.requests.requirements.constraints.ClaimRegexConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
@@ -146,9 +150,309 @@ class CredentialPresentationInputDescriptorsMappingTest {
         assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
         assertThat((actualConstraint as GroupConstraint).constraints.size).isEqualTo(2)
         assertThat(actualConstraint.constraintOperator).isEqualTo(GroupConstraintOperator.ANY)
-        assertThat(actualConstraint.constraints.filterIsInstance<VcTypeConstraint>().size).isEqualTo(2)
+        assertThat(actualConstraint.constraints.filterIsInstance<VcTypeConstraint>().size).isEqualTo(
+            2
+        )
         assertThat(
             actualConstraint.constraints.filterIsInstance<VcTypeConstraint>()
                 .map { it.vcType }).containsAll(expectedVcTypes)
+    }
+
+    @Test
+    fun constraintMapping_WithEmptySchemaUri_ReturnsNull() {
+        // Act
+        val actualConstraint = toVcTypeConstraint(emptyList())
+
+        // Assert
+        assertThat(actualConstraint).isNull()
+    }
+
+    @Test
+    fun constraintMapping_WithEmptyFields_ReturnsNull() {
+        // Act
+        val actualConstraint = toClaimRegexConstraint(emptyList())
+
+        // Assert
+        assertThat(actualConstraint).isNull()
+    }
+
+    @Test
+    fun constraintMapping_WithSingleValidField_ReturnsClaimConstraint() {
+        // Arrange
+        val expectedPattern = "did:ion:test"
+        val filter = Filter("string", expectedPattern)
+        val field = Fields(listOf(".iss"))
+        field.filter = filter
+        // Act
+        val actualConstraint = toClaimRegexConstraint(listOf(field))
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(ClaimRegexConstraint::class.java)
+        assertThat((actualConstraint as ClaimRegexConstraint).pattern).isEqualTo(expectedPattern)
+    }
+
+    @Test
+    fun constraintMapping_WithMultipleValidFields_ReturnsGroupConstraint() {
+        // Arrange
+        val expectedPatterns = arrayListOf("did:ion:test1", "did:ion:test2")
+        val filter1 = Filter("string", expectedPatterns[0])
+        val field1 = Fields(listOf(".iss"))
+        field1.filter = filter1
+
+        val filter2 = Filter("string", expectedPatterns[1])
+        val field2 = Fields(listOf(".iss"))
+        field2.filter = filter2
+
+        // Act
+        val actualConstraint = toClaimRegexConstraint(listOf(field1, field2))
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
+        assertThat((actualConstraint as GroupConstraint).constraints.size).isEqualTo(2)
+        assertThat(actualConstraint.constraintOperator).isEqualTo(GroupConstraintOperator.ALL)
+        assertThat(actualConstraint.constraints.filterIsInstance<ClaimRegexConstraint>().size).isEqualTo(
+            2
+        )
+        assertThat(
+            actualConstraint.constraints.filterIsInstance<ClaimRegexConstraint>()
+                .map { it.pattern }).containsAll(expectedPatterns)
+    }
+
+    @Test
+    fun constraintMapping_WithNoConstraints_ReturnsNull() {
+        // Arrange
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            emptyList(),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList()
+        )
+
+        // Act
+        val actualConstraint = credentialPresentationInputDescriptor.toConstraint()
+
+        // Assert
+        assertThat(actualConstraint).isNull()
+    }
+
+    @Test
+    fun constraintMapping_WithSingleVcTypeConstraintAndNoClaimConstraint_ReturnsVcTypeConstraint() {
+        // Arrange
+        val expectedSchema = "schema1"
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            listOf(Schema(expectedSchema)),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList()
+        )
+
+        // Act
+        val actualConstraints = credentialPresentationInputDescriptor.toConstraint()
+
+        // Assert
+        assertThat(actualConstraints).isInstanceOf(VcTypeConstraint::class.java)
+        assertThat((actualConstraints as VcTypeConstraint).vcType).isEqualTo(expectedSchema)
+    }
+
+    @Test
+    fun constraintMapping_WithSingleClaimConstraintAndNoVcTypeConstraint_ReturnsClaimConstraint() {
+        // Arrange
+        val expectedPath = ".iss"
+        val expectedConstraint = Constraints(listOf(Fields(listOf(expectedPath))))
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            emptyList(),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList(),
+            expectedConstraint
+        )
+
+        // Act
+        val actualConstraint = credentialPresentationInputDescriptor.toConstraint()
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(ClaimRegexConstraint::class.java)
+        assertThat((actualConstraint as ClaimRegexConstraint).path).contains(expectedPath)
+    }
+
+    @Test
+    fun constraintMapping_WithMultipleClaimConstraintsAndNoVcTypeConstraint_ReturnsGroupConstraint() {
+        // Arrange
+        val expectedPath = ".iss"
+        val expectedConstraint =
+            Constraints(listOf(Fields(listOf(expectedPath)), Fields(listOf(expectedPath))))
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            emptyList(),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList(),
+            expectedConstraint
+        )
+
+        // Act
+        val actualConstraint = credentialPresentationInputDescriptor.toConstraint()
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
+        assertThat((actualConstraint as GroupConstraint).constraints.size).isEqualTo(2)
+        assertThat(actualConstraint.constraintOperator).isEqualTo(GroupConstraintOperator.ALL)
+        assertThat(actualConstraint.constraints.filterIsInstance<ClaimRegexConstraint>().size).isEqualTo(
+            2
+        )
+        assertThat(
+            actualConstraint.constraints.filterIsInstance<ClaimRegexConstraint>()
+                .map { it.path }).contains(listOf(expectedPath))
+    }
+
+    @Test
+    fun constraintMapping_WithSingleClaimConstraintAndSingleVcTypeConstraint_ReturnsGroupConstraintWithAllOperator() {
+        // Arrange
+        val expectedPath = ".iss"
+        val expectedSchema = "schema1"
+        val expectedConstraint = Constraints(listOf(Fields(listOf(expectedPath))))
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            listOf(Schema(expectedSchema)),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList(),
+            expectedConstraint
+        )
+
+        // Act
+        val actualConstraint = credentialPresentationInputDescriptor.toConstraint()
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
+        assertThat((actualConstraint as GroupConstraint).constraintOperator).isEqualTo(
+            GroupConstraintOperator.ALL
+        )
+        assertThat(actualConstraint.constraints.size).isEqualTo(2)
+        assertThat(actualConstraint.constraints.filterIsInstance<GroupConstraint>().size).isEqualTo(
+            0
+        )
+    }
+
+    @Test
+    fun constraintMapping_WithMultipleClaimConstraintsAndSingleVcTypeConstraint_ReturnsNestedGroupConstraintWithAllOperator() {
+        // Arrange
+        val expectedPath = ".iss"
+        val expectedSchema = "schema1"
+        val expectedConstraint =
+            Constraints(listOf(Fields(listOf(expectedPath)), Fields(listOf(expectedPath))))
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            listOf(Schema(expectedSchema)),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList(),
+            expectedConstraint
+        )
+
+        // Act
+        val actualConstraint = credentialPresentationInputDescriptor.toConstraint()
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
+        assertThat((actualConstraint as GroupConstraint).constraintOperator).isEqualTo(
+            GroupConstraintOperator.ALL
+        )
+        assertThat(actualConstraint.constraints.size).isEqualTo(2)
+        assertThat(actualConstraint.constraints.filterIsInstance<GroupConstraint>().size).isEqualTo(
+            1
+        )
+        assertThat(
+            actualConstraint.constraints.filterIsInstance<GroupConstraint>()
+                .first().constraintOperator
+        ).isEqualTo(
+            GroupConstraintOperator.ALL
+        )
+        assertThat(actualConstraint.constraints.filterIsInstance<VcTypeConstraint>().size).isEqualTo(
+            1
+        )
+    }
+
+    @Test
+    fun constraintMapping_WithSingleClaimConstraintAndMultipleVcTypeConstraints_ReturnsNestedGroupConstraintWithAnyOperator() {
+        // Arrange
+        val expectedPath = ".iss"
+        val expectedSchema = "schema1"
+        val expectedConstraint = Constraints(listOf(Fields(listOf(expectedPath))))
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            listOf(Schema(expectedSchema), Schema(expectedSchema)),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList(),
+            expectedConstraint
+        )
+
+        // Act
+        val actualConstraint = credentialPresentationInputDescriptor.toConstraint()
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
+        assertThat((actualConstraint as GroupConstraint).constraintOperator).isEqualTo(
+            GroupConstraintOperator.ALL
+        )
+        assertThat(actualConstraint.constraints.size).isEqualTo(2)
+        assertThat(actualConstraint.constraints.filterIsInstance<GroupConstraint>().size).isEqualTo(
+            1
+        )
+        assertThat(
+            actualConstraint.constraints.filterIsInstance<GroupConstraint>()
+                .first().constraintOperator
+        ).isEqualTo(
+            GroupConstraintOperator.ANY
+        )
+        assertThat(actualConstraint.constraints.filterIsInstance<ClaimRegexConstraint>().size).isEqualTo(
+            1
+        )
+    }
+
+    @Test
+    fun constraintMapping_WithMultipleClaimConstraintsAndMultipleVcTypeConstraints_ReturnsNestedGroupConstraintsWithAllAndAnyOperator() {
+        // Arrange
+        val expectedPath = ".iss"
+        val expectedSchema = "schema1"
+        val expectedConstraint =
+            Constraints(listOf(Fields(listOf(expectedPath)), Fields(listOf(expectedPath))))
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            listOf(Schema(expectedSchema), Schema(expectedSchema)),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList(),
+            expectedConstraint
+        )
+
+        // Act
+        val actualConstraint = credentialPresentationInputDescriptor.toConstraint()
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
+        assertThat((actualConstraint as GroupConstraint).constraintOperator).isEqualTo(
+            GroupConstraintOperator.ALL
+        )
+        assertThat(actualConstraint.constraints.size).isEqualTo(2)
+        assertThat(actualConstraint.constraints.filterIsInstance<GroupConstraint>().size).isEqualTo(
+            2
+        )
+        assertThat(
+            actualConstraint.constraints.filterIsInstance<GroupConstraint>()
+                .first().constraintOperator
+        ).isEqualTo(
+            GroupConstraintOperator.ANY
+        )
+        assertThat(
+            actualConstraint.constraints.filterIsInstance<GroupConstraint>()
+                .last().constraintOperator
+        ).isEqualTo(
+            GroupConstraintOperator.ALL
+        )
     }
 }

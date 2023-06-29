@@ -30,6 +30,7 @@ class PresentationDefinitionMappingTest {
             every { inputDescriptor.id } returns ""
             every { inputDescriptor.purpose } returns ""
             every { inputDescriptor.issuanceMetadataList } returns emptyList()
+            every { inputDescriptor.constraints } returns null
         }
         presentationDefinition = PresentationDefinition(expectedId, expectedInputDescriptors)
     }
@@ -48,8 +49,10 @@ class PresentationDefinitionMappingTest {
     fun presentationDefinitionMapping_WithMultipleInputDescriptors_ReturnsGroupRequirement() {
         // Arrange
         val expectedInputDescriptor1 = mockk<CredentialPresentationInputDescriptor>()
+        every { expectedInputDescriptor1.constraints } returns null
         val expectedInputDescriptor2 = mockk<CredentialPresentationInputDescriptor>()
         setupInput(listOf(expectedInputDescriptor1, expectedInputDescriptor2))
+        every { expectedInputDescriptor2.constraints } returns null
 
         // Act
         val actualRequirement = presentationDefinition.toRequirement()
