@@ -10,6 +10,9 @@ import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
+import com.microsoft.walletlibrary.util.UnspecifiedVerifiedIdException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
+import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.decodeFromString
@@ -33,25 +36,25 @@ class VerifiedIdClient(
             val requestResolver = requestResolverFactory.getResolver(verifiedIdRequestInput)
             val rawRequest = requestResolver.resolve(verifiedIdRequestInput)
             val requestHandler = requestHandlerFactory.getHandler(requestResolver)
-            Result.success(requestHandler.handleRequest(rawRequest))
+            VerifiedIdResult.success(requestHandler.handleRequest(rawRequest))
         } catch (exception: Exception) {
-            Result.failure(exception)
+            UnspecifiedVerifiedIdException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
         }
     }
 
-    fun encode(verifiedId: VerifiedId): Result<String> {
+    fun encode(verifiedId: VerifiedId): VerifiedIdResult<String> {
         return try {
-            Result.success(serializer.encodeToString(verifiedId))
+            VerifiedIdResult.success(serializer.encodeToString(verifiedId))
         } catch (exception: Exception) {
-            Result.failure(exception)
+            UnspecifiedVerifiedIdException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
         }
     }
 
     fun decodeVerifiedId(encodedVerifiedId: String): Result<VerifiedId> {
         return try {
-            Result.success(serializer.decodeFromString(encodedVerifiedId))
+            VerifiedIdResult.success(serializer.decodeFromString(encodedVerifiedId))
         } catch (exception: Exception) {
-            Result.failure(exception)
+            UnspecifiedVerifiedIdException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
         }
     }
 }
