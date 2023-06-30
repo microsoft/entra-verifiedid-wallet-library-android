@@ -5,5 +5,3 @@ enum class VerifiedIdExceptions(val value: String) {
     REQUIREMENT_NOT_MET_EXCEPTION("requirement_not_met"),
     UNSPECIFIED_EXCEPTION("unspecified_error")
 }
-
-typealias VerifiedIdResult<T> = Result<T>
