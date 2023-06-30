@@ -11,13 +11,21 @@
 The Microsoft Entra Wallet Library for Android gives your app the ability to begin using the Microsoft Entra Verified Id platform by supporting the issuance and presentation of Verified Ids in accordance with OpenID Connect, Presentation Exchange, Verifiable Credentials, and more up and coming industry standards.
 
 ---
+## Requirements
+
+The library runs on a minimum sdk version 26. The app consuming the library should have minsdk version set to at least 26.
+
 ## Installation
 
 Add to your app's build.gradle to add Wallet Library as a dependency:
 ```kotlin
 dependencies {
-    implementation 'com.microsoft.entra.verifiedid:walletlibrary:0.0.1'
+    implementation 'com.microsoft.entra.verifiedid:walletlibrary:1.0.0'
 }
+```
+Add to repositories section of your app's settings.gradle.
+```kotlin
+maven { url "https://jitpack.io" }
 ```
 
 ## Quick Start
@@ -47,7 +55,7 @@ At the time of publish, we support the following requirements on a request:
 | Requirement                  	| Description 	| Supported on Request 	|
 |------------------------------	|-------------	|------------------------------	|
 | GroupRequirement             	| A verifier/issuer could request multiple requirements. If more than one requirement is requested, a GroupRequirement contains a list of the requirements.        	| Issuance/Presentation        	|
-| VerifiedIdRequirement        	| A verifier/issuer can request a VerifiedId. See below for helper methods to fulfill the requirement.       	| Issuance/Presentation        	|
+| VerifiedIdRequirement        	| A verifier/issuer can request a VerifiedId. See below for helper methods to fulfill the requirement.       	| Presentation (Issuance coming end of June)        	|
 | SelfAttestedClaimRequirement 	| An issuer might require a self-attested claim that is simply a string value.        	| Issuance                     	|
 | PinRequirement               	| An issuer might require a pin from user.         	| Issuance                     	|
 | AccessTokenRequirement       	| An issuer might request an Access Token. An Access Token must be retrieved using an external library.        	| Issuance                     	|

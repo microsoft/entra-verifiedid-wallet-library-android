@@ -70,5 +70,3 @@ class VerifiedIdRequirementMissingIdException(message: String = "", cause: Throw
 class VerifiedIdRequirementIdConflictException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
 
 class IdInVerifiedIdRequirementDoesNotMatchRequestException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
-
-class PinRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)

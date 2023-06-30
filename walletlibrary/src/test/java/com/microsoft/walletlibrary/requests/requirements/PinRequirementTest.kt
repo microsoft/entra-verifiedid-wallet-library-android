@@ -1,6 +1,7 @@
 package com.microsoft.walletlibrary.requests.requirements
 
-import com.microsoft.walletlibrary.util.PinRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
+import com.microsoft.walletlibrary.util.VerifiedIdResult
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -38,10 +39,13 @@ class PinRequirementTest {
         val actualResult = pinRequirement.validate()
 
         // Assert
-        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
-        assertThat(actualResult.exceptionOrNull()).isInstanceOf(PinRequirementNotFulfilledException::class.java)
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(RequirementNotMetException::class.java)
+        assertThat((actualResult.exceptionOrNull() as RequirementNotMetException).code).isEqualTo("requirement_not_met")
+        assertThat(actualResult.exceptionOrNull() as RequirementNotMetException).hasMessage("Pin has not been set.")
+        assertThat((actualResult.exceptionOrNull() as RequirementNotMetException).correlationId).isNull()
     }
 
     @Test
@@ -54,7 +58,7 @@ class PinRequirementTest {
         val actualResult = pinRequirement.validate()
 
         // Assert
-        assertThat(actualResult).isInstanceOf(Result::class.java)
+        assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
         assertThat(actualResult.isSuccess).isTrue
         assertThat(pinRequirement.pin).isNotNull
         assertThat(pinRequirement.pin).isEqualTo(expectedPin)
