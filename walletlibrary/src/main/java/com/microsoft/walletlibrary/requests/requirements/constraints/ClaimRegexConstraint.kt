@@ -11,18 +11,21 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.json.Json
 import java.util.regex.Pattern
 
-class ClaimRegexConstraint(internal val path: List<String>, internal val pattern: String): VerifiedIdConstraint {
+class ClaimRegexConstraint(internal val path: List<String>, internal val pattern: String) :
+    VerifiedIdConstraint {
     override fun doesMatch(verifiedId: VerifiedId): Boolean {
         if (verifiedId !is VerifiableCredential)
             return false
-        val vccJsonString = Json.encodeToString(VerifiableCredentialContent.serializer(), verifiedId.raw.contents)
+        val vccJsonString =
+            Json.encodeToString(VerifiableCredentialContent.serializer(), verifiedId.raw.contents)
         return path.any { matchAnyPathInFields(pattern, it, vccJsonString) }
     }
 
     private fun matchAnyPathInFields(pattern: String, path: String, vccJson: String): Boolean {
         if (pattern.isEmpty())
             SdkLog.d("Empty pattern in filter.")
-        val configuration = Configuration.defaultConfiguration().addOptions(Option.SUPPRESS_EXCEPTIONS)
+        val configuration =
+            Configuration.defaultConfiguration().addOptions(Option.SUPPRESS_EXCEPTIONS)
         val constraintValue: String? = JsonPath.using(configuration).parse(vccJson).read(path)
         return if (constraintValue != null) {
             matchPattern(pattern, constraintValue)
@@ -36,7 +39,11 @@ class ClaimRegexConstraint(internal val path: List<String>, internal val pattern
     }
 
     private fun sanitizePattern(pattern: String): String {
-        return pattern.split("/").firstOrNull { it.isNotEmpty() } ?: ""
+        return if (pattern.isNotEmpty() && pattern.length > 1) {
+            val escapeRegex = ".*(/[gi]*)"
+            val flagsToEscape = Regex(escapeRegex).find(pattern)?.groups?.last()?.value ?: ""
+            pattern.substring(1, pattern.length - flagsToEscape.length)
+        } else ""
     }
 
     override fun matches(verifiedId: VerifiedId) {

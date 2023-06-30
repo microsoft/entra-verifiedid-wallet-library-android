@@ -19,7 +19,20 @@ class ClaimRegexConstraintTest {
         val claimRegexConstraint =
             ClaimRegexConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
         val mockVerifiableCredential: VerifiableCredential = mockk()
-        val verifiableCredentialContent = VerifiableCredentialContent("urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(listOf("https://www.w3.org/2018/credentials/v1"), listOf("VerifiableCredential", "BusinessCard"), mapOf("name" to "n", "company" to "m"), null, null), "did:ion:testsubject", "did:web:test", 1686870564, 1689462564)
+        val verifiableCredentialContent = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36",
+            VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                listOf("VerifiableCredential", "BusinessCard"),
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ),
+            "did:ion:testsubject",
+            "did:web:test",
+            1686870564,
+            1689462564
+        )
         every { mockVerifiableCredential.raw.contents } returns verifiableCredentialContent
 
         // Act
@@ -37,7 +50,20 @@ class ClaimRegexConstraintTest {
         val claimRegexConstraint =
             ClaimRegexConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
         val mockVerifiableCredential: VerifiableCredential = mockk()
-        val verifiableCredentialContent = VerifiableCredentialContent("urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(listOf("https://www.w3.org/2018/credentials/v1"), listOf("VerifiableCredential", "BusinessCard"), mapOf("name" to "n", "company" to "m"), null, null), "did:ion:testsubject", actualIssuer, 1686870564, 1689462564)
+        val verifiableCredentialContent = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36",
+            VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                listOf("VerifiableCredential", "BusinessCard"),
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ),
+            "did:ion:testsubject",
+            actualIssuer,
+            1686870564,
+            1689462564
+        )
         every { mockVerifiableCredential.raw.contents } returns verifiableCredentialContent
 
         // Act
@@ -54,7 +80,20 @@ class ClaimRegexConstraintTest {
         val claimRegexConstraint =
             ClaimRegexConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
         val mockVerifiableCredential: VerifiableCredential = mockk()
-        val verifiableCredentialContent = VerifiableCredentialContent("urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(listOf("https://www.w3.org/2018/credentials/v1"), listOf("VerifiableCredential", "BusinessCard"), mapOf("name" to "n", "company" to "m"), null, null), "did:ion:testsubject", "", 1686870564, 1689462564)
+        val verifiableCredentialContent = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36",
+            VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                listOf("VerifiableCredential", "BusinessCard"),
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ),
+            "did:ion:testsubject",
+            "",
+            1686870564,
+            1689462564
+        )
         every { mockVerifiableCredential.raw.contents } returns verifiableCredentialContent
 
         // Act
@@ -72,7 +111,20 @@ class ClaimRegexConstraintTest {
         val claimRegexConstraint =
             ClaimRegexConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
         val mockVerifiableCredential: VerifiableCredential = mockk()
-        val verifiableCredentialContent = VerifiableCredentialContent("urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(listOf("https://www.w3.org/2018/credentials/v1"), listOf("VerifiableCredential", "BusinessCard"), mapOf("name" to "n", "company" to "m"), null, null), "did:ion:testsubject", actualIssuer, 1686870564, 1689462564)
+        val verifiableCredentialContent = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36",
+            VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                listOf("VerifiableCredential", "BusinessCard"),
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ),
+            "did:ion:testsubject",
+            actualIssuer,
+            1686870564,
+            1689462564
+        )
         every { mockVerifiableCredential.raw.contents } returns verifiableCredentialContent
 
         // Act and Assert
@@ -88,7 +140,20 @@ class ClaimRegexConstraintTest {
         val claimRegexConstraint =
             ClaimRegexConstraint(listOf("$.issuer", "$.vc.issuer", "$.iss"), expectedIssuer)
         val mockVerifiableCredential: VerifiableCredential = mockk()
-        val verifiableCredentialContent = VerifiableCredentialContent("urn:pic:71d9f132fa904325a6520e6bc6007c36", VerifiableCredentialDescriptor(listOf("https://www.w3.org/2018/credentials/v1"), listOf("VerifiableCredential", "BusinessCard"), mapOf("name" to "n", "company" to "m"), null, null), "did:ion:testsubject", "did:web:test", 1686870564, 1689462564)
+        val verifiableCredentialContent = VerifiableCredentialContent(
+            "urn:pic:71d9f132fa904325a6520e6bc6007c36",
+            VerifiableCredentialDescriptor(
+                listOf("https://www.w3.org/2018/credentials/v1"),
+                listOf("VerifiableCredential", "BusinessCard"),
+                mapOf("name" to "n", "company" to "m"),
+                null,
+                null
+            ),
+            "did:ion:testsubject",
+            "did:web:test",
+            1686870564,
+            1689462564
+        )
         every { mockVerifiableCredential.raw.contents } returns verifiableCredentialContent
 
         // Act
@@ -150,7 +215,7 @@ class ClaimRegexConstraintTest {
     @Test
     fun matchPattern_ValuesMatching_ReturnsTrue() {
         // Arrange
-        val pattern = """/^test${'$'}/gi"""
+        val pattern = """/^test$/gi"""
         val value = "test"
 
         // Act
@@ -200,10 +265,10 @@ class ClaimRegexConstraintTest {
     }
 
     @Test
-    fun matchPattern_EnumValueNotMatchingLast1_ReturnsTrue() {
+    fun matchPattern_MatchPathLikeValue_ReturnsTrue() {
         // Arrange
-        val pattern = """did:web:test"""
-        val value = "did:web:test1"
+        val pattern = """/^test\/path$/gi"""
+        val value = "test/path"
 
         // Act
         val actualResult = ClaimRegexConstraint(emptyList(), "").matchPattern(pattern, value)
