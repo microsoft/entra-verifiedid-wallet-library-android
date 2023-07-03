@@ -5,9 +5,9 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Cred
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Fields
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Filter
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
-import com.microsoft.walletlibrary.requests.requirements.constraints.ClaimRegexConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
+import com.microsoft.walletlibrary.requests.requirements.constraints.VcPathRegexConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
 import io.mockk.every
@@ -170,7 +170,7 @@ class CredentialPresentationInputDescriptorsMappingTest {
     @Test
     fun constraintMapping_WithEmptyFields_ReturnsNull() {
         // Act
-        val actualConstraint = toClaimRegexConstraint(emptyList())
+        val actualConstraint = toVcPathRegexConstraint(emptyList())
 
         // Assert
         assertThat(actualConstraint).isNull()
@@ -184,11 +184,11 @@ class CredentialPresentationInputDescriptorsMappingTest {
         val field = Fields(listOf(".iss"))
         field.filter = filter
         // Act
-        val actualConstraint = toClaimRegexConstraint(listOf(field))
+        val actualConstraint = toVcPathRegexConstraint(listOf(field))
 
         // Assert
-        assertThat(actualConstraint).isInstanceOf(ClaimRegexConstraint::class.java)
-        assertThat((actualConstraint as ClaimRegexConstraint).pattern).isEqualTo(expectedPattern)
+        assertThat(actualConstraint).isInstanceOf(VcPathRegexConstraint::class.java)
+        assertThat((actualConstraint as VcPathRegexConstraint).pattern).isEqualTo(expectedPattern)
     }
 
     @Test
@@ -204,17 +204,17 @@ class CredentialPresentationInputDescriptorsMappingTest {
         field2.filter = filter2
 
         // Act
-        val actualConstraint = toClaimRegexConstraint(listOf(field1, field2))
+        val actualConstraint = toVcPathRegexConstraint(listOf(field1, field2))
 
         // Assert
         assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
         assertThat((actualConstraint as GroupConstraint).constraints.size).isEqualTo(2)
         assertThat(actualConstraint.constraintOperator).isEqualTo(GroupConstraintOperator.ALL)
-        assertThat(actualConstraint.constraints.filterIsInstance<ClaimRegexConstraint>().size).isEqualTo(
+        assertThat(actualConstraint.constraints.filterIsInstance<VcPathRegexConstraint>().size).isEqualTo(
             2
         )
         assertThat(
-            actualConstraint.constraints.filterIsInstance<ClaimRegexConstraint>()
+            actualConstraint.constraints.filterIsInstance<VcPathRegexConstraint>()
                 .map { it.pattern }).containsAll(expectedPatterns)
     }
 
@@ -274,8 +274,8 @@ class CredentialPresentationInputDescriptorsMappingTest {
         val actualConstraint = credentialPresentationInputDescriptor.toConstraint()
 
         // Assert
-        assertThat(actualConstraint).isInstanceOf(ClaimRegexConstraint::class.java)
-        assertThat((actualConstraint as ClaimRegexConstraint).path).contains(expectedPath)
+        assertThat(actualConstraint).isInstanceOf(VcPathRegexConstraint::class.java)
+        assertThat((actualConstraint as VcPathRegexConstraint).path).contains(expectedPath)
     }
 
     @Test
@@ -300,11 +300,11 @@ class CredentialPresentationInputDescriptorsMappingTest {
         assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
         assertThat((actualConstraint as GroupConstraint).constraints.size).isEqualTo(2)
         assertThat(actualConstraint.constraintOperator).isEqualTo(GroupConstraintOperator.ALL)
-        assertThat(actualConstraint.constraints.filterIsInstance<ClaimRegexConstraint>().size).isEqualTo(
+        assertThat(actualConstraint.constraints.filterIsInstance<VcPathRegexConstraint>().size).isEqualTo(
             2
         )
         assertThat(
-            actualConstraint.constraints.filterIsInstance<ClaimRegexConstraint>()
+            actualConstraint.constraints.filterIsInstance<VcPathRegexConstraint>()
                 .map { it.path }).contains(listOf(expectedPath))
     }
 
@@ -409,7 +409,7 @@ class CredentialPresentationInputDescriptorsMappingTest {
         ).isEqualTo(
             GroupConstraintOperator.ANY
         )
-        assertThat(actualConstraint.constraints.filterIsInstance<ClaimRegexConstraint>().size).isEqualTo(
+        assertThat(actualConstraint.constraints.filterIsInstance<VcPathRegexConstraint>().size).isEqualTo(
             1
         )
     }

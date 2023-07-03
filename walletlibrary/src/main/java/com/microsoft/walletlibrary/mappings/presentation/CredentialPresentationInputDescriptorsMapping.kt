@@ -10,9 +10,9 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Cred
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Fields
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
-import com.microsoft.walletlibrary.requests.requirements.constraints.ClaimRegexConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
+import com.microsoft.walletlibrary.requests.requirements.constraints.VcPathRegexConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.VerifiedIdConstraint
 import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
@@ -37,35 +37,35 @@ internal fun CredentialPresentationInputDescriptor.toVerifiedIdRequirement(): Ve
 internal fun CredentialPresentationInputDescriptor.toConstraint(): VerifiedIdConstraint? {
     val vcTypeConstraint =
         if (schemas.isNotEmpty()) toVcTypeConstraint(schemas.map { it.uri }) else null
-    val claimConstraint = constraints?.fields?.let { toClaimRegexConstraint(it) }
-    if (claimConstraint == null && vcTypeConstraint == null) return null
+    val vcPathRegexConstraint = constraints?.fields?.let { toVcPathRegexConstraint(it) }
+    if (vcPathRegexConstraint == null && vcTypeConstraint == null) return null
     if (vcTypeConstraint != null) {
-        claimConstraint?.let {
+        vcPathRegexConstraint?.let {
             return GroupConstraint(
-                listOf(vcTypeConstraint, claimConstraint),
+                listOf(vcTypeConstraint, vcPathRegexConstraint),
                 GroupConstraintOperator.ALL
             )
         } ?: return vcTypeConstraint
     }
-    return claimConstraint
+    return vcPathRegexConstraint
 }
 
-internal fun toClaimRegexConstraint(fields: List<Fields>): VerifiedIdConstraint? {
+internal fun toVcPathRegexConstraint(fields: List<Fields>): VerifiedIdConstraint? {
     if (fields.isEmpty()) return null
-    if (fields.size == 1) return ClaimRegexConstraint(
+    if (fields.size == 1) return VcPathRegexConstraint(
         fields.first().path,
         fields.first().filter?.pattern ?: ""
     )
-    val claimRegexConstraints = mutableListOf<ClaimRegexConstraint>()
+    val vcPathRegexConstraints = mutableListOf<VcPathRegexConstraint>()
     fields.forEach {
-        claimRegexConstraints.add(
-            ClaimRegexConstraint(
+        vcPathRegexConstraints.add(
+            VcPathRegexConstraint(
                 it.path,
                 it.filter?.pattern ?: ""
             )
         )
     }
-    return GroupConstraint(claimRegexConstraints, GroupConstraintOperator.ALL)
+    return GroupConstraint(vcPathRegexConstraints, GroupConstraintOperator.ALL)
 }
 
 internal fun toVcTypeConstraint(vcTypes: List<String>): VerifiedIdConstraint? {

@@ -2,7 +2,7 @@ package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
-import com.microsoft.walletlibrary.requests.requirements.constraints.ClaimRegexConstraint
+import com.microsoft.walletlibrary.requests.requirements.constraints.VcPathRegexConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
@@ -257,7 +257,7 @@ class VerifiedIdRequirementTest {
         verifiedIdRequirement = VerifiedIdRequirement(
             "id",
             expectedVcTypes,
-            ClaimRegexConstraint(listOf("$.iss"), "WrongIssuer"),
+            VcPathRegexConstraint(listOf("$.iss"), "WrongIssuer"),
             encrypted = false,
             required = true,
             "testing purposes",
@@ -288,7 +288,7 @@ class VerifiedIdRequirementTest {
         verifiedIdRequirement = VerifiedIdRequirement(
             "id",
             expectedVcTypes,
-            ClaimRegexConstraint(listOf("$.iss"), "TestIssuer"),
+            VcPathRegexConstraint(listOf("$.iss"), "TestIssuer"),
             encrypted = false,
             required = true,
             "testing purposes",
@@ -331,7 +331,7 @@ class VerifiedIdRequirementTest {
         verifiedIdRequirement = VerifiedIdRequirement(
             "id",
             expectedVcTypes,
-            ClaimRegexConstraint(listOf("$.iss"), "TestIssuer"),
+            VcPathRegexConstraint(listOf("$.iss"), "TestIssuer"),
             encrypted = false,
             required = true,
             "testing purposes",
@@ -368,7 +368,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             GroupConstraint(
                 listOf(
-                    ClaimRegexConstraint(listOf("$.iss"), "WrongIssuer"),
+                    VcPathRegexConstraint(listOf("$.iss"), "WrongIssuer"),
                     VcTypeConstraint("BusinessCard")
                 ), GroupConstraintOperator.ALL
             ),
@@ -405,7 +405,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             GroupConstraint(
                 listOf(
-                    ClaimRegexConstraint(listOf("$.iss"), "TestIssuer"),
+                    VcPathRegexConstraint(listOf("$.iss"), "TestIssuer"),
                     VcTypeConstraint("TestCredential")
                 ), GroupConstraintOperator.ALL
             ),
@@ -442,7 +442,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             GroupConstraint(
                 listOf(
-                    ClaimRegexConstraint(listOf("$.iss"), "TestIssuer"),
+                    VcPathRegexConstraint(listOf("$.iss"), "TestIssuer"),
                     VcTypeConstraint("BusinessCard")
                 ), GroupConstraintOperator.ALL
             ),
@@ -481,8 +481,8 @@ class VerifiedIdRequirementTest {
                 listOf(
                     GroupConstraint(
                         listOf(
-                            ClaimRegexConstraint(listOf("$.iss"), "TestIssuer"),
-                            ClaimRegexConstraint(listOf("$.vc.credentialSubject.name"), "/n/gi")
+                            VcPathRegexConstraint(listOf("$.iss"), "TestIssuer"),
+                            VcPathRegexConstraint(listOf("$.vc.credentialSubject.name"), "/n/gi")
                         ), GroupConstraintOperator.ALL
                     ),
                     VcTypeConstraint("BusinessCard")
@@ -521,7 +521,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             GroupConstraint(
                 listOf(
-                    ClaimRegexConstraint(listOf("$.vc.credentialSubject.name"), "/n/gi"),
+                    VcPathRegexConstraint(listOf("$.vc.credentialSubject.name"), "/n/gi"),
                     GroupConstraint(
                         listOf(
                             VcTypeConstraint("BusinessCard"),

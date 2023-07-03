@@ -5,32 +5,33 @@ import com.jayway.jsonpath.JsonPath
 import com.jayway.jsonpath.Option
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.did.sdk.util.log.SdkLog
-import com.microsoft.walletlibrary.util.VerifiedIdIssuerIsNotRequestedException
+import com.microsoft.walletlibrary.util.NoMatchForVcPathRegexConstraintException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.json.Json
 import java.util.regex.Pattern
 
-class ClaimRegexConstraint(internal val path: List<String>, internal val pattern: String) :
-    VerifiedIdConstraint {
+class VcPathRegexConstraint(
+    internal val path: List<String>, internal val pattern: String
+) : VerifiedIdConstraint {
     override fun doesMatch(verifiedId: VerifiedId): Boolean {
-        if (verifiedId !is VerifiableCredential)
-            return false
-        val vccJsonString =
+        if (verifiedId !is VerifiableCredential) return false
+        val verifiableCredentialJsonString =
             Json.encodeToString(VerifiableCredentialContent.serializer(), verifiedId.raw.contents)
-        return path.any { matchAnyPathInFields(pattern, it, vccJsonString) }
+        return path.any { matchAnyPathInFields(pattern, it, verifiableCredentialJsonString) }
     }
 
-    private fun matchAnyPathInFields(pattern: String, path: String, vccJson: String): Boolean {
-        if (pattern.isEmpty())
-            SdkLog.d("Empty pattern in filter.")
+    private fun matchAnyPathInFields(
+        pattern: String, path: String, verifiableCredentialJsonString: String
+    ): Boolean {
+        if (pattern.isEmpty()) SdkLog.d("Empty pattern in filter.")
         val configuration =
             Configuration.defaultConfiguration().addOptions(Option.SUPPRESS_EXCEPTIONS)
-        val constraintValue: String? = JsonPath.using(configuration).parse(vccJson).read(path)
+        val constraintValue: String? =
+            JsonPath.using(configuration).parse(verifiableCredentialJsonString).read(path)
         return if (constraintValue != null) {
             matchPattern(pattern, constraintValue)
-        } else
-            false
+        } else false
     }
 
     internal fun matchPattern(pattern: String, value: String): Boolean {
@@ -47,7 +48,8 @@ class ClaimRegexConstraint(internal val path: List<String>, internal val pattern
     }
 
     override fun matches(verifiedId: VerifiedId) {
-        if (!doesMatch(verifiedId))
-            throw VerifiedIdIssuerIsNotRequestedException("Provided Verified Id claim doesn't match.")
+        if (!doesMatch(verifiedId)) throw NoMatchForVcPathRegexConstraintException(
+            "Provided Verified Id claim doesn't match."
+        )
     }
 }
