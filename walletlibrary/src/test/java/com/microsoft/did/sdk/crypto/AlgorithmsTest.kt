@@ -5,7 +5,13 @@ package com.microsoft.did.sdk.crypto
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
-import com.microsoft.did.sdk.util.Constants.AES_KEY
+import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
+import com.microsoft.walletlibrary.did.sdk.crypto.DigestAlgorithm
+import com.microsoft.walletlibrary.did.sdk.crypto.KeyGenAlgorithm
+import com.microsoft.walletlibrary.did.sdk.crypto.MacAlgorithm
+import com.microsoft.walletlibrary.did.sdk.crypto.PrivateKeyFactoryAlgorithm
+import com.microsoft.walletlibrary.did.sdk.crypto.PublicKeyFactoryAlgorithm
+import com.microsoft.walletlibrary.did.sdk.util.Constants.AES_KEY
 import org.junit.Test
 import java.math.BigInteger
 import java.security.interfaces.ECPrivateKey

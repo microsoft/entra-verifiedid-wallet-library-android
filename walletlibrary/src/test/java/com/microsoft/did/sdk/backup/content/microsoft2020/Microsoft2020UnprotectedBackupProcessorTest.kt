@@ -3,10 +3,15 @@
 package com.microsoft.did.sdk.backup.content.microsoft2020
 
 import android.util.BackupTestUtil
-import com.microsoft.did.sdk.IdentifierService
-import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.IdentifierService
+import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.defaultTestSerializer
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020BackupProcessor
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackup
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.RawIdentifierConverter
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.WalletMetadata
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

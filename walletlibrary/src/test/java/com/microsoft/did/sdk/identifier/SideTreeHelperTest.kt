@@ -3,6 +3,7 @@
 package com.microsoft.did.sdk.identifier
 
 
+import com.microsoft.walletlibrary.did.sdk.identifier.SideTreeHelper
 import com.nimbusds.jose.jwk.JWK
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

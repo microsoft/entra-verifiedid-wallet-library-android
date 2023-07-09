@@ -2,6 +2,7 @@
 
 package com.microsoft.did.sdk.util
 
+import com.microsoft.walletlibrary.did.sdk.util.NetworkErrorParser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 

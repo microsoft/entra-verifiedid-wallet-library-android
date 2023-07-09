@@ -2,13 +2,14 @@
 
 package com.microsoft.did.sdk
 
-import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
-import com.microsoft.did.sdk.identifier.IdentifierCreator
-import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.Constants.MAIN_IDENTIFIER_REFERENCE
-import com.microsoft.did.sdk.util.controlflow.RepositoryException
-import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
+import com.microsoft.walletlibrary.did.sdk.identifier.IdentifierCreator
+import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
+import com.microsoft.walletlibrary.did.sdk.util.Constants.MAIN_IDENTIFIER_REFERENCE
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.RepositoryException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.IdentifierService
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.mockk

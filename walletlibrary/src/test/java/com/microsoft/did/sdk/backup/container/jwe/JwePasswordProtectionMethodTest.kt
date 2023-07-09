@@ -2,11 +2,13 @@
 
 package com.microsoft.did.sdk.backup.container.jwe
 
-import com.microsoft.did.sdk.backup.content.UnprotectedBackupData
-import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
-import com.microsoft.did.sdk.backup.content.microsoft2020.WalletMetadata
-import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
+import com.microsoft.walletlibrary.did.sdk.backup.content.UnprotectedBackupData
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.WalletMetadata
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jwe.JweToken
 import com.microsoft.did.sdk.util.defaultTestSerializer
+import com.microsoft.walletlibrary.did.sdk.backup.container.jwe.JwePasswordProtectedBackupData
+import com.microsoft.walletlibrary.did.sdk.backup.container.jwe.JwePasswordProtectionMethod
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jose.JWEHeader

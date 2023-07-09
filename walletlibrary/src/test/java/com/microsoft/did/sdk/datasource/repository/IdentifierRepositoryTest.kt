@@ -2,15 +2,16 @@
 
 package com.microsoft.did.sdk.datasource.repository
 
-import com.microsoft.did.sdk.datasource.db.SdkDatabase
-import com.microsoft.did.sdk.datasource.db.dao.IdentifierDao
-import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
-import com.microsoft.did.sdk.datasource.network.identifierOperations.ResolveIdentifierNetworkOperation
-import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
-import com.microsoft.did.sdk.util.controlflow.NotFoundException
-import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDatabase
+import com.microsoft.walletlibrary.did.sdk.datasource.db.dao.IdentifierDao
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations.ResolveIdentifierNetworkOperation
+import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
+import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.NotFoundException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.defaultTestSerializer
+import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify

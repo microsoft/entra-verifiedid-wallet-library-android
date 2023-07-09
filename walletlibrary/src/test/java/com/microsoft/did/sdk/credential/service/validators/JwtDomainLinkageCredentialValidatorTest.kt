@@ -2,8 +2,10 @@
 
 package com.microsoft.did.sdk.credential.service.validators
 
-import com.microsoft.did.sdk.credential.service.models.serviceResponses.LinkedDomainsResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResponses.LinkedDomainsResponse
 import com.microsoft.did.sdk.di.defaultTestSerializer
+import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
+import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking

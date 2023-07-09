@@ -5,9 +5,9 @@
 
 package com.microsoft.did.sdk.crypto.pairwise
 
-import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.identifier.IdentifierCreator
-import com.microsoft.did.sdk.util.Constants
+import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.walletlibrary.did.sdk.identifier.IdentifierCreator
+import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import com.nimbusds.jose.util.Base64URL
 import io.mockk.every

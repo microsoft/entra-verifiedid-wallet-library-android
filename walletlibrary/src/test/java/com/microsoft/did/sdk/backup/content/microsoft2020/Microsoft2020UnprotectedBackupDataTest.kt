@@ -3,6 +3,8 @@
 package com.microsoft.did.sdk.backup.content.microsoft2020
 
 import android.util.BackupTestUtil
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.WalletMetadata
 import org.junit.Test
 import kotlin.test.assertEquals
 

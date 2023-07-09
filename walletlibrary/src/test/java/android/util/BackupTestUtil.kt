@@ -2,18 +2,18 @@
 
 package android.util
 
-import com.microsoft.did.sdk.backup.content.microsoft2020.RawIdentity
-import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
-import com.microsoft.did.sdk.credential.service.models.contracts.display.CardDescriptor
-import com.microsoft.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
-import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
-import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
-import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
-import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.RawIdentity
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.CardDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.Logo
+import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
+import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
@@ -63,7 +63,7 @@ object BackupTestUtil {
         val jws = JwsToken(
             JWSObject(
                 JWSHeader(JWSAlgorithm.ES256),
-                Payload(Base64URL.encode(Json.Default.encodeToString(testVerifiableCredentialContent)))
+                Payload(Base64URL.encode(Json.encodeToString(testVerifiableCredentialContent)))
             )
         )
         jws.sign(

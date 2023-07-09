@@ -2,17 +2,18 @@
 
 package com.microsoft.did.sdk
 
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
-import com.microsoft.did.sdk.credential.service.models.serviceResponses.LinkedDomainsResponse
-import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
-import com.microsoft.did.sdk.credential.service.validators.JwtValidator
-import com.microsoft.did.sdk.datasource.network.linkedDomainsOperations.FetchWellKnownConfigDocumentNetworkOperation
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResponses.LinkedDomainsResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
+import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
+import com.microsoft.walletlibrary.did.sdk.datasource.network.linkedDomainsOperations.FetchWellKnownConfigDocumentNetworkOperation
 import com.microsoft.did.sdk.di.defaultTestSerializer
-import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
-import com.microsoft.did.sdk.identifier.resolvers.Resolver
-import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
+import com.microsoft.walletlibrary.did.sdk.LinkedDomainsService
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

@@ -1,9 +1,9 @@
 package com.microsoft.did.sdk.util
 
-import com.microsoft.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
-import com.microsoft.did.sdk.credential.service.models.serviceResponses.RevocationServiceResponse
-import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
-import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResponses.RevocationServiceResponse
+import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
+import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
 import com.nimbusds.jose.jwk.JWK
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

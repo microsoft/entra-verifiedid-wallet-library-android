@@ -2,11 +2,11 @@ package com.microsoft.walletlibrary.wrapper
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import com.microsoft.did.sdk.IssuanceService
-import com.microsoft.did.sdk.VerifiableCredentialSdk
-import com.microsoft.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
-import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.SdkException
+import com.microsoft.walletlibrary.did.sdk.IssuanceService
+import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.util.VerifiedIdIssuanceCompletionCallbackException
 import io.mockk.coEvery
 import io.mockk.every

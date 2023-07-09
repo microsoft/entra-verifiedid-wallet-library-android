@@ -1,11 +1,12 @@
 package com.microsoft.did.sdk.credential.service.validators
 
-import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
-import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
-import com.microsoft.did.sdk.identifier.resolvers.Resolver
-import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.ValidatorException
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
+import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
+import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyType
 import io.mockk.coEvery

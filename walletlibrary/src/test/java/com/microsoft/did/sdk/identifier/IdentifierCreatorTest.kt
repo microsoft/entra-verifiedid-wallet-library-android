@@ -2,13 +2,14 @@ package com.microsoft.did.sdk.identifier
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.PrivateKeyFactoryAlgorithm
-import com.microsoft.did.sdk.crypto.PublicKeyFactoryAlgorithm
-import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.util.Constants
+import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
+import com.microsoft.walletlibrary.did.sdk.crypto.PrivateKeyFactoryAlgorithm
+import com.microsoft.walletlibrary.did.sdk.crypto.PublicKeyFactoryAlgorithm
+import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.util.defaultTestSerializer
-import com.nimbusds.jose.jwk.OctetSequenceKey
+import com.microsoft.walletlibrary.did.sdk.identifier.IdentifierCreator
+import com.microsoft.walletlibrary.did.sdk.identifier.SideTreeHelper
+import com.microsoft.walletlibrary.did.sdk.identifier.SidetreePayloadProcessor
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic

@@ -2,8 +2,10 @@
 
 package com.microsoft.did.sdk.identifier
 
-import com.microsoft.did.sdk.util.Constants
+import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.defaultTestSerializer
+import com.microsoft.walletlibrary.did.sdk.identifier.SideTreeHelper
+import com.microsoft.walletlibrary.did.sdk.identifier.SidetreePayloadProcessor
 import com.nimbusds.jose.jwk.JWK
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

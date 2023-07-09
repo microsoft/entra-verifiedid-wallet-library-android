@@ -2,13 +2,14 @@
 
 package com.microsoft.did.sdk.identifier.resolvers
 
-import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
-import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
-import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
-import com.microsoft.did.sdk.util.controlflow.NotFoundException
-import com.microsoft.did.sdk.util.controlflow.ResolverException
-import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
+import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.LocalNetworkException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.NotFoundException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.defaultTestSerializer
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking

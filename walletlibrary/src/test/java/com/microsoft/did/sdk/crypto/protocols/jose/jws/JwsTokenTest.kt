@@ -1,5 +1,6 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey

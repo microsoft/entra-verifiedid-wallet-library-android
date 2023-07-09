@@ -3,6 +3,8 @@
 package com.microsoft.did.sdk.backup.content.microsoft2020
 
 import android.util.BackupTestUtil
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.RawIdentifierConverter
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.RawIdentity
 import com.nimbusds.jose.jwk.KeyOperation
 import com.nimbusds.jose.jwk.KeyUse
 import kotlinx.coroutines.runBlocking

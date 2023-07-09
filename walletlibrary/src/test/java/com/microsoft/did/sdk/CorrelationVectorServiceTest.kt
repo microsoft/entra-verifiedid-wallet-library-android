@@ -3,7 +3,8 @@
 package com.microsoft.did.sdk
 
 import android.content.SharedPreferences
-import com.microsoft.did.sdk.util.Constants
+import com.microsoft.walletlibrary.did.sdk.CorrelationVectorService
+import com.microsoft.walletlibrary.did.sdk.util.Constants
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk

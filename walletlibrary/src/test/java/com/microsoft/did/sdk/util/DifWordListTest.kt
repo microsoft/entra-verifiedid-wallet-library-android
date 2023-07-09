@@ -2,6 +2,8 @@
 
 package com.microsoft.did.sdk.util
 
+import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.did.sdk.util.DifWordList
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

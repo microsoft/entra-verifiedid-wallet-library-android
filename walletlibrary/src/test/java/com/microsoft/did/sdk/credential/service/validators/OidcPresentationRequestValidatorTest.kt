@@ -5,16 +5,18 @@
 
 package com.microsoft.did.sdk.credential.service.validators
 
-import com.microsoft.did.sdk.credential.service.PresentationRequest
-import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
-import com.microsoft.did.sdk.credential.service.models.oidc.Registration
-import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.controlflow.InvalidResponseModeException
-import com.microsoft.did.sdk.util.controlflow.InvalidResponseTypeException
-import com.microsoft.did.sdk.util.controlflow.InvalidScopeException
-import com.microsoft.did.sdk.util.controlflow.MissingInputInRequestException
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.Registration
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
+import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
+import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidResponseModeException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidResponseTypeException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidScopeException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.MissingInputInRequestException
+import com.microsoft.walletlibrary.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk

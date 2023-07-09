@@ -1,11 +1,10 @@
 package com.microsoft.walletlibrary
 
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
-import com.microsoft.did.sdk.credential.service.PresentationRequest
-import com.microsoft.did.sdk.credential.service.models.contracts.InputContract
-import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.did.sdk.credential.service.models.contracts.display.*
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.InputContract
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
@@ -15,6 +14,11 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.CardDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ClaimDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.Logo
 import com.microsoft.walletlibrary.util.*
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.coEvery
@@ -198,7 +202,7 @@ class VerifiedIdClientTest {
             )
         val claimDescriptor1 = ClaimDescriptor("text", "name 1")
         val vc = VerifiableCredential(
-            com.microsoft.did.sdk.credential.models.VerifiableCredential(
+            com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential(
                 "123",
                 "raw",
                 VerifiableCredentialContent(
@@ -246,7 +250,7 @@ class VerifiedIdClientTest {
             )
         val claimDescriptor1 = ClaimDescriptor("text", "name 1")
         val expectedVc = VerifiableCredential(
-            com.microsoft.did.sdk.credential.models.VerifiableCredential(
+            com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential(
                 "123",
                 "raw",
                 VerifiableCredentialContent(

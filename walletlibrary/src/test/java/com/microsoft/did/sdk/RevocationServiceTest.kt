@@ -2,13 +2,15 @@
 
 package com.microsoft.did.sdk
 
-import com.microsoft.did.sdk.credential.models.RevocationReceipt
-import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.service.models.RevocationRequest
-import com.microsoft.did.sdk.credential.service.protectors.RevocationResponseFormatter
-import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
-import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.credential.models.RevocationReceipt
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.RevocationRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.RevocationResponseFormatter
+import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
+import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
+import com.microsoft.walletlibrary.did.sdk.IdentifierService
+import com.microsoft.walletlibrary.did.sdk.RevocationService
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

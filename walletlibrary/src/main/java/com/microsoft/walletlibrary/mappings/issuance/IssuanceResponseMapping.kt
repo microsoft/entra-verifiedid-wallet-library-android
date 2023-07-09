@@ -5,8 +5,8 @@
 
 package com.microsoft.walletlibrary.mappings.issuance
 
-import com.microsoft.did.sdk.credential.service.IssuanceResponse
-import com.microsoft.did.sdk.credential.service.models.pin.IssuancePin
+import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.pin.IssuancePin
 import com.microsoft.walletlibrary.requests.requirements.*
 
 /**

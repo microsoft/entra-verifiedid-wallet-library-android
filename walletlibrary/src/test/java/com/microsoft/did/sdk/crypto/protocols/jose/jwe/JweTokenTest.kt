@@ -1,7 +1,8 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jwe
 
-import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.util.controlflow.KeyException
+import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jwe.JweToken
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.KeyException
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jose.JWEHeader

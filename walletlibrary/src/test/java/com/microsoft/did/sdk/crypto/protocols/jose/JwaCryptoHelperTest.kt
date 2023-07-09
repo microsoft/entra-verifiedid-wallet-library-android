@@ -2,7 +2,8 @@
 
 package com.microsoft.did.sdk.crypto.protocols.jose
 
-import com.microsoft.did.sdk.util.controlflow.ValidatorException
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.Test

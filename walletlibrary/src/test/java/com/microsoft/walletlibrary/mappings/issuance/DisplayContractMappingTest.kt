@@ -1,7 +1,11 @@
 package com.microsoft.walletlibrary.mappings.issuance
 
-import com.microsoft.did.sdk.credential.service.models.contracts.display.*
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.CardDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ClaimDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.Logo
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat

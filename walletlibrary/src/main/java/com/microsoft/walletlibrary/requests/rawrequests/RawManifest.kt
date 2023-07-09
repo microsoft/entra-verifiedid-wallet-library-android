@@ -5,7 +5,7 @@
 
 package com.microsoft.walletlibrary.requests.rawrequests
 
-import com.microsoft.did.sdk.credential.service.IssuanceRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.walletlibrary.mappings.issuance.getRequesterStyle
 import com.microsoft.walletlibrary.mappings.issuance.toRequirement
 import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
