@@ -28,7 +28,7 @@ internal class ManifestIssuanceRequest(
     override val rootOfTrust: RootOfTrust,
 
     // Attributes describing the Verified ID (eg. name, issuer, logo, background and text colors).
-    val verifiedIdStyle: VerifiedIdStyle,
+    override val verifiedIdStyle: VerifiedIdStyle,
 
     val request: RawManifest,
 
