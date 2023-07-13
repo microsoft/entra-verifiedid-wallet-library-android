@@ -30,7 +30,7 @@ class VerifiedIdClient(
 ) {
 
     // Creates an issuance or presentation request based on the provided input.
-    suspend fun createRequest(verifiedIdRequestInput: VerifiedIdRequestInput): Result<VerifiedIdRequest<*>> {
+    suspend fun createRequest(verifiedIdRequestInput: VerifiedIdRequestInput): VerifiedIdResult<VerifiedIdRequest<*>> {
         return try {
             VerifiableCredentialSdk.correlationVectorService.startNewFlowAndSave()
             val requestResolver = requestResolverFactory.getResolver(verifiedIdRequestInput)
@@ -38,7 +38,11 @@ class VerifiedIdClient(
             val requestHandler = requestHandlerFactory.getHandler(requestResolver)
             VerifiedIdResult.success(requestHandler.handleRequest(rawRequest))
         } catch (exception: Exception) {
-            UnspecifiedVerifiedIdException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
+            UnspecifiedVerifiedIdException(
+                "Unspecified Exception",
+                VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value,
+                exception
+            ).toVerifiedIdResult()
         }
     }
 
@@ -46,15 +50,23 @@ class VerifiedIdClient(
         return try {
             VerifiedIdResult.success(serializer.encodeToString(verifiedId))
         } catch (exception: Exception) {
-            UnspecifiedVerifiedIdException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
+            UnspecifiedVerifiedIdException(
+                "Unspecified Exception",
+                VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value,
+                exception
+            ).toVerifiedIdResult()
         }
     }
 
-    fun decodeVerifiedId(encodedVerifiedId: String): Result<VerifiedId> {
+    fun decodeVerifiedId(encodedVerifiedId: String): VerifiedIdResult<VerifiedId> {
         return try {
             VerifiedIdResult.success(serializer.decodeFromString(encodedVerifiedId))
         } catch (exception: Exception) {
-            UnspecifiedVerifiedIdException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
+            UnspecifiedVerifiedIdException(
+                "Unspecified Exception",
+                VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value,
+                exception
+            ).toVerifiedIdResult()
         }
     }
 }
