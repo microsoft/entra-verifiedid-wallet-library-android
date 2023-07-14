@@ -34,12 +34,15 @@ class IdTokenRequirement(
     override val required: Boolean = false,
 
     internal var idToken: String? = null
-): Requirement {
+) : Requirement {
 
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate(): VerifiedIdResult<Unit> {
         if (idToken == null)
-            return RequirementNotMetException("Id Token has not been set.", VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value).toVerifiedIdResult()
+            return RequirementNotMetException(
+                "Id Token has not been set.",
+                VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value
+            ).toVerifiedIdResult()
         return VerifiedIdResult.success(Unit)
     }
 

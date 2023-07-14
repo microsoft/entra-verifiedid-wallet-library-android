@@ -52,7 +52,8 @@ class VerifiedIdRequirement(
             } catch (constraintException: RequirementValidationException) {
                 return RequirementNotMetException(
                     "Verified ID constraint do not match.",
-                    VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value
+                    VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value,
+                    listOf(constraintException)
                 ).toVerifiedIdResult()
             }
         }
@@ -60,14 +61,18 @@ class VerifiedIdRequirement(
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(selectedVerifiedId: VerifiedId): Result<Unit> {
+    fun fulfill(selectedVerifiedId: VerifiedId): VerifiedIdResult<Unit> {
         try {
             constraint.matches(selectedVerifiedId)
         } catch (constraintException: RequirementValidationException) {
-            return Result.failure(constraintException)
+            return RequirementNotMetException(
+                "Verified ID constraint do not match.",
+                VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value,
+                listOf(constraintException)
+            ).toVerifiedIdResult()
         }
         verifiedId = selectedVerifiedId
-        return Result.success(Unit)
+        return VerifiedIdResult.success(Unit)
     }
 
     // Retrieves list of Verified IDs from the provided list that matches this requirement.

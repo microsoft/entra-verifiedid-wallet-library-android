@@ -14,7 +14,13 @@ class NetworkingException(
     retryable: Boolean = false
 ) : VerifiedIdException(message, code, correlationId)
 
-class RequirementNotMetException(message: String, code: String, correlationId: String? = null) :
+class RequirementNotMetException(message: String, code: String, val innerErrors: List<Exception>? = null, correlationId: String? = null) :
+    VerifiedIdException(message, code, correlationId)
+
+class MalformedInputException(message: String, code: String, val innerError: Exception?= null, correlationId: String? = null) :
+    VerifiedIdException(message, code, correlationId)
+
+class UserCanceledException(message: String, code: String, correlationId: String? = null) :
     VerifiedIdException(message, code, correlationId)
 
 class UnspecifiedVerifiedIdException(message: String, code: String, val innerError: Exception? = null, correlationId: String? = null) :

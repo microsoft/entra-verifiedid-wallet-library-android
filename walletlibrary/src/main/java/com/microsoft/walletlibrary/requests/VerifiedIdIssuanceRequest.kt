@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.requests
 
+import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 /**
@@ -15,5 +16,5 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 interface VerifiedIdIssuanceRequest: VerifiedIdRequest<VerifiedId> {
 
     // Completes the request and returns a VerifiedID if successful.
-    override suspend fun complete(): Result<VerifiedId>
+    override suspend fun complete(): VerifiedIdResult<VerifiedId>
 }
