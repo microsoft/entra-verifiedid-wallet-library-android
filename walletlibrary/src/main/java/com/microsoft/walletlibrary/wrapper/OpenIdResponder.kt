@@ -11,7 +11,6 @@ import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.mappings.presentation.addRequirements
 import com.microsoft.walletlibrary.requests.requirements.Requirement
-import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
 
 /**
  * Wrapper class to wrap the send presentation response to VC SDK.
@@ -27,11 +26,6 @@ object OpenIdResponder {
         presentationResponse.addRequirements(requirement)
         val presentationResponseResult =
             VerifiableCredentialSdk.presentationService.sendResponse(presentationResponse)
-        if (presentationResponseResult is Result.Failure) {
-            throw OpenIdResponseCompletionException(
-                "Unable to send presentation response",
-                presentationResponseResult.payload
-            )
-        }
+        if (presentationResponseResult is Result.Failure) throw presentationResponseResult.payload
     }
 }

@@ -3,7 +3,6 @@ package com.microsoft.walletlibrary.wrapper
 import com.microsoft.did.sdk.VerifiableCredentialSdk
 import com.microsoft.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.walletlibrary.util.VerifiedIdIssuanceCompletionCallbackException
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 
 /**
@@ -22,10 +21,6 @@ object VerifiedIdCompletionCallBack {
         )
         if (callbackResult is Result.Failure) {
             WalletLibraryLogger.e("Unable to send issuance callback after issuance fails")
-            throw VerifiedIdIssuanceCompletionCallbackException(
-                "Unable to send issuance completion callback",
-                callbackResult.payload
-            )
         }
     }
 }
