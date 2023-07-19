@@ -47,10 +47,12 @@ internal suspend fun <T> getResult(block: suspend () -> T): VerifiedIdResult<T> 
             }
         }
     } catch (exception: Exception) {
-        UnspecifiedVerifiedIdException(
+        val unspecifiedVerifiedIdException = UnspecifiedVerifiedIdException(
             exception.message ?: "",
             VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value,
             exception
-        ).toVerifiedIdResult()
+        )
+        unspecifiedVerifiedIdException.cause = exception
+        unspecifiedVerifiedIdException.toVerifiedIdResult()
     }
 }
