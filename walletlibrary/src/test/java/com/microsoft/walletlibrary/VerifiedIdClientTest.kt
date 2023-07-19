@@ -22,6 +22,7 @@ import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRe
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
 import com.microsoft.walletlibrary.util.HandlerMissingException
+import com.microsoft.walletlibrary.util.MalformedInputException
 import com.microsoft.walletlibrary.util.ResolverMissingException
 import com.microsoft.walletlibrary.util.UnSupportedProtocolException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
@@ -35,6 +36,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -274,6 +277,55 @@ class VerifiedIdClientTest {
     }
 
     @Test
+    fun encode_ProvideInvalidVerifiableCredential_ThrowsException() {
+        // Arrange
+        requestHandlerFactory = mockk()
+        requestResolverFactory = mockk()
+        val serializer = mockk<Json>()
+        val verifiedIdClient =
+            VerifiedIdClient(
+                requestResolverFactory,
+                requestHandlerFactory,
+                WalletLibraryLogger,
+                serializer
+            )
+        val claimDescriptor1 = ClaimDescriptor("text", "name 1")
+        val vc = VerifiableCredential(
+            com.microsoft.did.sdk.credential.models.VerifiableCredential(
+                "123",
+                "raw",
+                VerifiableCredentialContent(
+                    "456",
+                    VerifiableCredentialDescriptor(emptyList(), listOf("TestVC"), mapOf("claim1" to "value1")),
+                    "me",
+                    "Test",
+                    1234567L,
+                    null
+                )
+            ),
+            VerifiableCredentialContract(
+                "1",
+                InputContract("", "", ""),
+                DisplayContract(
+                    card = CardDescriptor("Test VC", "Test Issuer", "#000000", "#ffffff", Logo("testlogo.com", null, "test logo"), ""),
+                    consent = ConsentDescriptor("", ""),
+                    claims = mapOf("vc.credentialSubject.claim1" to claimDescriptor1)
+                )
+            )
+        )
+        every { serializer.encodeToString(vc) } throws Exception()
+
+        // Act
+        val actualEncodedVc = verifiedIdClient.encode(vc)
+
+        // Assert
+        assertThat(actualEncodedVc).isInstanceOf(VerifiedIdResult::class.java)
+        assertThat(actualEncodedVc.isSuccess).isFalse
+        assertThat(actualEncodedVc.exceptionOrNull()).isNotNull
+        assertThat(actualEncodedVc.exceptionOrNull()).isInstanceOf(MalformedInputException::class.java)
+    }
+
+    @Test
     fun decode_ProvideEncodedVerifiableCredential_ReturnsVerifiableCredentialObject() {
         // Arrange
         requestHandlerFactory = mockk()
@@ -328,5 +380,56 @@ class VerifiedIdClientTest {
         assertThat((actualVc.style as BasicVerifiedIdStyle).backgroundColor).isEqualTo("#000000")
         assertThat((actualVc.style as BasicVerifiedIdStyle).textColor).isEqualTo("#ffffff")
         assertThat((actualVc.style as BasicVerifiedIdStyle).issuer).isEqualTo("Test Issuer")
+    }
+
+    @Test
+    fun decode_ProvideInvalidEncodedVerifiableCredential_ThrowsException() {
+        // Arrange
+        requestHandlerFactory = mockk()
+        requestResolverFactory = mockk()
+        val serializer = mockk<Json>()
+        val verifiedIdClient =
+            VerifiedIdClient(
+                requestResolverFactory,
+                requestHandlerFactory,
+                WalletLibraryLogger,
+                serializer
+            )
+        val claimDescriptor1 = ClaimDescriptor("text", "name 1")
+        val expectedVc = VerifiableCredential(
+            com.microsoft.did.sdk.credential.models.VerifiableCredential(
+                "123",
+                "raw",
+                VerifiableCredentialContent(
+                    "456",
+                    VerifiableCredentialDescriptor(emptyList(), listOf("TestVC"), emptyMap()),
+                    "me",
+                    "Test",
+                    1234567L,
+                    null
+                )
+            ),
+            VerifiableCredentialContract(
+                "1",
+                InputContract("", "", ""),
+                DisplayContract(
+                    card = CardDescriptor("Test VC", "Test Issuer", "#000000", "#ffffff", null, ""),
+                    consent = ConsentDescriptor("", ""),
+                    claims = mapOf("vc.credentialSubject.claim1" to claimDescriptor1)
+                )
+            )
+        )
+        val encodedVc = """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC","issuedBy":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle","name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""}}"""
+        every { serializer.decodeFromString(VerifiableCredential.serializer(), encodedVc) } throws Exception()
+
+        // Act
+        val actualDecodedVc = verifiedIdClient.decodeVerifiedId(encodedVc)
+        val actualVc = actualDecodedVc.exceptionOrNull()
+
+        // Assert
+        assertThat(actualDecodedVc).isInstanceOf(VerifiedIdResult::class.java)
+        assertThat(actualDecodedVc.isSuccess).isFalse
+        assertThat(actualVc).isNotNull
+        assertThat(actualVc).isInstanceOf(MalformedInputException::class.java)
     }
 }
