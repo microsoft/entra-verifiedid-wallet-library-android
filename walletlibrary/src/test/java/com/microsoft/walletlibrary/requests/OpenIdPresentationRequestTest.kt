@@ -11,10 +11,15 @@ import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
-import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
+import com.microsoft.walletlibrary.util.UnspecifiedVerifiedIdException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.coJustRun
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.Test
@@ -186,7 +191,7 @@ class OpenIdPresentationRequestTest {
             // Assert
             Assertions.assertThat(actualResult.isFailure).isTrue
             Assertions.assertThat(actualResult.exceptionOrNull()).isInstanceOf(
-                OpenIdResponseCompletionException::class.java
+                UnspecifiedVerifiedIdException::class.java
             )
         }
     }
@@ -224,8 +229,9 @@ class OpenIdPresentationRequestTest {
             // Assert
             Assertions.assertThat(actualResult.isFailure).isTrue
             Assertions.assertThat(actualResult.exceptionOrNull()).isInstanceOf(
-                VerifiedIdRequirementNotFulfilledException::class.java
+                RequirementNotMetException::class.java
             )
+                .hasMessage("Verified ID has not been set.")
         }
     }
 

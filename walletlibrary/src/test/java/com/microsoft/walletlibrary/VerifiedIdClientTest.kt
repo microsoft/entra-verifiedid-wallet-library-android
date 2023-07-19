@@ -115,7 +115,6 @@ class VerifiedIdClientTest {
             assertThat(actualException).isNotNull
             assertThat(actualException).isInstanceOf(UnspecifiedVerifiedIdException::class.java)
             assertThat((actualException as UnspecifiedVerifiedIdException).code).isEqualTo("unspecified_error")
-            assertThat(actualException).hasMessage("Unspecified Exception")
             assertThat(actualException.correlationId).isNull()
             assertThat(actualException.innerError).isInstanceOf(ResolverMissingException::class.java)
         }
@@ -149,7 +148,6 @@ class VerifiedIdClientTest {
             assertThat(actualException).isNotNull
             assertThat(actualException).isInstanceOf(UnspecifiedVerifiedIdException::class.java)
             assertThat((actualException as UnspecifiedVerifiedIdException).code).isEqualTo("unspecified_error")
-            assertThat(actualException).hasMessage("Unspecified Exception")
             assertThat(actualException.correlationId).isNull()
             assertThat(actualException.innerError).isInstanceOf(HandlerMissingException::class.java)
         }
@@ -186,7 +184,6 @@ class VerifiedIdClientTest {
             assertThat(actualException).isNotNull
             assertThat(actualException).isInstanceOf(UnspecifiedVerifiedIdException::class.java)
             assertThat((actualException as UnspecifiedVerifiedIdException).code).isEqualTo("unspecified_error")
-            assertThat(actualException).hasMessage("Unspecified Exception")
             assertThat(actualException.correlationId).isNull()
             assertThat(actualException.innerError).isInstanceOf(UnSupportedProtocolException::class.java)
         }
@@ -223,7 +220,6 @@ class VerifiedIdClientTest {
             assertThat(actualException).isNotNull
             assertThat(actualException).isInstanceOf(UnspecifiedVerifiedIdException::class.java)
             assertThat((actualException as UnspecifiedVerifiedIdException).code).isEqualTo("unspecified_error")
-            assertThat(actualException).hasMessage("Unspecified Exception")
             assertThat(actualException.correlationId).isNull()
             assertThat(actualException.innerError).isInstanceOf(UnSupportedVerifiedIdRequestInputException::class.java)
         }

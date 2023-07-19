@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.requests.requirements
 
-import com.microsoft.walletlibrary.util.RequirementValidationException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -48,7 +48,11 @@ class GroupRequirementTest {
         assertThat(actualResult).isInstanceOf(Result::class.java)
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
-        assertThat(actualResult.exceptionOrNull()).isInstanceOf(RequirementValidationException::class.java)
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(RequirementNotMetException::class.java)
+        (actualResult.exceptionOrNull() as RequirementNotMetException).innerErrors?.forEach {
+            assertThat(it).isInstanceOf(RequirementNotMetException::class.java)
+                .hasMessage("Id Token has not been set.")
+        }
     }
 
     @Test
@@ -85,6 +89,10 @@ class GroupRequirementTest {
         assertThat(actualResult).isInstanceOf(Result::class.java)
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
-        assertThat(actualResult.exceptionOrNull()).isInstanceOf(RequirementValidationException::class.java)
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(RequirementNotMetException::class.java)
+        (actualResult.exceptionOrNull() as RequirementNotMetException).innerErrors?.forEach {
+            assertThat(it).isInstanceOf(RequirementNotMetException::class.java)
+                .hasMessage("Id Token has not been set.")
+        }
     }
 }

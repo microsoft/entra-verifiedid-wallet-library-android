@@ -4,7 +4,12 @@ import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
-import com.microsoft.walletlibrary.util.*
+import com.microsoft.walletlibrary.util.IdInVerifiedIdRequirementDoesNotMatchRequestException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
+import com.microsoft.walletlibrary.util.UnSupportedRequirementException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
+import com.microsoft.walletlibrary.util.VerifiedIdRequirementIdConflictException
+import com.microsoft.walletlibrary.util.VerifiedIdRequirementMissingIdException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 
 /**
@@ -22,7 +27,10 @@ private fun PresentationResponse.addVerifiedIdRequirement(verifiedIdRequirement:
     if (verifiedIdRequirement.id == null)
         throw VerifiedIdRequirementMissingIdException("Id is missing in the VerifiedId Requirement.")
     if (verifiedIdRequirement.verifiedId == null)
-        throw VerifiedIdRequirementNotFulfilledException("Verified Id is not selected to fulfill the requirement.")
+        throw RequirementNotMetException(
+            "Verified ID has not been set.",
+            VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value
+        )
     val credentialPresentationInputDescriptor =
         request.getPresentationDefinition().credentialPresentationInputDescriptors.filter { it.id == verifiedIdRequirement.id }
     if (credentialPresentationInputDescriptor.isEmpty())
