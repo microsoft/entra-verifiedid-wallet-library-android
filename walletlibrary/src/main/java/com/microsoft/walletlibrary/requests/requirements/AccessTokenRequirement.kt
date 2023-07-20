@@ -6,10 +6,12 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.util.AccessTokenRequirementNotFulfilledException
+import kotlinx.serialization.Serializable
 
 /**
  * Represents information that describes Access Token required in order to complete a VerifiedID request.
  */
+@Serializable
 class AccessTokenRequirement(
     internal val id: String,
 

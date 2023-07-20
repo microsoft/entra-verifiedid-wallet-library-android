@@ -6,15 +6,19 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.util.PinRequirementNotFulfilledException
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * Represents information that describes pin required in order to complete a VerifiedID request.
  */
+@Serializable
 class PinRequirement(
     // Length of the pin.
     val length: Int,
 
     // Type of the pin (eg. alphanumeric, numeric).
+    @SerialName("pinType")
     val type: String,
 
     // Indicates if pin is required or optional.

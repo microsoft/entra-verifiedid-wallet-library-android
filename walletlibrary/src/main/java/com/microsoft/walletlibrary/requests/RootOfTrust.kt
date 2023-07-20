@@ -5,9 +5,12 @@
 
 package com.microsoft.walletlibrary.requests
 
+import kotlinx.serialization.Serializable
+
 /**
  * Information about trust model of requester like domain url and verification status.
  */
+@Serializable
 data class RootOfTrust(
     // Source of root of trust (eg. well-known endpoint url).
     val source: String,

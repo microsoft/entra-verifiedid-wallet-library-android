@@ -2,7 +2,11 @@ package com.microsoft.walletlibrary
 
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.ClaimAttestation
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.CredentialAttestations
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.SelfIssuedAttestation
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.InputContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
@@ -19,6 +23,15 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.d
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.Logo
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
+import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
+import com.microsoft.walletlibrary.requests.RootOfTrust
+import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
+import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
+import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.*
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.coEvery
@@ -224,7 +237,8 @@ class VerifiedIdClientTest {
                 )
             )
         )
-        val expectedEncoding = """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC","issuedBy":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","logo":{"uri":"testlogo.com","description":"test logo"},"description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle","name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":"","logo":{"url":"testlogo.com","altText":"test logo"}}}"""
+        val expectedEncoding =
+            """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC","issuedBy":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","logo":{"uri":"testlogo.com","description":"test logo"},"description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle","name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":"","logo":{"url":"testlogo.com","altText":"test logo"}}}"""
 
         // Act
         val actualEncodedVc = verifiedIdClient.encode(vc)
@@ -272,7 +286,8 @@ class VerifiedIdClientTest {
                 )
             )
         )
-        val encodedVc = """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC","issuedBy":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle","name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""}}"""
+        val encodedVc =
+            """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC","issuedBy":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle","name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""}}"""
 
         // Act
         val actualDecodedVc = verifiedIdClient.decodeVerifiedId(encodedVc)
@@ -290,5 +305,93 @@ class VerifiedIdClientTest {
         assertThat(((actualDecodedVc.getOrNull() as VerifiableCredential).style as BasicVerifiedIdStyle).backgroundColor).isEqualTo("#000000")
         assertThat(((actualDecodedVc.getOrNull() as VerifiableCredential).style as BasicVerifiedIdStyle).textColor).isEqualTo("#ffffff")
         assertThat(((actualDecodedVc.getOrNull() as VerifiableCredential).style as BasicVerifiedIdStyle).issuer).isEqualTo("Test Issuer")
+    }
+
+    @Test
+    fun encodeVerifiedIdRequest_ProvideManifestIssuanceRequest_ReturnsEncodedString() {
+        // Arrange
+        val expectedClaimName = "name"
+        val expectedClaimType = "string"
+        val claimAttestation = ClaimAttestation(expectedClaimName, true, expectedClaimType)
+        val expectedIssuer = "issuer"
+        val expectedCardDescription = "card description"
+        val expectedTextColor = "#000000"
+        val expectedBackgroundColor = "#FFFFFF"
+        val expectedIssuerInCard = "Test Issuer"
+        val expectedCardTitle = "Card Title"
+        val expectedConsentTitle = "Consent Title"
+        val expectedConsentInstructions = "Consent Instructions"
+        val expectedContractUrl = "test.com"
+        val selfIssuedAttestation = SelfIssuedAttestation(required = true, claims = listOf(claimAttestation))
+        val inputContract = InputContract(
+            "",
+            "",
+            expectedIssuer,
+            CredentialAttestations(selfIssued = selfIssuedAttestation)
+        )
+        val cardDescriptor = CardDescriptor(
+            expectedCardTitle,
+            expectedIssuerInCard,
+            expectedBackgroundColor,
+            expectedTextColor,
+            null,
+            expectedCardDescription
+        )
+        val consentDescriptor =
+            ConsentDescriptor(expectedConsentTitle, expectedConsentInstructions)
+        val displayContract =
+            DisplayContract("", "", "", cardDescriptor, consentDescriptor, emptyMap())
+        val contract = VerifiableCredentialContract("", inputContract, displayContract)
+        val mockIssuanceRequest =
+            IssuanceRequest(contract, expectedContractUrl, LinkedDomainMissing)
+        val manifestIssuanceRequest = ManifestIssuanceRequest(
+            VerifiedIdManifestIssuerStyle("name", "title", "instructions"),
+            SelfAttestedClaimRequirement("id", "claim"),
+            RootOfTrust("source"),
+            BasicVerifiedIdStyle("name", "issuer", "backgroundColor", "textColor", "description"),
+            RawManifest(mockIssuanceRequest)
+        )
+        requestHandlerFactory = mockk()
+        requestResolverFactory = mockk()
+        val verifiedIdClient =
+            VerifiedIdClient(
+                requestResolverFactory,
+                requestHandlerFactory,
+                WalletLibraryLogger,
+                defaultTestSerializer
+            )
+
+        // Act
+        val encodedRequest = verifiedIdClient.encodeRequest(manifestIssuanceRequest)
+
+        // Assert
+        assertThat(encodedRequest).isInstanceOf(Result::class.java)
+        assertThat(encodedRequest.isSuccess).isTrue
+        assertThat(encodedRequest.getOrNull()).isNotNull
+    }
+
+    @Test
+    fun decodeRequest_ProvideEncodedVerifiedIdRequest_ReturnsVerifiedIdRequestObject() {
+        // Arrange
+        val encodedVerifiedIdRequest =
+            """{"requesterStyle":{"type":"com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle","name":"name","requestTitle":"title","requestInstructions":"instructions"},"requirement":{"type":"com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement","id":"id","claim":"claim"},"rootOfTrust":{"source":"source"},"verifiedIdStyle":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle","name":"name","issuer":"issuer","backgroundColor":"backgroundColor","textColor":"textColor","description":"description"},"request":{"rawRequest":{"entityName":"Test Issuer","entityIdentifier":"issuer","contract":{"id":"","input":{"id":"","credentialIssuer":"","issuer":"issuer","attestations":{"selfIssued":{"claims":[{"claim":"name","required":true,"type":"string"}],"required":true}}},"display":{"id":"","card":{"title":"Card Title","issuedBy":"Test Issuer","backgroundColor":"#FFFFFF","textColor":"#000000","description":"card description"},"consent":{"title":"Consent Title","instructions":"Consent Instructions"},"claims":{}}},"contractUrl":"test.com","linkedDomainResult":{"type":"LinkedDomainMissing"}}}}"""
+        requestHandlerFactory = mockk()
+        requestResolverFactory = mockk()
+        val verifiedIdClient =
+            VerifiedIdClient(
+                requestResolverFactory,
+                requestHandlerFactory,
+                WalletLibraryLogger,
+                defaultTestSerializer
+            )
+
+        // Act
+        val decodedRequest = verifiedIdClient.decodeRequest(encodedVerifiedIdRequest)
+
+        // Assert
+        assertThat(decodedRequest).isInstanceOf(Result::class.java)
+        assertThat(decodedRequest.isSuccess).isTrue
+        assertThat(decodedRequest.getOrNull()).isNotNull
+        assertThat(decodedRequest.getOrNull()).isInstanceOf(ManifestIssuanceRequest::class.java)
     }
 }

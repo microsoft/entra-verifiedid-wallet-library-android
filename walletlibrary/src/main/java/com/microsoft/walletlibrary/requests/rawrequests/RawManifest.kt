@@ -11,10 +11,12 @@ import com.microsoft.walletlibrary.mappings.issuance.toRequirement
 import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
 import com.microsoft.walletlibrary.mappings.toRootOfTrust
 import com.microsoft.walletlibrary.requests.IssuanceRequestContent
+import kotlinx.serialization.Serializable
 
 /**
  * Represents the raw issuance request from VC SDK.
  */
+@Serializable
 class RawManifest(
     override val rawRequest: IssuanceRequest,
     override val requestType: RequestType = RequestType.ISSUANCE
