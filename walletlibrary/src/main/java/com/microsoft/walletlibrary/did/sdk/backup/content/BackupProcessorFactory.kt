@@ -11,7 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class BackupProcessorFactory @Inject constructor(
+internal class BackupProcessorFactory @Inject constructor(
     private val microsoft2020BackupProcessor: Microsoft2020BackupProcessor
 ) : BackupProcessor {
 

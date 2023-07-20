@@ -4,7 +4,7 @@ package com.microsoft.walletlibrary.did.sdk.util.log
 
 import java.util.regex.Pattern
 
-object SdkLog {
+internal object SdkLog {
     interface Consumer {
         fun log(logLevel: Level, message: String, throwable: Throwable? = null, tag: String)
 

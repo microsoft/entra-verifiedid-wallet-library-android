@@ -7,6 +7,6 @@ package com.microsoft.walletlibrary.did.sdk.backup.content
  * The details are defined by implementations of this class.
  * e.g. a JWE Token encrypted by a password.
  */
-abstract class ProtectedBackupData {
+internal abstract class ProtectedBackupData {
     abstract fun serialize(): String
 }

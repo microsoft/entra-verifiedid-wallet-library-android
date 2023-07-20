@@ -21,7 +21,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import kotlinx.serialization.json.Json
 import retrofit2.Response
 
-class SendVerifiableCredentialIssuanceRequestNetworkOperation(
+internal class SendVerifiableCredentialIssuanceRequestNetworkOperation(
     url: String,
     serializedResponse: String,
     apiProvider: ApiProvider,

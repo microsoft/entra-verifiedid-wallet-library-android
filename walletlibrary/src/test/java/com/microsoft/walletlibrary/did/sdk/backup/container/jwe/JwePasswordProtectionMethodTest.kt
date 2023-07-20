@@ -18,13 +18,13 @@ import kotlin.test.assertTrue
 class JwePasswordProtectionMethodTest {
     private val password = "incredibly weak password, do not attempt."
 
-    val payload = Microsoft2020UnprotectedBackupData(
+    internal val payload = Microsoft2020UnprotectedBackupData(
         vcs = emptyMap(),
         vcsMetaInf = emptyMap(),
         metaInf = WalletMetadata(),
         identifiers = emptyList()
     )
-    var backup: JwePasswordProtectedBackupData
+    internal var backup: JwePasswordProtectedBackupData
 
     init {
         val token = JweToken(

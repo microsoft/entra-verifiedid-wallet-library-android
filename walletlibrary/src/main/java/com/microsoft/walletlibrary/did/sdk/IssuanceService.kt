@@ -22,8 +22,8 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperatio
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.internal.ImageLoader
 import com.microsoft.walletlibrary.did.sdk.util.Constants
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.did.sdk.util.logTime
 import kotlinx.coroutines.runBlocking
@@ -34,7 +34,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class IssuanceService @Inject constructor(
+internal class IssuanceService @Inject constructor(
     private val identifierService: IdentifierService,
     private val linkedDomainsService: LinkedDomainsService,
     private val apiProvider: ApiProvider,

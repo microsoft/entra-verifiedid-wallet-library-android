@@ -11,7 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class VerifiablePresentationFormatter @Inject constructor(
+internal class VerifiablePresentationFormatter @Inject constructor(
     private val serializer: Json,
     private val signer: TokenSigner
 ) {

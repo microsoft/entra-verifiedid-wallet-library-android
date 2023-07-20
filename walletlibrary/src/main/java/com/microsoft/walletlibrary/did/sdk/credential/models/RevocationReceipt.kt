@@ -9,7 +9,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RevocationReceipt(
+internal data class RevocationReceipt(
     @SerialName("jti")
     val jwtId: String,
     @SerialName("iss")

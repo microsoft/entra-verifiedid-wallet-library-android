@@ -5,4 +5,4 @@
 
 package com.microsoft.walletlibrary.did.sdk.datasource.network
 
-abstract class PostNetworkOperation<S, T> : BaseNetworkOperation<S, T>()
+internal abstract class PostNetworkOperation<S, T> : BaseNetworkOperation<S, T>()

@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  * @see [OpenID Spec](https://openid.net/specs/openid-connect-core-1_0.html#JWTRequests)
  */
 @Serializable
-data class PresentationResponseClaims(
+internal data class PresentationResponseClaims(
 
     @SerialName("_vp_token")
     val vpToken: VpTokenInResponse,

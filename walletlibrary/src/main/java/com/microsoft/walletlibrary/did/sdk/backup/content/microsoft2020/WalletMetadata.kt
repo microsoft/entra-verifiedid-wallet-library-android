@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("BaseWallet")
-open class WalletMetadata {
+internal open class WalletMetadata {
     var seed: String = ""
 }

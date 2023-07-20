@@ -10,7 +10,7 @@ import okhttp3.Response
 import java.io.IOException
 import javax.inject.Inject
 
-class CorrelationVectorInterceptor @Inject constructor(private val correlationVectorService: CorrelationVectorService) : Interceptor {
+internal class CorrelationVectorInterceptor @Inject constructor(private val correlationVectorService: CorrelationVectorService) : Interceptor {
 
     @Throws(IOException::class)
     override fun intercept(chain: Chain): Response {

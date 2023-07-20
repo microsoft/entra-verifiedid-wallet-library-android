@@ -20,7 +20,7 @@ import kotlinx.serialization.json.Json
 import retrofit2.Response
 
 //TODO("improve onSuccess method to create receipt when this is spec'd out")
-class FetchPresentationRequestNetworkOperation(
+internal class FetchPresentationRequestNetworkOperation(
     private val url: String,
     private val apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,

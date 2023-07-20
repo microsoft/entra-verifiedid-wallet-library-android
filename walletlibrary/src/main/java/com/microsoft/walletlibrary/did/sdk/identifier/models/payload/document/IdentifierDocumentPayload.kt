@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  * @class
  */
 @Serializable
-data class IdentifierDocumentPayload(
+internal data class IdentifierDocumentPayload(
     @SerialName("publicKeys")
     val publicKeys: List<IdentifierDocumentPublicKeyInput>,
     @SerialName("service_endpoints")

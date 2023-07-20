@@ -252,7 +252,8 @@ class PresentationServiceTest {
         runBlocking {
             val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
             assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
-            assertThat((actualRequest as Result.Failure).payload).isInstanceOf(InvalidSignatureException::class.java)
+            assertThat((actualRequest as Result.Failure).payload).isInstanceOf(
+                InvalidSignatureException::class.java)
         }
     }
 

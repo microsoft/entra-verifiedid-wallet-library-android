@@ -18,7 +18,7 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
  * https://developer.android.com/topic/libraries/architecture/room
  */
 @Database(entities = [Identifier::class], version = 2)
-abstract class SdkDatabase : RoomDatabase() {
+internal abstract class SdkDatabase : RoomDatabase() {
 
     abstract fun identifierDao(): IdentifierDao
 }

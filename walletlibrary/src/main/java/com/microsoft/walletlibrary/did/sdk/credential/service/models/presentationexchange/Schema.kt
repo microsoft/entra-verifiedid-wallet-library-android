@@ -9,7 +9,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Schema(
+internal data class Schema(
     @SerialName("uri")
     val uri: String
 )

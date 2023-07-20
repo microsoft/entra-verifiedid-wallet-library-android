@@ -4,7 +4,7 @@ package com.microsoft.walletlibrary.did.sdk.crypto.spi
 
 import java.security.spec.KeySpec
 
-class EcPairwisePrivateKeySpec(
+internal class EcPairwisePrivateKeySpec(
     val personaSeed: ByteArray,
     val peerDid: String
 ) : KeySpec

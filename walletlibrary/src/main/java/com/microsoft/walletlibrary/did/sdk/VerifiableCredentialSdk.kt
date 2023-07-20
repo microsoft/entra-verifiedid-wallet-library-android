@@ -28,25 +28,25 @@ import kotlinx.serialization.modules.SerializersModule
  *     return VerifiableCredentialSdk.issuanceService
  * }
  */
-object VerifiableCredentialSdk {
+internal object VerifiableCredentialSdk {
 
     @JvmStatic
-    lateinit var issuanceService: IssuanceService
+    internal lateinit var issuanceService: IssuanceService
 
     @JvmStatic
-    lateinit var presentationService: PresentationService
+    internal lateinit var presentationService: PresentationService
 
     @JvmStatic
-    lateinit var revocationService: RevocationService
+    internal lateinit var revocationService: RevocationService
 
     @JvmStatic
-    lateinit var correlationVectorService: CorrelationVectorService
+    internal lateinit var correlationVectorService: CorrelationVectorService
 
     @JvmStatic
-    lateinit var backupService: BackupService
+    internal lateinit var backupService: BackupService
 
     @JvmStatic
-    lateinit var identifierService: IdentifierService
+    internal lateinit var identifierService: IdentifierService
 
 
     /**
@@ -59,19 +59,22 @@ object VerifiableCredentialSdk {
      * @param registrationUrl url used to register DID
      * @param resolverUrl url used to resolve DID
      */
+    // TODO(Change how version numbers are passed for headers when HTTP client layer is refactored)
     @JvmOverloads
     @JvmStatic
-    fun init(
+    internal fun init(
         context: Context,
         userAgentInfo: String = "",
         logConsumer: SdkLog.Consumer = DefaultLogConsumer(),
         polymorphicJsonSerializers: SerializersModule = Json.serializersModule,
         registrationUrl: String = "",
-        resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers"
+        resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers",
+        walletLibraryVersionInfo: String = ""
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
             .userAgentInfo(userAgentInfo)
+            .walletLibraryVersionInfo(walletLibraryVersionInfo)
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
             .polymorphicJsonSerializer(polymorphicJsonSerializers)

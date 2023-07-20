@@ -8,7 +8,11 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.RecyclerView
-import com.microsoft.walletlibrary.requests.requirements.*
+import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
+import com.microsoft.walletlibrary.requests.requirements.PinRequirement
+import com.microsoft.walletlibrary.requests.requirements.Requirement
+import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
+import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrarydemo.R
 import com.microsoft.walletlibrarydemo.databinding.RequirementTextRowBinding
 import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedclaimRowBinding

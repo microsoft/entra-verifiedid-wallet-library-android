@@ -8,7 +8,7 @@ import retrofit2.http.GET
 import retrofit2.http.Url
 import java.net.URI
 
-interface LinkedDomainsApis {
+internal interface LinkedDomainsApis {
 
     @GET
     suspend fun fetchWellKnownConfigDocument(@Url overrideUrl: URI): Response<LinkedDomainsResponse>

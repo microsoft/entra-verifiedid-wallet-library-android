@@ -16,9 +16,9 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentatio
  * @param request request from which response is created
  * @param audience entity to send the response to.
  */
-sealed class Response(open val request: Request, val audience: String)
+internal sealed class Response(open val request: Request, val audience: String)
 
-class IssuanceResponse(override val request: IssuanceRequest) :
+internal class IssuanceResponse(override val request: IssuanceRequest) :
     Response(request, request.contract.input.credentialIssuer) {
     var issuancePin: IssuancePin? = null
     val requestedVcMap: RequestedVcMap = mutableMapOf()
@@ -27,7 +27,7 @@ class IssuanceResponse(override val request: IssuanceRequest) :
     val requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap = mutableMapOf()
 }
 
-class PresentationResponse(override val request: PresentationRequest) :
+internal class PresentationResponse(override val request: PresentationRequest) :
     Response(request, request.content.clientId) {
     val requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf()
     val requestedVcPresentationDefinitionId: String = request.getPresentationDefinition().id
@@ -36,5 +36,5 @@ class PresentationResponse(override val request: PresentationRequest) :
 typealias RequestedIdTokenMap = MutableMap<String, String>
 typealias RequestedAccessTokenMap = MutableMap<String, String>
 typealias RequestedSelfAttestedClaimMap = MutableMap<String, String>
-typealias RequestedVcMap = MutableMap<PresentationAttestation, VerifiableCredential>
-typealias RequestedVcPresentationSubmissionMap = MutableMap<CredentialPresentationInputDescriptor, VerifiableCredential>
+internal typealias RequestedVcMap = MutableMap<PresentationAttestation, VerifiableCredential>
+internal typealias RequestedVcPresentationSubmissionMap = MutableMap<CredentialPresentationInputDescriptor, VerifiableCredential>

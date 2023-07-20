@@ -9,6 +9,6 @@ import kotlinx.serialization.Serializable
  * On the other hand, Backup classes represent the same Backups but imported into the class model of the SDK.
  */
 @Serializable
-abstract class UnprotectedBackupData {
+internal abstract class UnprotectedBackupData {
     abstract val type: String
 }

@@ -20,7 +20,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class Microsoft2020BackupProcessor @Inject constructor(
+internal class Microsoft2020BackupProcessor @Inject constructor(
     private val identifierService: IdentifierService,
     private val identityRepository: IdentifierRepository,
     private val keyStore: EncryptedKeyStore,
@@ -75,7 +75,8 @@ class Microsoft2020BackupProcessor @Inject constructor(
         backup.vcs.forEach { mapEntry ->
             val (jti, rawVcToken) = mapEntry
             val jwsToken = JwsToken.deserialize(rawVcToken)
-            val verifiableCredentialContent = jsonSerializer.decodeFromString(VerifiableCredentialContent.serializer(), jwsToken.content())
+            val verifiableCredentialContent = jsonSerializer.decodeFromString(
+                VerifiableCredentialContent.serializer(), jwsToken.content())
             val vc = VerifiableCredential(verifiableCredentialContent.jti, rawVcToken, verifiableCredentialContent)
             if (backup.vcsMetaInf[jti] == null) throw BackupException("Corrupt backup. MetaInf for $jti is missing.")
             vcList.add(Pair(vc, backup.vcsMetaInf[jti]!!))

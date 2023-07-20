@@ -70,7 +70,8 @@ class IdentifierServiceTest {
         runBlocking {
             val actualIdentifier = identifierManager.getIdentifierById("")
             assertThat(actualIdentifier).isInstanceOf(Result.Failure::class.java)
-            assertThat((actualIdentifier as Result.Failure).payload).isInstanceOf(RepositoryException::class.java)
+            assertThat((actualIdentifier as Result.Failure).payload).isInstanceOf(
+                RepositoryException::class.java)
         }
     }
 }

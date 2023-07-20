@@ -15,7 +15,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class TokenSigner @Inject constructor(
+internal class TokenSigner @Inject constructor(
     private val keyStore: EncryptedKeyStore
 ) {
     fun signWithIdentifier(payload: String, identifier: Identifier): String {

@@ -4,7 +4,7 @@ package com.microsoft.walletlibrary.did.sdk.util.log
 
 import android.util.Log
 
-class DefaultLogConsumer : SdkLog.Consumer {
+internal class DefaultLogConsumer : SdkLog.Consumer {
 
     override fun log(logLevel: SdkLog.Level, message: String, throwable: Throwable?, tag: String) {
         if (throwable == null) {

@@ -2,7 +2,7 @@
 
 package com.microsoft.walletlibrary.did.sdk.credential.service.validators
 
-interface DomainLinkageCredentialValidator {
+internal interface DomainLinkageCredentialValidator {
 
     suspend fun validate(domainLinkageCredential: String, rpDid: String, rpDomain: String): Boolean
 }

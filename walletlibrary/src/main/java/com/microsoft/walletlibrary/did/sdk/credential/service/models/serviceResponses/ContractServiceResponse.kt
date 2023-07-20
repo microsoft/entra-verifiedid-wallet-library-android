@@ -5,6 +5,6 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceRes
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ContractServiceResponse(
+internal data class ContractServiceResponse(
     val token: String
 )

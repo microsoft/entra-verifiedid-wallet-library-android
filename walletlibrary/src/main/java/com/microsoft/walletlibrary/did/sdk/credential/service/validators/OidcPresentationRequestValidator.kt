@@ -21,7 +21,8 @@ import javax.inject.Singleton
  * Validates an OpenID Connect Request.
  */
 @Singleton
-class OidcPresentationRequestValidator @Inject constructor(private val jwtValidator: JwtValidator) : PresentationRequestValidator {
+internal class OidcPresentationRequestValidator @Inject constructor(private val jwtValidator: JwtValidator) :
+    PresentationRequestValidator {
 
     override suspend fun validate(request: PresentationRequest) {
         checkResponseMode(request.content.responseMode)

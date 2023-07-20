@@ -25,7 +25,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class IdentifierCreator @Inject constructor(
+internal class IdentifierCreator @Inject constructor(
     private val payloadProcessor: SidetreePayloadProcessor,
     private val sideTreeHelper: SideTreeHelper,
     private val serializer: Json,

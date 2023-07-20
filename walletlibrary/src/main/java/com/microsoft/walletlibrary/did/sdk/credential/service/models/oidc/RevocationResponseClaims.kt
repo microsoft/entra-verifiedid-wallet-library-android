@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RevocationResponseClaims(
+internal data class RevocationResponseClaims(
     @SerialName("rp")
     val rpList: List<String> = emptyList(),
 

@@ -8,6 +8,6 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceRes
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class IssuanceServiceResponse(
+internal data class IssuanceServiceResponse(
     val vc: String
 )

@@ -14,12 +14,12 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentatio
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class Request(val entityName: String, val entityIdentifier: String) {
+internal sealed class Request(val entityName: String, val entityIdentifier: String) {
     abstract val linkedDomainResult: LinkedDomainResult
 }
 
 @Serializable
-class IssuanceRequest(
+internal class IssuanceRequest(
     val contract: VerifiableCredentialContract,
     val contractUrl: String,
     override val linkedDomainResult: LinkedDomainResult
@@ -31,7 +31,7 @@ class IssuanceRequest(
 }
 
 @Serializable
-class PresentationRequest(
+internal class PresentationRequest(
     val content: PresentationRequestContent,
     override val linkedDomainResult: LinkedDomainResult
 ) : Request(content.registration.clientName, content.clientId) {

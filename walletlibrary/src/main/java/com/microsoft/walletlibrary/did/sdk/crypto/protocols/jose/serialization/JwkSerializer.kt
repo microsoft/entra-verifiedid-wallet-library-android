@@ -22,7 +22,7 @@ import kotlinx.serialization.json.Json
  * Please refer to kotlin serialization docs for more info:
  * https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/serializers.md#composite-serializer-via-surrogate
  */
-object JwkSerializer : KSerializer<JWK> {
+internal object JwkSerializer : KSerializer<JWK> {
     override val descriptor: SerialDescriptor = JwkSurrogate.serializer().descriptor
     override fun serialize(encoder: Encoder, value: JWK) {
         val ecJwk = value as? ECKey

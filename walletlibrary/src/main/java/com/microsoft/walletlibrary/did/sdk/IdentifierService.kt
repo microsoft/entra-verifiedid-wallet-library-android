@@ -12,8 +12,8 @@ import com.microsoft.walletlibrary.did.sdk.identifier.IdentifierCreator
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants.MAIN_IDENTIFIER_REFERENCE
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.RepositoryException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import javax.inject.Inject
@@ -23,7 +23,7 @@ import javax.inject.Singleton
  * This class provides methods to create, update and manage decentralized identifiers.
  */
 @Singleton
-class IdentifierService @Inject constructor(
+internal class IdentifierService @Inject constructor(
     private val identifierRepository: IdentifierRepository,
     private val identifierCreator: IdentifierCreator,
     private val keyStore: EncryptedKeyStore
