@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
-package com.microsoft.did.sdk.datasource.db.dao
+package com.microsoft.walletlibrary.did.sdk.datasource.db.dao
 
 import android.content.Context
 import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDatabase
-import com.microsoft.walletlibrary.did.sdk.datasource.db.dao.IdentifierDao
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat

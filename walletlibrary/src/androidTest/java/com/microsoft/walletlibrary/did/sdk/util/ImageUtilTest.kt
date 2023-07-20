@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.util
+package com.microsoft.walletlibrary.did.sdk.util
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import com.microsoft.walletlibrary.did.sdk.util.ImageUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
