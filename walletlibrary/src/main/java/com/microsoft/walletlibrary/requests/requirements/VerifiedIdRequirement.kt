@@ -21,7 +21,7 @@ class VerifiedIdRequirement(
     val types: List<String>,
 
     // Constraint that represents how the requirement is fulfilled
-    private val constraint: VerifiedIdConstraint? = null,
+    private val constraint: VerifiedIdConstraint,
 
     // Indicates if the requirement must be encrypted.
     internal val encrypted: Boolean = false,
@@ -43,7 +43,7 @@ class VerifiedIdRequirement(
             return Result.failure(VerifiedIdRequirementNotFulfilledException("VerifiedIdRequirement has not been fulfilled."))
         verifiedId?.let {
             try {
-                constraint?.matches(it)
+                constraint.matches(it)
             } catch (constraintException: RequirementValidationException) {
                 return Result.failure(constraintException)
             }
@@ -54,7 +54,7 @@ class VerifiedIdRequirement(
     // Fulfills the requirement in the request with specified value.
     fun fulfill(selectedVerifiedId: VerifiedId): Result<Unit> {
         try {
-            constraint?.matches(selectedVerifiedId)
+            constraint.matches(selectedVerifiedId)
         } catch (constraintException: RequirementValidationException) {
             return Result.failure(constraintException)
         }
@@ -64,6 +64,6 @@ class VerifiedIdRequirement(
 
     // Retrieves list of Verified IDs from the provided list that matches this requirement.
     fun getMatches(verifiedIds: List<VerifiedId>): List<VerifiedId> {
-        return verifiedIds.filter { constraint?.doesMatch(it) ?: true }
+        return verifiedIds.filter { constraint.doesMatch(it) }
     }
 }

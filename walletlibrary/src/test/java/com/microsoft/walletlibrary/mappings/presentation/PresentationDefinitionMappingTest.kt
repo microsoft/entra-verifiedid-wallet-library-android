@@ -26,7 +26,7 @@ class PresentationDefinitionMappingTest {
         for (inputDescriptor in expectedInputDescriptors) {
             val expectedSchema = mockk<Schema>()
             every { inputDescriptor.schemas } returns listOf(expectedSchema)
-            every { expectedSchema.uri } returns ""
+            every { expectedSchema.uri } returns "TestSchemaUri"
             every { inputDescriptor.id } returns ""
             every { inputDescriptor.purpose } returns ""
             every { inputDescriptor.issuanceMetadataList } returns emptyList()

@@ -16,6 +16,8 @@ import com.microsoft.walletlibrary.requests.requirements.constraints.VcPathRegex
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.VerifiedIdConstraint
 import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
+import com.microsoft.walletlibrary.util.VcTypeConstraintsMissingException
+import okhttp3.internal.filterList
 
 /**
  * Maps CredentialPresentationInputDescriptor object of presentation in SDK to VerifiedIdRequirement object in library.
@@ -34,20 +36,17 @@ internal fun CredentialPresentationInputDescriptor.toVerifiedIdRequirement(): Ve
     )
 }
 
-internal fun CredentialPresentationInputDescriptor.toConstraint(): VerifiedIdConstraint? {
+internal fun CredentialPresentationInputDescriptor.toConstraint(): VerifiedIdConstraint {
     val vcTypeConstraint =
-        if (schemas.isNotEmpty()) toVcTypeConstraint(schemas.map { it.uri }) else null
+        if (schemas.isNotEmpty()) toVcTypeConstraint(schemas.map { it.uri })
+        else throw VcTypeConstraintsMissingException("There is no VerifiedId Type in credential input descriptor.")
     val vcPathRegexConstraint = constraints?.fields?.let { toVcPathRegexConstraint(it) }
-    if (vcPathRegexConstraint == null && vcTypeConstraint == null) return null
-    if (vcTypeConstraint != null) {
-        vcPathRegexConstraint?.let {
-            return GroupConstraint(
-                listOf(vcTypeConstraint, vcPathRegexConstraint),
-                GroupConstraintOperator.ALL
-            )
-        } ?: return vcTypeConstraint
-    }
-    return vcPathRegexConstraint
+    vcPathRegexConstraint?.let {
+        return GroupConstraint(
+            listOf(vcTypeConstraint, vcPathRegexConstraint),
+            GroupConstraintOperator.ALL
+        )
+    } ?: return vcTypeConstraint
 }
 
 internal fun toVcPathRegexConstraint(fields: List<Fields>): VerifiedIdConstraint? {
@@ -68,8 +67,8 @@ internal fun toVcPathRegexConstraint(fields: List<Fields>): VerifiedIdConstraint
     return GroupConstraint(vcPathRegexConstraints, GroupConstraintOperator.ALL)
 }
 
-internal fun toVcTypeConstraint(vcTypes: List<String>): VerifiedIdConstraint? {
-    if (vcTypes.isEmpty()) return null
+internal fun toVcTypeConstraint(vcTypes: List<String>): VerifiedIdConstraint {
+    if (vcTypes.isEmpty() || vcTypes.filterList { isNotBlank() }.isEmpty()) throw VcTypeConstraintsMissingException("There is no VerifiedId Type in credential input descriptor.")
     if (vcTypes.size == 1) return VcTypeConstraint(vcTypes.first())
     val vcTypeConstraints = mutableListOf<VcTypeConstraint>()
     vcTypes.forEach { vcTypeConstraints.add(VcTypeConstraint(it)) }

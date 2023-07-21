@@ -65,6 +65,8 @@ class NoMatchForAnyConstraintsException(message: String = "", val exceptions: Li
 
 class NoMatchForAtLeastOneConstraintException(message: String = "", val exceptions: List<Throwable> = emptyList(), retryable: Boolean = false): RequirementValidationException(message, retryable = retryable)
 
+class VcTypeConstraintsMissingException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
+
 class VerifiedIdRequirementMissingIdException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
 
 class VerifiedIdRequirementIdConflictException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
