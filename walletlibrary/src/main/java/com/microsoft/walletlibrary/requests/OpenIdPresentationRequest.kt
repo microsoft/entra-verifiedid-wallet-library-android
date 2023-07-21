@@ -44,9 +44,11 @@ internal class OpenIdPresentationRequest(
     }
 
     override suspend fun cancel(message: String?): VerifiedIdResult<Unit> {
-        return UserCanceledException(
-            message ?: "User Canceled",
-            VerifiedIdExceptions.USER_CANCELED_EXCEPTION.value
-        ).toVerifiedIdResult()
+        return getResult {
+            throw UserCanceledException(
+                message ?: "User Canceled",
+                VerifiedIdExceptions.USER_CANCELED_EXCEPTION.value
+            )
+        }
     }
 }

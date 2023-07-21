@@ -12,19 +12,18 @@ internal suspend fun <T> getResult(block: suspend () -> T): VerifiedIdResult<T> 
     } catch (verifiedIdException: VerifiedIdException) {
         verifiedIdException.toVerifiedIdResult()
     } catch (exception: WalletLibraryException) {
-        when (exception.cause) {
+        when (val innerException = exception.cause) {
             is NetworkException -> {
-                val networkException = exception.cause as NetworkException
                 val networkingException = NetworkingException(
                     exception.message ?: "",
                     VerifiedIdExceptions.NETWORKING_EXCEPTION.value,
-                    networkException.correlationVector,
-                    networkException.errorCode,
-                    networkException.innerErrorCodes,
-                    networkException.errorBody,
-                    networkException.retryable
+                    innerException.correlationVector,
+                    innerException.errorCode,
+                    innerException.innerErrorCodes,
+                    innerException.errorBody,
+                    innerException.retryable
                 )
-                networkingException.cause = networkException
+                networkingException.cause = innerException
                 networkingException.toVerifiedIdResult()
             }
             is SdkException -> {
