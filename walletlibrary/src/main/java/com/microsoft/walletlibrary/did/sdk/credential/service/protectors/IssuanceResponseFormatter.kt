@@ -23,7 +23,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class IssuanceResponseFormatter @Inject constructor(
+internal class IssuanceResponseFormatter @Inject constructor(
     private val serializer: Json,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
     private val signer: TokenSigner,

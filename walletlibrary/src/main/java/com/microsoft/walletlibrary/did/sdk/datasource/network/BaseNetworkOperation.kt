@@ -29,7 +29,7 @@ import java.io.IOException
  * In default methods, S == T, for no transformation takes place.
  * fire method will just return Result.Success(responseBody: S)
  */
-abstract class BaseNetworkOperation<S, T> {
+internal abstract class BaseNetworkOperation<S, T> {
 
     abstract val call: suspend () -> Response<S>
 

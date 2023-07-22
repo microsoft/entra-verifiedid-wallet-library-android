@@ -20,6 +20,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.validators.Present
 import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.walletlibrary.did.sdk.datasource.network.interceptors.CorrelationVectorInterceptor
 import com.microsoft.walletlibrary.did.sdk.datasource.network.interceptors.UserAgentInterceptor
+import com.microsoft.walletlibrary.did.sdk.datasource.network.interceptors.WalletLibraryHeaderInterceptor
 import com.microsoft.walletlibrary.did.sdk.identifier.registrars.Registrar
 import com.microsoft.walletlibrary.did.sdk.identifier.registrars.SidetreeRegistrar
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
@@ -51,12 +52,13 @@ import javax.inject.Singleton
  * https://developer.android.com/training/dependency-injection
  */
 @Module
-class SdkModule {
+internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultOkHttpClient(
+    internal fun defaultOkHttpClient(
         @Named("userAgentInfo") userAgentInfo: String,
+        @Named("walletLibraryVersionInfo") walletLibraryVersionInfo: String,
         correlationVectorService: CorrelationVectorService
     ): OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.d(it) }
@@ -65,6 +67,7 @@ class SdkModule {
             .followRedirects(false)
             .addInterceptor(httpLoggingInterceptor)
             .addInterceptor(UserAgentInterceptor(userAgentInfo))
+            .addInterceptor(WalletLibraryHeaderInterceptor(walletLibraryVersionInfo))
             .addInterceptor(CorrelationVectorInterceptor(correlationVectorService))
             .build()
     }

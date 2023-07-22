@@ -9,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class JwtDomainLinkageCredentialValidator @Inject constructor(
+internal class JwtDomainLinkageCredentialValidator @Inject constructor(
     private val jwtValidator: JwtValidator,
     private val serializer: Json
 ) : DomainLinkageCredentialValidator {

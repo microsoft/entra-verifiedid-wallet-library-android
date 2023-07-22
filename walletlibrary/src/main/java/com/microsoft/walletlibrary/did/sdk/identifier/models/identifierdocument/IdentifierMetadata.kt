@@ -8,7 +8,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class IdentifierMetadata(
+internal data class IdentifierMetadata(
     @SerialName("operationPublicKeys")
     val operationPublicKeys: List<IdentifierDocumentPublicKey>? = null,
     @Serializable(with = JwkSerializer::class)

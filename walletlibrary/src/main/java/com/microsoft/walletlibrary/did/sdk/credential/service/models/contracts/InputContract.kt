@@ -8,7 +8,7 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.CredentialAttestations
 import kotlinx.serialization.Serializable
 
-const val INPUT = "input"
+internal const val INPUT = "input"
 
 /**
  * a subset of the model in the Rules file for client consumption.
@@ -16,7 +16,7 @@ const val INPUT = "input"
  * where to obtain the inputs and the endpoint to call to obtain a Verifiable Credential.
  */
 @Serializable
-data class InputContract(
+internal data class InputContract(
 
     // Value should be set to "input".
     val id: String = INPUT,

@@ -8,12 +8,12 @@ package com.microsoft.walletlibrary.did.sdk.identifier.resolvers
 import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import javax.inject.Inject
 import javax.inject.Named
 
-class Resolver @Inject constructor(
+internal class Resolver @Inject constructor(
     @Named("resolverUrl") private val baseUrl: String,
     private val identifierRepository: IdentifierRepository
 ) {

@@ -13,7 +13,7 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Url
 
-interface PresentationApis {
+internal interface PresentationApis {
     
     @Headers("prefer: JWT-interop-profile-0.0.1")
     @GET

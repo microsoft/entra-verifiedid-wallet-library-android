@@ -19,7 +19,7 @@ import javax.inject.Singleton
  * Class that forms Response Contents Properly.
  */
 @Singleton
-class RevocationResponseFormatter @Inject constructor(
+internal class RevocationResponseFormatter @Inject constructor(
     private val serializer: Json,
     private val signer: TokenSigner,
     private val keyStore: EncryptedKeyStore

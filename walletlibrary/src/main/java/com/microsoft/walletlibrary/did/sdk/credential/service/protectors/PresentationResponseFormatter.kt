@@ -20,7 +20,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class PresentationResponseFormatter @Inject constructor(
+internal class PresentationResponseFormatter @Inject constructor(
     private val serializer: Json,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
     private val signer: TokenSigner

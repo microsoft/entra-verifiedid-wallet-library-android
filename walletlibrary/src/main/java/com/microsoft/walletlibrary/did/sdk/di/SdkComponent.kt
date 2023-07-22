@@ -62,6 +62,9 @@ internal interface SdkComponent {
         fun userAgentInfo(@Named("userAgentInfo") userAgentInfo: String): Builder
 
         @BindsInstance
+        fun walletLibraryVersionInfo(@Named("walletLibraryVersionInfo") walletLibraryVersionInfo: String): Builder
+
+        @BindsInstance
         fun polymorphicJsonSerializer(@Named("polymorphicJsonSerializer") jsonSerializer: SerializersModule): Builder
     }
 }

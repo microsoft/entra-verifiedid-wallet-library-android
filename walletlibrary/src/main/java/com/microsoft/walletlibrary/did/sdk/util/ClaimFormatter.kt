@@ -7,7 +7,7 @@ package com.microsoft.walletlibrary.did.sdk.util
 
 import java.text.DateFormat
 
-object ClaimFormatter {
+internal object ClaimFormatter {
 
     enum class ClaimType {
         DATE,

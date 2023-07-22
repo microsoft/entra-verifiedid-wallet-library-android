@@ -8,4 +8,4 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceRes
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RevocationServiceResponse(val receipt: HashMap<String, String>)
+internal data class RevocationServiceResponse(val receipt: HashMap<String, String>)

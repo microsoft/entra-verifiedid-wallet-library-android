@@ -14,7 +14,7 @@ import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.util.Base64URL
 import java.security.PublicKey
 
-class JwsToken constructor(
+internal class JwsToken constructor(
     private var jwsObject: JWSObject
 ) {
 

@@ -5,10 +5,10 @@
 
 package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 
-import java.util.Date
+import java.util.*
 import kotlin.math.floor
 
-fun createIssuedAndExpiryTime(expiryInSeconds: Int): Pair<Long, Long> {
+internal fun createIssuedAndExpiryTime(expiryInSeconds: Int): Pair<Long, Long> {
     val currentTime = Date().time
     val issuedTime = floor(currentTime / 1000f).toLong()
     val expiryInMilliseconds = 1000 * expiryInSeconds

@@ -8,15 +8,15 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.RevocationR
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.RevocationResponseFormatter
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.RevocationException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RevocationService @Inject constructor(
+internal class RevocationService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val identifierService: IdentifierService,
     private val revocationResponseFormatter: RevocationResponseFormatter,

@@ -22,7 +22,7 @@ import kotlinx.serialization.json.JsonPrimitive
  * @see [Presentation Exchange] (https://identity.foundation/presentation-exchange/#presentation-definition)
  */
 @Serializer(forClass = List::class)
-class PresentationRequestFormatSerializer(@Suppress("UNUSED_PARAMETER") dataSerializer: KSerializer<String>) :
+internal class PresentationRequestFormatSerializer(@Suppress("UNUSED_PARAMETER") dataSerializer: KSerializer<String>) :
     KSerializer<List<String>> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("format", PrimitiveKind.STRING)
 

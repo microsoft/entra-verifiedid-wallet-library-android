@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  * @see [OpenID Spec](https://openid.net/specs/openid-connect-core-1_0.html)
  */
 @Serializable
-data class Registration(
+internal data class Registration(
     @SerialName("client_name")
     val clientName: String = "",
 

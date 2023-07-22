@@ -14,7 +14,7 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Url
 
-interface IssuanceApis {
+internal interface IssuanceApis {
 
     @Headers("x-ms-sign-contract: true")
     @GET

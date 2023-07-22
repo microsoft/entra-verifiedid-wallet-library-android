@@ -8,14 +8,14 @@ import com.microsoft.walletlibrary.did.sdk.backup.container.ProtectionMethod
 import com.microsoft.walletlibrary.did.sdk.backup.content.BackupProcessorFactory
 import com.microsoft.walletlibrary.did.sdk.backup.content.ProtectedBackupData
 import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class BackupService @Inject constructor(
+internal class BackupService @Inject constructor(
     private val backupParser: BackupParser,
     private val backupProcessorFactory: BackupProcessorFactory,
     private val identityRepository: IdentifierRepository,

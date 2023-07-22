@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class IssuanceCompletionResponse(
+internal class IssuanceCompletionResponse(
     var code: IssuanceCompletionCode,
     val state: String,
     var details: IssuanceCompletionErrorDetails? = null

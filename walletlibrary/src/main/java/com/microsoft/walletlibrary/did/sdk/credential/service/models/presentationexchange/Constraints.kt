@@ -5,6 +5,6 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.models.presentati
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Constraints(
+internal data class Constraints(
     var fields: List<Fields> = emptyList()
 )

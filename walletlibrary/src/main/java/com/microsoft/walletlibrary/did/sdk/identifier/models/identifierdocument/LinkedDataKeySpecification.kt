@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument
 
-enum class LinkedDataKeySpecification(val values: List<String>) {
+internal enum class LinkedDataKeySpecification(val values: List<String>) {
     Ed25519Signature2018(listOf("Ed25519VerificationKey2018", "Ed25519Signature2018")),
     RsaSignature2018(listOf("RsaVerificationKey2018", "RsaSignature2018")),
     EcdsaKoblitzSignature2016(listOf("EcdsaKoblitzSignature2016")),

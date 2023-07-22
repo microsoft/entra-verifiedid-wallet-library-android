@@ -11,7 +11,7 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.
 import retrofit2.Response
 import javax.inject.Inject
 
-class ResolveIdentifierNetworkOperation @Inject constructor(apiProvider: ApiProvider, url: String, val identifier: String) :
+internal class ResolveIdentifierNetworkOperation @Inject constructor(apiProvider: ApiProvider, url: String, val identifier: String) :
     GetNetworkOperation<IdentifierResponse, IdentifierResponse>() {
 
     override val call: suspend () -> Response<IdentifierResponse> = { apiProvider.identifierApi.resolveIdentifier("$url/$identifier") }

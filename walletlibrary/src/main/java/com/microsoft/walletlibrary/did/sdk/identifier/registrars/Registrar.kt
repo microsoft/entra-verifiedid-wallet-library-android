@@ -12,7 +12,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
  * @interface defining methods and properties
  * to be implemented by specific registration methods.
  */
-abstract class Registrar {
+internal abstract class Registrar {
 
     /**
      * @return Identifier that was created.

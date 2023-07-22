@@ -7,12 +7,12 @@ import com.microsoft.walletlibrary.did.sdk.util.MetricsConstants.NAME
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import retrofit2.Response
 
-object MetricsConstants {
+internal object MetricsConstants {
     const val NAME = "eventName"
     const val DURATION = "duration_ms"
 }
 
-inline fun <R> logTime(name: String, block: () -> R): R {
+internal inline fun <R> logTime(name: String, block: () -> R): R {
     val start = System.currentTimeMillis()
     val result = block()
     val elapsedTime = System.currentTimeMillis() - start
@@ -25,7 +25,7 @@ inline fun <R> logTime(name: String, block: () -> R): R {
     return result
 }
 
-inline fun <S> logNetworkTime(name: String, block: () -> Response<S>): Response<S> {
+internal inline fun <S> logNetworkTime(name: String, block: () -> Response<S>): Response<S> {
     val start = System.currentTimeMillis()
     val result = block()
     val elapsedTime = System.currentTimeMillis() - start

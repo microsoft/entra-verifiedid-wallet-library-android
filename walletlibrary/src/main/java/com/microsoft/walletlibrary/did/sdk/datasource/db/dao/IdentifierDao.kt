@@ -7,7 +7,7 @@ import androidx.room.Query
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 
 @Dao
-interface IdentifierDao {
+internal interface IdentifierDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(identifier: Identifier)

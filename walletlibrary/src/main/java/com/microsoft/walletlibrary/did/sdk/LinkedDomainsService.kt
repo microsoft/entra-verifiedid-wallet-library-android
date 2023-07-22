@@ -11,16 +11,16 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.linkedDomainsOperations.FetchWellKnownConfigDocumentNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.map
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class LinkedDomainsService @Inject constructor(
+internal class LinkedDomainsService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val resolver: Resolver,
     private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator

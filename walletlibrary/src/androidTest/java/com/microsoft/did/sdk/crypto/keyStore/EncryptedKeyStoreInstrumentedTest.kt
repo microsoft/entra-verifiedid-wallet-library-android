@@ -3,12 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.did.sdk.crypto.keyStore
+package com.microsoft.walletlibrary.did.sdk.crypto.keyStore
 
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.KeyStoreException
-import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.nimbusds.jose.jwk.JWK
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

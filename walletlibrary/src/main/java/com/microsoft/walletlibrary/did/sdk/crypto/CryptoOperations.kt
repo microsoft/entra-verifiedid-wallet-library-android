@@ -21,7 +21,7 @@ import javax.crypto.Cipher.ENCRYPT_MODE
 import javax.crypto.Mac
 import javax.crypto.SecretKey
 
-object CryptoOperations {
+internal object CryptoOperations {
 
     fun sign(digest: ByteArray, signingKey: PrivateKey, alg: SigningAlgorithm): ByteArray {
         val signer = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)
