@@ -16,7 +16,10 @@ import kotlinx.serialization.Serializable
 /**
  * Represents the raw issuance request from VC SDK.
  */
+<<<<<<< HEAD
 @Serializable
+=======
+>>>>>>> dev
 internal class RawManifest(
     override val rawRequest: IssuanceRequest,
     override val requestType: RequestType = RequestType.ISSUANCE

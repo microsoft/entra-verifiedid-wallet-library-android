@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary
 
+<<<<<<< HEAD
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceRequest
@@ -9,6 +10,20 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestation
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.SelfIssuedAttestation
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.InputContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+=======
+import com.microsoft.did.sdk.CorrelationVectorService
+import com.microsoft.did.sdk.VerifiableCredentialSdk
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
+import com.microsoft.did.sdk.credential.service.PresentationRequest
+import com.microsoft.did.sdk.credential.service.models.contracts.InputContract
+import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.did.sdk.credential.service.models.contracts.display.CardDescriptor
+import com.microsoft.did.sdk.credential.service.models.contracts.display.ClaimDescriptor
+import com.microsoft.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
+import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
+import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
+>>>>>>> dev
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
@@ -18,6 +33,7 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
+<<<<<<< HEAD
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.CardDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ClaimDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
@@ -33,15 +49,27 @@ import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.*
+=======
+import com.microsoft.walletlibrary.util.HandlerMissingException
+import com.microsoft.walletlibrary.util.ResolverMissingException
+import com.microsoft.walletlibrary.util.UnSupportedProtocolException
+import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
+import com.microsoft.walletlibrary.util.UnspecifiedVerifiedIdException
+import com.microsoft.walletlibrary.util.VerifiedIdResult
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
+import com.microsoft.walletlibrary.util.defaultTestSerializer
+>>>>>>> dev
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class VerifiedIdClientTest {
+    private val mockCorrelationVectorService: CorrelationVectorService = mockk()
     private val openIdRequestHandler: OpenIdRequestHandler = mockk()
     private val openIdURLRequestResolver: OpenIdURLRequestResolver = mockk()
     private val presentationRequest: PresentationRequest = mockk()
@@ -49,6 +77,16 @@ class VerifiedIdClientTest {
     private val verifiedIdOpenIdJwtRawRequest = VerifiedIdOpenIdJwtRawRequest(presentationRequest)
     private lateinit var requestHandlerFactory: RequestHandlerFactory
     private lateinit var requestResolverFactory: RequestResolverFactory
+
+    init {
+        setupInput()
+    }
+
+    private fun setupInput() {
+        mockkStatic(VerifiableCredentialSdk::class)
+        every { VerifiableCredentialSdk.correlationVectorService } returns mockCorrelationVectorService
+        every { mockCorrelationVectorService.startNewFlowAndSave() } returns ""
+    }
 
     @Test
     fun createRequest_SuccessFromResolverAndHandler_ReturnsVerifiedIdRequest() {
@@ -73,7 +111,7 @@ class VerifiedIdClientTest {
             val verifiedIdRequest = verifiedIdClient.createRequest(verifiedIdRequestURL)
 
             // Assert
-            assertThat(verifiedIdRequest).isInstanceOf(Result::class.java)
+            assertThat(verifiedIdRequest).isInstanceOf(VerifiedIdResult::class.java)
             assertThat(verifiedIdRequest.isSuccess).isTrue
             assertThat(verifiedIdRequest.getOrNull()).isNotNull
             assertThat(verifiedIdRequest.getOrNull()).isInstanceOf(VerifiedIdPresentationRequest::class.java)
@@ -99,12 +137,17 @@ class VerifiedIdClientTest {
         runBlocking {
             // Act
             val actualResult = verifiedIdClient.createRequest(verifiedIdRequestURL)
+            val actualException = actualResult.exceptionOrNull()
 
             // Assert
-            assertThat(actualResult).isInstanceOf(Result::class.java)
+            assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
             assertThat(actualResult.isFailure).isTrue
-            assertThat(actualResult.exceptionOrNull()).isNotNull
-            assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverMissingException::class.java)
+            assertThat(actualException).isNotNull
+            assertThat(actualException).isInstanceOf(UnspecifiedVerifiedIdException::class.java)
+            assertThat((actualException as UnspecifiedVerifiedIdException).code).isEqualTo("unspecified_error")
+            assertThat(actualException).hasMessage("Unspecified Exception")
+            assertThat(actualException.correlationId).isNull()
+            assertThat(actualException.innerError).isInstanceOf(ResolverMissingException::class.java)
         }
     }
 
@@ -128,12 +171,17 @@ class VerifiedIdClientTest {
         runBlocking {
             // Act
             val actualResult = verifiedIdClient.createRequest(verifiedIdRequestURL)
+            val actualException = actualResult.exceptionOrNull()
 
             // Assert
-            assertThat(actualResult).isInstanceOf(Result::class.java)
+            assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
             assertThat(actualResult.isFailure).isTrue
-            assertThat(actualResult.exceptionOrNull()).isNotNull
-            assertThat(actualResult.exceptionOrNull()).isInstanceOf(HandlerMissingException::class.java)
+            assertThat(actualException).isNotNull
+            assertThat(actualException).isInstanceOf(UnspecifiedVerifiedIdException::class.java)
+            assertThat((actualException as UnspecifiedVerifiedIdException).code).isEqualTo("unspecified_error")
+            assertThat(actualException).hasMessage("Unspecified Exception")
+            assertThat(actualException.correlationId).isNull()
+            assertThat(actualException.innerError).isInstanceOf(HandlerMissingException::class.java)
         }
     }
 
@@ -160,12 +208,17 @@ class VerifiedIdClientTest {
         runBlocking {
             // Act
             val actualResult = verifiedIdClient.createRequest(verifiedIdRequestURL)
+            val actualException = actualResult.exceptionOrNull()
 
             // Assert
-            assertThat(actualResult).isInstanceOf(Result::class.java)
+            assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
             assertThat(actualResult.isFailure).isTrue
-            assertThat(actualResult.exceptionOrNull()).isNotNull
-            assertThat(actualResult.exceptionOrNull()).isInstanceOf(UnSupportedProtocolException::class.java)
+            assertThat(actualException).isNotNull
+            assertThat(actualException).isInstanceOf(UnspecifiedVerifiedIdException::class.java)
+            assertThat((actualException as UnspecifiedVerifiedIdException).code).isEqualTo("unspecified_error")
+            assertThat(actualException).hasMessage("Unspecified Exception")
+            assertThat(actualException.correlationId).isNull()
+            assertThat(actualException.innerError).isInstanceOf(UnSupportedProtocolException::class.java)
         }
     }
 
@@ -192,12 +245,17 @@ class VerifiedIdClientTest {
         runBlocking {
             // Act
             val actualResult = verifiedIdClient.createRequest(verifiedIdRequestURL)
+            val actualException = actualResult.exceptionOrNull()
 
             // Assert
-            assertThat(actualResult).isInstanceOf(Result::class.java)
+            assertThat(actualResult).isInstanceOf(VerifiedIdResult::class.java)
             assertThat(actualResult.isFailure).isTrue
-            assertThat(actualResult.exceptionOrNull()).isNotNull
-            assertThat(actualResult.exceptionOrNull()).isInstanceOf(UnSupportedVerifiedIdRequestInputException::class.java)
+            assertThat(actualException).isNotNull
+            assertThat(actualException).isInstanceOf(UnspecifiedVerifiedIdException::class.java)
+            assertThat((actualException as UnspecifiedVerifiedIdException).code).isEqualTo("unspecified_error")
+            assertThat(actualException).hasMessage("Unspecified Exception")
+            assertThat(actualException.correlationId).isNull()
+            assertThat(actualException.innerError).isInstanceOf(UnSupportedVerifiedIdRequestInputException::class.java)
         }
     }
 
@@ -244,7 +302,7 @@ class VerifiedIdClientTest {
         val actualEncodedVc = verifiedIdClient.encode(vc)
 
         // Assert
-        assertThat(actualEncodedVc).isInstanceOf(Result::class.java)
+        assertThat(actualEncodedVc).isInstanceOf(VerifiedIdResult::class.java)
         assertThat(actualEncodedVc.isSuccess).isTrue
         assertThat(actualEncodedVc.getOrNull()).isNotNull
         assertThat(actualEncodedVc.getOrNull()).isEqualTo(expectedEncoding)
@@ -291,20 +349,21 @@ class VerifiedIdClientTest {
 
         // Act
         val actualDecodedVc = verifiedIdClient.decodeVerifiedId(encodedVc)
+        val actualVc = actualDecodedVc.getOrNull()
 
         // Assert
-        assertThat(actualDecodedVc).isInstanceOf(Result::class.java)
+        assertThat(actualDecodedVc).isInstanceOf(VerifiedIdResult::class.java)
         assertThat(actualDecodedVc.isSuccess).isTrue
-        assertThat(actualDecodedVc.getOrNull()).isNotNull
-        assertThat(actualDecodedVc.getOrNull()).isInstanceOf(VerifiableCredential::class.java)
-        assertThat((actualDecodedVc.getOrNull() as VerifiableCredential).getClaims().size).isEqualTo(1)
-        assertThat((actualDecodedVc.getOrNull() as VerifiableCredential).getClaims().first().id).isEqualTo("name 1")
-        assertThat((actualDecodedVc.getOrNull() as VerifiableCredential).getClaims().first().value).isEqualTo("\"value1\"")
-        assertThat((actualDecodedVc.getOrNull() as VerifiableCredential).style).isInstanceOf(BasicVerifiedIdStyle::class.java)
-        assertThat((actualDecodedVc.getOrNull() as VerifiableCredential).style.name).isEqualTo("Test VC")
-        assertThat(((actualDecodedVc.getOrNull() as VerifiableCredential).style as BasicVerifiedIdStyle).backgroundColor).isEqualTo("#000000")
-        assertThat(((actualDecodedVc.getOrNull() as VerifiableCredential).style as BasicVerifiedIdStyle).textColor).isEqualTo("#ffffff")
-        assertThat(((actualDecodedVc.getOrNull() as VerifiableCredential).style as BasicVerifiedIdStyle).issuer).isEqualTo("Test Issuer")
+        assertThat(actualVc).isNotNull
+        assertThat(actualVc).isInstanceOf(VerifiableCredential::class.java)
+        assertThat((actualVc as VerifiableCredential).getClaims().size).isEqualTo(1)
+        assertThat(actualVc.getClaims().first().id).isEqualTo("name 1")
+        assertThat(actualVc.getClaims().first().value).isEqualTo("\"value1\"")
+        assertThat(actualVc.style).isInstanceOf(BasicVerifiedIdStyle::class.java)
+        assertThat(actualVc.style.name).isEqualTo("Test VC")
+        assertThat((actualVc.style as BasicVerifiedIdStyle).backgroundColor).isEqualTo("#000000")
+        assertThat((actualVc.style as BasicVerifiedIdStyle).textColor).isEqualTo("#ffffff")
+        assertThat((actualVc.style as BasicVerifiedIdStyle).issuer).isEqualTo("Test Issuer")
     }
 
     @Test

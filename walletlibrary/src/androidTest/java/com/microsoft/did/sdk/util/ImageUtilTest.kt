@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
+<<<<<<< HEAD
 package com.microsoft.walletlibrary.did.sdk.util
+=======
+package com.microsoft.did.sdk.util
+>>>>>>> dev
 
 import android.graphics.Bitmap
 import android.graphics.Canvas

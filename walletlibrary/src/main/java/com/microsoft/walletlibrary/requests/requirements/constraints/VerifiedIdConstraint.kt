@@ -12,4 +12,6 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
  */
 interface VerifiedIdConstraint {
     fun doesMatch(verifiedId: VerifiedId): Boolean
+
+    fun matches(verifiedId: VerifiedId)
 }

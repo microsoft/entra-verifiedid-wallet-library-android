@@ -5,6 +5,9 @@
 
 package com.microsoft.walletlibrary.requests.requirements.constraints
 
+import com.microsoft.walletlibrary.util.NoMatchForAnyConstraintsException
+import com.microsoft.walletlibrary.util.NoMatchForAtLeastOneConstraintException
+import com.microsoft.walletlibrary.util.WalletLibraryException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 enum class GroupConstraintOperator {
@@ -28,6 +31,28 @@ class GroupConstraint(
             GroupConstraintOperator.ALL -> {
                 constraints.forEach { if (!it.doesMatch(verifiedId)) return false }
                 return true
+            }
+        }
+    }
+
+    override fun matches(verifiedId: VerifiedId) {
+        val validationExceptions = mutableListOf<Throwable>()
+        constraints.forEach { constraint ->
+            try {
+                constraint.matches(verifiedId)
+            } catch (exception: WalletLibraryException) {
+                validationExceptions.add(exception)
+            }
+        }
+
+        when (constraintOperator) {
+            GroupConstraintOperator.ANY -> {
+                if (constraints.size == validationExceptions.size)
+                    throw NoMatchForAnyConstraintsException("None of the constraints match.", validationExceptions)
+            }
+            GroupConstraintOperator.ALL -> {
+                if (validationExceptions.isNotEmpty())
+                    throw NoMatchForAtLeastOneConstraintException("At least one of the constraints doesn't match.", validationExceptions)
             }
         }
     }

@@ -5,9 +5,15 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+<<<<<<< HEAD
 import com.microsoft.walletlibrary.util.PinRequirementNotFulfilledException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+=======
+import com.microsoft.walletlibrary.util.RequirementNotMetException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
+import com.microsoft.walletlibrary.util.VerifiedIdResult
+>>>>>>> dev
 
 /**
  * Represents information that describes pin required in order to complete a VerifiedID request.
@@ -29,10 +35,10 @@ class PinRequirement(
     internal var pin: String? = null
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
-    override fun validate(): Result<Unit> {
+    override fun validate(): VerifiedIdResult<Unit> {
         if (pin == null)
-            return Result.failure(PinRequirementNotFulfilledException("PinRequirement has not been fulfilled."))
-        return Result.success(Unit)
+            return RequirementNotMetException("Pin has not been set.", VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value).toVerifiedIdResult()
+        return VerifiedIdResult.success(Unit)
     }
 
     // Fulfills the requirement in the request with specified value.
