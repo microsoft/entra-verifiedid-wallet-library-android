@@ -5,15 +5,11 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
-<<<<<<< HEAD
-import com.microsoft.walletlibrary.util.PinRequirementNotFulfilledException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-=======
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
->>>>>>> dev
 
 /**
  * Represents information that describes pin required in order to complete a VerifiedID request.
