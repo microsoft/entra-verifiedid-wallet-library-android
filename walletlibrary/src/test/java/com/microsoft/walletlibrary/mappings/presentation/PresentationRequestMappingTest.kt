@@ -1,12 +1,12 @@
 package com.microsoft.walletlibrary.mappings.presentation
 
-import com.microsoft.did.sdk.credential.service.PresentationRequest
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
-import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
-import com.microsoft.did.sdk.credential.service.models.oidc.Registration
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.Registration
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.walletlibrary.requests.styles.OpenIdVerifierStyle
 import io.mockk.every
 import io.mockk.mockk

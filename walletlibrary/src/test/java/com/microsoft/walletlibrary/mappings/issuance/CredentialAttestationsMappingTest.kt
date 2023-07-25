@@ -1,7 +1,13 @@
 package com.microsoft.walletlibrary.mappings.issuance
 
-import com.microsoft.did.sdk.credential.service.models.attestations.*
 import com.microsoft.walletlibrary.requests.requirements.*
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.AcceptedIssuer
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.AccessTokenAttestation
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.ClaimAttestation
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.CredentialAttestations
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.IdTokenAttestation
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.PresentationAttestation
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.SelfIssuedAttestation
 import com.microsoft.walletlibrary.util.MissingRequirementException
 import io.mockk.every
 import io.mockk.mockk

@@ -5,9 +5,9 @@
 
 package com.microsoft.walletlibrary.wrapper
 
-import com.microsoft.did.sdk.VerifiableCredentialSdk
-import com.microsoft.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
-import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 import com.microsoft.walletlibrary.util.WalletLibraryException

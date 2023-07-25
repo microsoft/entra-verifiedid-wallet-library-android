@@ -5,7 +5,7 @@
 
 package com.microsoft.walletlibrary.requests.rawrequests
 
-import com.microsoft.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.requests.PresentationRequestContent
 
 /**
