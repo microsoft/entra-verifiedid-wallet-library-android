@@ -1,7 +1,7 @@
 package com.microsoft.walletlibrary.util
 
-import com.microsoft.did.sdk.util.controlflow.NetworkException
-import com.microsoft.did.sdk.util.controlflow.SdkException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.NetworkException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking

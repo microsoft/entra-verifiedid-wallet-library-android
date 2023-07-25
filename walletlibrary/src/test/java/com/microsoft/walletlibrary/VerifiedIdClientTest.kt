@@ -1,12 +1,12 @@
 package com.microsoft.walletlibrary
 
+import com.microsoft.walletlibrary.did.sdk.CorrelationVectorService
+import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.InputContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.walletlibrary.did.sdk.CorrelationVectorService
-import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.CardDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ClaimDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
@@ -291,7 +291,7 @@ class VerifiedIdClientTest {
             )
         val claimDescriptor1 = ClaimDescriptor("text", "name 1")
         val vc = VerifiableCredential(
-            com.microsoft.did.sdk.credential.models.VerifiableCredential(
+            com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential(
                 "123",
                 "raw",
                 VerifiableCredentialContent(
@@ -397,7 +397,7 @@ class VerifiedIdClientTest {
             )
         val claimDescriptor1 = ClaimDescriptor("text", "name 1")
         val expectedVc = VerifiableCredential(
-            com.microsoft.did.sdk.credential.models.VerifiableCredential(
+            com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential(
                 "123",
                 "raw",
                 VerifiableCredentialContent(
