@@ -42,6 +42,6 @@ internal class PresentationRequestFormatSerializer(@Suppress("UNUSED_PARAMETER")
     }
 }
 
-enum class AlgorithmKeys(val value: String) {
+internal enum class AlgorithmKeys(val value: String) {
     Alg("alg")
 }
