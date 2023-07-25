@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.util
 
-import com.microsoft.did.sdk.util.log.SdkLog
+import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import org.junit.BeforeClass
 import org.junit.Test
 

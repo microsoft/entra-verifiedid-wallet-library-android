@@ -1,9 +1,9 @@
 package com.microsoft.walletlibrary.mappings.issuance
 
-import com.microsoft.did.sdk.credential.service.IssuanceRequest
-import com.microsoft.did.sdk.credential.service.IssuanceResponse
-import com.microsoft.did.sdk.credential.service.models.contracts.InputContract
-import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.InputContract
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator

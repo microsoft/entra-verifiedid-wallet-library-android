@@ -1,18 +1,18 @@
 package com.microsoft.walletlibrary.wrapper
 
-import com.microsoft.did.sdk.PresentationService
-import com.microsoft.did.sdk.VerifiableCredentialSdk
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
-import com.microsoft.did.sdk.credential.service.PresentationRequest
-import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.did.sdk.credential.service.models.contracts.display.CardDescriptor
-import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
-import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
-import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.SdkException
+import com.microsoft.walletlibrary.did.sdk.PresentationService
+import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.CardDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
@@ -38,7 +38,7 @@ class OpenIdResponderTest {
     private lateinit var requirement: Requirement
     private lateinit var verifiedId: VerifiedId
     private val vcContractFromSdk: VerifiableCredentialContract = mockk()
-    private val vcFromSdk: com.microsoft.did.sdk.credential.models.VerifiableCredential = mockk()
+    private val vcFromSdk: com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential = mockk()
     private val mockDisplayContract: DisplayContract = mockk()
     private val mockCardDescriptor: CardDescriptor = mockk()
     private val expectedCardTitle = "Test VC"

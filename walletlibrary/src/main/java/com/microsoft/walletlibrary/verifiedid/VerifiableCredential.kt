@@ -1,7 +1,8 @@
 package com.microsoft.walletlibrary.verifiedid
 
-import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import kotlinx.serialization.Serializable
 import java.util.*
 
@@ -10,7 +11,7 @@ import java.util.*
  */
 @Serializable
 internal class VerifiableCredential(
-    internal val raw: com.microsoft.did.sdk.credential.models.VerifiableCredential,
+    internal val raw: VerifiableCredential,
     internal val contract: VerifiableCredentialContract
 ): VerifiedId {
     override val id = raw.jti

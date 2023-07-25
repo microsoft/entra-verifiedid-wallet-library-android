@@ -1,8 +1,8 @@
 package com.microsoft.walletlibrary.requests
 
-import com.microsoft.did.sdk.credential.service.PresentationRequest
-import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator

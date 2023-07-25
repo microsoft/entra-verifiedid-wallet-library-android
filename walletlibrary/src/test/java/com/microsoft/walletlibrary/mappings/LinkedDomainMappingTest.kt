@@ -1,8 +1,8 @@
 package com.microsoft.walletlibrary.mappings
 
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
