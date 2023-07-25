@@ -1,16 +1,9 @@
 package com.microsoft.walletlibrary.mappings.issuance
 
-<<<<<<< HEAD
 import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.InputContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.walletlibrary.requests.requirements.*
-=======
-import com.microsoft.did.sdk.credential.service.IssuanceRequest
-import com.microsoft.did.sdk.credential.service.IssuanceResponse
-import com.microsoft.did.sdk.credential.service.models.contracts.InputContract
-import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator
@@ -18,7 +11,6 @@ import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.PinRequirement
 import com.microsoft.walletlibrary.requests.requirements.RequestedClaim
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
->>>>>>> dev
 import com.microsoft.walletlibrary.util.IdTokenRequirementNotFulfilledException
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.SelfAttestedClaimRequirementNotFulfilledException

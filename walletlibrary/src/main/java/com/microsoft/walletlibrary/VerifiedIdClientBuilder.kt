@@ -7,9 +7,9 @@ package com.microsoft.walletlibrary
 
 import android.content.Context
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
+import android.content.pm.PackageManager
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
-import android.content.pm.PackageManager
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest

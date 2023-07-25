@@ -3,8 +3,6 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.VerifiablePresentationFormatter
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import io.mockk.every

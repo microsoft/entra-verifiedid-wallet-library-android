@@ -53,7 +53,8 @@ class LinkedDomainsServiceTest {
         runBlocking {
             val linkedDomainsResult = linkedDomainsService.fetchAndVerifyLinkedDomains(suppliedDidWithSingleServiceEndpoint)
             assertThat(linkedDomainsResult).isInstanceOf(Result.Success::class.java)
-            assertThat((linkedDomainsResult as Result.Success).payload).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((linkedDomainsResult as Result.Success).payload).isInstanceOf(
+                LinkedDomainVerified::class.java)
             assertThat((linkedDomainsResult.payload as LinkedDomainVerified).domainUrl).isEqualTo(hostnameOfUrl)
         }
     }
@@ -80,7 +81,8 @@ class LinkedDomainsServiceTest {
         runBlocking {
             val linkedDomainsArrResult = linkedDomainsService.fetchAndVerifyLinkedDomains(suppliedDidWithMultipleServiceEndpoints)
             assertThat(linkedDomainsArrResult).isInstanceOf(Result.Success::class.java)
-            assertThat((linkedDomainsArrResult as Result.Success).payload).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((linkedDomainsArrResult as Result.Success).payload).isInstanceOf(
+                LinkedDomainVerified::class.java)
             assertThat((linkedDomainsArrResult.payload as LinkedDomainVerified).domainUrl).isEqualTo(hostnameOfUrl)
         }
     }
@@ -96,7 +98,8 @@ class LinkedDomainsServiceTest {
         runBlocking {
             val actualDomainUrlResult = linkedDomainsService.fetchAndVerifyLinkedDomains(suppliedDidWithoutServiceEndpoint)
             assertThat(actualDomainUrlResult).isInstanceOf(Result.Success::class.java)
-            assertThat((actualDomainUrlResult as Result.Success).payload).isInstanceOf(LinkedDomainMissing::class.java)
+            assertThat((actualDomainUrlResult as Result.Success).payload).isInstanceOf(
+                LinkedDomainMissing::class.java)
         }
     }
 
@@ -125,7 +128,8 @@ class LinkedDomainsServiceTest {
         runBlocking {
             val actualWellKnownConfigDoc = linkedDomainsService.fetchAndVerifyLinkedDomains(rpDid)
             assertThat(actualWellKnownConfigDoc).isInstanceOf(Result.Success::class.java)
-            assertThat((actualWellKnownConfigDoc as Result.Success).payload).isInstanceOf(LinkedDomainUnVerified::class.java)
+            assertThat((actualWellKnownConfigDoc as Result.Success).payload).isInstanceOf(
+                LinkedDomainUnVerified::class.java)
         }
         coVerify(exactly = 1) {
             anyConstructed<FetchWellKnownConfigDocumentNetworkOperation>().fire()
@@ -158,7 +162,8 @@ class LinkedDomainsServiceTest {
         runBlocking {
             val actualWellKnownConfigDoc = linkedDomainsService.fetchAndVerifyLinkedDomains(rpDid)
             assertThat(actualWellKnownConfigDoc).isInstanceOf(Result.Success::class.java)
-            assertThat((actualWellKnownConfigDoc as Result.Success).payload).isInstanceOf(LinkedDomainUnVerified::class.java)
+            assertThat((actualWellKnownConfigDoc as Result.Success).payload).isInstanceOf(
+                LinkedDomainUnVerified::class.java)
         }
         coVerify(exactly = 1) {
             anyConstructed<FetchWellKnownConfigDocumentNetworkOperation>().fire()

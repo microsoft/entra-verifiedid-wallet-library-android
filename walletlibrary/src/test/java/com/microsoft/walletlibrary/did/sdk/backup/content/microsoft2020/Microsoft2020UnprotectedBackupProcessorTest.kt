@@ -5,8 +5,8 @@ package com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020
 import android.util.BackupTestUtil
 import com.microsoft.walletlibrary.did.sdk.IdentifierService
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
-import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

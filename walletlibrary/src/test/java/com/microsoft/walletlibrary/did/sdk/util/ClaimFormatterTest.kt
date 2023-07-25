@@ -2,7 +2,6 @@
 
 package com.microsoft.walletlibrary.did.sdk.util
 
-import com.microsoft.walletlibrary.did.sdk.util.ClaimFormatter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -45,9 +44,9 @@ class ClaimFormatterTest {
         assertThat(actualFormattedClaim).isEqualTo(expectedFormattedDate)
     }
 
-/*    @Test
+    @Test
     fun `test formatting date and time successfully`() {
         val actualFormattedClaim = ClaimFormatter.formatDateAndTimeInMillis(suppliedClaimValueForDateInMills)
         assertThat(actualFormattedClaim).isIn(expectedFormattedDateTimeInDifferentTimeZone)
-    }*/
+    }
 }

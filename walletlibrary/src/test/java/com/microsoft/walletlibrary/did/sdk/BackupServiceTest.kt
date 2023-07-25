@@ -674,7 +674,8 @@ class BackupServiceTest {
     @Test
     fun `parse Microsoft PBE encrypted backup returns backup`() {
         runBlocking {
-            assertThat(service.parseBackup(testBackupString + testBackupString2 + testBackupString3)).isInstanceOf(Result.Success::class.java)
+            assertThat(service.parseBackup(testBackupString + testBackupString2 + testBackupString3)).isInstanceOf(
+                Result.Success::class.java)
         }
     }
 

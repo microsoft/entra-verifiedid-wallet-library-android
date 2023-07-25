@@ -118,7 +118,8 @@ class IdentifierRepositoryTest {
         runBlocking {
             val actualIdentifierDocument = identifierRepository.resolveIdentifier("testUrl", suppliedIdentifier.id)
             assertThat(actualIdentifierDocument).isInstanceOf(Result.Failure::class.java)
-            assertThat((actualIdentifierDocument as Result.Failure).payload).isInstanceOf(NotFoundException::class.java)
+            assertThat((actualIdentifierDocument as Result.Failure).payload).isInstanceOf(
+                NotFoundException::class.java)
         }
         coVerify(exactly = 1) {
             anyConstructed<ResolveIdentifierNetworkOperation>().fire()
