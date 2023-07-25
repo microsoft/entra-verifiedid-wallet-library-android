@@ -5,7 +5,7 @@
 
 package com.microsoft.walletlibrary.mappings.presentation
 
-import com.microsoft.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.requests.styles.OpenIdVerifierStyle
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdLogo

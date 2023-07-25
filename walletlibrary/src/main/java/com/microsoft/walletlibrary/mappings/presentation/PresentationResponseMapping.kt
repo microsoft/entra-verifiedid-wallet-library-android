@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.mappings.presentation
 
-import com.microsoft.did.sdk.credential.service.PresentationResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement

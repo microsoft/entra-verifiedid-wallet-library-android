@@ -1,7 +1,7 @@
 package com.microsoft.walletlibrary.mappings.presentation
 
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint

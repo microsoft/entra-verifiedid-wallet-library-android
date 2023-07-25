@@ -1,9 +1,9 @@
 package com.microsoft.walletlibrary.mappings.presentation
 
-import com.microsoft.did.sdk.credential.service.PresentationRequest
-import com.microsoft.did.sdk.credential.service.PresentationResponse
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import com.microsoft.walletlibrary.requests.requirements.*
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.util.IdInVerifiedIdRequirementDoesNotMatchRequestException
@@ -98,7 +98,7 @@ class PresentationResponseMappingTest {
     fun addRequirement_validVerifiedIdRequirement_addsRequirementToPresentationResponse() {
         // Arrange
         val expectedVerifiedId: VerifiableCredential = mockk()
-        val expectedVerifiableCredential: com.microsoft.did.sdk.credential.models.VerifiableCredential =
+        val expectedVerifiableCredential: com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential =
             mockk()
         every { expectedVerifiedId.types } returns listOf(expectedVcType)
         verifiedIdRequirement.fulfill(expectedVerifiedId)
@@ -136,10 +136,10 @@ class PresentationResponseMappingTest {
             required = true
         )
         val expectedVerifiedId1: VerifiableCredential = mockk()
-        val expectedVerifiableCredential1: com.microsoft.did.sdk.credential.models.VerifiableCredential =
+        val expectedVerifiableCredential1: com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential =
             mockk()
         val expectedVerifiedId2: VerifiableCredential = mockk()
-        val expectedVerifiableCredential2: com.microsoft.did.sdk.credential.models.VerifiableCredential =
+        val expectedVerifiableCredential2: com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential =
             mockk()
         every { expectedVerifiedId1.types } returns listOf(expectedVcType)
         every { expectedVerifiedId2.types } returns listOf(expectedVcType)

@@ -1,0 +1,17 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+package com.microsoft.walletlibrary.did.sdk.datasource.network.apis
+
+import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
+import retrofit2.Response
+import retrofit2.http.GET
+import retrofit2.http.Url
+
+internal interface IdentifierApi {
+
+    @GET
+    suspend fun resolveIdentifier(@Url overrideUrl: String): Response<IdentifierResponse>
+}

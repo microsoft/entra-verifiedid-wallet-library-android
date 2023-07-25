@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.mappings.issuance
 
-import com.microsoft.did.sdk.credential.service.IssuanceRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import io.mockk.every
 import io.mockk.mockk
