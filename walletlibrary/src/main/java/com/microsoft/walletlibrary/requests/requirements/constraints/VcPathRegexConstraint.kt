@@ -11,7 +11,7 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.json.Json
 import java.util.regex.Pattern
 
-class VcPathRegexConstraint(
+internal class VcPathRegexConstraint(
     internal val path: List<String>, internal val pattern: String
 ) : VerifiedIdConstraint {
     override fun doesMatch(verifiedId: VerifiedId): Boolean {

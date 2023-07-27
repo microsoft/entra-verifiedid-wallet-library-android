@@ -18,7 +18,7 @@ enum class GroupConstraintOperator {
 /**
  * Represents a group of constraints to fulfill a requirement.
  */
-class GroupConstraint(
+internal class GroupConstraint(
     internal val constraints: List<VerifiedIdConstraint>,
     internal val constraintOperator: GroupConstraintOperator
 ): VerifiedIdConstraint {
