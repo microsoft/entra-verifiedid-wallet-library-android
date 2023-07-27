@@ -7,6 +7,7 @@ package com.microsoft.walletlibrary.requests
 
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.util.VerifiedIdResult
 
 /**
  * VerifiedIdRequest handles information contained in a request like the visual styling of requester,
@@ -27,8 +28,8 @@ interface VerifiedIdRequest<out T> {
     fun isSatisfied(): Boolean
 
     // Completes the request and returns a generic object if successful.
-    suspend fun complete(): Result<T>
+    suspend fun complete(): VerifiedIdResult<T>
 
     // Cancels the request with an optional message.
-    suspend fun cancel(message: String?): Result<Unit>
+    suspend fun cancel(message: String? = null): VerifiedIdResult<Unit>
 }
