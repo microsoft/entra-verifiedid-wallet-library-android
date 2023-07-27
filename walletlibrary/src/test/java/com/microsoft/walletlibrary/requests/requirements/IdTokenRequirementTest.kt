@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.requests.requirements
 
-import com.microsoft.walletlibrary.util.IdTokenRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -50,7 +50,8 @@ class IdTokenRequirementTest {
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
         assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(IdTokenRequirementNotFulfilledException::class.java)
+            .isInstanceOf(RequirementNotMetException::class.java)
+            .hasMessage("Id Token has not been set.")
     }
 
     @Test

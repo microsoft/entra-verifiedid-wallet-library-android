@@ -5,7 +5,9 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
-import com.microsoft.walletlibrary.util.AccessTokenRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
+import com.microsoft.walletlibrary.util.VerifiedIdResult
 
 /**
  * Represents information that describes Access Token required in order to complete a VerifiedID request.
@@ -29,12 +31,15 @@ class AccessTokenRequirement(
     override val required: Boolean = false,
 
     internal var accessToken: String? = null
-): Requirement {
+) : Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
-    override fun validate(): Result<Unit> {
+    override fun validate(): VerifiedIdResult<Unit> {
         if (accessToken == null)
-            return Result.failure(AccessTokenRequirementNotFulfilledException("AccessTokenRequirement has not been fulfilled."))
-        return Result.success(Unit)
+            return RequirementNotMetException(
+                "Access Token has not been set.",
+                VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value
+            ).toVerifiedIdResult()
+        return VerifiedIdResult.success(Unit)
     }
 
     // Fulfills the requirement in the request with specified value.

@@ -1,7 +1,7 @@
 package com.microsoft.walletlibrary.mappings.issuance
 
-import com.microsoft.did.sdk.credential.service.models.attestations.ClaimAttestation
-import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.ClaimAttestation
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.IdTokenAttestation
 import org.assertj.core.api.Assertions
 import org.junit.Test
 

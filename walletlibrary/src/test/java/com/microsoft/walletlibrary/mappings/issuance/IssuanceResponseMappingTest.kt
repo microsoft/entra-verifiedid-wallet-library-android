@@ -1,9 +1,9 @@
 package com.microsoft.walletlibrary.mappings.issuance
 
-import com.microsoft.did.sdk.credential.service.IssuanceRequest
-import com.microsoft.did.sdk.credential.service.IssuanceResponse
-import com.microsoft.did.sdk.credential.service.models.contracts.InputContract
-import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.InputContract
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator
@@ -11,9 +11,7 @@ import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.PinRequirement
 import com.microsoft.walletlibrary.requests.requirements.RequestedClaim
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
-import com.microsoft.walletlibrary.util.IdTokenRequirementNotFulfilledException
 import com.microsoft.walletlibrary.util.RequirementNotMetException
-import com.microsoft.walletlibrary.util.SelfAttestedClaimRequirementNotFulfilledException
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -108,7 +106,8 @@ class IssuanceResponseMappingTest {
         // Act and Assert
         assertThatThrownBy{
             issuanceResponse.addRequirements(selfAttestedClaimRequirement)
-        }.isInstanceOf(SelfAttestedClaimRequirementNotFulfilledException::class.java)
+        }.isInstanceOf(RequirementNotMetException::class.java)
+            .hasMessage("Self Attested Claim has not been set.")
     }
 
     @Test
@@ -142,7 +141,8 @@ class IssuanceResponseMappingTest {
         // Act and Assert
         assertThatThrownBy{
             issuanceResponse.addRequirements(idTokenRequirement)
-        }.isInstanceOf(IdTokenRequirementNotFulfilledException::class.java)
+        }.isInstanceOf(RequirementNotMetException::class.java)
+            .hasMessage("Id Token has not been set.")
     }
 
     @Test

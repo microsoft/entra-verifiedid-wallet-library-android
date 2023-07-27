@@ -6,7 +6,7 @@
 package com.microsoft.walletlibrary.mappings.issuance
 
 import android.net.Uri
-import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint

@@ -7,6 +7,7 @@ import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
+import com.microsoft.walletlibrary.util.UnspecifiedVerifiedIdException
 import com.microsoft.walletlibrary.util.VerifiedIdResponseCompletionException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
@@ -175,7 +176,7 @@ class ManifestIssuanceRequestTest {
             // Assert
             assertThat(actualResult.isFailure).isTrue
             assertThat(actualResult.exceptionOrNull()).isInstanceOf(
-                VerifiedIdResponseCompletionException::class.java
+                UnspecifiedVerifiedIdException::class.java
             )
         }
     }

@@ -5,6 +5,8 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.walletlibrary.util.VerifiedIdResult
+
 /**
  * Represents the necessary information required in order to complete a Verified ID request (issuance or presentation).
  */
@@ -13,5 +15,5 @@ interface Requirement {
     val required: Boolean
 
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
-    fun validate(): Result<Unit>
+    fun validate(): VerifiedIdResult<Unit>
 }

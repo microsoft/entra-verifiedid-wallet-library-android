@@ -5,15 +5,16 @@
 
 package com.microsoft.walletlibrary
 
-import com.microsoft.did.sdk.VerifiableCredentialSdk
+import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
-import com.microsoft.walletlibrary.util.UnspecifiedVerifiedIdException
+import com.microsoft.walletlibrary.util.MalformedInputException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
+import com.microsoft.walletlibrary.util.getResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -30,15 +31,13 @@ class VerifiedIdClient(
 ) {
 
     // Creates an issuance or presentation request based on the provided input.
-    suspend fun createRequest(verifiedIdRequestInput: VerifiedIdRequestInput): Result<VerifiedIdRequest<*>> {
-        return try {
+    suspend fun createRequest(verifiedIdRequestInput: VerifiedIdRequestInput): VerifiedIdResult<VerifiedIdRequest<*>> {
+        return getResult {
             VerifiableCredentialSdk.correlationVectorService.startNewFlowAndSave()
             val requestResolver = requestResolverFactory.getResolver(verifiedIdRequestInput)
             val rawRequest = requestResolver.resolve(verifiedIdRequestInput)
             val requestHandler = requestHandlerFactory.getHandler(requestResolver)
-            VerifiedIdResult.success(requestHandler.handleRequest(rawRequest))
-        } catch (exception: Exception) {
-            UnspecifiedVerifiedIdException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
+            requestHandler.handleRequest(rawRequest)
         }
     }
 
@@ -46,15 +45,23 @@ class VerifiedIdClient(
         return try {
             VerifiedIdResult.success(serializer.encodeToString(verifiedId))
         } catch (exception: Exception) {
-            UnspecifiedVerifiedIdException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
+            MalformedInputException(
+                "Malformed Input Exception",
+                VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value,
+                exception
+            ).toVerifiedIdResult()
         }
     }
 
-    fun decodeVerifiedId(encodedVerifiedId: String): Result<VerifiedId> {
+    fun decodeVerifiedId(encodedVerifiedId: String): VerifiedIdResult<VerifiedId> {
         return try {
             VerifiedIdResult.success(serializer.decodeFromString(encodedVerifiedId))
         } catch (exception: Exception) {
-            UnspecifiedVerifiedIdException("Unspecified Exception", VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value, exception).toVerifiedIdResult()
+            MalformedInputException(
+                "Malformed Input Exception",
+                VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value,
+                exception
+            ).toVerifiedIdResult()
         }
     }
 }

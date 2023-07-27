@@ -23,8 +23,6 @@ class VerifiedIdResponseCompletionException(message: String = "", cause: Throwab
 
 class OpenIdResponseCompletionException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
 
-class VerifiedIdIssuanceCompletionCallbackException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
-
 class UnSupportedProtocolException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : WalletLibraryException(message, cause, retryable)
 
 class UnSupportedRequirementException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
@@ -39,8 +37,6 @@ class InputCastingException(message: String = "", cause: Throwable? = null, retr
 
 class MissingRequirementException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
 
-class PresentationRequestCancelIsNotSupported(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
-
 open class ParameterMissingException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
 
 class MissingRequestStateException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): ParameterMissingException(message, cause, retryable)
@@ -49,14 +45,6 @@ class MissingCallbackUrlException(message: String = "", cause: Throwable? = null
 
 open class RequirementValidationException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
 
-class SelfAttestedClaimRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
-
-class IdTokenRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
-
-class AccessTokenRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
-
-class VerifiedIdRequirementNotFulfilledException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
-
 class VerifiedIdTypeIsNotRequestedTypeException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
 
 class NoMatchForVcPathRegexConstraintException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
@@ -64,8 +52,6 @@ class NoMatchForVcPathRegexConstraintException(message: String = "", cause: Thro
 class NoMatchForAnyConstraintsException(message: String = "", val exceptions: List<Throwable> = emptyList(), retryable: Boolean = false) : RequirementValidationException(message, retryable = retryable)
 
 class NoMatchForAtLeastOneConstraintException(message: String = "", val exceptions: List<Throwable> = emptyList(), retryable: Boolean = false): RequirementValidationException(message, retryable = retryable)
-
-class VcTypeConstraintsMissingException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
 
 class VerifiedIdRequirementMissingIdException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
 

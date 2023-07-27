@@ -5,7 +5,7 @@
 
 package com.microsoft.walletlibrary.mappings.issuance
 
-import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.IdTokenAttestation
 import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 
 /**

@@ -1,16 +1,15 @@
 package com.microsoft.walletlibrary.mappings.presentation
 
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.Constraints
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.Fields
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.Filter
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Constraints
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Fields
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Filter
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcPathRegexConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
-import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
-import com.microsoft.walletlibrary.util.VcTypeConstraintsMissingException
+import com.microsoft.walletlibrary.util.MalformedInputException
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -47,7 +46,7 @@ class CredentialPresentationInputDescriptorsMappingTest {
 
         // Act and Assert
         assertThatThrownBy { credentialPresentationInputDescriptor.toVerifiedIdRequirement() }.isInstanceOf(
-            MissingVerifiedIdTypeException::class.java
+            MalformedInputException::class.java
         )
     }
 
@@ -102,7 +101,7 @@ class CredentialPresentationInputDescriptorsMappingTest {
         // Act and Assert
         assertThatThrownBy {
             credentialPresentationInputDescriptor.toVerifiedIdRequirement()
-        }.isInstanceOf(VcTypeConstraintsMissingException::class.java)
+        }.isInstanceOf(MalformedInputException::class.java)
     }
 
     @Test
@@ -158,7 +157,7 @@ class CredentialPresentationInputDescriptorsMappingTest {
         // Act and Assert
         assertThatThrownBy {
             toVcTypeConstraint(listOf(""))
-        }.isInstanceOf(VcTypeConstraintsMissingException::class.java)
+        }.isInstanceOf(MalformedInputException::class.java)
     }
 
     @Test
@@ -226,7 +225,7 @@ class CredentialPresentationInputDescriptorsMappingTest {
         // Act and Assert
         assertThatThrownBy {
             credentialPresentationInputDescriptor.toConstraint()
-        }.isInstanceOf(VcTypeConstraintsMissingException::class.java)
+        }.isInstanceOf(MalformedInputException::class.java)
     }
 
     @Test
@@ -266,7 +265,7 @@ class CredentialPresentationInputDescriptorsMappingTest {
         // Act and Assert
         assertThatThrownBy {
             credentialPresentationInputDescriptor.toConstraint()
-        }.isInstanceOf(VcTypeConstraintsMissingException::class.java)
+        }.isInstanceOf(MalformedInputException::class.java)
     }
 
     @Test
@@ -287,7 +286,7 @@ class CredentialPresentationInputDescriptorsMappingTest {
         // Act and Assert
         assertThatThrownBy {
             credentialPresentationInputDescriptor.toConstraint()
-        }.isInstanceOf(VcTypeConstraintsMissingException::class.java)
+        }.isInstanceOf(MalformedInputException::class.java)
     }
 
     @Test

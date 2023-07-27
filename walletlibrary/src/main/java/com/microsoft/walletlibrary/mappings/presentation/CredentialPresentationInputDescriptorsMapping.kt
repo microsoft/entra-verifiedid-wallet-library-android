@@ -6,8 +6,8 @@
 package com.microsoft.walletlibrary.mappings.presentation
 
 import android.net.Uri
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.Fields
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Fields
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
@@ -15,8 +15,8 @@ import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstr
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcPathRegexConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.VerifiedIdConstraint
-import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
-import com.microsoft.walletlibrary.util.VcTypeConstraintsMissingException
+import com.microsoft.walletlibrary.util.MalformedInputException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import okhttp3.internal.filterList
 
 /**
@@ -24,7 +24,10 @@ import okhttp3.internal.filterList
  */
 internal fun CredentialPresentationInputDescriptor.toVerifiedIdRequirement(): VerifiedIdRequirement {
     if (this.schemas.isEmpty())
-        throw MissingVerifiedIdTypeException("There is no VerifiedId Type in credential input descriptor.")
+        throw MalformedInputException(
+            "There is no Verified ID type in the request.",
+            VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value
+        )
     return VerifiedIdRequirement(
         this.id,
         this.schemas.map { it.uri },
@@ -39,7 +42,10 @@ internal fun CredentialPresentationInputDescriptor.toVerifiedIdRequirement(): Ve
 internal fun CredentialPresentationInputDescriptor.toConstraint(): VerifiedIdConstraint {
     val vcTypeConstraint =
         if (schemas.isNotEmpty()) toVcTypeConstraint(schemas.map { it.uri })
-        else throw VcTypeConstraintsMissingException("There is no VerifiedId Type in credential input descriptor.")
+        else throw MalformedInputException(
+            "There is no Verified ID type in the request.",
+            VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value
+        )
     val vcPathRegexConstraint = constraints?.fields?.let { toVcPathRegexConstraint(it) }
     vcPathRegexConstraint?.let {
         return GroupConstraint(
@@ -68,7 +74,11 @@ internal fun toVcPathRegexConstraint(fields: List<Fields>): VerifiedIdConstraint
 }
 
 internal fun toVcTypeConstraint(vcTypes: List<String>): VerifiedIdConstraint {
-    if (vcTypes.isEmpty() || vcTypes.filterList { isNotBlank() }.isEmpty()) throw VcTypeConstraintsMissingException("There is no VerifiedId Type in credential input descriptor.")
+    if (vcTypes.isEmpty() || vcTypes.filterList { isNotBlank() }
+            .isEmpty()) throw MalformedInputException(
+        "There is no Verified ID type in the request.",
+        VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value
+    )
     if (vcTypes.size == 1) return VcTypeConstraint(vcTypes.first())
     val vcTypeConstraints = mutableListOf<VcTypeConstraint>()
     vcTypes.forEach { vcTypeConstraints.add(VcTypeConstraint(it)) }
