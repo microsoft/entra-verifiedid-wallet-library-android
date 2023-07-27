@@ -10,7 +10,9 @@ import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
-import com.microsoft.walletlibrary.util.WalletLibraryException
+import com.microsoft.walletlibrary.util.VerifiedIdException
+import com.microsoft.walletlibrary.util.VerifiedIdResult
+import com.microsoft.walletlibrary.util.getResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
 
@@ -35,21 +37,17 @@ internal class ManifestIssuanceRequest(
     private var issuanceCallbackUrl: String? = null,
 
     private var requestState: String? = null
-): VerifiedIdIssuanceRequest {
+) : VerifiedIdIssuanceRequest {
     // Completes the issuance request and returns a Result with VerifiedId if successful.
-    override suspend fun complete(): Result<VerifiedId> {
-        return try {
-            val verifiedId =
-                VerifiedIdRequester.sendIssuanceResponse(
-                    request.rawRequest,
-                    requirement,
-                    requestState,
-                    issuanceCallbackUrl
-                )
-            Result.success(verifiedId)
-        } catch (exception: WalletLibraryException) {
-            Result.failure(exception)
+    override suspend fun complete(): VerifiedIdResult<VerifiedId> {
+        val result = getResult {
+            VerifiedIdRequester.sendIssuanceResponse(
+                request.rawRequest,
+                requirement
+            )
         }
+        sendIssuanceCallbackIfRequestStateAndCallbackExists(requestState, result, issuanceCallbackUrl)
+        return result
     }
 
     // Indicates whether issuance request is satisfied on client side.
@@ -59,8 +57,8 @@ internal class ManifestIssuanceRequest(
         return !validationResult.isFailure
     }
 
-    override suspend fun cancel(message: String?): Result<Unit> {
-        return try {
+    override suspend fun cancel(message: String?): VerifiedIdResult<Unit> {
+        return getResult {
             val issuanceCompletionResponse = requestState?.let {
                 IssuanceCompletionResponse(
                     IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
@@ -68,14 +66,46 @@ internal class ManifestIssuanceRequest(
                     IssuanceCompletionResponse.IssuanceCompletionErrorDetails.USER_CANCELED
                 )
             }
-            val result = VerifiedIdRequester.sendIssuanceCallback(
+            VerifiedIdRequester.sendIssuanceCallback(
                 issuanceCompletionResponse,
                 issuanceCallbackUrl
             )
-            Result.success(result)
-        } catch (exception: WalletLibraryException) {
-            Result.failure(exception)
         }
+    }
 
+    private suspend fun sendIssuanceCallbackIfRequestStateAndCallbackExists(
+        requestState: String?,
+        result: VerifiedIdResult<VerifiedId>,
+        issuanceCallbackUrl: String?
+    ) {
+        if (requestState == null || issuanceCallbackUrl == null) {
+            return
+        }
+        var issuanceCompletionCode: IssuanceCompletionResponse.IssuanceCompletionCode =
+            IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED
+        var issuanceCompletionErrorDetails: IssuanceCompletionResponse.IssuanceCompletionErrorDetails? =
+            null
+        result.fold(
+            onSuccess = {
+                issuanceCompletionCode =
+                    IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_SUCCESSFUL
+            },
+            onFailure = {
+                issuanceCompletionCode =
+                    IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED
+                issuanceCompletionErrorDetails = when (it) {
+                    is VerifiedIdException -> IssuanceCompletionResponse.IssuanceCompletionErrorDetails.ISSUANCE_SERVICE_ERROR
+                    else -> IssuanceCompletionResponse.IssuanceCompletionErrorDetails.UNSPECIFIED_ERROR
+                }
+            }
+        )
+        val issuanceCompletionResponse = IssuanceCompletionResponse(
+            issuanceCompletionCode,
+            requestState,
+            issuanceCompletionErrorDetails
+        )
+        VerifiedIdRequester.sendIssuanceCallback(
+            issuanceCompletionResponse,
+            issuanceCallbackUrl)
     }
 }

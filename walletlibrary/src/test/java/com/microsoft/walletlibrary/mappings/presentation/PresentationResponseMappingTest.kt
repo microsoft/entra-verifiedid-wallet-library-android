@@ -1,15 +1,19 @@
 package com.microsoft.walletlibrary.mappings.presentation
 
+import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
+import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator
+import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
+import com.microsoft.walletlibrary.requests.requirements.RequestedClaim
+import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
-import com.microsoft.walletlibrary.requests.requirements.*
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.util.IdInVerifiedIdRequirementDoesNotMatchRequestException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.UnSupportedRequirementException
 import com.microsoft.walletlibrary.util.VerifiedIdRequirementMissingIdException
-import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.every
 import io.mockk.mockk
@@ -91,7 +95,8 @@ class PresentationResponseMappingTest {
         // Act and Assert
         assertThatThrownBy {
             presentationResponse.addRequirements(verifiedIdRequirement)
-        }.isInstanceOf(VerifiedIdRequirementNotFulfilledException::class.java)
+        }.isInstanceOf(RequirementNotMetException::class.java)
+            .hasMessage("Verified ID has not been set.")
     }
 
     @Test

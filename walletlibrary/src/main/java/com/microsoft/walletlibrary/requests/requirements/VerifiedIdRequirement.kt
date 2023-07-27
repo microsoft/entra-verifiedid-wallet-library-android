@@ -7,8 +7,10 @@ package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.requirements.constraints.VerifiedIdConstraint
+import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.RequirementValidationException
-import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
+import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 /**
@@ -38,28 +40,39 @@ class VerifiedIdRequirement(
     internal var verifiedId: VerifiedId? = null
 ): Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
-    override fun validate(): Result<Unit> {
+    override fun validate(): VerifiedIdResult<Unit> {
         if (verifiedId == null)
-            return Result.failure(VerifiedIdRequirementNotFulfilledException("VerifiedIdRequirement has not been fulfilled."))
+            return RequirementNotMetException(
+                "Verified ID has not been set.",
+                VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value
+            ).toVerifiedIdResult()
         verifiedId?.let {
             try {
                 constraint.matches(it)
             } catch (constraintException: RequirementValidationException) {
-                return Result.failure(constraintException)
+                return RequirementNotMetException(
+                    "Verified ID constraint do not match.",
+                    VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value,
+                    listOf(constraintException)
+                ).toVerifiedIdResult()
             }
         }
-        return Result.success(Unit)
+        return VerifiedIdResult.success(Unit)
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(selectedVerifiedId: VerifiedId): Result<Unit> {
+    fun fulfill(selectedVerifiedId: VerifiedId): VerifiedIdResult<Unit> {
         try {
             constraint.matches(selectedVerifiedId)
         } catch (constraintException: RequirementValidationException) {
-            return Result.failure(constraintException)
+            return RequirementNotMetException(
+                "Verified ID constraint do not match.",
+                VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value,
+                listOf(constraintException)
+            ).toVerifiedIdResult()
         }
         verifiedId = selectedVerifiedId
-        return Result.success(Unit)
+        return VerifiedIdResult.success(Unit)
     }
 
     // Retrieves list of Verified IDs from the provided list that matches this requirement.

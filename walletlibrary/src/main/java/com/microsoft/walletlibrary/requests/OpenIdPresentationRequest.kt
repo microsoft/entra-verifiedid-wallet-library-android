@@ -8,8 +8,10 @@ package com.microsoft.walletlibrary.requests
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
-import com.microsoft.walletlibrary.util.PresentationRequestCancelIsNotSupported
-import com.microsoft.walletlibrary.util.WalletLibraryException
+import com.microsoft.walletlibrary.util.UserCanceledException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
+import com.microsoft.walletlibrary.util.VerifiedIdResult
+import com.microsoft.walletlibrary.util.getResult
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
 
 /**
@@ -35,16 +37,18 @@ internal class OpenIdPresentationRequest(
     }
 
     // Completes the presentation request and returns Result with success status if successful.
-    override suspend fun complete(): Result<Unit> {
-        return try {
-            val result = OpenIdResponder.sendPresentationResponse(request.rawRequest, requirement)
-            Result.success(result)
-        } catch (exception: WalletLibraryException) {
-            Result.failure(exception)
+    override suspend fun complete(): VerifiedIdResult<Unit> {
+        return getResult {
+            OpenIdResponder.sendPresentationResponse(request.rawRequest, requirement)
         }
     }
 
-    override suspend fun cancel(message: String?): Result<Unit> {
-        return Result.failure(PresentationRequestCancelIsNotSupported("Cancelling presentation request is not supported."))
+    override suspend fun cancel(message: String?): VerifiedIdResult<Unit> {
+        return getResult {
+            throw UserCanceledException(
+                message ?: "User Canceled",
+                VerifiedIdExceptions.USER_CANCELED_EXCEPTION.value
+            )
+        }
     }
 }
