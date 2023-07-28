@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  * Properties used to render a Logo.
  */
 @Serializable
-internal data class Logo(
+data class Logo(
 
     // If image needs to be fetched, service will use this property.
     var uri: String? = null,

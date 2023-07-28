@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-internal data class VerifiableCredential(
+data class VerifiableCredential(
     // jti of the verifiable credential
     val jti: String,
 

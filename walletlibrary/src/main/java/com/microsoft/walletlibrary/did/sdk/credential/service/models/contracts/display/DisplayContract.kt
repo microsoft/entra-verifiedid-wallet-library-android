@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
  */
 @Entity
 @Serializable
-internal data class DisplayContract(
+data class DisplayContract(
 
     // Must be set to "display"
     val id: String = "display",
