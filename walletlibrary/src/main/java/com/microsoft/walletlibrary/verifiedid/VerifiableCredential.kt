@@ -12,7 +12,7 @@ import java.util.*
 @Serializable
 class VerifiableCredential(
     val raw: VerifiableCredential,
-    val contract: VerifiableCredentialContract
+    val contract: VerifiableCredentialContract? = null
 ): VerifiedId {
     override val id = raw.jti
 
@@ -24,16 +24,16 @@ class VerifiableCredential(
 
     val types = raw.contents.vc.type
 
-    override val style = contract.display.toVerifiedIdStyle()
+    override val style = contract?.display?.toVerifiedIdStyle()
 
     override fun getClaims(): ArrayList<VerifiedIdClaim> {
-        val claimDescriptors = contract.display.claims
+        val claimDescriptors = contract?.display?.claims
         val claimValues = raw.contents.vc.credentialSubject
 
         //TODO("Add support for type and path in Claims)
         val claims = ArrayList<VerifiedIdClaim>()
         for ((claimIdentifier, claimValue) in claimValues) {
-            val claimDescriptor = claimDescriptors["vc.credentialSubject.$claimIdentifier"]
+            val claimDescriptor = claimDescriptors?.get("vc.credentialSubject.$claimIdentifier")
             claimDescriptor?.let { claims.add(VerifiedIdClaim(claimDescriptor.label, claimValue)) }
                 ?: claims.add(VerifiedIdClaim(claimIdentifier, claimValue))
         }

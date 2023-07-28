@@ -21,7 +21,7 @@ interface VerifiedId {
     val expiresOn: Date?
 
     // Information needed to style a Verified ID.
-    val style: VerifiedIdStyle
+    val style: VerifiedIdStyle?
 
     // Return list of claims in the Verified ID.
     fun getClaims(): ArrayList<VerifiedIdClaim>

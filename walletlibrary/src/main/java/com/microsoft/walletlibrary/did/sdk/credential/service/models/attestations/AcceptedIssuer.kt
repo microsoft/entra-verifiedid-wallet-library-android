@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  * Data Model for Accepted Issuer in OidcRequestContent.
  */
 @Serializable
-internal data class AcceptedIssuer(
+data class AcceptedIssuer(
     // did of the issuer.
     val iss: String
 )

@@ -8,7 +8,7 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.models.attestatio
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class AccessTokenAttestation(
+data class AccessTokenAttestation(
 
     val claims: List<ClaimAttestation>,
 
