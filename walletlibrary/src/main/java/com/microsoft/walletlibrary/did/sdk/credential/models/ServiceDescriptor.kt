@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
  * (e.g. status service, revocation service)
  */
 @Serializable
-internal data class ServiceDescriptor(
+data class ServiceDescriptor(
     val id: String,
     val type: String
 )

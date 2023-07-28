@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
  * Data model to describe a Verifiable Credential.
  */
 @Serializable
-internal data class VerifiableCredentialDescriptor(
+data class VerifiableCredentialDescriptor(
     @SerialName(CONTEXT)
     val context: List<String>,
 
