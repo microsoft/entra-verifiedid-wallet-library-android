@@ -12,7 +12,8 @@ import java.util.*
 @Serializable
 class VerifiableCredential(
     val raw: VerifiableCredential,
-    val contract: VerifiableCredentialContract? = null
+    val contract: VerifiableCredentialContract? = null,
+    override val type: List<String> = raw.contents.vc.type
 ): VerifiedId {
     override val id = raw.jti
 
@@ -21,8 +22,6 @@ class VerifiableCredential(
 
     @Serializable(with = DateSerializer::class)
     override val expiresOn = raw.contents.exp?.let { Date(it * 1000L) }
-
-    val types = raw.contents.vc.type
 
     override val style = contract?.display?.toVerifiedIdStyle()
 
