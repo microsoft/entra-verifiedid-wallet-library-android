@@ -24,7 +24,7 @@ interface VerifiedId {
     val style: VerifiedIdStyle?
 
     // List of types of Verified ID.
-    val type: List<String>
+    val types: List<String>
 
     // Return list of claims in the Verified ID.
     fun getClaims(): ArrayList<VerifiedIdClaim>

@@ -13,7 +13,7 @@ import java.util.*
 class VerifiableCredential(
     val raw: VerifiableCredential,
     val contract: VerifiableCredentialContract? = null,
-    override val type: List<String> = raw.contents.vc.type
+    override val types: List<String> = raw.contents.vc.type
 ): VerifiedId {
     override val id = raw.jti
 
