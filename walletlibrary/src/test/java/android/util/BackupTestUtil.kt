@@ -34,14 +34,25 @@ import kotlinx.serialization.json.Json
 // cryptographically correct and consistent Verifiable Credential data
 object BackupTestUtil {
     private const val testDid = "did:web:localhost"
-    val signKey: ECKey = ECKeyGenerator(Curve.P_256).keyID("sign").keyUse(KeyUse.SIGNATURE).generate()
-    val updateKey: ECKey = ECKeyGenerator(Curve.P_256).keyID("update").keyUse(KeyUse.SIGNATURE).generate()
-    val recoverKey: ECKey = ECKeyGenerator(Curve.P_256).keyID("recover").keyUse(KeyUse.SIGNATURE).generate()
-    val encryptKey: RSAKey = RSAKeyGenerator(4096).keyID("encrypt").keyUse(KeyUse.ENCRYPTION).generate()
+    val signKey: ECKey =
+        ECKeyGenerator(Curve.P_256).keyID("sign").keyUse(KeyUse.SIGNATURE).generate()
+    val updateKey: ECKey =
+        ECKeyGenerator(Curve.P_256).keyID("update").keyUse(KeyUse.SIGNATURE).generate()
+    val recoverKey: ECKey =
+        ECKeyGenerator(Curve.P_256).keyID("recover").keyUse(KeyUse.SIGNATURE).generate()
+    val encryptKey: RSAKey =
+        RSAKeyGenerator(4096).keyID("encrypt").keyUse(KeyUse.ENCRYPTION).generate()
     internal val testDisplayContract = DisplayContract(
         locale = "en-US",
         contract = "http://localhost/contract",
-        card = CardDescriptor("Test", "n/a", "#f64ded", "#a80aa5", Logo(description = "test"), "test card"),
+        card = CardDescriptor(
+            "Test",
+            "n/a",
+            "#f64ded",
+            "#a80aa5",
+            Logo(description = "test"),
+            "test card"
+        ),
         consent = ConsentDescriptor("You shouldn't approve this", "Reject this card"),
         claims = emptyMap()
     )

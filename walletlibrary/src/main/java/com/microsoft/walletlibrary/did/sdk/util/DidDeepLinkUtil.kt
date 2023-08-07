@@ -4,7 +4,7 @@ package com.microsoft.walletlibrary.did.sdk.util
 
 import android.net.Uri
 
-internal object DidDeepLinkUtil {
+object DidDeepLinkUtil {
 
     private const val DEEP_LINK_SCHEME = "openid"
     private const val DEEP_LINK_HOST = "vc"

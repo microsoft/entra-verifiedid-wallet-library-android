@@ -5,6 +5,9 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class RequestedClaim(
     internal val indexed: Boolean,
 

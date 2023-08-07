@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+import kotlinx.serialization.Serializable
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
@@ -17,6 +18,7 @@ enum class GroupRequirementOperator {
 /**
  * Represents a group of requirements required to complete the request.
  */
+@Serializable
 class GroupRequirement(
     override val required: Boolean,
     val requirements: MutableList<Requirement>,

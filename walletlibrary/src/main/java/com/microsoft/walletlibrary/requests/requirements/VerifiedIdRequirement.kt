@@ -12,10 +12,12 @@ import com.microsoft.walletlibrary.util.RequirementValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import kotlinx.serialization.Serializable
 
 /**
  * Represents information that describes Verified IDs required in order to complete a VerifiedID request.
  */
+@Serializable
 class VerifiedIdRequirement(
     internal val id: String?,
 
