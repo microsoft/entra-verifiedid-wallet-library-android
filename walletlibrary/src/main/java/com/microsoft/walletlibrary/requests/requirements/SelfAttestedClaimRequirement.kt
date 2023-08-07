@@ -8,10 +8,12 @@ package com.microsoft.walletlibrary.requests.requirements
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
+import kotlinx.serialization.Serializable
 
 /**
  * Represents information that describes self-attested claims required in order to complete a VerifiedID request.
  */
+@Serializable
 class SelfAttestedClaimRequirement(
     internal val id: String,
 

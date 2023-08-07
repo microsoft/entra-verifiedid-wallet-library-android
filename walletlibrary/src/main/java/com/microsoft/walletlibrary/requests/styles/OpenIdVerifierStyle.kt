@@ -5,9 +5,12 @@
 
 package com.microsoft.walletlibrary.requests.styles
 
+import kotlinx.serialization.Serializable
+
 /**
  * Holds information describing look and feel of a requester.
  */
+@Serializable
 data class OpenIdVerifierStyle(
     // Name of the requester.
     override val name: String,

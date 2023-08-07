@@ -15,10 +15,12 @@ import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.getResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
+import kotlinx.serialization.Serializable
 
 /**
  * Issuance request specific to Manifest/Contract.
  */
+@Serializable
 internal class ManifestIssuanceRequest(
     // Attributes describing the requester (eg. name, logo).
     override val requesterStyle: RequesterStyle,

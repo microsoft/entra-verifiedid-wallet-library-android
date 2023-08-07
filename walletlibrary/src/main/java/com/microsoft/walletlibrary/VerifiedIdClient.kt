@@ -9,6 +9,7 @@ import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
+import com.microsoft.walletlibrary.requests.VerifiedIdRequestSerializer
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.util.MalformedInputException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
@@ -38,6 +39,22 @@ class VerifiedIdClient(
             val rawRequest = requestResolver.resolve(verifiedIdRequestInput)
             val requestHandler = requestHandlerFactory.getHandler(requestResolver)
             requestHandler.handleRequest(rawRequest)
+        }
+    }
+
+    fun encodeRequest(verifiedIdRequest: VerifiedIdRequest<*>): Result<String> {
+        return try {
+            Result.success(serializer.encodeToString(VerifiedIdRequestSerializer, verifiedIdRequest))
+        } catch (exception: Exception) {
+            Result.failure(exception)
+        }
+    }
+
+    fun decodeRequest(encodedVerifiedIdRequest: String): Result<VerifiedIdRequest<*>> {
+        return try {
+            Result.success(serializer.decodeFromString(VerifiedIdRequestSerializer, encodedVerifiedIdRequest))
+        } catch (exception: Exception) {
+            Result.failure(exception)
         }
     }
 

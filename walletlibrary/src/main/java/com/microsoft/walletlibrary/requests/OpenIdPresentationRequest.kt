@@ -13,10 +13,12 @@ import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.getResult
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
+import kotlinx.serialization.Serializable
 
 /**
  * Presentation request specific to OpenId protocol.
  */
+@Serializable
 internal class OpenIdPresentationRequest(
     // Attributes describing the requester (eg. name, logo).
     override val requesterStyle: RequesterStyle,
