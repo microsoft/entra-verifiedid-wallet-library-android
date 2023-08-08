@@ -4,7 +4,7 @@
 
 package android.util
 
-import com.microsoft.did.sdk.util.Constants
+import com.microsoft.walletlibrary.did.sdk.util.Constants
 import java.util.Base64
 
 /**

@@ -6,8 +6,8 @@
 package com.microsoft.walletlibrary
 
 import android.content.Context
+import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import android.content.pm.PackageManager
-import com.microsoft.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler

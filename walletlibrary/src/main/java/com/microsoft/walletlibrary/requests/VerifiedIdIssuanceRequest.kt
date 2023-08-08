@@ -5,6 +5,8 @@
 
 package com.microsoft.walletlibrary.requests
 
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
+import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 
 /**
@@ -12,8 +14,11 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
  * styling of requester and VerifiedID, requirements needed in order to complete the request and information about
  * trust model of requester like domain url and verification status.
  */
-interface VerifiedIdIssuanceRequest: VerifiedIdRequest<VerifiedId> {
+interface VerifiedIdIssuanceRequest : VerifiedIdRequest<VerifiedId> {
+
+    // Attributes describing the Verified ID (eg. name, issuer, logo, background and text colors).
+    val verifiedIdStyle: VerifiedIdStyle
 
     // Completes the request and returns a VerifiedID if successful.
-    override suspend fun complete(): Result<VerifiedId>
+    override suspend fun complete(): VerifiedIdResult<VerifiedId>
 }

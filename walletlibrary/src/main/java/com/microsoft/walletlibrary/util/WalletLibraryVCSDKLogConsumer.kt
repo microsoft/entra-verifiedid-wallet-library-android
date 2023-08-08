@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.util
 
-import com.microsoft.did.sdk.util.log.SdkLog
+import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 
 internal class WalletLibraryVCSDKLogConsumer(private val logger: WalletLibraryLogger): SdkLog.Consumer {
 

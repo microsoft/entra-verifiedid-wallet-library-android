@@ -5,6 +5,8 @@
 
 package com.microsoft.walletlibrary.requests
 
+import com.microsoft.walletlibrary.util.VerifiedIdResult
+
 /**
  * VerifiedIdPresentationRequest handles information contained in an presentation request like the visual
  * styling of requester, requirements needed in order to complete the request and information about
@@ -13,5 +15,5 @@ package com.microsoft.walletlibrary.requests
 interface VerifiedIdPresentationRequest: VerifiedIdRequest<Unit> {
 
     // Completes the request and returns nothing if successful.
-    override suspend fun complete(): Result<Unit>
+    override suspend fun complete(): VerifiedIdResult<Unit>
 }

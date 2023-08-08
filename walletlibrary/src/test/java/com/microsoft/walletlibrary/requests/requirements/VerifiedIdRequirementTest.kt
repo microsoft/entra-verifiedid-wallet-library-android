@@ -5,7 +5,7 @@ import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstr
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.util.NoMatchForAnyConstraintsException
 import com.microsoft.walletlibrary.util.NoMatchForAtLeastOneConstraintException
-import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.VerifiedIdTypeIsNotRequestedTypeException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.every
@@ -60,7 +60,7 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
         assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
+            .isInstanceOf(RequirementNotMetException::class.java)
     }
 
     @Test
@@ -93,9 +93,13 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
         assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(NoMatchForAnyConstraintsException::class.java)
-        (actualResult.exceptionOrNull() as NoMatchForAnyConstraintsException).exceptions.forEach {
-            assertThat(it).isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
+            .isInstanceOf(RequirementNotMetException::class.java)
+            .hasMessage("Verified ID constraint do not match.")
+        (actualResult.exceptionOrNull() as RequirementNotMetException).innerErrors?.forEach { innerError ->
+            assertThat(innerError).isInstanceOf(NoMatchForAnyConstraintsException::class.java)
+            (innerError as NoMatchForAnyConstraintsException).exceptions.forEach {
+                assertThat(it).isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
+            }
         }
     }
 
@@ -130,9 +134,13 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
         assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(NoMatchForAtLeastOneConstraintException::class.java)
-        (actualResult.exceptionOrNull() as NoMatchForAtLeastOneConstraintException).exceptions.forEach {
-            assertThat(it).isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
+            .isInstanceOf(RequirementNotMetException::class.java)
+            .hasMessage("Verified ID constraint do not match.")
+        (actualResult.exceptionOrNull() as RequirementNotMetException).innerErrors?.forEach { innerError ->
+            assertThat(innerError).isInstanceOf(NoMatchForAtLeastOneConstraintException::class.java)
+            (innerError as NoMatchForAtLeastOneConstraintException).exceptions.forEach {
+                assertThat(it).isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
+            }
         }
     }
 
@@ -151,7 +159,11 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
         assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
+            .isInstanceOf(RequirementNotMetException::class.java)
+            .hasMessage("Verified ID constraint do not match.")
+        (actualResult.exceptionOrNull() as RequirementNotMetException).innerErrors?.forEach {
+            assertThat(it).isInstanceOf(VerifiedIdTypeIsNotRequestedTypeException::class.java)
+        }
     }
 
     @Test
@@ -164,7 +176,8 @@ class VerifiedIdRequirementTest {
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
         assertThat(actualResult.exceptionOrNull())
-            .isInstanceOf(VerifiedIdRequirementNotFulfilledException::class.java)
+            .isInstanceOf(RequirementNotMetException::class.java)
+            .hasMessage("Verified ID has not been set.")
     }
 
     @Test
