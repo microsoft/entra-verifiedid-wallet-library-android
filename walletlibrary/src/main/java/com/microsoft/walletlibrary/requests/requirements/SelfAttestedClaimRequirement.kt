@@ -25,12 +25,15 @@ class SelfAttestedClaimRequirement(
     override val required: Boolean = false,
 
     internal var value: String? = null
-): Requirement {
+) : Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate(): VerifiedIdResult<Unit> {
         //TODO("should required field be checked?")
         if (value == null)
-            return RequirementNotMetException("Self Attested Claim has not been set.", VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value).toVerifiedIdResult()
+            return RequirementNotMetException(
+                "Self Attested Claim has not been set.",
+                VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value
+            ).toVerifiedIdResult()
         return VerifiedIdResult.success(Unit)
     }
 

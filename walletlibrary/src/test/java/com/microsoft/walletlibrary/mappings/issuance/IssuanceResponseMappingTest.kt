@@ -104,7 +104,7 @@ class IssuanceResponseMappingTest {
         )
 
         // Act and Assert
-        assertThatThrownBy{
+        assertThatThrownBy {
             issuanceResponse.addRequirements(selfAttestedClaimRequirement)
         }.isInstanceOf(RequirementNotMetException::class.java)
             .hasMessage("Self Attested Claim has not been set.")
@@ -139,7 +139,7 @@ class IssuanceResponseMappingTest {
             )
 
         // Act and Assert
-        assertThatThrownBy{
+        assertThatThrownBy {
             issuanceResponse.addRequirements(idTokenRequirement)
         }.isInstanceOf(RequirementNotMetException::class.java)
             .hasMessage("Id Token has not been set.")
