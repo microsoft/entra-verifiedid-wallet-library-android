@@ -45,9 +45,9 @@ class MissingCallbackUrlException(message: String = "", cause: Throwable? = null
 
 open class RequirementValidationException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
 
-class VerifiedIdRequirementTypeConflictException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
+class MultipleRequirementsWithSameIdException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
 
-class TypeInVerifiedIdRequirementDoesNotMatchRequestException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
+class NoMatchingRequirementInRequestException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
 
 class VerifiedIdTypeIsNotRequestedTypeException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
 
