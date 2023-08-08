@@ -46,10 +46,10 @@ class OpenIdPresentationRequestTest {
         requirement = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
         openIdPresentationRequest = OpenIdPresentationRequest(
             requesterStyle,
             requirement,
@@ -73,10 +73,10 @@ class OpenIdPresentationRequestTest {
         requirement = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
         openIdPresentationRequest = OpenIdPresentationRequest(
             requesterStyle,
             requirement,
@@ -134,10 +134,10 @@ class OpenIdPresentationRequestTest {
         requirement = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
         openIdPresentationRequest = OpenIdPresentationRequest(
             requesterStyle,
             requirement,
@@ -167,10 +167,10 @@ class OpenIdPresentationRequestTest {
         requirement = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
         openIdPresentationRequest = OpenIdPresentationRequest(
             requesterStyle,
             requirement,
@@ -204,10 +204,10 @@ class OpenIdPresentationRequestTest {
         requirement = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
         openIdPresentationRequest = OpenIdPresentationRequest(
             requesterStyle,
             requirement,
@@ -243,10 +243,10 @@ class OpenIdPresentationRequestTest {
         requirement = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
         openIdPresentationRequest = OpenIdPresentationRequest(
             requesterStyle,
             requirement,
@@ -269,18 +269,18 @@ class OpenIdPresentationRequestTest {
         val verifiedIdRequirement1 = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType1),
-            VcTypeConstraint(expectedVcType1),
             encrypted = false,
             required = true
         )
+        verifiedIdRequirement1.constraint = VcTypeConstraint(expectedVcType1)
         val expectedVcType2 = "VcType2"
         val verifiedIdRequirement2 = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType2),
-            VcTypeConstraint(expectedVcType2),
             encrypted = false,
             required = true
         )
+        verifiedIdRequirement2.constraint = VcTypeConstraint(expectedVcType2)
         val groupRequirement = GroupRequirement(
             true,
             mutableListOf(verifiedIdRequirement1, verifiedIdRequirement2),

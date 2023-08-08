@@ -45,7 +45,13 @@ class MissingCallbackUrlException(message: String = "", cause: Throwable? = null
 
 open class RequirementValidationException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): WalletLibraryException(message, cause, retryable)
 
+class MultipleRequirementsWithSameIdException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
+
+class NoMatchingRequirementInRequestException(message: String = "", cause: Throwable? = null, retryable: Boolean = false) : RequirementValidationException(message, cause, retryable)
+
 class VerifiedIdTypeIsNotRequestedTypeException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
+
+class NoMatchForVcPathRegexConstraintException(message: String = "", cause: Throwable? = null, retryable: Boolean = false): RequirementValidationException(message, cause, retryable)
 
 class NoMatchForAnyConstraintsException(message: String = "", val exceptions: List<Throwable> = emptyList(), retryable: Boolean = false) : RequirementValidationException(message, retryable = retryable)
 

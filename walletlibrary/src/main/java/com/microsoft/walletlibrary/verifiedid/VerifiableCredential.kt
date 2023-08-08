@@ -4,7 +4,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.V
 import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import kotlinx.serialization.Serializable
-import java.util.*
+import java.util.Date
 
 /**
  * Holds the information related to a VerifiedID like the claims, issued and expiry dates.
