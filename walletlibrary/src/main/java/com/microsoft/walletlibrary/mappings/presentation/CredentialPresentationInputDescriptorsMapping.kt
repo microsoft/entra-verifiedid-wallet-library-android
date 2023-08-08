@@ -13,11 +13,9 @@ import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcPathRegexConstraint
-import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.VerifiedIdConstraint
 import com.microsoft.walletlibrary.util.MalformedInputException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
-import okhttp3.internal.filterList
 
 /**
  * Maps CredentialPresentationInputDescriptor object of presentation in SDK to VerifiedIdRequirement object in library.
@@ -28,20 +26,22 @@ internal fun CredentialPresentationInputDescriptor.toVerifiedIdRequirement(): Ve
             "There is no Verified ID type in the request.",
             VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value
         )
-    return VerifiedIdRequirement(
+    val verifiedIdRequirement = VerifiedIdRequirement(
         this.id,
         this.schemas.map { it.uri },
-        toConstraint(),
         encrypted = false,
         required = true,
         this.purpose,
         this.issuanceMetadataList.map { VerifiedIdRequestURL(Uri.parse(it.issuerContract)) }
     )
+    val verifiedIdConstraint = toConstraint(verifiedIdRequirement)
+    verifiedIdRequirement.constraint = verifiedIdConstraint
+    return verifiedIdRequirement
 }
 
-internal fun CredentialPresentationInputDescriptor.toConstraint(): VerifiedIdConstraint {
+internal fun CredentialPresentationInputDescriptor.toConstraint(verifiedIdRequirement: VerifiedIdRequirement): VerifiedIdConstraint {
     val vcTypeConstraint =
-        if (schemas.isNotEmpty()) toVcTypeConstraint(schemas.map { it.uri })
+        if (schemas.isNotEmpty()) verifiedIdRequirement.constraint
         else throw MalformedInputException(
             "There is no Verified ID type in the request.",
             VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value
@@ -71,16 +71,4 @@ internal fun toVcPathRegexConstraint(fields: List<Fields>): VerifiedIdConstraint
         )
     }
     return GroupConstraint(vcPathRegexConstraints, GroupConstraintOperator.ALL)
-}
-
-internal fun toVcTypeConstraint(vcTypes: List<String>): VerifiedIdConstraint {
-    if (vcTypes.isEmpty() || vcTypes.filterList { isNotBlank() }
-            .isEmpty()) throw MalformedInputException(
-        "There is no Verified ID type in the request.",
-        VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value
-    )
-    if (vcTypes.size == 1) return VcTypeConstraint(vcTypes.first())
-    val vcTypeConstraints = mutableListOf<VcTypeConstraint>()
-    vcTypes.forEach { vcTypeConstraints.add(VcTypeConstraint(it)) }
-    return GroupConstraint(vcTypeConstraints, GroupConstraintOperator.ANY)
 }

@@ -122,45 +122,6 @@ class CredentialPresentationInputDescriptorsMappingTest {
     }
 
     @Test
-    fun constraintMapping_WithSingleValidSchemaUri_ReturnsTypeConstraint() {
-        // Act
-        val expectedVcType = "BusinessCard"
-        val actualVcTypeConstraint = toVcTypeConstraint(listOf(expectedVcType))
-
-        // Assert
-        assertThat(actualVcTypeConstraint).isInstanceOf(VcTypeConstraint::class.java)
-        assertThat((actualVcTypeConstraint as VcTypeConstraint).vcType).isEqualTo(expectedVcType)
-    }
-
-    @Test
-    fun constraintMapping_WithMultipleValidSchemaUri_ReturnsGroupConstraint() {
-        // Arrange
-        val expectedVcTypes = listOf("BusinessCard1", "BusinessCard2")
-
-        // Act
-        val actualConstraint = toVcTypeConstraint(expectedVcTypes)
-
-        // Assert
-        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
-        assertThat((actualConstraint as GroupConstraint).constraints.size).isEqualTo(2)
-        assertThat(actualConstraint.constraintOperator).isEqualTo(GroupConstraintOperator.ANY)
-        assertThat(actualConstraint.constraints.filterIsInstance<VcTypeConstraint>().size).isEqualTo(
-            2
-        )
-        assertThat(
-            actualConstraint.constraints.filterIsInstance<VcTypeConstraint>()
-                .map { it.vcType }).containsAll(expectedVcTypes)
-    }
-
-    @Test
-    fun constraintMapping_WithEmptySchemaUri_ThrowsException() {
-        // Act and Assert
-        assertThatThrownBy {
-            toVcTypeConstraint(listOf(""))
-        }.isInstanceOf(MalformedInputException::class.java)
-    }
-
-    @Test
     fun constraintMapping_WithEmptyFields_ReturnsNull() {
         // Act
         val actualConstraint = toVcPathRegexConstraint(emptyList())
@@ -224,7 +185,7 @@ class CredentialPresentationInputDescriptorsMappingTest {
 
         // Act and Assert
         assertThatThrownBy {
-            credentialPresentationInputDescriptor.toConstraint()
+            credentialPresentationInputDescriptor.toVerifiedIdRequirement()
         }.isInstanceOf(MalformedInputException::class.java)
     }
 
@@ -239,9 +200,10 @@ class CredentialPresentationInputDescriptorsMappingTest {
             expectedInputPurpose,
             emptyList()
         )
+        val verifiedIdRequirement = credentialPresentationInputDescriptor.toVerifiedIdRequirement()
 
         // Act
-        val actualConstraints = credentialPresentationInputDescriptor.toConstraint()
+        val actualConstraints = credentialPresentationInputDescriptor.toConstraint(verifiedIdRequirement)
 
         // Assert
         assertThat(actualConstraints).isInstanceOf(VcTypeConstraint::class.java)
@@ -264,7 +226,7 @@ class CredentialPresentationInputDescriptorsMappingTest {
 
         // Act and Assert
         assertThatThrownBy {
-            credentialPresentationInputDescriptor.toConstraint()
+            credentialPresentationInputDescriptor.toVerifiedIdRequirement()
         }.isInstanceOf(MalformedInputException::class.java)
     }
 
@@ -285,7 +247,8 @@ class CredentialPresentationInputDescriptorsMappingTest {
 
         // Act and Assert
         assertThatThrownBy {
-            credentialPresentationInputDescriptor.toConstraint()
+            val verifiedIdRequirement = credentialPresentationInputDescriptor.toVerifiedIdRequirement()
+            credentialPresentationInputDescriptor.toConstraint(verifiedIdRequirement)
         }.isInstanceOf(MalformedInputException::class.java)
     }
 
@@ -305,7 +268,8 @@ class CredentialPresentationInputDescriptorsMappingTest {
         )
 
         // Act
-        val actualConstraint = credentialPresentationInputDescriptor.toConstraint()
+        val verifiedIdRequirement = credentialPresentationInputDescriptor.toVerifiedIdRequirement()
+        val actualConstraint = verifiedIdRequirement.constraint
 
         // Assert
         assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
@@ -335,7 +299,8 @@ class CredentialPresentationInputDescriptorsMappingTest {
         )
 
         // Act
-        val actualConstraint = credentialPresentationInputDescriptor.toConstraint()
+        val verifiedIdRequirement = credentialPresentationInputDescriptor.toVerifiedIdRequirement()
+        val actualConstraint = verifiedIdRequirement.constraint
 
         // Assert
         assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
@@ -373,7 +338,8 @@ class CredentialPresentationInputDescriptorsMappingTest {
         )
 
         // Act
-        val actualConstraint = credentialPresentationInputDescriptor.toConstraint()
+        val verifiedIdRequirement = credentialPresentationInputDescriptor.toVerifiedIdRequirement()
+        val actualConstraint = verifiedIdRequirement.constraint
 
         // Assert
         assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
@@ -412,7 +378,8 @@ class CredentialPresentationInputDescriptorsMappingTest {
         )
 
         // Act
-        val actualConstraint = credentialPresentationInputDescriptor.toConstraint()
+        val verifiedIdRequirement = credentialPresentationInputDescriptor.toVerifiedIdRequirement()
+        val actualConstraint = verifiedIdRequirement.constraint
 
         // Assert
         assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)

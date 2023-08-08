@@ -54,7 +54,8 @@ class OpenIdResponderTest {
     private fun setupInput() {
         val expectedVcType = "testVc"
         val expectedVcId = "TestVC1"
-        requirement = VerifiedIdRequirement(expectedVcId, listOf(expectedVcType), VcTypeConstraint(expectedVcType))
+        requirement = VerifiedIdRequirement(expectedVcId, listOf(expectedVcType))
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
         val mockVerifiableCredentialContent: VerifiableCredentialContent = mockk()
         val mockVerifiableCredentialDescriptor: VerifiableCredentialDescriptor = mockk()
         val expectedCredentialSubject = mutableMapOf<String, String>()
