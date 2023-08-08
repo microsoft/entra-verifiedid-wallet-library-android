@@ -40,7 +40,7 @@ class VerifiedIdRequirement(
     val issuanceOptions: List<VerifiedIdRequestInput> = mutableListOf(),
 
     internal var verifiedId: VerifiedId? = null
-): Requirement {
+) : Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate(): VerifiedIdResult<Unit> {
         if (verifiedId == null)
