@@ -68,6 +68,7 @@ private fun IssuanceResponse.addPinRequirement(pinRequirement: PinRequirement) {
 }
 
 private fun IssuanceResponse.addVerifiedIdRequirement(verifiedIdRequirement: VerifiedIdRequirement) {
+    verifiedIdRequirement.validate().getOrThrow()
     val presentationAttestation =
         request.getAttestations().presentations.filter { verifiedIdRequirement.types.contains(it.credentialType) }
     if (presentationAttestation.isEmpty())
