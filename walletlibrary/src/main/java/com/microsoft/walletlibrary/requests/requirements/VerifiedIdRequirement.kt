@@ -6,12 +6,17 @@
 package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
+import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
+import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
+import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.VerifiedIdConstraint
+import com.microsoft.walletlibrary.util.MalformedInputException
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.RequirementValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import okhttp3.internal.filterList
 
 /**
  * Represents information that describes Verified IDs required in order to complete a VerifiedID request.
@@ -21,9 +26,6 @@ class VerifiedIdRequirement(
 
     // The types of Verified ID required.
     val types: List<String>,
-
-    // Constraint that represents how the requirement is fulfilled
-    private val constraint: VerifiedIdConstraint,
 
     // Indicates if the requirement must be encrypted.
     internal val encrypted: Boolean = false,
@@ -39,6 +41,21 @@ class VerifiedIdRequirement(
 
     internal var verifiedId: VerifiedId? = null
 ): Requirement {
+    // Constraint that represents how the requirement is fulfilled
+    internal var constraint: VerifiedIdConstraint = toVcTypeConstraint()
+
+    internal fun toVcTypeConstraint(): VerifiedIdConstraint {
+        if (types.isEmpty() || types.filterList { isNotBlank() }
+                .isEmpty()) throw MalformedInputException(
+            "There is no Verified ID type in the request.",
+            VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value
+        )
+        if (types.size == 1) return VcTypeConstraint(types.first())
+        val vcTypeConstraints = mutableListOf<VcTypeConstraint>()
+        types.forEach { vcTypeConstraints.add(VcTypeConstraint(it)) }
+        return GroupConstraint(vcTypeConstraints, GroupConstraintOperator.ANY)
+    }
+
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate(): VerifiedIdResult<Unit> {
         if (verifiedId == null)

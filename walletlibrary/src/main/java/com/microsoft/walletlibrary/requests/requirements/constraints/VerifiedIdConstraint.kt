@@ -10,7 +10,7 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 /**
  * Represents a constraint on the properties of VerifiedId to determine if it matches the constraint.
  */
-interface VerifiedIdConstraint {
+internal interface VerifiedIdConstraint {
     fun doesMatch(verifiedId: VerifiedId): Boolean
 
     fun matches(verifiedId: VerifiedId)
