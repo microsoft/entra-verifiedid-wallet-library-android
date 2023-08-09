@@ -23,4 +23,4 @@ data class VerifiedIdManifestIssuerStyle(
 
     // The instructions on the request.
     val requestInstructions: String? = null
-): RequesterStyle
+) : RequesterStyle
