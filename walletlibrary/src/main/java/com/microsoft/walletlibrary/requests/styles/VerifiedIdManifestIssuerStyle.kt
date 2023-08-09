@@ -15,9 +15,6 @@ data class VerifiedIdManifestIssuerStyle(
     // Name of the requester.
     override val name: String,
 
-    // The DID of the requester.
-    val did: String,
-
     // The title of the request.
     val requestTitle: String? = null,
 

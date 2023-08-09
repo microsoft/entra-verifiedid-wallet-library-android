@@ -15,7 +15,6 @@ import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 internal fun IssuanceRequest.getRequesterStyle(): RequesterStyle {
     return VerifiedIdManifestIssuerStyle(
         entityName,
-        entityIdentifier,
         contract.display.consent.title,
         contract.display.consent.instructions
     )
