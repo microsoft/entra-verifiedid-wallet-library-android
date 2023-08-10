@@ -6,7 +6,7 @@
 package com.microsoft.walletlibrary.verifiedid
 
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
-import java.util.*
+import java.util.Date
 
 /**
  * Data model for VerifiedId
@@ -21,7 +21,7 @@ interface VerifiedId {
     val expiresOn: Date?
 
     // Information needed to style a Verified ID.
-    val style: VerifiedIdStyle?
+    val style: VerifiedIdStyle
 
     // List of types of Verified ID.
     val types: List<String>
