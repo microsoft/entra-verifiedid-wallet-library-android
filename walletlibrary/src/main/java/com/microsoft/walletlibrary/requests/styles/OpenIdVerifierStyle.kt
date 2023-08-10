@@ -14,4 +14,4 @@ data class OpenIdVerifierStyle(
 
     // Logo of the requester.
     val verifierLogo: VerifiedIdLogo? = null
-): RequesterStyle
+) : RequesterStyle

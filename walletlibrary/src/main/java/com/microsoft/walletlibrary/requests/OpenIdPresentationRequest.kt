@@ -28,7 +28,7 @@ internal class OpenIdPresentationRequest(
     override val rootOfTrust: RootOfTrust,
 
     val request: OpenIdRawRequest
-): VerifiedIdPresentationRequest {
+) : VerifiedIdPresentationRequest {
     // Indicates whether presentation request is satisfied on client side.
     override fun isSatisfied(): Boolean {
         val validationResult = requirement.validate()

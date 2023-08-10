@@ -40,7 +40,7 @@ class VerifiedIdRequirement(
     val issuanceOptions: List<VerifiedIdRequestInput> = mutableListOf(),
 
     internal var verifiedId: VerifiedId? = null
-): Requirement {
+) : Requirement {
     // Constraint that represents how the requirement is fulfilled
     internal var constraint: VerifiedIdConstraint = toVcTypeConstraint()
 
