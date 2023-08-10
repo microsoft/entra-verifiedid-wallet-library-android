@@ -17,7 +17,7 @@ import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
-import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import io.mockk.coEvery
@@ -54,7 +54,8 @@ class OpenIdResponderTest {
     private fun setupInput() {
         val expectedVcType = "testVc"
         val expectedVcId = "TestVC1"
-        requirement = VerifiedIdRequirement(expectedVcId, listOf(expectedVcType), VcTypeConstraint(expectedVcType))
+        requirement = VerifiedIdRequirement(expectedVcId, listOf(expectedVcType))
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
         val mockVerifiableCredentialContent: VerifiableCredentialContent = mockk()
         val mockVerifiableCredentialDescriptor: VerifiableCredentialDescriptor = mockk()
         val expectedCredentialSubject = mutableMapOf<String, String>()
@@ -143,6 +144,7 @@ class OpenIdResponderTest {
             runBlocking {
                 OpenIdResponder.sendPresentationResponse(mockPresentationRequest, requirement)
             }
-        }.isInstanceOf(VerifiedIdRequirementNotFulfilledException::class.java)
+        }.isInstanceOf(RequirementNotMetException::class.java)
+            .hasMessage("Verified ID has not been set.")
     }
 }

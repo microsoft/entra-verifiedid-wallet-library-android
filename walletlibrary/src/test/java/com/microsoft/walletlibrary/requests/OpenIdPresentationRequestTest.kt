@@ -11,10 +11,16 @@ import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
-import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
+import com.microsoft.walletlibrary.util.UnspecifiedVerifiedIdException
+import com.microsoft.walletlibrary.util.UserCanceledException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.coJustRun
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.Test
@@ -40,10 +46,10 @@ class OpenIdPresentationRequestTest {
         requirement = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
         openIdPresentationRequest = OpenIdPresentationRequest(
             requesterStyle,
             requirement,
@@ -67,10 +73,10 @@ class OpenIdPresentationRequestTest {
         requirement = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
         openIdPresentationRequest = OpenIdPresentationRequest(
             requesterStyle,
             requirement,
@@ -128,10 +134,10 @@ class OpenIdPresentationRequestTest {
         requirement = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
         openIdPresentationRequest = OpenIdPresentationRequest(
             requesterStyle,
             requirement,
@@ -161,10 +167,10 @@ class OpenIdPresentationRequestTest {
         requirement = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
         openIdPresentationRequest = OpenIdPresentationRequest(
             requesterStyle,
             requirement,
@@ -186,7 +192,7 @@ class OpenIdPresentationRequestTest {
             // Assert
             Assertions.assertThat(actualResult.isFailure).isTrue
             Assertions.assertThat(actualResult.exceptionOrNull()).isInstanceOf(
-                OpenIdResponseCompletionException::class.java
+                UnspecifiedVerifiedIdException::class.java
             )
         }
     }
@@ -198,10 +204,10 @@ class OpenIdPresentationRequestTest {
         requirement = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
         openIdPresentationRequest = OpenIdPresentationRequest(
             requesterStyle,
             requirement,
@@ -224,9 +230,38 @@ class OpenIdPresentationRequestTest {
             // Assert
             Assertions.assertThat(actualResult.isFailure).isTrue
             Assertions.assertThat(actualResult.exceptionOrNull()).isInstanceOf(
-                VerifiedIdRequirementNotFulfilledException::class.java
+                RequirementNotMetException::class.java
             )
+                .hasMessage("Verified ID has not been set.")
         }
+    }
+
+    @Test
+    fun cancelRequest_throwsUserCanceledException() {
+        // Arrange
+        val expectedVcType = "TestVc"
+        requirement = VerifiedIdRequirement(
+            "id",
+            listOf(expectedVcType),
+            encrypted = false,
+            required = true
+        )
+        (requirement as VerifiedIdRequirement).constraint = VcTypeConstraint(expectedVcType)
+        openIdPresentationRequest = OpenIdPresentationRequest(
+            requesterStyle,
+            requirement,
+            rootOfTrust,
+            rawRequest
+        )
+
+        // Act
+        val actualResult = runBlocking { openIdPresentationRequest.cancel() }
+
+        // Assert
+        Assertions.assertThat(actualResult.isFailure).isTrue
+        Assertions.assertThat(actualResult.exceptionOrNull()).isInstanceOf(
+            UserCanceledException::class.java
+        )
     }
 
     private fun setupGroupRequirement(fulFilledRequirement: FulFilledRequirement) {
@@ -234,18 +269,18 @@ class OpenIdPresentationRequestTest {
         val verifiedIdRequirement1 = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType1),
-            VcTypeConstraint(expectedVcType1),
             encrypted = false,
             required = true
         )
+        verifiedIdRequirement1.constraint = VcTypeConstraint(expectedVcType1)
         val expectedVcType2 = "VcType2"
         val verifiedIdRequirement2 = VerifiedIdRequirement(
             "id",
             listOf(expectedVcType2),
-            VcTypeConstraint(expectedVcType2),
             encrypted = false,
             required = true
         )
+        verifiedIdRequirement2.constraint = VcTypeConstraint(expectedVcType2)
         val groupRequirement = GroupRequirement(
             true,
             mutableListOf(verifiedIdRequirement1, verifiedIdRequirement2),

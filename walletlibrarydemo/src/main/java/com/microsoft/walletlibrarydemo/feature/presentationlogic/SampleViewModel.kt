@@ -41,21 +41,21 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : V
                 verifiedIdRequest = it
             },
             onFailure = {
-                populateErrorState(it.message)
+                populateErrorState(it.cause?.message ?: it.message)
             })
     }
 
     suspend fun completeIssuance() {
-        verifiedIdRequest?.let {
+        verifiedIdRequest?.let { request ->
             // Completes an issuance request
-            val issuanceResult = it.complete()
+            val issuanceResult = request.complete()
             issuanceResult.fold(
                 onSuccess = { issuedVerifiedId ->
                     state = State.ISSUANCE_SUCCESS
                     verifiedId = issuedVerifiedId as VerifiedId
-                    verifiedId?.let { it -> encodeVerifiedId(it) }
+                    verifiedId?.let { encodeVerifiedId(it) }
                 },
-                onFailure = { exception -> populateErrorState(exception.cause?.message ?: exception.message) })
+                onFailure = { exception -> populateErrorState(exception.cause?.message ?: exception.message) } )
         }
     }
 
@@ -69,7 +69,7 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : V
                     verifiedIdDao.insert(vc)
                 }
             },
-            onFailure = { populateErrorState(it.message) }
+            onFailure = { populateErrorState(it.cause?.message ?: it.message) }
         )
     }
 
@@ -83,7 +83,7 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : V
                 onSuccess = {
                     it.let { decodedVerifiedId -> decodedVerifiedIds.add(decodedVerifiedId) }
                 },
-                onFailure = { populateErrorState(it.message) }
+                onFailure = { populateErrorState(it.cause?.message ?: it.message) }
             )
         }
         return decodedVerifiedIds

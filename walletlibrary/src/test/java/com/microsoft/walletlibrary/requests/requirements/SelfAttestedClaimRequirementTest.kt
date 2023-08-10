@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.requests.requirements
 
-import com.microsoft.walletlibrary.util.SelfAttestedClaimRequirementNotFulfilledException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -40,7 +40,8 @@ class SelfAttestedClaimRequirementTest {
 
         assertThat(actualResult.isFailure).isTrue
         assertThat(actualResult.exceptionOrNull()).isNotNull
-        assertThat(actualResult.exceptionOrNull()).isInstanceOf(SelfAttestedClaimRequirementNotFulfilledException::class.java)
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(RequirementNotMetException::class.java)
+            .hasMessage("Self Attested Claim has not been set.")
     }
 
     @Test

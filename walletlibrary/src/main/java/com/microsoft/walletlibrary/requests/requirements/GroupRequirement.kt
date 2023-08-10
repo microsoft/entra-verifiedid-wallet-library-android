@@ -5,8 +5,10 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
-import com.microsoft.walletlibrary.util.RequirementValidationException
 import kotlinx.serialization.Serializable
+import com.microsoft.walletlibrary.util.RequirementNotMetException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
+import com.microsoft.walletlibrary.util.VerifiedIdResult
 
 enum class GroupRequirementOperator {
     ANY,
@@ -21,16 +23,19 @@ class GroupRequirement(
     override val required: Boolean,
     val requirements: MutableList<Requirement>,
     val requirementOperator: GroupRequirementOperator
-): Requirement {
+) : Requirement {
 
-    override fun validate(): Result<Unit> {
+    override fun validate(): VerifiedIdResult<Unit> {
         val validationExceptions = mutableListOf<String>()
         for (requirement in requirements) {
             if (requirement.validate().isFailure)
                 validationExceptions.add("${requirement.validate().exceptionOrNull()}")
         }
         if (validationExceptions.isNotEmpty())
-            return Result.failure(RequirementValidationException("Validation failed with following exceptions: $validationExceptions"))
-        return Result.success(Unit)
+            return RequirementNotMetException(
+                "Group Requirement validation failed with following exceptions: $validationExceptions",
+                VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value
+            ).toVerifiedIdResult()
+        return VerifiedIdResult.success(Unit)
     }
 }

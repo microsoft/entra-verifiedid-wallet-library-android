@@ -1,11 +1,15 @@
 package com.microsoft.walletlibrary.mappings.presentation
 
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Constraints
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Fields
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Filter
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
+import com.microsoft.walletlibrary.requests.requirements.constraints.VcPathRegexConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
-import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
+import com.microsoft.walletlibrary.util.MalformedInputException
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -42,14 +46,14 @@ class CredentialPresentationInputDescriptorsMappingTest {
 
         // Act and Assert
         assertThatThrownBy { credentialPresentationInputDescriptor.toVerifiedIdRequirement() }.isInstanceOf(
-            MissingVerifiedIdTypeException::class.java
+            MalformedInputException::class.java
         )
     }
 
     @Test
     fun inputDescriptorMapping_WithOneIdType_ReturnsVerifiedIdRequirement() {
         // Arrange
-        every { expectedSchema.uri } returns ""
+        every { expectedSchema.uri } returns "TestVcType"
 
         // Act
         val actualVerifiedIdRequirement =
@@ -90,26 +94,20 @@ class CredentialPresentationInputDescriptorsMappingTest {
     }
 
     @Test
-    fun inputDescriptorMapping_WithNoContracts_ReturnsVerifiedIdRequirement() {
+    fun inputDescriptorMapping_WithVcType_ThrowsException() {
         // Arrange
         every { expectedSchema.uri } returns ""
 
-        // Act
-        val actualVerifiedIdRequirement =
+        // Act and Assert
+        assertThatThrownBy {
             credentialPresentationInputDescriptor.toVerifiedIdRequirement()
-
-        // Assert
-        assertThat(actualVerifiedIdRequirement.id).isEqualTo(expectedId)
-        assertThat(actualVerifiedIdRequirement.purpose).isEqualTo(expectedInputPurpose)
-        assertThat(actualVerifiedIdRequirement.types.size).isEqualTo(1)
-        assertThat(actualVerifiedIdRequirement.required).isEqualTo(expectedRequiredFieldValue)
-        assertThat(actualVerifiedIdRequirement.encrypted).isEqualTo(expectedEncryptedFieldValue)
+        }.isInstanceOf(MalformedInputException::class.java)
     }
 
     @Test
     fun inputDescriptorMapping_WithPurpose_ReturnsVerifiedIdRequirement() {
         // Arrange
-        every { expectedSchema.uri } returns ""
+        every { expectedSchema.uri } returns "TestVcType"
 
         // Act
         val actualVerifiedIdRequirement =
@@ -124,31 +122,285 @@ class CredentialPresentationInputDescriptorsMappingTest {
     }
 
     @Test
-    fun constraintMapping_WithSingleValidSchemaUri_ReturnsTypeConstraint() {
+    fun constraintMapping_WithEmptyFields_ReturnsNull() {
         // Act
-        val expectedVcType = "BusinessCard"
-        val actualVcTypeConstraint = toVcTypeConstraint(listOf(expectedVcType))
+        val actualConstraint = toVcPathRegexConstraint(emptyList())
 
         // Assert
-        assertThat(actualVcTypeConstraint).isInstanceOf(VcTypeConstraint::class.java)
-        assertThat((actualVcTypeConstraint as VcTypeConstraint).vcType).isEqualTo(expectedVcType)
+        assertThat(actualConstraint).isNull()
     }
 
     @Test
-    fun constraintMapping_WithMultipleValidSchemaUri_ReturnsGroupConstraint() {
+    fun constraintMapping_WithSingleValidField_ReturnsClaimConstraint() {
         // Arrange
-        val expectedVcTypes = listOf("BusinessCard1", "BusinessCard2")
+        val expectedPattern = "did:ion:test"
+        val filter = Filter("string", expectedPattern)
+        val field = Fields(listOf(".iss"))
+        field.filter = filter
+        // Act
+        val actualConstraint = toVcPathRegexConstraint(listOf(field))
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(VcPathRegexConstraint::class.java)
+        assertThat((actualConstraint as VcPathRegexConstraint).pattern).isEqualTo(expectedPattern)
+    }
+
+    @Test
+    fun constraintMapping_WithMultipleValidFields_ReturnsGroupConstraint() {
+        // Arrange
+        val expectedPatterns = arrayListOf("did:ion:test1", "did:ion:test2")
+        val filter1 = Filter("string", expectedPatterns[0])
+        val field1 = Fields(listOf(".iss"))
+        field1.filter = filter1
+
+        val filter2 = Filter("string", expectedPatterns[1])
+        val field2 = Fields(listOf(".iss"))
+        field2.filter = filter2
 
         // Act
-        val actualConstraint = toVcTypeConstraint(expectedVcTypes)
+        val actualConstraint = toVcPathRegexConstraint(listOf(field1, field2))
 
         // Assert
         assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
         assertThat((actualConstraint as GroupConstraint).constraints.size).isEqualTo(2)
-        assertThat(actualConstraint.constraintOperator).isEqualTo(GroupConstraintOperator.ANY)
-        assertThat(actualConstraint.constraints.filterIsInstance<VcTypeConstraint>().size).isEqualTo(2)
+        assertThat(actualConstraint.constraintOperator).isEqualTo(GroupConstraintOperator.ALL)
+        assertThat(actualConstraint.constraints.filterIsInstance<VcPathRegexConstraint>().size).isEqualTo(
+            2
+        )
         assertThat(
-            actualConstraint.constraints.filterIsInstance<VcTypeConstraint>()
-                .map { it.vcType }).containsAll(expectedVcTypes)
+            actualConstraint.constraints.filterIsInstance<VcPathRegexConstraint>()
+                .map { it.pattern }).containsAll(expectedPatterns)
+    }
+
+    @Test
+    fun constraintMapping_WithNoVcTypeConstraints_ThrowsException() {
+        // Arrange
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            emptyList(),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList()
+        )
+
+        // Act and Assert
+        assertThatThrownBy {
+            credentialPresentationInputDescriptor.toVerifiedIdRequirement()
+        }.isInstanceOf(MalformedInputException::class.java)
+    }
+
+    @Test
+    fun constraintMapping_WithSingleVcTypeConstraintAndNoClaimConstraint_ReturnsVcTypeConstraint() {
+        // Arrange
+        val expectedSchema = "schema1"
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            listOf(Schema(expectedSchema)),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList()
+        )
+        val verifiedIdRequirement = credentialPresentationInputDescriptor.toVerifiedIdRequirement()
+
+        // Act
+        val actualConstraints = credentialPresentationInputDescriptor.toConstraint(verifiedIdRequirement)
+
+        // Assert
+        assertThat(actualConstraints).isInstanceOf(VcTypeConstraint::class.java)
+        assertThat((actualConstraints as VcTypeConstraint).vcType).isEqualTo(expectedSchema)
+    }
+
+    @Test
+    fun constraintMapping_WithSingleClaimConstraintAndNoVcTypeConstraint_ThrowsException() {
+        // Arrange
+        val expectedPath = ".iss"
+        val expectedConstraint = Constraints(listOf(Fields(listOf(expectedPath))))
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            emptyList(),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList(),
+            expectedConstraint
+        )
+
+        // Act and Assert
+        assertThatThrownBy {
+            credentialPresentationInputDescriptor.toVerifiedIdRequirement()
+        }.isInstanceOf(MalformedInputException::class.java)
+    }
+
+    @Test
+    fun constraintMapping_WithMultipleClaimConstraintsAndNoVcTypeConstraint_ThrowsException() {
+        // Arrange
+        val expectedPath = ".iss"
+        val expectedConstraint =
+            Constraints(listOf(Fields(listOf(expectedPath)), Fields(listOf(expectedPath))))
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            emptyList(),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList(),
+            expectedConstraint
+        )
+
+        // Act and Assert
+        assertThatThrownBy {
+            val verifiedIdRequirement = credentialPresentationInputDescriptor.toVerifiedIdRequirement()
+            credentialPresentationInputDescriptor.toConstraint(verifiedIdRequirement)
+        }.isInstanceOf(MalformedInputException::class.java)
+    }
+
+    @Test
+    fun constraintMapping_WithSingleClaimConstraintAndSingleVcTypeConstraint_ReturnsGroupConstraintWithAllOperator() {
+        // Arrange
+        val expectedPath = ".iss"
+        val expectedSchema = "schema1"
+        val expectedConstraint = Constraints(listOf(Fields(listOf(expectedPath))))
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            listOf(Schema(expectedSchema)),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList(),
+            expectedConstraint
+        )
+
+        // Act
+        val verifiedIdRequirement = credentialPresentationInputDescriptor.toVerifiedIdRequirement()
+        val actualConstraint = verifiedIdRequirement.constraint
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
+        assertThat((actualConstraint as GroupConstraint).constraintOperator).isEqualTo(
+            GroupConstraintOperator.ALL
+        )
+        assertThat(actualConstraint.constraints.size).isEqualTo(2)
+        assertThat(actualConstraint.constraints.filterIsInstance<GroupConstraint>().size).isEqualTo(
+            0
+        )
+    }
+
+    @Test
+    fun constraintMapping_WithMultipleClaimConstraintsAndSingleVcTypeConstraint_ReturnsNestedGroupConstraintWithAllOperator() {
+        // Arrange
+        val expectedPath = ".iss"
+        val expectedSchema = "schema1"
+        val expectedConstraint =
+            Constraints(listOf(Fields(listOf(expectedPath)), Fields(listOf(expectedPath))))
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            listOf(Schema(expectedSchema)),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList(),
+            expectedConstraint
+        )
+
+        // Act
+        val verifiedIdRequirement = credentialPresentationInputDescriptor.toVerifiedIdRequirement()
+        val actualConstraint = verifiedIdRequirement.constraint
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
+        assertThat((actualConstraint as GroupConstraint).constraintOperator).isEqualTo(
+            GroupConstraintOperator.ALL
+        )
+        assertThat(actualConstraint.constraints.size).isEqualTo(2)
+        assertThat(actualConstraint.constraints.filterIsInstance<GroupConstraint>().size).isEqualTo(
+            1
+        )
+        assertThat(
+            actualConstraint.constraints.filterIsInstance<GroupConstraint>()
+                .first().constraintOperator
+        ).isEqualTo(
+            GroupConstraintOperator.ALL
+        )
+        assertThat(actualConstraint.constraints.filterIsInstance<VcTypeConstraint>().size).isEqualTo(
+            1
+        )
+    }
+
+    @Test
+    fun constraintMapping_WithSingleClaimConstraintAndMultipleVcTypeConstraints_ReturnsNestedGroupConstraintWithAnyOperator() {
+        // Arrange
+        val expectedPath = ".iss"
+        val expectedSchema = "schema1"
+        val expectedConstraint = Constraints(listOf(Fields(listOf(expectedPath))))
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            listOf(Schema(expectedSchema), Schema(expectedSchema)),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList(),
+            expectedConstraint
+        )
+
+        // Act
+        val verifiedIdRequirement = credentialPresentationInputDescriptor.toVerifiedIdRequirement()
+        val actualConstraint = verifiedIdRequirement.constraint
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
+        assertThat((actualConstraint as GroupConstraint).constraintOperator).isEqualTo(
+            GroupConstraintOperator.ALL
+        )
+        assertThat(actualConstraint.constraints.size).isEqualTo(2)
+        assertThat(actualConstraint.constraints.filterIsInstance<GroupConstraint>().size).isEqualTo(
+            1
+        )
+        assertThat(
+            actualConstraint.constraints.filterIsInstance<GroupConstraint>()
+                .first().constraintOperator
+        ).isEqualTo(
+            GroupConstraintOperator.ANY
+        )
+        assertThat(actualConstraint.constraints.filterIsInstance<VcPathRegexConstraint>().size).isEqualTo(
+            1
+        )
+    }
+
+    @Test
+    fun constraintMapping_WithMultipleClaimConstraintsAndMultipleVcTypeConstraints_ReturnsNestedGroupConstraintsWithAllAndAnyOperator() {
+        // Arrange
+        val expectedPath = ".iss"
+        val expectedSchema = "schema1"
+        val expectedConstraint =
+            Constraints(listOf(Fields(listOf(expectedPath)), Fields(listOf(expectedPath))))
+        val credentialPresentationInputDescriptor = CredentialPresentationInputDescriptor(
+            expectedId,
+            listOf(Schema(expectedSchema), Schema(expectedSchema)),
+            expectedInputName,
+            expectedInputPurpose,
+            emptyList(),
+            expectedConstraint
+        )
+
+        // Act
+        val verifiedIdRequirement = credentialPresentationInputDescriptor.toVerifiedIdRequirement()
+        val actualConstraint = verifiedIdRequirement.constraint
+
+        // Assert
+        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
+        assertThat((actualConstraint as GroupConstraint).constraintOperator).isEqualTo(
+            GroupConstraintOperator.ALL
+        )
+        assertThat(actualConstraint.constraints.size).isEqualTo(2)
+        assertThat(actualConstraint.constraints.filterIsInstance<GroupConstraint>().size).isEqualTo(
+            2
+        )
+        assertThat(
+            actualConstraint.constraints.filterIsInstance<GroupConstraint>()
+                .first().constraintOperator
+        ).isEqualTo(
+            GroupConstraintOperator.ANY
+        )
+        assertThat(
+            actualConstraint.constraints.filterIsInstance<GroupConstraint>()
+                .last().constraintOperator
+        ).isEqualTo(
+            GroupConstraintOperator.ALL
+        )
     }
 }

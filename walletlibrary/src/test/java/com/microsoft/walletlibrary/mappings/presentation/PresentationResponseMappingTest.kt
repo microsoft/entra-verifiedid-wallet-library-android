@@ -4,12 +4,16 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationReques
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
-import com.microsoft.walletlibrary.requests.requirements.*
+import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
+import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator
+import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
+import com.microsoft.walletlibrary.requests.requirements.RequestedClaim
+import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.util.IdInVerifiedIdRequirementDoesNotMatchRequestException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.UnSupportedRequirementException
 import com.microsoft.walletlibrary.util.VerifiedIdRequirementMissingIdException
-import com.microsoft.walletlibrary.util.VerifiedIdRequirementNotFulfilledException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.every
 import io.mockk.mockk
@@ -27,7 +31,6 @@ class PresentationResponseMappingTest {
     private val verifiedIdRequirement = VerifiedIdRequirement(
         "id",
         listOf(expectedVcType),
-        VcTypeConstraint(expectedVcType),
         encrypted = false,
         required = true
     )
@@ -52,6 +55,7 @@ class PresentationResponseMappingTest {
     init {
         // Arrange
         setupInput()
+        verifiedIdRequirement.constraint = VcTypeConstraint(expectedVcType)
     }
 
     private fun setupInput() {
@@ -75,10 +79,10 @@ class PresentationResponseMappingTest {
         val verifiedIdRequirement = VerifiedIdRequirement(
             null,
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        verifiedIdRequirement.constraint = VcTypeConstraint(expectedVcType)
 
         // Act and Assert
         assertThatThrownBy {
@@ -91,7 +95,8 @@ class PresentationResponseMappingTest {
         // Act and Assert
         assertThatThrownBy {
             presentationResponse.addRequirements(verifiedIdRequirement)
-        }.isInstanceOf(VerifiedIdRequirementNotFulfilledException::class.java)
+        }.isInstanceOf(RequirementNotMetException::class.java)
+            .hasMessage("Verified ID has not been set.")
     }
 
     @Test
@@ -124,17 +129,17 @@ class PresentationResponseMappingTest {
         val verifiedIdRequirement1 = VerifiedIdRequirement(
             "id1",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        verifiedIdRequirement1.constraint = VcTypeConstraint(expectedVcType)
         val verifiedIdRequirement2 = VerifiedIdRequirement(
             "id2",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        verifiedIdRequirement2.constraint = VcTypeConstraint(expectedVcType)
         val expectedVerifiedId1: VerifiableCredential = mockk()
         val expectedVerifiableCredential1: com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential =
             mockk()
@@ -179,10 +184,10 @@ class PresentationResponseMappingTest {
         val verifiedIdRequirement1 = VerifiedIdRequirement(
             "id1",
             listOf(expectedVcType),
-            VcTypeConstraint(expectedVcType),
             encrypted = false,
             required = true
         )
+        verifiedIdRequirement1.constraint = VcTypeConstraint(expectedVcType)
         val expectedVerifiedId1: VerifiableCredential = mockk()
         every { expectedVerifiedId1.types } returns listOf(expectedVcType)
         verifiedIdRequirement1.fulfill(expectedVerifiedId1)
