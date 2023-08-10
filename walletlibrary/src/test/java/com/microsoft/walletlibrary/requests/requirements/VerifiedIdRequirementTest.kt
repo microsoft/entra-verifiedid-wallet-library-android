@@ -269,7 +269,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = VcPathRegexConstraint(listOf("$.iss"), "WrongIssuer")
 
