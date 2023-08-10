@@ -467,7 +467,11 @@ class VerifiedIdClientTest {
                 "raw",
                 VerifiableCredentialContent(
                     "456",
-                    VerifiableCredentialDescriptor(emptyList(), listOf("TestVC"), mapOf("claim1" to "value1")),
+                    VerifiableCredentialDescriptor(
+                        emptyList(),
+                        listOf("TestVC"),
+                        mapOf("claim1" to "value1")
+                    ),
                     "me",
                     "Test",
                     1234567L,
@@ -478,7 +482,14 @@ class VerifiedIdClientTest {
                 "1",
                 InputContract("", "", ""),
                 DisplayContract(
-                    card = CardDescriptor("Test VC", "Test Issuer", "#000000", "#ffffff", Logo("testlogo.com", null, "test logo"), ""),
+                    card = CardDescriptor(
+                        "Test VC",
+                        "Test Issuer",
+                        "#000000",
+                        "#ffffff",
+                        Logo("testlogo.com", null, "test logo"),
+                        ""
+                    ),
                     consent = ConsentDescriptor("", ""),
                     claims = mapOf("vc.credentialSubject.claim1" to claimDescriptor1)
                 )
@@ -533,8 +544,14 @@ class VerifiedIdClientTest {
                 )
             )
         )
-        val encodedVc = """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC","issuedBy":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle","name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""}}"""
-        every { serializer.decodeFromString(VerifiableCredential.serializer(), encodedVc) } throws Exception()
+        val encodedVc =
+            """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC","issuedBy":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle","name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""}}"""
+        every {
+            serializer.decodeFromString(
+                VerifiableCredential.serializer(),
+                encodedVc
+            )
+        } throws Exception()
 
         // Act
         val actualDecodedVc = verifiedIdClient.decodeVerifiedId(encodedVc)
