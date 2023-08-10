@@ -30,7 +30,7 @@ class VerifiedIdRequirementTest {
             listOf("TestCredential"),
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = VcTypeConstraint(expectedVcType)
     }
@@ -300,7 +300,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = VcPathRegexConstraint(listOf("$.iss"), "TestIssuer")
 
@@ -343,7 +343,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = VcPathRegexConstraint(listOf("$.iss"), "TestIssuer")
 
@@ -378,7 +378,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = GroupConstraint(
             listOf(
@@ -415,7 +415,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = GroupConstraint(
             listOf(
@@ -452,7 +452,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = GroupConstraint(
             listOf(
@@ -489,7 +489,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = GroupConstraint(
             listOf(
@@ -531,7 +531,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = GroupConstraint(
             listOf(
@@ -573,7 +573,7 @@ class VerifiedIdRequirementTest {
             listOf(expectedVcType),
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = VcPathRegexConstraint(listOf("$.iss"), "WrongIssuer")
 
@@ -584,33 +584,4 @@ class VerifiedIdRequirementTest {
         assertThat(actualVcTypeConstraint).isInstanceOf(VcTypeConstraint::class.java)
         assertThat((actualVcTypeConstraint as VcTypeConstraint).vcType).isEqualTo(expectedVcType)
     }
-
-/*    @Test
-    fun constraintMapping_WithMultipleValidSchemaUri_ReturnsGroupConstraint() {
-        // Arrange
-        val expectedVcTypes = listOf("BusinessCard1", "BusinessCard2")
-
-        // Act
-        val actualConstraint = toVcTypeConstraint(expectedVcTypes)
-
-        // Assert
-        assertThat(actualConstraint).isInstanceOf(GroupConstraint::class.java)
-        assertThat((actualConstraint as GroupConstraint).constraints.size).isEqualTo(2)
-        assertThat(actualConstraint.constraintOperator).isEqualTo(GroupConstraintOperator.ANY)
-        assertThat(actualConstraint.constraints.filterIsInstance<VcTypeConstraint>().size).isEqualTo(
-            2
-        )
-        assertThat(
-            actualConstraint.constraints.filterIsInstance<VcTypeConstraint>()
-                .map { it.vcType }).containsAll(expectedVcTypes)
-    }
-
-    @Test
-    fun constraintMapping_WithEmptySchemaUri_ThrowsException() {
-        // Act and Assert
-        Assertions.assertThatThrownBy {
-            toVcTypeConstraint(listOf(""))
-        }.isInstanceOf(MalformedInputException::class.java)
-    }*/
-
 }

@@ -198,7 +198,7 @@ class IssuanceResponseMappingTest {
         val pinRequirement = PinRequirement(4, "numeric", true, expectedPinSalt)
 
         // Act and Assert
-        assertThatThrownBy{
+        assertThatThrownBy {
             issuanceResponse.addRequirements(pinRequirement)
         }.isInstanceOf(RequirementNotMetException::class.java)
     }
@@ -225,8 +225,7 @@ class IssuanceResponseMappingTest {
         val expectedCredentialType = "TestVc"
         val verifiedIdRequirement = VerifiedIdRequirement(
             "TestId",
-            listOf(expectedCredentialType),
-            VcTypeConstraint(expectedCredentialType)
+            listOf(expectedCredentialType)
         )
         val mockVerifiableCredential: VerifiableCredential = mockk()
         every { mockVerifiableCredential.raw } returns mockk()
@@ -249,12 +248,11 @@ class IssuanceResponseMappingTest {
         val expectedCredentialType = "TestVc"
         val verifiedIdRequirement = VerifiedIdRequirement(
             "TestId",
-            listOf(expectedCredentialType),
-            VcTypeConstraint(expectedCredentialType)
+            listOf(expectedCredentialType)
         )
 
         // Act and Assert
-        assertThatThrownBy{
+        assertThatThrownBy {
             issuanceResponse.addRequirements(verifiedIdRequirement)
         }.isInstanceOf(RequirementNotMetException::class.java)
     }
