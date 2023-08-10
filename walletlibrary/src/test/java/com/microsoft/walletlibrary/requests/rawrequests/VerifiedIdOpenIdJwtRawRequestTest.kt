@@ -9,9 +9,9 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentatio
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.styles.OpenIdVerifierStyle
+import com.microsoft.walletlibrary.util.MalformedInputException
 import com.microsoft.walletlibrary.util.MissingCallbackUrlException
 import com.microsoft.walletlibrary.util.MissingRequestStateException
-import com.microsoft.walletlibrary.util.MissingVerifiedIdTypeException
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions
@@ -74,6 +74,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
             every { inputDescriptor.id } returns expectedInputDescriptorId
             every { inputDescriptor.purpose } returns expectedPurpose
             every { inputDescriptor.issuanceMetadataList } returns emptyList()
+            every { inputDescriptor.constraints } returns null
             setupSchema(inputDescriptor, isSchemaEmpty)
         }
     }
@@ -150,7 +151,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         // Act and Assert
         Assertions.assertThatThrownBy {
             verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent()
-        }.isInstanceOf(MissingVerifiedIdTypeException::class.java)
+        }.isInstanceOf(MalformedInputException::class.java)
     }
 
     @Test

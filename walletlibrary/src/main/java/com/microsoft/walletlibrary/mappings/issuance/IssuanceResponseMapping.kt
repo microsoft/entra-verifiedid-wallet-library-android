@@ -7,7 +7,16 @@ package com.microsoft.walletlibrary.mappings.issuance
 
 import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.pin.IssuancePin
-import com.microsoft.walletlibrary.requests.requirements.*
+import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
+import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
+import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
+import com.microsoft.walletlibrary.requests.requirements.PinRequirement
+import com.microsoft.walletlibrary.requests.requirements.Requirement
+import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
+import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.util.MultipleRequirementsWithSameIdException
+import com.microsoft.walletlibrary.util.NoMatchingRequirementInRequestException
+import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 
 /**
  * Fills the attestation requirement in IssuanceResponse object with Requirements object in library.
@@ -18,6 +27,7 @@ internal fun IssuanceResponse.addRequirements(requirement: Requirement) {
         is IdTokenRequirement -> addIdTokenRequirement(requirement)
         is AccessTokenRequirement -> addAccessTokenRequirement(requirement)
         is PinRequirement -> addPinRequirement(requirement)
+        is VerifiedIdRequirement -> addVerifiedIdRequirement(requirement)
         is GroupRequirement -> addGroupRequirement(requirement)
     }
 }
@@ -55,6 +65,19 @@ private fun IssuanceResponse.addPinRequirement(pinRequirement: PinRequirement) {
     pinRequirement.salt?.let {
         issuancePin?.pinSalt = it
     }
+}
+
+private fun IssuanceResponse.addVerifiedIdRequirement(verifiedIdRequirement: VerifiedIdRequirement) {
+    verifiedIdRequirement.validate().getOrThrow()
+    val presentationAttestation =
+        request.getAttestations().presentations.filter { verifiedIdRequirement.types.contains(it.credentialType) }
+    if (presentationAttestation.isEmpty())
+        throw NoMatchingRequirementInRequestException("Id in VerifiedId Requirement does not match the id in request.")
+    if (presentationAttestation.size > 1)
+        throw MultipleRequirementsWithSameIdException("Multiple VerifiedId Requirements have the same Ids.")
+    verifiedIdRequirement.validate()
+    requestedVcMap[presentationAttestation.first()] =
+        (verifiedIdRequirement.verifiedId as VerifiableCredential).raw
 }
 
 private fun IssuanceResponse.addGroupRequirement(groupRequirement: GroupRequirement) {

@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary.mappings.issuance
 
 import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.InputContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
@@ -11,7 +12,10 @@ import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.PinRequirement
 import com.microsoft.walletlibrary.requests.requirements.RequestedClaim
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
+import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.util.RequirementNotMetException
+import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -213,5 +217,45 @@ class IssuanceResponseMappingTest {
         assertThat(issuanceResponse.requestedAccessTokenMap[expectedConfiguration]).isEqualTo(
             expectedAccessTokenValue
         )
+    }
+
+    @Test
+    fun addRequirementToResponse_AddVerifiedIdRequirement_AddsRequirementToIssuanceResponse() {
+        // Arrange
+        val expectedCredentialType = "TestVc"
+        val verifiedIdRequirement = VerifiedIdRequirement(
+            "TestId",
+            listOf(expectedCredentialType),
+            VcTypeConstraint(expectedCredentialType)
+        )
+        val mockVerifiableCredential: VerifiableCredential = mockk()
+        every { mockVerifiableCredential.raw } returns mockk()
+        every { mockVerifiableCredential.types } returns listOf(expectedCredentialType)
+        verifiedIdRequirement.verifiedId = mockVerifiableCredential
+        val mockPresentationAttestation: PresentationAttestation = mockk()
+        every { mockIssuanceRequest.getAttestations().presentations } returns listOf(mockPresentationAttestation)
+        every { mockPresentationAttestation.credentialType } returns expectedCredentialType
+
+        // Act
+        issuanceResponse.addRequirements(verifiedIdRequirement)
+
+        // Assert
+        assertThat(issuanceResponse.requestedVcMap.size).isEqualTo(1)
+    }
+
+    @Test
+    fun addRequirementToResponse_VerifiedIdRequirementNotFulfilled_ThrowsException() {
+        // Arrange
+        val expectedCredentialType = "TestVc"
+        val verifiedIdRequirement = VerifiedIdRequirement(
+            "TestId",
+            listOf(expectedCredentialType),
+            VcTypeConstraint(expectedCredentialType)
+        )
+
+        // Act and Assert
+        assertThatThrownBy{
+            issuanceResponse.addRequirements(verifiedIdRequirement)
+        }.isInstanceOf(RequirementNotMetException::class.java)
     }
 }
