@@ -12,7 +12,7 @@ import com.microsoft.walletlibrary.util.VerifiedIdResult
  * styling of requester, requirements needed in order to complete the request and information about
  * trust model of requester like domain url and verification status.
  */
-interface VerifiedIdPresentationRequest: VerifiedIdRequest<Unit> {
+interface VerifiedIdPresentationRequest : VerifiedIdRequest<Unit> {
 
     // Completes the request and returns nothing if successful.
     override suspend fun complete(): VerifiedIdResult<Unit>
