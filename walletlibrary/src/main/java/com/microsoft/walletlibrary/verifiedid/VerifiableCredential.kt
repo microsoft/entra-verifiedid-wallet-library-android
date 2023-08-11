@@ -33,7 +33,7 @@ class VerifiableCredential(
         val claims = ArrayList<VerifiedIdClaim>()
         for ((claimIdentifier, claimValue) in claimValues) {
             val claimDescriptor = claimDescriptors?.get("vc.credentialSubject.$claimIdentifier")
-            claimDescriptor?.let { claims.add(VerifiedIdClaim(claimDescriptor.label, claimValue)) }
+            claimDescriptor?.let { claims.add(VerifiedIdClaim(claimDescriptor.label, claimValue, claimDescriptor.type)) }
                 ?: claims.add(VerifiedIdClaim(claimIdentifier, claimValue))
         }
         return claims

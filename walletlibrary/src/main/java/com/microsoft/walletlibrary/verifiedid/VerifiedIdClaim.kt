@@ -13,5 +13,8 @@ data class VerifiedIdClaim(
     val id: String,
 
     // Represents value of the claim.
-    val value: Any
+    val value: Any,
+
+    // Represents type of the claim (eg. date, jpg, png, etc.).
+    val type: String? = null
 )
