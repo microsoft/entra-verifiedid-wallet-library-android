@@ -1,8 +1,8 @@
 package com.microsoft.walletlibrary.verifiedid
 
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
-import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import kotlinx.serialization.Serializable
 import java.util.Date
 
@@ -12,8 +12,7 @@ import java.util.Date
 @Serializable
 internal class VerifiableCredential(
     internal val raw: VerifiableCredential,
-    internal val contract: VerifiableCredentialContract,
-    override val types: List<String> = raw.contents.vc.type
+    internal val contract: VerifiableCredentialContract
 ): VerifiedId {
     override val id = raw.jti
 
@@ -22,6 +21,8 @@ internal class VerifiableCredential(
 
     @Serializable(with = DateSerializer::class)
     override val expiresOn = raw.contents.exp?.let { Date(it * 1000L) }
+
+    val types = raw.contents.vc.type
 
     override val style = contract.display.toVerifiedIdStyle()
 
