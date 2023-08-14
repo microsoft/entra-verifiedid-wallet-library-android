@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.requests.handlers
 
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RawRequest
 
@@ -14,5 +15,5 @@ import com.microsoft.walletlibrary.requests.rawrequests.RawRequest
 internal interface RequestHandler {
 
     // Handle and process the provided raw request and returns a VerifiedIdRequest.
-    suspend fun handleRequest(rawRequest: RawRequest): VerifiedIdRequest<*>
+    suspend fun handleRequest(rawRequest: RawRequest, rootOfTrustResolver: RootOfTrustResolver? = null): VerifiedIdRequest<*>
 }

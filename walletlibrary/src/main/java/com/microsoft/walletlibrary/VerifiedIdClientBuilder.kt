@@ -8,6 +8,7 @@ package com.microsoft.walletlibrary
 import android.content.Context
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import android.content.pm.PackageManager
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
@@ -82,10 +83,15 @@ class VerifiedIdClientBuilder(private val context: Context) {
         ignoreUnknownKeys = true
         isLenient = true
     }
+    private var rootOfTrustResolver: RootOfTrustResolver? = null
 
     // An optional custom log consumer can be passed to be used by VerifiedIdClient.
     fun with(logConsumer: WalletLibraryLogger.Consumer) {
         logger.addConsumer(logConsumer)
+    }
+
+    fun with(rootOfTrustResolver: RootOfTrustResolver) {
+        this.rootOfTrustResolver = rootOfTrustResolver
     }
 
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
@@ -109,7 +115,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
             requestResolverFactory,
             requestHandlerFactory,
             logger,
-            jsonSerializer
+            jsonSerializer,
+            rootOfTrustResolver
         )
     }
 

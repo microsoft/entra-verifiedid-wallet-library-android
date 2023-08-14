@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
-internal object NetworkErrorParser {
+object NetworkErrorParser {
 
     /**
      * Attempts to parse a json errorBody and extracts and concatenates all error codes.

@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.requests.handlers
 
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
@@ -25,14 +26,14 @@ import com.microsoft.walletlibrary.wrapper.ManifestResolver
 /**
  * OIDC protocol specific implementation of RequestHandler. It can handle OpenID raw request and returns a VerifiedIdRequest.
  */
-internal class OpenIdRequestHandler: RequestHandler {
+internal class OpenIdRequestHandler : RequestHandler {
 
-    override suspend fun handleRequest(rawRequest: RawRequest): VerifiedIdRequest<*> {
+    override suspend fun handleRequest(rawRequest: RawRequest, rootOfTrustResolver: RootOfTrustResolver?): VerifiedIdRequest<*> {
         if (rawRequest !is OpenIdRawRequest)
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
         val presentationRequestContent = rawRequest.mapToPresentationRequestContent()
         if (rawRequest.requestType == RequestType.ISSUANCE)
-            return handleIssuanceRequest(presentationRequestContent)
+            return handleIssuanceRequest(presentationRequestContent, rootOfTrustResolver)
         return handlePresentationRequest(presentationRequestContent, rawRequest)
     }
 
@@ -48,14 +49,18 @@ internal class OpenIdRequestHandler: RequestHandler {
         )
     }
 
-    private suspend fun handleIssuanceRequest(presentationRequestContent: PresentationRequestContent): VerifiedIdRequest<VerifiedId> {
+    private suspend fun handleIssuanceRequest(
+        presentationRequestContent: PresentationRequestContent,
+        rootOfTrustResolver: RootOfTrustResolver? = null
+    ): VerifiedIdRequest<VerifiedId> {
         validateRequirement(presentationRequestContent)
         val contractUrl =
             ((presentationRequestContent.requirement as VerifiedIdRequirement).issuanceOptions.first() as VerifiedIdRequestURL).url
         val rawManifest = getIssuanceRequest(
             contractUrl.toString(),
             presentationRequestContent.requestState,
-            presentationRequestContent.issuanceCallbackUrl
+            presentationRequestContent.issuanceCallbackUrl,
+            rootOfTrustResolver
         )
         val issuanceRequestContent = rawManifest.mapToIssuanceRequestContent()
         presentationRequestContent.injectedIdToken?.let {
@@ -84,8 +89,9 @@ internal class OpenIdRequestHandler: RequestHandler {
     private suspend fun getIssuanceRequest(
         contractUrl: String,
         requestState: String?,
-        issuanceCallbackUrl: String?
+        issuanceCallbackUrl: String?,
+        rootOfTrustResolver: RootOfTrustResolver? = null
     ): RawManifest {
-        return ManifestResolver.getIssuanceRequest(contractUrl, requestState, issuanceCallbackUrl)
+        return ManifestResolver.getIssuanceRequest(contractUrl, requestState, issuanceCallbackUrl, rootOfTrustResolver)
     }
 }

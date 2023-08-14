@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.requests.resolvers
 
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
 import com.microsoft.walletlibrary.requests.handlers.RequestHandler
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
@@ -18,7 +19,7 @@ import com.microsoft.walletlibrary.wrapper.OpenIdResolver
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
-internal class OpenIdURLRequestResolver: RequestResolver {
+internal class OpenIdURLRequestResolver : RequestResolver {
 
     // Indicates whether the raw request returned by this resolver can be handled by provided handler.
     override fun canResolve(requestHandler: RequestHandler): Boolean {
@@ -34,10 +35,13 @@ internal class OpenIdURLRequestResolver: RequestResolver {
     }
 
     // Resolves the provided input and returns a raw request.
-    override suspend fun resolve(verifiedIdRequestInput: VerifiedIdRequestInput): OpenIdRawRequest {
+    override suspend fun resolve(
+        verifiedIdRequestInput: VerifiedIdRequestInput,
+        rootOfTrustResolver: RootOfTrustResolver?
+    ): OpenIdRawRequest {
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) throw UnSupportedVerifiedIdRequestInputException(
             "Provided VerifiedIdRequestInput is not supported."
         )
-        return OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString())
+        return OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString(), rootOfTrustResolver)
     }
 }

@@ -7,6 +7,7 @@ package com.microsoft.walletlibrary.wrapper
 
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
@@ -22,10 +23,11 @@ internal object ManifestResolver {
     suspend fun getIssuanceRequest(
         uri: String,
         requestState: String? = null,
-        issuanceCallbackUrl: String? = null
+        issuanceCallbackUrl: String? = null,
+        rootOfTrustResolver: RootOfTrustResolver? = null
     ): RawManifest {
         return when (val issuanceRequestResult =
-            VerifiableCredentialSdk.issuanceService.getRequest(uri)) {
+            VerifiableCredentialSdk.issuanceService.getRequest(uri, rootOfTrustResolver)) {
             is Result.Success -> {
                 val request = issuanceRequestResult.payload
                 RawManifest(request)

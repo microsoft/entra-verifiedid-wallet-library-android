@@ -20,6 +20,7 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperatio
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendIssuanceCompletionResponse
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
@@ -48,12 +49,14 @@ internal class IssuanceService @Inject constructor(
      * @param contractUrl url that the contract is fetched from
      */
     suspend fun getRequest(
-        contractUrl: String
+        contractUrl: String,
+        rootOfTrustResolver: RootOfTrustResolver? = null
     ): Result<IssuanceRequest> {
         return runResultTry {
             logTime("Issuance getRequest") {
                 val contract = fetchContract(contractUrl).abortOnError()
-                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError()
+                val linkedDomainResult =
+                    linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer, rootOfTrustResolver).abortOnError()
                 val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
                 Result.Success(request)
             }
