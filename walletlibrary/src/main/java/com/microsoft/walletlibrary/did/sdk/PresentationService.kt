@@ -15,7 +15,6 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
-import com.microsoft.walletlibrary.did.sdk.internal.ImageLoader
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.DidDeepLinkUtil
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
@@ -35,8 +34,7 @@ internal class PresentationService @Inject constructor(
     private val jwtValidator: JwtValidator,
     private val presentationRequestValidator: PresentationRequestValidator,
     private val apiProvider: ApiProvider,
-    private val presentationResponseFormatter: PresentationResponseFormatter,
-    private val imageLoader: ImageLoader
+    private val presentationResponseFormatter: PresentationResponseFormatter
 ) {
 
     suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
@@ -46,7 +44,6 @@ internal class PresentationService @Inject constructor(
                 val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
                 val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId).abortOnError()
                 val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
-                imageLoader.loadRemoteImage(request)
                 isRequestValid(request).abortOnError()
                 Result.Success(request)
             }

@@ -24,7 +24,6 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.did.sdk.identifier.models.payload.document.IdentifierDocumentService
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
-import com.microsoft.walletlibrary.did.sdk.internal.ImageLoader
 import com.microsoft.walletlibrary.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import io.mockk.coEvery
@@ -48,7 +47,6 @@ class IssuanceServiceTest {
     private val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
     private val linkedDomainsService =
         spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
-    private val imageLoader: ImageLoader = mockk()
     private val issuanceService =
         spyk(
             IssuanceService(
@@ -57,8 +55,7 @@ class IssuanceServiceTest {
                 mockk(relaxed = true),
                 mockedJwtValidator,
                 issuanceResponseFormatter,
-                defaultTestSerializer,
-                imageLoader
+                defaultTestSerializer
             ),
             recordPrivateCalls = true
         )
@@ -99,7 +96,6 @@ class IssuanceServiceTest {
         mockkConstructor(FetchContractNetworkOperation::class)
         expectedContract = setUpTestContract(expectedContractString)
         mockkConstructor(SendVerifiableCredentialIssuanceRequestNetworkOperation::class)
-        coEvery { imageLoader.loadRemoteImage(any<IssuanceRequest>()) } returns Unit
     }
 
     private fun setUpTestContract(expectedContractJwt: String): VerifiableCredentialContract {
