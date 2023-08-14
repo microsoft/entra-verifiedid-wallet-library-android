@@ -199,4 +199,3 @@ class IssuanceServiceTest {
         return defaultTestSerializer.decodeFromString(VerifiableCredentialContract.serializer(), jwsToken.content())
     }
 }
-
