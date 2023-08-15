@@ -26,7 +26,7 @@ class PinRequirement(
     // Indicates if pin is required or optional.
     override val required: Boolean = false,
 
-    internal val salt: String? = null,
+    val salt: String? = null,
 
     internal var pin: String? = null
 ): Requirement {
