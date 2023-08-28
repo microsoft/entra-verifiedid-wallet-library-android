@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationResponseClaims
@@ -26,27 +27,33 @@ internal class PresentationResponseFormatter @Inject constructor(
     private val signer: TokenSigner
     ) {
     fun formatResponse(
+        request: PresentationRequest,
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf(),
-        presentationResponse: PresentationResponse,
+        presentationResponses: List<PresentationResponse>,
         responder: Identifier,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Pair<String, String> {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
-        val credentialPresentationSubmission = createAttestationsAndPresentationSubmission(presentationResponse)
+        val vpTokens = presentationResponses.map {
+            createAttestationsAndPresentationSubmission(it)
+        }.map {
+            VpTokenInResponse(it)
+        }
+        val vpClaims =  PresentationResponseClaims(vpTokens)
 
-        val oidcResponseClaims = PresentationResponseClaims(VpTokenInResponse(credentialPresentationSubmission)).apply {
+        val oidcResponseClaims = vpClaims.apply {
             subject = responder.id
-            audience = presentationResponse.audience
-            nonce = presentationResponse.request.content.nonce
+            audience = request.content.audience
+            nonce = request.content.nonce
             responseCreationTime = issuedTime
             responseExpirationTime = expiryTime
         }
 
         val attestationResponse = createPresentations(
             requestedVcPresentationSubmissionMap,
-            presentationResponse.request.content.clientId,
+            request.content.clientId,
             responder,
-            presentationResponse.request.content.nonce
+            request.content.nonce
         )
 
         val idToken = signContents(oidcResponseClaims, responder)

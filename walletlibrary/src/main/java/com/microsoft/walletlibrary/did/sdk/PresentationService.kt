@@ -94,35 +94,39 @@ internal class PresentationService @Inject constructor(
      * @param response PresentationResponse to be formed, signed, and sent.
      */
     suspend fun sendResponse(
-        response: PresentationResponse
+        presentationRequest: PresentationRequest,
+        response: List<PresentationResponse>
     ): Result<Unit> {
         return runResultTry {
             logTime("Presentation sendResponse") {
                 val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
-                val vcRequestedMapping = response.requestedVcPresentationSubmissionMap
-                formAndSendResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
+                val vcRequestedMapping = response.map{ it.requestedVcPresentationSubmissionMap }
+                    .reduce { acc, responseMap -> (acc.toMap() + responseMap.toMap()) as RequestedVcPresentationSubmissionMap }
+                formAndSendResponse(presentationRequest, response, masterIdentifier, vcRequestedMapping).abortOnError()
             }
             Result.Success(Unit)
         }
     }
 
     private suspend fun formAndSendResponse(
-        response: PresentationResponse,
+        presentationRequest: PresentationRequest,
+        response: List<PresentationResponse>,
         responder: Identifier,
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<Unit> {
         val (idToken, vpToken) = presentationResponseFormatter.formatResponse(
+            request = presentationRequest,
             requestedVcPresentationSubmissionMap = requestedVcPresentationSubmissionMap,
-            presentationResponse = response,
+            presentationResponses = response,
             responder = responder,
             expiryInSeconds = expiryInSeconds
         )
         return SendPresentationResponseNetworkOperation(
-            response.request.content.redirectUrl,
+            presentationRequest.content.redirectUrl,
             idToken,
             vpToken,
-            response.request.content.state,
+            presentationRequest.content.state,
             apiProvider
         ).fire()
     }

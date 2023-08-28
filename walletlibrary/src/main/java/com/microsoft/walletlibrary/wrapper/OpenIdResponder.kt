@@ -11,6 +11,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRespon
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.mappings.presentation.addRequirements
 import com.microsoft.walletlibrary.requests.requirements.Requirement
+import com.microsoft.walletlibrary.util.IdInVerifiedIdRequirementDoesNotMatchRequestException
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
 
 /**
@@ -23,10 +24,16 @@ object OpenIdResponder {
         presentationRequest: PresentationRequest,
         requirement: Requirement
     ) {
-        val presentationResponse = PresentationResponse(presentationRequest)
-        presentationResponse.addRequirements(requirement)
+        val presentationResponses = presentationRequest.getPresentationDefinitions().map { PresentationResponse(presentationRequest, it.id) }
+        for (presentationResponse in presentationResponses) {
+            try {
+                presentationResponse.addRequirements(requirement)
+            } catch (exception: IdInVerifiedIdRequirementDoesNotMatchRequestException) {
+                // This will be thrown if a verified ID couldn't be matched
+            }
+        }
         val presentationResponseResult =
-            VerifiableCredentialSdk.presentationService.sendResponse(presentationResponse)
+            VerifiableCredentialSdk.presentationService.sendResponse(presentationRequest, presentationResponses)
         if (presentationResponseResult is Result.Failure) {
             throw OpenIdResponseCompletionException(
                 "Unable to send presentation response",

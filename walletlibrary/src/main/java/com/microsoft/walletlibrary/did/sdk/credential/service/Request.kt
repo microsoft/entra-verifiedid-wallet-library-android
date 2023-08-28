@@ -35,7 +35,7 @@ internal class PresentationRequest(
     val content: PresentationRequestContent,
     override val linkedDomainResult: LinkedDomainResult
 ) : Request(content.registration.clientName, content.clientId) {
-    fun getPresentationDefinition(): PresentationDefinition {
-        return content.claims.vpTokenInRequest.presentationDefinition
+    fun getPresentationDefinitions(): List<PresentationDefinition> {
+        return content.claims.vpTokensInRequest.map { it.presentationDefinition }
     }
 }
