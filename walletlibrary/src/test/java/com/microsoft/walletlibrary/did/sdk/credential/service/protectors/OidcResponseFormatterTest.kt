@@ -1,14 +1,11 @@
 package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceResponse
-import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
-import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedIdTokenMap
-import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedSelfAttestedClaimMap
-import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcMap
+import com.microsoft.walletlibrary.did.sdk.credential.service.*
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.RevocationResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
@@ -80,6 +77,7 @@ class OidcResponseFormatterTest {
         mapOf(expectedSelfAttestedField to expectedSelfAttestedClaimValue) as RequestedSelfAttestedClaimMap
     private val mockedPresentationAttestation: PresentationAttestation = mockk()
     private val mockedRequestedVcMap: RequestedVcMap = mutableMapOf(mockedPresentationAttestation to mockedVc)
+    private val mockedPresentationRequest: PresentationRequest = mockk()
 
     init {
         issuanceResponseFormatter = IssuanceResponseFormatter(
@@ -110,6 +108,9 @@ class OidcResponseFormatterTest {
                 mockedIdentifier
             )
         } returns expectedVerifiablePresentation
+        every { mockedPresentationRequest.content.nonce } returns mockedNonce
+        every { mockedPresentationRequest.content.clientId } returns expectedDid
+        every { mockedPresentationRequest.content.audience } returns expectedPresentationAudience
         mockPresentationResponse()
         mockIssuanceResponseWithNoAttestations()
         mockPresentationAttestation()
@@ -135,8 +136,9 @@ class OidcResponseFormatterTest {
     @Test
     fun `format presentation response with no attestations`() {
         val actualFormattedToken = presentationResponseFormatter.formatResponse(
+            mockedPresentationRequest,
             mutableMapOf(),
-            mockedPresentationResponse,
+            listOf(mockedPresentationResponse),
             mockedIdentifier,
             expectedExpiry
         )
@@ -144,7 +146,7 @@ class OidcResponseFormatterTest {
         assertEquals(expectedPresentationAudience, actualTokenContents.audience)
         assertEquals(mockedNonce, actualTokenContents.nonce)
         assertEquals(expectedDid, actualTokenContents.subject)
-        assertThat(actualTokenContents.vpToken.presentationSubmission.presentationSubmissionDescriptors.size).isEqualTo(0)
+        assertThat(actualTokenContents.vpToken.first().presentationSubmission.presentationSubmissionDescriptors.size).isEqualTo(0)
     }
 
     @Test

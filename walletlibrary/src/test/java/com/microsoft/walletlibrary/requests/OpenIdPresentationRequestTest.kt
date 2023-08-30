@@ -220,7 +220,7 @@ class OpenIdPresentationRequestTest {
         every { rawRequest.rawRequest } returns presentationRequest
         every { presentationRequest.content } returns presentationRequestContent
         every { presentationRequestContent.clientId } returns ""
-        every { presentationRequest.getPresentationDefinition() } returns presentationDefinition
+        every { presentationRequest.getPresentationDefinitions() } returns listOf(presentationDefinition)
         every { presentationDefinition.id } returns ""
 
         runBlocking {

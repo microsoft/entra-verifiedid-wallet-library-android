@@ -5,9 +5,12 @@ package com.microsoft.walletlibrary.did.sdk
 import android.net.Uri
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.PresentationResponseFormatter
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
@@ -24,6 +27,7 @@ import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.every
@@ -280,10 +284,17 @@ class PresentationServiceTest {
         val expectedPresentationRequestContent =
             defaultTestSerializer.decodeFromString(PresentationRequestContent.serializer(), expectedPresentationRequestString)
         val presentationRequest = PresentationRequest(expectedPresentationRequestContent, LinkedDomainMissing)
-        val presentationResponse = PresentationResponse(presentationRequest)
+        val presentationResponse = presentationRequest.getPresentationDefinitions().map {
+            PresentationResponse(presentationRequest, it.id)
+        }
+        val presentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf()
+        presentationResponse.forEach { response ->
+            presentationSubmissionMap += response.requestedVcPresentationSubmissionMap
+        }
         every {
             presentationResponseFormatter.formatResponse(
-                presentationResponse.requestedVcPresentationSubmissionMap,
+                presentationRequest,
+                presentationSubmissionMap,
                 presentationResponse,
                 masterIdentifier,
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
@@ -291,23 +302,25 @@ class PresentationServiceTest {
         } returns formattedResponse
         every {
             presentationService["formAndSendResponse"](
+                presentationRequest,
                 presentationResponse,
                 masterIdentifier,
-                presentationResponse.requestedVcPresentationSubmissionMap,
+                presentationSubmissionMap,
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
         } returns Result.Success(Unit)
 
         runBlocking {
-            val presentedResponse = presentationService.sendResponse(presentationResponse)
+            val presentedResponse = presentationService.sendResponse(presentationRequest, presentationResponse)
             assertThat(presentedResponse).isInstanceOf(Result.Success::class.java)
         }
 
         verify(exactly = 1) {
             presentationService["formAndSendResponse"](
+                presentationRequest,
                 presentationResponse,
                 masterIdentifier,
-                presentationResponse.requestedVcPresentationSubmissionMap,
+                presentationSubmissionMap,
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
         }

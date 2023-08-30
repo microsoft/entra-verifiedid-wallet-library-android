@@ -8,6 +8,7 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.validators
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.Registration
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
@@ -106,7 +107,10 @@ class OidcPresentationRequestValidatorTest {
     @Test
     fun `valid signature is validated successfully`() {
         setUpExpiration(86400)
-        every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns listOf(mockk())
+        every { mockedPresentationRequest.getPresentationDefinitions() } returns
+            listOf(mockk {
+                    every { credentialPresentationInputDescriptors } returns listOf(mockk())
+                })
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
         every { mockedOidcRequestContent.idTokenHint } returns null
         every { mockedOidcRequestContent.registration } returns mockedRegistration
@@ -125,7 +129,10 @@ class OidcPresentationRequestValidatorTest {
     @Test
     fun `throws when request has invalid response mode`() {
         setUpExpiration(86400)
-        every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns listOf(mockk())
+        every { mockedPresentationRequest.getPresentationDefinitions() } returns
+                listOf( mockk {
+                    every { credentialPresentationInputDescriptors } returns listOf(mockk())
+                })
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
         setUpOidcRequestContentWithInvalidResponseMode()
         runBlocking {
@@ -140,7 +147,10 @@ class OidcPresentationRequestValidatorTest {
     @Test
     fun `throws when request has invalid response type`() {
         setUpExpiration(86400)
-        every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns listOf(mockk())
+        every { mockedPresentationRequest.getPresentationDefinitions() } returns
+                listOf( mockk {
+                    every { credentialPresentationInputDescriptors } returns listOf(mockk())
+                })
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
         setUpOidcRequestContentWithInvalidResponseType()
         runBlocking {
@@ -155,7 +165,10 @@ class OidcPresentationRequestValidatorTest {
     @Test
     fun `throws when request has invalid scope`() {
         setUpExpiration(86400)
-        every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns listOf(mockk())
+        every { mockedPresentationRequest.getPresentationDefinitions() } returns
+                listOf( mockk {
+                    every { credentialPresentationInputDescriptors } returns listOf(mockk())
+                })
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
         setUpOidcRequestContentWithInvalidScope()
         runBlocking {
@@ -170,7 +183,10 @@ class OidcPresentationRequestValidatorTest {
     @Test
     fun `throws when request has missing input`() {
         setUpExpiration(86400)
-        every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns emptyList()
+        every { mockedPresentationRequest.getPresentationDefinitions() } returns
+            listOf( mockk {
+                every { credentialPresentationInputDescriptors } returns emptyList()
+            })
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
         setUpOidcRequestContentWithValidFields()
         runBlocking {
