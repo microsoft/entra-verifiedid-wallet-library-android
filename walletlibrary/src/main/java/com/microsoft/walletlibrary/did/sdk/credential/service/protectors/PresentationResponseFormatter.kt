@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
@@ -15,6 +16,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentatio
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
@@ -43,7 +45,7 @@ internal class PresentationResponseFormatter @Inject constructor(
 
         val oidcResponseClaims = vpClaims.apply {
             subject = responder.id
-            audience = request.content.audience
+            audience = request.content.clientId
             nonce = request.content.nonce
             responseCreationTime = issuedTime
             responseExpirationTime = expiryTime
@@ -91,13 +93,16 @@ internal class PresentationResponseFormatter @Inject constructor(
         responder: Identifier,
         nonce: String
     ): String {
-        return verifiablePresentationFormatter.createPresentation(
-            requestedVcPresentationSubmissionMap.values.toList(),
-            DEFAULT_VP_EXPIRATION_IN_SECONDS,
-            audience,
-            responder,
-            nonce
-        )
+        return Json.encodeToString(
+            requestedVcPresentationSubmissionMap.values.toList<VerifiableCredential>().map { credential ->
+                verifiablePresentationFormatter.createPresentation(
+                    listOf(credential),
+                    DEFAULT_VP_EXPIRATION_IN_SECONDS,
+                    audience,
+                    responder,
+                    nonce
+                )
+        })
     }
 
     private fun signContents(contents: PresentationResponseClaims, responder: Identifier): String {
