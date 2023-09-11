@@ -32,7 +32,7 @@ private fun PresentationResponse.addVerifiedIdRequirement(verifiedIdRequirement:
             VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value
         )
     val credentialPresentationInputDescriptor =
-        request.getPresentationDefinitions().map { it.credentialPresentationInputDescriptors
+        request.getPresentationDefinitions().filter { it.id == this.requestedVcPresentationDefinitionId }.map { it.credentialPresentationInputDescriptors
             .filter { that -> that.id == verifiedIdRequirement.id } }
             .reduce { acc, credentialPresentationInputDescriptors -> acc + credentialPresentationInputDescriptors }
     if (credentialPresentationInputDescriptor.isEmpty())
@@ -48,6 +48,11 @@ private fun PresentationResponse.addGroupRequirement(groupRequirement: GroupRequ
     groupRequirement.validate().getOrThrow()
     val requirements = groupRequirement.requirements
     for (requirement in requirements) {
-        addRequirements(requirement)
+        try {
+            addRequirements(requirement)
+        } catch (exception: IdInVerifiedIdRequirementDoesNotMatchRequestException) {
+            // This will be thrown if a verified ID couldn't be matched which may happen
+            // with multiple VPs
+        }
     }
 }

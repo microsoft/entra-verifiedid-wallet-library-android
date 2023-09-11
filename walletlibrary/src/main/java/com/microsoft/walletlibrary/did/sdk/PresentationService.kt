@@ -14,6 +14,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
+import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendPresentationResponsesNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.internal.ImageLoader
 import com.microsoft.walletlibrary.did.sdk.util.Constants
@@ -115,19 +116,37 @@ internal class PresentationService @Inject constructor(
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<Unit> {
-        val (idToken, vpToken) = presentationResponseFormatter.formatResponse(
-            request = presentationRequest,
-            requestedVcPresentationSubmissionMap = requestedVcPresentationSubmissionMap,
-            presentationResponses = response,
-            responder = responder,
-            expiryInSeconds = expiryInSeconds
-        )
-        return SendPresentationResponseNetworkOperation(
-            presentationRequest.content.redirectUrl,
-            idToken,
-            vpToken,
-            presentationRequest.content.state,
-            apiProvider
-        ).fire()
+        // split on number of responses
+        if (response.size > 1) {
+            val (idToken, vpToken) = presentationResponseFormatter.formatResponses(
+                request = presentationRequest,
+                requestedVcPresentationSubmissionMap = requestedVcPresentationSubmissionMap,
+                presentationResponses = response,
+                responder = responder,
+                expiryInSeconds = expiryInSeconds
+            )
+            return SendPresentationResponsesNetworkOperation(
+                presentationRequest.content.redirectUrl,
+                idToken,
+                vpToken,
+                presentationRequest.content.state,
+                apiProvider
+            ).fire()
+        } else {
+            val (idToken, vpToken) = presentationResponseFormatter.formatResponse(
+                request = presentationRequest,
+                requestedVcPresentationSubmissionMap = requestedVcPresentationSubmissionMap,
+                presentationResponse = response.first(),
+                responder = responder,
+                expiryInSeconds = expiryInSeconds
+            )
+            return SendPresentationResponseNetworkOperation(
+                presentationRequest.content.redirectUrl,
+                idToken,
+                vpToken,
+                presentationRequest.content.state,
+                apiProvider
+            ).fire()
+        }
     }
 }

@@ -16,7 +16,6 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentatio
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
@@ -31,10 +30,27 @@ internal class PresentationResponseFormatter @Inject constructor(
     fun formatResponse(
         request: PresentationRequest,
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf(),
-        presentationResponses: List<PresentationResponse>,
+        presentationResponse: PresentationResponse,
         responder: Identifier,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Pair<String, String> {
+        val (id_token, vp_tokens) = this.formatResponses(
+            request,
+            requestedVcPresentationSubmissionMap,
+            listOf(presentationResponse),
+            responder,
+            expiryInSeconds
+        )
+        return Pair(id_token, vp_tokens.first())
+    }
+
+    fun formatResponses(
+        request: PresentationRequest,
+        requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf(),
+        presentationResponses: List<PresentationResponse>,
+        responder: Identifier,
+        expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
+    ): Pair<String, List<String>> {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
         val vpTokens = presentationResponses.map {
             createAttestationsAndPresentationSubmission(it)
@@ -92,9 +108,8 @@ internal class PresentationResponseFormatter @Inject constructor(
         audience: String,
         responder: Identifier,
         nonce: String
-    ): String {
-        return Json.encodeToString(
-            requestedVcPresentationSubmissionMap.values.toList<VerifiableCredential>().map { credential ->
+    ): List<String> {
+        return requestedVcPresentationSubmissionMap.values.toList<VerifiableCredential>().map { credential ->
                 verifiablePresentationFormatter.createPresentation(
                     listOf(credential),
                     DEFAULT_VP_EXPIRATION_IN_SECONDS,
@@ -102,7 +117,7 @@ internal class PresentationResponseFormatter @Inject constructor(
                     responder,
                     nonce
                 )
-        })
+        }
     }
 
     private fun signContents(contents: PresentationResponseClaims, responder: Identifier): String {
