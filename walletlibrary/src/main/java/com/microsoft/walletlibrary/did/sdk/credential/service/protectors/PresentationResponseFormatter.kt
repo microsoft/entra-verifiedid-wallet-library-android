@@ -52,8 +52,14 @@ internal class PresentationResponseFormatter @Inject constructor(
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Pair<String, List<String>> {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
-        val vpTokens = presentationResponses.map {
-            createAttestationsAndPresentationSubmission(it)
+        val multipleVPs = presentationResponses.size > 1
+        val vpTokens = presentationResponses.mapIndexed {
+            index, it ->
+            if (multipleVPs) {
+                createAttestationsAndPresentationSubmission(it, index)
+            } else {
+                createAttestationsAndPresentationSubmission(it)
+            }
         }.map {
             VpTokenInResponse(it)
         }
@@ -78,14 +84,14 @@ internal class PresentationResponseFormatter @Inject constructor(
         return Pair(idToken, attestationResponse)
     }
 
-    private fun createAttestationsAndPresentationSubmission(presentationResponse: PresentationResponse): PresentationSubmission {
+    private fun createAttestationsAndPresentationSubmission(presentationResponse: PresentationResponse, index: Int? = null): PresentationSubmission {
         presentationResponse.requestedVcPresentationSubmissionMap.entries.indices
         val credentialPresentationSubmissionDescriptors =
             presentationResponse.requestedVcPresentationSubmissionMap.map { pair ->
                 PresentationSubmissionDescriptor(
                     pair.key.id,
                     Constants.VERIFIABLE_PRESENTATION_FORMAT,
-                    "$",
+                    if (index != null) { "$[$index]" } else { "$" },
                     PresentationSubmissionDescriptor(
                         pair.key.id,
                         Constants.VERIFIABLE_CREDENTIAL_FORMAT,
