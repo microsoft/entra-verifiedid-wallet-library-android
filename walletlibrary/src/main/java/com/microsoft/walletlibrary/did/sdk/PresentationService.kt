@@ -5,7 +5,6 @@ package com.microsoft.walletlibrary.did.sdk
 import android.net.Uri
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
-import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.PresentationResponseFormatter
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
@@ -101,9 +100,7 @@ internal class PresentationService @Inject constructor(
         return runResultTry {
             logTime("Presentation sendResponse") {
                 val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
-                val vcRequestedMapping = response.map{ it.requestedVcPresentationSubmissionMap }
-                    .reduce { acc, responseMap -> (acc.toMap() + responseMap.toMap()) as RequestedVcPresentationSubmissionMap }
-                formAndSendResponse(presentationRequest, response, masterIdentifier, vcRequestedMapping).abortOnError()
+                formAndSendResponse(presentationRequest, response, masterIdentifier).abortOnError()
             }
             Result.Success(Unit)
         }
@@ -113,14 +110,12 @@ internal class PresentationService @Inject constructor(
         presentationRequest: PresentationRequest,
         response: List<PresentationResponse>,
         responder: Identifier,
-        requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<Unit> {
         // split on number of responses
         if (response.size > 1) {
             val (idToken, vpToken) = presentationResponseFormatter.formatResponses(
                 request = presentationRequest,
-                requestedVcPresentationSubmissionMap = requestedVcPresentationSubmissionMap,
                 presentationResponses = response,
                 responder = responder,
                 expiryInSeconds = expiryInSeconds
@@ -135,7 +130,6 @@ internal class PresentationService @Inject constructor(
         } else {
             val (idToken, vpToken) = presentationResponseFormatter.formatResponse(
                 request = presentationRequest,
-                requestedVcPresentationSubmissionMap = requestedVcPresentationSubmissionMap,
                 presentationResponse = response.first(),
                 responder = responder,
                 expiryInSeconds = expiryInSeconds

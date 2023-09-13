@@ -8,7 +8,6 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
-import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.VpTokenInResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
@@ -29,14 +28,12 @@ internal class PresentationResponseFormatter @Inject constructor(
     ) {
     fun formatResponse(
         request: PresentationRequest,
-        requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf(),
         presentationResponse: PresentationResponse,
         responder: Identifier,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Pair<String, String> {
         val (id_token, vp_tokens) = this.formatResponses(
             request,
-            requestedVcPresentationSubmissionMap,
             listOf(presentationResponse),
             responder,
             expiryInSeconds
@@ -46,7 +43,6 @@ internal class PresentationResponseFormatter @Inject constructor(
 
     fun formatResponses(
         request: PresentationRequest,
-        requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf(),
         presentationResponses: List<PresentationResponse>,
         responder: Identifier,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
@@ -74,7 +70,7 @@ internal class PresentationResponseFormatter @Inject constructor(
         }
 
         val attestationResponse = createPresentations(
-            requestedVcPresentationSubmissionMap,
+            presentationResponses,
             request.content.clientId,
             responder,
             request.content.nonce
@@ -110,19 +106,19 @@ internal class PresentationResponseFormatter @Inject constructor(
     }
 
     private fun createPresentations(
-        requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
+        presentationResponses: List<PresentationResponse>,
         audience: String,
         responder: Identifier,
         nonce: String
     ): List<String> {
-        return requestedVcPresentationSubmissionMap.values.toList<VerifiableCredential>().map { credential ->
-                verifiablePresentationFormatter.createPresentation(
-                    listOf(credential),
-                    DEFAULT_VP_EXPIRATION_IN_SECONDS,
-                    audience,
-                    responder,
-                    nonce
-                )
+        return presentationResponses.map{ response ->
+            verifiablePresentationFormatter.createPresentation(
+                response.requestedVcPresentationSubmissionMap.values.toList<VerifiableCredential>(),
+                DEFAULT_VP_EXPIRATION_IN_SECONDS,
+                audience,
+                responder,
+                nonce
+            )
         }
     }
 
