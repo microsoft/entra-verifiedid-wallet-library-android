@@ -9,8 +9,6 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcPresent
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
-import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
-import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.PresentationResponseFormatter
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
@@ -27,7 +25,6 @@ import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
-import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.every
@@ -68,7 +65,7 @@ class PresentationServiceTest {
             ),
             recordPrivateCalls = true
         )
-    private val formattedResponse = Pair("FORMATTED_RESPONSE", "FORMATTED_RESPONSE")
+    private val formattedResponses = Pair("FORMATTED_RESPONSE", listOf("FORMATTED_RESPONSE"))
     private val expectedPresentationRequestString =
         """{
   "jti": "3941ff88-69d5-465b-be13-2fe9805efe21",
@@ -280,7 +277,7 @@ class PresentationServiceTest {
     }
 
     @Test
-    fun `test to send Presentation Response`() {
+    fun `test to send multiple VP Presentation Response`() {
         val expectedPresentationRequestContent =
             defaultTestSerializer.decodeFromString(PresentationRequestContent.serializer(), expectedPresentationRequestString)
         val presentationRequest = PresentationRequest(expectedPresentationRequestContent, LinkedDomainMissing)
@@ -292,14 +289,14 @@ class PresentationServiceTest {
             presentationSubmissionMap += response.requestedVcPresentationSubmissionMap
         }
         every {
-            presentationResponseFormatter.formatResponse(
+            presentationResponseFormatter.formatResponses(
                 presentationRequest,
                 presentationSubmissionMap,
                 presentationResponse,
                 masterIdentifier,
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
-        } returns formattedResponse
+        } returns formattedResponses
         every {
             presentationService["formAndSendResponse"](
                 presentationRequest,

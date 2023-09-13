@@ -5,11 +5,9 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.*
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
-import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.RevocationResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
-import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
@@ -63,10 +61,8 @@ class OidcResponseFormatterTest {
     private val expectedRevocationReason = "testing revocation"
     private val mockedPresentationResponse: PresentationResponse = mockk()
     private val mockedNonce = "123456789876"
-    private val mockedClientId = "mockedClientId"
     private val mockedState = "mockedState"
     private val mockedPresentationDefinitionId = UUID.randomUUID().toString()
-    private val credentialSchema = listOf(Schema("https://schema.org/testcredential1"), Schema("https://schema.org/testcredential2"))
     private val requestedVchPresentationSubmissionMap = mutableMapOf<CredentialPresentationInputDescriptor, VerifiableCredential>()
 
     private val mockedIssuanceResponse: IssuanceResponse = mockk()
@@ -135,7 +131,7 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format presentation response with no attestations`() {
-        val actualFormattedToken = presentationResponseFormatter.formatResponse(
+        val actualFormattedToken = presentationResponseFormatter.formatResponses(
             mockedPresentationRequest,
             mutableMapOf(),
             listOf(mockedPresentationResponse),
