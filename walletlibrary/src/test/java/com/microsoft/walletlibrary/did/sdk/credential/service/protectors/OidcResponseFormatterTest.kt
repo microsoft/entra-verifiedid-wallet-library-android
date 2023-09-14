@@ -133,7 +133,6 @@ class OidcResponseFormatterTest {
     fun `format presentation response with no attestations`() {
         val actualFormattedToken = presentationResponseFormatter.formatResponses(
             mockedPresentationRequest,
-            mutableMapOf(),
             listOf(mockedPresentationResponse),
             mockedIdentifier,
             expectedExpiry

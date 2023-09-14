@@ -291,7 +291,6 @@ class PresentationServiceTest {
         every {
             presentationResponseFormatter.formatResponses(
                 presentationRequest,
-                presentationSubmissionMap,
                 presentationResponse,
                 masterIdentifier,
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
@@ -302,7 +301,6 @@ class PresentationServiceTest {
                 presentationRequest,
                 presentationResponse,
                 masterIdentifier,
-                presentationSubmissionMap,
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
         } returns Result.Success(Unit)
@@ -317,7 +315,6 @@ class PresentationServiceTest {
                 presentationRequest,
                 presentationResponse,
                 masterIdentifier,
-                presentationSubmissionMap,
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
         }

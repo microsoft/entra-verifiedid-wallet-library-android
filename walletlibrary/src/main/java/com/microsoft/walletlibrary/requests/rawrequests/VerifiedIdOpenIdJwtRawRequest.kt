@@ -14,6 +14,7 @@ import com.microsoft.walletlibrary.requests.InjectedIdToken
 import com.microsoft.walletlibrary.requests.PresentationRequestContent
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator
+import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.MissingCallbackUrlException
 import com.microsoft.walletlibrary.util.MissingRequestStateException
 
@@ -30,9 +31,23 @@ internal class VerifiedIdOpenIdJwtRawRequest(
         val requirement = if (requirementsList.size == 1) {
             requirementsList.first()
         } else {
-            GroupRequirement(true,
-            requirementsList.toMutableList(),
-            GroupRequirementOperator.ALL)
+            var groupRequirement = true
+            var groupOperator = GroupRequirementOperator.ALL
+            val requirements: List<Requirement> = requirementsList.map {
+                /// primary verifiable presentation
+                if (it is GroupRequirement) {
+                    groupRequirement = it.required
+                    groupOperator = it.requirementOperator
+                    return@map it.requirements
+                }
+                return@map listOf(it)
+            }.flatten()
+
+            GroupRequirement(
+                groupRequirement,
+                requirements.toMutableList(),
+                groupOperator
+            )
         }
         return PresentationRequestContent(
             rawRequest.getRequesterStyle(),
