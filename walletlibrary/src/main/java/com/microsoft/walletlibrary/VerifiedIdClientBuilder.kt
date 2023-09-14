@@ -8,12 +8,9 @@ package com.microsoft.walletlibrary
 import android.content.Context
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import android.content.pm.PackageManager
-<<<<<<< HEAD
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
-=======
->>>>>>> origin/logirvin/httpInterseptor
 import com.microsoft.walletlibrary.interceptor.HttpInterceptor
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
