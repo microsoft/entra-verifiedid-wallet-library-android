@@ -19,11 +19,13 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.validators.OidcPre
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.walletlibrary.did.sdk.datasource.network.interceptors.CorrelationVectorInterceptor
+import com.microsoft.walletlibrary.did.sdk.datasource.network.interceptors.ExternalInterceptor
 import com.microsoft.walletlibrary.did.sdk.datasource.network.interceptors.UserAgentInterceptor
 import com.microsoft.walletlibrary.did.sdk.datasource.network.interceptors.WalletLibraryHeaderInterceptor
 import com.microsoft.walletlibrary.did.sdk.identifier.registrars.Registrar
 import com.microsoft.walletlibrary.did.sdk.identifier.registrars.SidetreeRegistrar
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
+import com.microsoft.walletlibrary.interceptor.HttpInterceptor
 import dagger.Module
 import dagger.Provides
 import kotlinx.serialization.json.Json
@@ -59,6 +61,7 @@ internal class SdkModule {
     internal fun defaultOkHttpClient(
         @Named("userAgentInfo") userAgentInfo: String,
         @Named("walletLibraryVersionInfo") walletLibraryVersionInfo: String,
+        @Named("httpInterceptors") httpInterceptors: List<HttpInterceptor>,
         correlationVectorService: CorrelationVectorService
     ): OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.d(it) }
@@ -69,6 +72,7 @@ internal class SdkModule {
             .addInterceptor(UserAgentInterceptor(userAgentInfo))
             .addInterceptor(WalletLibraryHeaderInterceptor(walletLibraryVersionInfo))
             .addInterceptor(CorrelationVectorInterceptor(correlationVectorService))
+            .addInterceptor(ExternalInterceptor(httpInterceptors))
             .build()
     }
 

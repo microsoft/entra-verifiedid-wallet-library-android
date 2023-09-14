@@ -5,6 +5,7 @@ package com.microsoft.walletlibrary.did.sdk
 import android.net.Uri
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
@@ -64,7 +65,7 @@ class PresentationServiceTest {
             ),
             recordPrivateCalls = true
         )
-    private val formattedResponse = Pair("FORMATTED_RESPONSE", "FORMATTED_RESPONSE")
+    private val formattedResponses = Pair("FORMATTED_RESPONSE", listOf("FORMATTED_RESPONSE"))
     private val expectedPresentationRequestString =
         """{
   "jti": "3941ff88-69d5-465b-be13-2fe9805efe21",
@@ -276,38 +277,44 @@ class PresentationServiceTest {
     }
 
     @Test
-    fun `test to send Presentation Response`() {
+    fun `test to send multiple VP Presentation Response`() {
         val expectedPresentationRequestContent =
             defaultTestSerializer.decodeFromString(PresentationRequestContent.serializer(), expectedPresentationRequestString)
         val presentationRequest = PresentationRequest(expectedPresentationRequestContent, LinkedDomainMissing)
-        val presentationResponse = PresentationResponse(presentationRequest)
+        val presentationResponse = presentationRequest.getPresentationDefinitions().map {
+            PresentationResponse(presentationRequest, it.id)
+        }
+        val presentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf()
+        presentationResponse.forEach { response ->
+            presentationSubmissionMap += response.requestedVcPresentationSubmissionMap
+        }
         every {
-            presentationResponseFormatter.formatResponse(
-                presentationResponse.requestedVcPresentationSubmissionMap,
+            presentationResponseFormatter.formatResponses(
+                presentationRequest,
                 presentationResponse,
                 masterIdentifier,
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
-        } returns formattedResponse
+        } returns formattedResponses
         every {
             presentationService["formAndSendResponse"](
+                presentationRequest,
                 presentationResponse,
                 masterIdentifier,
-                presentationResponse.requestedVcPresentationSubmissionMap,
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
         } returns Result.Success(Unit)
 
         runBlocking {
-            val presentedResponse = presentationService.sendResponse(presentationResponse)
+            val presentedResponse = presentationService.sendResponse(presentationRequest, presentationResponse)
             assertThat(presentedResponse).isInstanceOf(Result.Success::class.java)
         }
 
         verify(exactly = 1) {
             presentationService["formAndSendResponse"](
+                presentationRequest,
                 presentationResponse,
                 masterIdentifier,
-                presentationResponse.requestedVcPresentationSubmissionMap,
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
         }

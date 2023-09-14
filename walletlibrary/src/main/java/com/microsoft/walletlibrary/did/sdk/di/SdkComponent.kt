@@ -13,6 +13,7 @@ import com.microsoft.walletlibrary.did.sdk.IssuanceService
 import com.microsoft.walletlibrary.did.sdk.LinkedDomainsService
 import com.microsoft.walletlibrary.did.sdk.PresentationService
 import com.microsoft.walletlibrary.did.sdk.RevocationService
+import com.microsoft.walletlibrary.interceptor.HttpInterceptor
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.serialization.modules.SerializersModule
@@ -66,5 +67,8 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun polymorphicJsonSerializer(@Named("polymorphicJsonSerializer") jsonSerializer: SerializersModule): Builder
+
+        @BindsInstance
+        fun httpInterceptors(@Named("httpInterceptors") httpInterceptors: List<HttpInterceptor>): Builder
     }
 }

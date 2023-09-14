@@ -19,3 +19,14 @@ internal class SendPresentationResponseNetworkOperation(url: String, serializedI
         return Result.Success(Unit)
     }
 }
+
+// The plural vp_token format
+internal class SendPresentationResponsesNetworkOperation(url: String, serializedIdToken: String, vpToken: List<String>, state: String?, apiProvider: ApiProvider) :
+    PostNetworkOperation<String, Unit>() {
+    override val call: suspend () -> Response<String> = {
+        apiProvider.presentationApis.sendResponses(url, serializedIdToken, vpToken, state) }
+
+    override suspend fun onSuccess(response: Response<String>): Result<Unit> {
+        return Result.Success(Unit)
+    }
+}

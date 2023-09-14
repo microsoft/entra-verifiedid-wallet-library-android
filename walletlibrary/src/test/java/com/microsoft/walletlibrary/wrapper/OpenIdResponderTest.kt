@@ -77,7 +77,7 @@ class OpenIdResponderTest {
         every { VerifiableCredentialSdk.presentationService } returns mockPresentationService
         every { mockPresentationRequest.content } returns mockPresentationRequestContent
         every { mockPresentationRequestContent.clientId } returns ""
-        every { mockPresentationRequest.getPresentationDefinition() } returns mockPresentationDefinition
+        every { mockPresentationRequest.getPresentationDefinitions() } returns listOf(mockPresentationDefinition)
         every { mockPresentationDefinition.id } returns "definitionid"
         every { mockPresentationDefinition.credentialPresentationInputDescriptors } returns listOf(mockCredentialDescriptors)
         every { mockCredentialDescriptors.id } returns expectedVcId
@@ -99,7 +99,7 @@ class OpenIdResponderTest {
         every { vcContractFromSdk.display } returns mockDisplayContract
         setupDisplayContract()
         coEvery {
-            mockPresentationService.sendResponse(any())
+            mockPresentationService.sendResponse(any(), any())
         } returns Result.Success(Unit)
         (requirement as VerifiedIdRequirement).fulfill(verifiedId)
 
@@ -118,7 +118,7 @@ class OpenIdResponderTest {
         every { vcContractFromSdk.display } returns mockDisplayContract
         setupDisplayContract()
         coEvery {
-            mockPresentationService.sendResponse(any())
+            mockPresentationService.sendResponse(any(), any())
         } returns Result.Failure(SdkException("Test failure"))
         (requirement as VerifiedIdRequirement).fulfill(verifiedId)
 
@@ -136,7 +136,7 @@ class OpenIdResponderTest {
         every { vcContractFromSdk.display } returns mockDisplayContract
         setupDisplayContract()
         coEvery {
-            mockPresentationService.sendResponse(any())
+            mockPresentationService.sendResponse(any(), any())
         } returns Result.Failure(SdkException("Test failure"))
 
         // Act and Assert

@@ -1,18 +1,13 @@
 package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceResponse
-import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
-import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedIdTokenMap
-import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedSelfAttestedClaimMap
-import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcMap
+import com.microsoft.walletlibrary.did.sdk.credential.service.*
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.RevocationResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
-import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
@@ -66,10 +61,8 @@ class OidcResponseFormatterTest {
     private val expectedRevocationReason = "testing revocation"
     private val mockedPresentationResponse: PresentationResponse = mockk()
     private val mockedNonce = "123456789876"
-    private val mockedClientId = "mockedClientId"
     private val mockedState = "mockedState"
     private val mockedPresentationDefinitionId = UUID.randomUUID().toString()
-    private val credentialSchema = listOf(Schema("https://schema.org/testcredential1"), Schema("https://schema.org/testcredential2"))
     private val requestedVchPresentationSubmissionMap = mutableMapOf<CredentialPresentationInputDescriptor, VerifiableCredential>()
 
     private val mockedIssuanceResponse: IssuanceResponse = mockk()
@@ -80,6 +73,7 @@ class OidcResponseFormatterTest {
         mapOf(expectedSelfAttestedField to expectedSelfAttestedClaimValue) as RequestedSelfAttestedClaimMap
     private val mockedPresentationAttestation: PresentationAttestation = mockk()
     private val mockedRequestedVcMap: RequestedVcMap = mutableMapOf(mockedPresentationAttestation to mockedVc)
+    private val mockedPresentationRequest: PresentationRequest = mockk()
 
     init {
         issuanceResponseFormatter = IssuanceResponseFormatter(
@@ -110,6 +104,9 @@ class OidcResponseFormatterTest {
                 mockedIdentifier
             )
         } returns expectedVerifiablePresentation
+        every { mockedPresentationRequest.content.nonce } returns mockedNonce
+        every { mockedPresentationRequest.content.clientId } returns expectedDid
+        every { mockedPresentationRequest.content.audience } returns expectedPresentationAudience
         mockPresentationResponse()
         mockIssuanceResponseWithNoAttestations()
         mockPresentationAttestation()
@@ -134,9 +131,9 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format presentation response with no attestations`() {
-        val actualFormattedToken = presentationResponseFormatter.formatResponse(
-            mutableMapOf(),
-            mockedPresentationResponse,
+        val actualFormattedToken = presentationResponseFormatter.formatResponses(
+            mockedPresentationRequest,
+            listOf(mockedPresentationResponse),
             mockedIdentifier,
             expectedExpiry
         )
@@ -144,7 +141,7 @@ class OidcResponseFormatterTest {
         assertEquals(expectedPresentationAudience, actualTokenContents.audience)
         assertEquals(mockedNonce, actualTokenContents.nonce)
         assertEquals(expectedDid, actualTokenContents.subject)
-        assertThat(actualTokenContents.vpToken.presentationSubmission.presentationSubmissionDescriptors.size).isEqualTo(0)
+        assertThat(actualTokenContents.vpToken.first().presentationSubmission.presentationSubmissionDescriptors.size).isEqualTo(0)
     }
 
     @Test
