@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.did.sdk.di.DaggerSdkComponent
 import com.microsoft.walletlibrary.did.sdk.util.DifWordList
 import com.microsoft.walletlibrary.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
+import com.microsoft.walletlibrary.interceptor.HttpInterceptor
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 
@@ -58,6 +59,7 @@ internal object VerifiableCredentialSdk {
      * @param polymorphicJsonSerializers serializer module
      * @param registrationUrl url used to register DID
      * @param resolverUrl url used to resolve DID
+     * @param interceptors HttpInterceptor to modify http request
      */
     // TODO(Change how version numbers are passed for headers when HTTP client layer is refactored)
     @JvmOverloads
@@ -69,7 +71,8 @@ internal object VerifiableCredentialSdk {
         polymorphicJsonSerializers: SerializersModule = Json.serializersModule,
         registrationUrl: String = "",
         resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers",
-        walletLibraryVersionInfo: String = ""
+        walletLibraryVersionInfo: String = "",
+        interceptors: List<HttpInterceptor> = emptyList()
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
@@ -78,6 +81,7 @@ internal object VerifiableCredentialSdk {
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
             .polymorphicJsonSerializer(polymorphicJsonSerializers)
+            .httpInterceptors(interceptors)
             .build()
 
         issuanceService = sdkComponent.issuanceService()
