@@ -16,4 +16,6 @@ interface VerifiedIdPresentationRequest : VerifiedIdRequest<Unit> {
 
     // Completes the request and returns nothing if successful.
     override suspend fun complete(): VerifiedIdResult<Unit>
+
+    fun getNonce(): String
 }
