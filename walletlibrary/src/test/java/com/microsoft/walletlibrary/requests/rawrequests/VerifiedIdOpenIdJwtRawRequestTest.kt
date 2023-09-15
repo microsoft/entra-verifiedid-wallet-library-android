@@ -70,7 +70,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         isSchemaEmpty: Boolean
     ) {
         every { mockPresentationRequest.getPresentationDefinitions() } returns
-                listOf( mockk {
+                listOf(mockk {
                     every { credentialPresentationInputDescriptors } returns inputDescriptors
                 })
         for (inputDescriptor in inputDescriptors) {

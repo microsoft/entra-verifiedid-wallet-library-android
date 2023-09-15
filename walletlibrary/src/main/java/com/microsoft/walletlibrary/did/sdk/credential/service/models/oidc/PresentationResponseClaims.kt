@@ -26,8 +26,7 @@ internal data class PresentationResponseClaims(
     var nonce: String = ""
     ) : OidcResponseClaims()
 
-
-internal class VPTokenResponseSerializer: JsonTransformingSerializer<List<VpTokenInResponse>>(
+internal class VPTokenResponseSerializer : JsonTransformingSerializer<List<VpTokenInResponse>>(
     ListSerializer(VpTokenInResponse.serializer())
 ) {
     override fun transformDeserialize(element: JsonElement): JsonElement {
