@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
+import com.microsoft.walletlibrary.interceptor.HttpInterceptor
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest
@@ -49,6 +50,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
     private var logger: WalletLibraryLogger = WalletLibraryLogger
     private val requestResolvers = mutableListOf<RequestResolver>()
     private val requestHandlers = mutableListOf<RequestHandler>()
+    private val httpInterceptors = mutableListOf<HttpInterceptor>()
     private val jsonSerializer = Json {
         serializersModule = SerializersModule {
             polymorphic(VerifiedId::class) {
@@ -94,6 +96,11 @@ class VerifiedIdClientBuilder(private val context: Context) {
         this.rootOfTrustResolver = rootOfTrustResolver
     }
 
+    fun with(httpInterceptor: HttpInterceptor): VerifiedIdClientBuilder {
+        httpInterceptors.add(httpInterceptor)
+        return this
+    }
+
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
     fun build(): VerifiedIdClient {
         val requestResolverFactory = RequestResolverFactory()
@@ -109,7 +116,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
             context,
             logConsumer = vcSdkLogConsumer,
             userAgentInfo = getUserAgent(context),
-            walletLibraryVersionInfo = getWalletLibraryVersionInfo()
+            walletLibraryVersionInfo = getWalletLibraryVersionInfo(),
+            interceptors = httpInterceptors
         )
         return VerifiedIdClient(
             requestResolverFactory,
