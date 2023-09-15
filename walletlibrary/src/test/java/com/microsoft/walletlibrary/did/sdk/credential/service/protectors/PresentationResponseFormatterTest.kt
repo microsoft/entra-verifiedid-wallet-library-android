@@ -149,7 +149,7 @@ class PresentationResponseFormatterTest {
         // arrange
         val vcRequested = CredentialPresentationInputDescriptor(
             firstInputDefinitionId,
-            listOf(Schema(firstVpTokenType)),
+            listOf(Schema(firstVpTokenType))
         )
 
         val request = PresentationRequest(
@@ -188,7 +188,7 @@ class PresentationResponseFormatterTest {
         val tokens = formatter.formatResponses(
             request,
             responses,
-            mockedIdentifier,
+            mockedIdentifier
         )
 
         // assert
@@ -226,11 +226,11 @@ class PresentationResponseFormatterTest {
         // arrange
         val vcRequestOne = CredentialPresentationInputDescriptor(
             firstInputDefinitionId,
-            listOf(Schema(firstVpTokenType)),
+            listOf(Schema(firstVpTokenType))
         )
         val vcRequestTwo = CredentialPresentationInputDescriptor(
             secondInputDefinitionId,
-            listOf(Schema(secondVpTokenType)),
+            listOf(Schema(secondVpTokenType))
         )
 
         val request = PresentationRequest(
@@ -285,7 +285,7 @@ class PresentationResponseFormatterTest {
         val tokens = formatter.formatResponses(
             request,
             responses,
-            mockedIdentifier,
+            mockedIdentifier
         )
 
         // assert
@@ -334,17 +334,16 @@ class PresentationResponseFormatterTest {
         assertThat(vpTokenTwo.verifiablePresentation.verifiableCredential[0]).isEqualTo(expectedVCRawTwo)
     }
 
-
     @Test
     fun formatResponses_shouldFormTokens_withMultipleCredentials() {
         // arrange
         val vcRequestOne = CredentialPresentationInputDescriptor(
             firstInputDefinitionId,
-            listOf(Schema(firstVpTokenType)),
+            listOf(Schema(firstVpTokenType))
         )
         val vcRequestTwo = CredentialPresentationInputDescriptor(
             secondInputDefinitionId,
-            listOf(Schema(secondVpTokenType)),
+            listOf(Schema(secondVpTokenType))
         )
 
         val request = PresentationRequest(

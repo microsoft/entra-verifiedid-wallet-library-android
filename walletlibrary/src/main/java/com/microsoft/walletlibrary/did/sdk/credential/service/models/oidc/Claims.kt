@@ -13,13 +13,13 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonTransformingSerializer
 
 @Serializable
-internal data class Claims (
+internal data class Claims(
     @Serializable(with = VPTokenRequestSerializer::class)
     @SerialName("vp_token")
-    val vpTokensInRequest: List<VpTokenInRequest>,
+    val vpTokensInRequest: List<VpTokenInRequest>
 )
 
-internal class VPTokenRequestSerializer: JsonTransformingSerializer<List<VpTokenInRequest>>(ListSerializer(VpTokenInRequest.serializer())) {
+internal class VPTokenRequestSerializer : JsonTransformingSerializer<List<VpTokenInRequest>>(ListSerializer(VpTokenInRequest.serializer())) {
     override fun transformDeserialize(element: JsonElement): JsonElement {
         return if (element !is JsonArray) {
             JsonArray(listOf(element))

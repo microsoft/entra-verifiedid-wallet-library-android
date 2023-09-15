@@ -257,7 +257,7 @@ class IssuanceResponseMappingTest {
         // Act and Assert
         assertTrue(verifiedIdRequirement.constraint is VcTypeConstraint)
         assertThat((verifiedIdRequirement.constraint as VcTypeConstraint).vcType).isEqualTo(expectedCredentialType)
-        assertThatThrownBy{
+        assertThatThrownBy {
             issuanceResponse.addRequirements(verifiedIdRequirement)
         }.isInstanceOf(RequirementNotMetException::class.java)
     }

@@ -9,7 +9,10 @@ import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.util.defaultTestSerializer
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import retrofit2.Response
