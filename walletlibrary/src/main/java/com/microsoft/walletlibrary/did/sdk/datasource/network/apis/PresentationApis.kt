@@ -27,4 +27,13 @@ internal interface PresentationApis {
         @Field("vp_token") vpToken: String,
         @Field("state") state: String?
     ): Response<String>
+
+    @FormUrlEncoded
+    @POST
+    suspend fun sendResponses(
+        @Url overrideUrl: String,
+        @Field("id_token") token: String,
+        @Field("vp_token") vpToken: List<String>,
+        @Field("state") state: String?
+    ): Response<String>
 }

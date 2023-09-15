@@ -60,9 +60,9 @@ class PresentationResponseMappingTest {
 
     private fun setupInput() {
         every { mockPresentationRequest.content.clientId } returns ""
-        every { mockPresentationRequest.getPresentationDefinition() } returns mockPresentationDefinition
+        every { mockPresentationRequest.getPresentationDefinitions() } returns listOf(mockPresentationDefinition)
         every { mockPresentationDefinition.id } returns ""
-        presentationResponse = PresentationResponse(mockPresentationRequest)
+        presentationResponse = PresentationResponse(mockPresentationRequest, "")
     }
 
     @Test

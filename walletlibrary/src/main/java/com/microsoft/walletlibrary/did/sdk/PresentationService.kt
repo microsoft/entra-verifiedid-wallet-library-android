@@ -5,7 +5,6 @@ package com.microsoft.walletlibrary.did.sdk
 import android.net.Uri
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
-import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.PresentationResponseFormatter
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
@@ -14,6 +13,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
+import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendPresentationResponsesNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.internal.ImageLoader
 import com.microsoft.walletlibrary.did.sdk.util.Constants
@@ -94,36 +94,53 @@ internal class PresentationService @Inject constructor(
      * @param response PresentationResponse to be formed, signed, and sent.
      */
     suspend fun sendResponse(
-        response: PresentationResponse
+        presentationRequest: PresentationRequest,
+        response: List<PresentationResponse>
     ): Result<Unit> {
         return runResultTry {
             logTime("Presentation sendResponse") {
                 val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
-                val vcRequestedMapping = response.requestedVcPresentationSubmissionMap
-                formAndSendResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
+                formAndSendResponse(presentationRequest, response, masterIdentifier).abortOnError()
             }
             Result.Success(Unit)
         }
     }
 
     private suspend fun formAndSendResponse(
-        response: PresentationResponse,
+        presentationRequest: PresentationRequest,
+        response: List<PresentationResponse>,
         responder: Identifier,
-        requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<Unit> {
-        val (idToken, vpToken) = presentationResponseFormatter.formatResponse(
-            requestedVcPresentationSubmissionMap = requestedVcPresentationSubmissionMap,
-            presentationResponse = response,
-            responder = responder,
-            expiryInSeconds = expiryInSeconds
-        )
-        return SendPresentationResponseNetworkOperation(
-            response.request.content.redirectUrl,
-            idToken,
-            vpToken,
-            response.request.content.state,
-            apiProvider
-        ).fire()
+        // split on number of responses
+        if (response.size > 1) {
+            val (idToken, vpToken) = presentationResponseFormatter.formatResponses(
+                request = presentationRequest,
+                presentationResponses = response,
+                responder = responder,
+                expiryInSeconds = expiryInSeconds
+            )
+            return SendPresentationResponsesNetworkOperation(
+                presentationRequest.content.redirectUrl,
+                idToken,
+                vpToken,
+                presentationRequest.content.state,
+                apiProvider
+            ).fire()
+        } else {
+            val (idToken, vpToken) = presentationResponseFormatter.formatResponse(
+                request = presentationRequest,
+                presentationResponse = response.first(),
+                responder = responder,
+                expiryInSeconds = expiryInSeconds
+            )
+            return SendPresentationResponseNetworkOperation(
+                presentationRequest.content.redirectUrl,
+                idToken,
+                vpToken,
+                presentationRequest.content.state,
+                apiProvider
+            ).fire()
+        }
     }
 }

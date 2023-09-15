@@ -27,10 +27,10 @@ internal class IssuanceResponse(override val request: IssuanceRequest) :
     val requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap = mutableMapOf()
 }
 
-internal class PresentationResponse(override val request: PresentationRequest) :
+internal class PresentationResponse(override val request: PresentationRequest, presentationId: String) :
     Response(request, request.content.clientId) {
     val requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf()
-    val requestedVcPresentationDefinitionId: String = request.getPresentationDefinition().id
+    val requestedVcPresentationDefinitionId: String = presentationId
 }
 
 typealias RequestedIdTokenMap = MutableMap<String, String>
