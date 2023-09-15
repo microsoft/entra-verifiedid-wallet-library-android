@@ -131,6 +131,7 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format presentation response with no attestations`() {
+        // Arrange/Act
         val actualFormattedToken = presentationResponseFormatter.formatResponses(
             mockedPresentationRequest,
             listOf(mockedPresentationResponse),
@@ -138,6 +139,7 @@ class OidcResponseFormatterTest {
             expectedExpiry
         )
         val actualTokenContents = defaultTestSerializer.decodeFromString(PresentationResponseClaims.serializer(), actualFormattedToken.first)
+        // Assert
         assertEquals(expectedPresentationAudience, actualTokenContents.audience)
         assertEquals(mockedNonce, actualTokenContents.nonce)
         assertEquals(expectedDid, actualTokenContents.subject)
@@ -146,9 +148,11 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format issuance response with no attestations`() {
+        // Arrange
         every { mockedIssuanceResponse.requestedIdTokenMap } returns mutableMapOf()
         every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns mutableMapOf()
         every { mockedIssuanceResponse.requestedAccessTokenMap } returns mutableMapOf()
+        // Act
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
@@ -156,6 +160,7 @@ class OidcResponseFormatterTest {
             expectedExpiry
         )
         val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        // Assert
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
@@ -168,9 +173,11 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format issuance response with id-token attestations`() {
+        // Arrange
         every { mockedIssuanceResponse.requestedIdTokenMap } returns requestedIdTokenMap
         every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns mutableMapOf()
         every { mockedIssuanceResponse.requestedAccessTokenMap } returns mutableMapOf()
+        // Act
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
@@ -178,6 +185,7 @@ class OidcResponseFormatterTest {
             expectedExpiry
         )
         val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        // Assert
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
@@ -191,9 +199,11 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format issuance response with self attested attestations`() {
+        // Arrange
         every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns requestedSelfAttestedClaimsMap
         every { mockedIssuanceResponse.requestedIdTokenMap } returns mutableMapOf()
         every { mockedIssuanceResponse.requestedAccessTokenMap } returns mutableMapOf()
+        // Act
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
@@ -201,6 +211,7 @@ class OidcResponseFormatterTest {
             expectedExpiry
         )
         val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        // Assert
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
@@ -214,10 +225,12 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format issuance response with presentation attestations`() {
+        // Arrange
         every { mockedIssuanceResponse.requestedVcMap } returns mockedRequestedVcMap
         every { mockedIssuanceResponse.requestedIdTokenMap } returns mutableMapOf()
         every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns mutableMapOf()
         every { mockedIssuanceResponse.requestedAccessTokenMap } returns mutableMapOf()
+        // Act
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mockedRequestedVcMap,
             mockedIssuanceResponse,
@@ -225,6 +238,7 @@ class OidcResponseFormatterTest {
             expectedExpiry
         )
         val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        // Assert
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
@@ -237,12 +251,14 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format issuance response with all attestations`() {
+        // Arrange
         val expectedRawToken = "rawToken2343"
         every { mockedIssuanceResponse.requestedIdTokenMap } returns requestedIdTokenMap
         every { mockedIssuanceResponse.requestedAccessTokenMap } returns mutableMapOf()
         every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns requestedSelfAttestedClaimsMap
         every { mockedIssuanceResponse.requestedVcMap } returns mockedRequestedVcMap
         every { mockedIssuanceResponse.request.entityIdentifier } returns expectedResponseAudience
+        // Act
         val results = issuanceResponseFormatter.formatResponse(
             mockedRequestedVcMap,
             mockedIssuanceResponse,
@@ -250,6 +266,7 @@ class OidcResponseFormatterTest {
             expectedExpiry
         )
         val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), results)
+        // Assert
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
@@ -286,14 +303,17 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format revocation request with revoked RPs and reason for revocation`() {
+        // Arrange
         every { revocationRequest.audience } returns expectedRevocationAudience
         every { revocationRequest.reason } returns expectedRevocationReason
         every { revocationRequest.rpList } returns expectedRevokedRps
         every { revocationRequest.owner } returns mockedIdentifier
         every { revocationRequest.verifiableCredential } returns mockedVc
         every { mockedVc.raw } returns mockedVcRaw
+        // Act
         val results = revocationResponseFormatter.formatResponse(revocationRequest, Constants.DEFAULT_EXPIRATION_IN_SECONDS)
         val actualTokenContents = defaultTestSerializer.decodeFromString(RevocationResponseClaims.serializer(), results)
+        // Assert
         assertThat(actualTokenContents.did).isEqualTo(expectedDid)
         assertThat(actualTokenContents.vc).isEqualTo(mockedVcRaw)
         assertThat(actualTokenContents.audience).isEqualTo(expectedRevocationAudience)
@@ -303,14 +323,17 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format revocation request with no reason and RP list`() {
+        // Arrange
         every { revocationRequest.audience } returns expectedRevocationAudience
         every { revocationRequest.verifiableCredential } returns mockedVc
         every { revocationRequest.owner } returns mockedIdentifier
         every { revocationRequest.rpList } returns emptyList()
         every { revocationRequest.reason } returns ""
         every { mockedVc.raw } returns mockedVcRaw
+        // Act
         val results = revocationResponseFormatter.formatResponse(revocationRequest, Constants.DEFAULT_EXPIRATION_IN_SECONDS)
         val actualTokenContents = defaultTestSerializer.decodeFromString(RevocationResponseClaims.serializer(), results)
+        // Assert
         assertThat(actualTokenContents.did).isEqualTo(expectedDid)
         assertThat(actualTokenContents.vc).isEqualTo(mockedVcRaw)
         assertThat(actualTokenContents.audience).isEqualTo(expectedRevocationAudience)

@@ -25,12 +25,17 @@ object OpenIdResponder {
         requirement: Requirement
     ) {
         val presentationResponses = presentationRequest.getPresentationDefinitions().map { PresentationResponse(presentationRequest, it.id) }
+        var presentationMatched = false
         for (presentationResponse in presentationResponses) {
             try {
                 presentationResponse.addRequirements(requirement)
+                presentationMatched = true
             } catch (exception: IdInVerifiedIdRequirementDoesNotMatchRequestException) {
                 // This will be thrown if a verified ID couldn't be matched
             }
+        }
+        if (!presentationMatched) {
+            throw IdInVerifiedIdRequirementDoesNotMatchRequestException("Id in VerifiedId Requirement does not match any id in request.")
         }
         val presentationResponseResult =
             VerifiableCredentialSdk.presentationService.sendResponse(presentationRequest, presentationResponses)

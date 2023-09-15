@@ -8,7 +8,6 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.validators
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.Registration
-import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
@@ -21,7 +20,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.util.Date
@@ -43,8 +41,6 @@ class OidcPresentationRequestValidatorTest {
     private val expectedSerializedToken: String = "token2364302"
 
     private val validator: OidcPresentationRequestValidator = OidcPresentationRequestValidator(mockedJwtValidator)
-
-    private val serializer: Json = Json
 
     private val expectedSigningKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
@@ -106,6 +102,7 @@ class OidcPresentationRequestValidatorTest {
 
     @Test
     fun `valid signature is validated successfully`() {
+        // Arrange
         setUpExpiration(86400)
         every { mockedPresentationRequest.getPresentationDefinitions() } returns
             listOf(mockk {
@@ -122,12 +119,15 @@ class OidcPresentationRequestValidatorTest {
         every { JwsToken.deserialize(expectedSerializedToken) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
         runBlocking {
+            // Act
             validator.validate(mockedPresentationRequest)
         }
+        // Assert
     }
 
     @Test
     fun `throws when request has invalid response mode`() {
+        // Arrange
         setUpExpiration(86400)
         every { mockedPresentationRequest.getPresentationDefinitions() } returns
                 listOf( mockk {
@@ -137,8 +137,10 @@ class OidcPresentationRequestValidatorTest {
         setUpOidcRequestContentWithInvalidResponseMode()
         runBlocking {
             try {
+                // Act
                 validator.validate(mockedPresentationRequest)
             } catch (exception: Exception) {
+                // Assert
                 assertThat(exception).isInstanceOf(InvalidResponseModeException::class.java)
             }
         }
@@ -146,6 +148,7 @@ class OidcPresentationRequestValidatorTest {
 
     @Test
     fun `throws when request has invalid response type`() {
+        // Arrange
         setUpExpiration(86400)
         every { mockedPresentationRequest.getPresentationDefinitions() } returns
                 listOf( mockk {
@@ -155,8 +158,10 @@ class OidcPresentationRequestValidatorTest {
         setUpOidcRequestContentWithInvalidResponseType()
         runBlocking {
             try {
+                // Act
                 validator.validate(mockedPresentationRequest)
             } catch (exception: Exception) {
+                // Assert
                 assertThat(exception).isInstanceOf(InvalidResponseTypeException::class.java)
             }
         }
@@ -164,6 +169,7 @@ class OidcPresentationRequestValidatorTest {
 
     @Test
     fun `throws when request has invalid scope`() {
+        // Arrange
         setUpExpiration(86400)
         every { mockedPresentationRequest.getPresentationDefinitions() } returns
                 listOf( mockk {
@@ -173,8 +179,10 @@ class OidcPresentationRequestValidatorTest {
         setUpOidcRequestContentWithInvalidScope()
         runBlocking {
             try {
+                // Act
                 validator.validate(mockedPresentationRequest)
             } catch (exception: Exception) {
+                // Assert
                 assertThat(exception).isInstanceOf(InvalidScopeException::class.java)
             }
         }
@@ -182,6 +190,7 @@ class OidcPresentationRequestValidatorTest {
 
     @Test
     fun `throws when request has missing input`() {
+        // Arrange
         setUpExpiration(86400)
         every { mockedPresentationRequest.getPresentationDefinitions() } returns
             listOf( mockk {
@@ -191,8 +200,10 @@ class OidcPresentationRequestValidatorTest {
         setUpOidcRequestContentWithValidFields()
         runBlocking {
             try {
+                // Act
                 validator.validate(mockedPresentationRequest)
             } catch (exception: Exception) {
+                // Assert
                 assertThat(exception).isInstanceOf(MissingInputInRequestException::class.java)
             }
         }

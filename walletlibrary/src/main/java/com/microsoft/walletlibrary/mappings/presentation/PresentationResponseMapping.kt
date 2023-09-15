@@ -31,16 +31,30 @@ private fun PresentationResponse.addVerifiedIdRequirement(verifiedIdRequirement:
             "Verified ID has not been set.",
             VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value
         )
-    val credentialPresentationInputDescriptor =
-        request.getPresentationDefinitions().filter { it.id == this.requestedVcPresentationDefinitionId }.map { it.credentialPresentationInputDescriptors
-            .filter { that -> that.id == verifiedIdRequirement.id } }
-            .reduce { acc, credentialPresentationInputDescriptors -> acc + credentialPresentationInputDescriptors }
-    if (credentialPresentationInputDescriptor.isEmpty())
+    val matchingInputDescriptors =
+        request.getPresentationDefinitions().filter {
+            presentationDefinition ->
+            // Limit to only this response' presentationDefinition
+            presentationDefinition.id == this.requestedVcPresentationDefinitionId
+        }.map {
+            presentationDefinition ->
+            // Filter to only matching inputDescriptor(s)
+            presentationDefinition.credentialPresentationInputDescriptors
+                .filter {
+                    inputDescriptor ->
+                    inputDescriptor.id == verifiedIdRequirement.id
+                }
+        }.reduce {
+            allInputDescriptors, inputDescriptor ->
+            // Flatten the inputDescriptors into a single array
+            allInputDescriptors + inputDescriptor
+        }
+    if (matchingInputDescriptors.isEmpty())
         throw IdInVerifiedIdRequirementDoesNotMatchRequestException("Id in VerifiedId Requirement does not match the id in request.")
-    if (credentialPresentationInputDescriptor.size > 1)
+    if (matchingInputDescriptors.size > 1)
         throw VerifiedIdRequirementIdConflictException("Multiple VerifiedId Requirements have the same Ids.")
     verifiedIdRequirement.validate().getOrThrow()
-    requestedVcPresentationSubmissionMap[credentialPresentationInputDescriptor.first()] =
+    requestedVcPresentationSubmissionMap[matchingInputDescriptors.first()] =
         (verifiedIdRequirement.verifiedId as VerifiableCredential).raw
 }
 
