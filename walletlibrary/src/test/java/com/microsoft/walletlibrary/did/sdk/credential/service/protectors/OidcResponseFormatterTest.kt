@@ -104,9 +104,18 @@ class OidcResponseFormatterTest {
                 mockedIdentifier
             )
         } returns expectedVerifiablePresentation
+        // handle empty VC
+        every {
+            mockedVerifiablePresentationFormatter.createPresentation(
+                emptyList(),
+                expectedValidityInterval,
+                any(),
+                mockedIdentifier,
+                mockedNonce
+            )
+        } returns expectedVerifiablePresentation
         every { mockedPresentationRequest.content.nonce } returns mockedNonce
-        every { mockedPresentationRequest.content.clientId } returns expectedDid
-        every { mockedPresentationRequest.content.audience } returns expectedPresentationAudience
+        every { mockedPresentationRequest.content.clientId } returns expectedPresentationAudience
         mockPresentationResponse()
         mockIssuanceResponseWithNoAttestations()
         mockPresentationAttestation()
@@ -131,7 +140,9 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format presentation response with no attestations`() {
-        // Arrange/Act
+        // Arrange
+        mockPresentationResponse()
+        // Act
         val actualFormattedToken = presentationResponseFormatter.formatResponses(
             mockedPresentationRequest,
             listOf(mockedPresentationResponse),
