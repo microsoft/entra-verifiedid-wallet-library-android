@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.interceptor
 
-data class HttpResponse (
+data class HttpResponse(
     /**
      * original http request
      */
