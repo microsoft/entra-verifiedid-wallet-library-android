@@ -14,6 +14,7 @@ import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.IdInVerifiedIdRequirementDoesNotMatchRequestException
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 
 /**
  * Wrapper class to wrap the send presentation response to VC SDK.
@@ -36,8 +37,8 @@ object OpenIdResponder {
                 // Each requirement maps to at most one response
                 val unmatchedPresentationResponses = mutableListOf<PresentationResponse>()
                 unmatchedPresentationResponses.addAll(presentationResponses)
-                groupRequirement.requirements.map {
-                    requirement ->
+                groupRequirement.requirements.mapIndexed {
+                    index, requirement ->
                     // find/remove the first matching presentation
                     val matchingPresentationResponse = unmatchedPresentationResponses.firstOrNull {
                         presentationResponse ->
@@ -46,6 +47,9 @@ object OpenIdResponder {
                             true
                         } catch (exception: IdInVerifiedIdRequirementDoesNotMatchRequestException) {
                             // Expected to throw for requirements in other responses
+                            WalletLibraryLogger.i("requirement $index does not match " +
+                                    presentationResponse.requestedVcPresentationDefinitionId
+                            )
                             false
                         }
                     } ?: throw IdInVerifiedIdRequirementDoesNotMatchRequestException()
