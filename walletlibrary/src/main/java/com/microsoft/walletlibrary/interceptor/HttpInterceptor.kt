@@ -4,7 +4,7 @@ package com.microsoft.walletlibrary.interceptor
  * Allows for hooking into http request events.
  * Inherit from this class and override functions to add hooks
  */
-class HttpInterceptor {
+open class HttpInterceptor {
 
     /**
      * Runs before an http request is made
