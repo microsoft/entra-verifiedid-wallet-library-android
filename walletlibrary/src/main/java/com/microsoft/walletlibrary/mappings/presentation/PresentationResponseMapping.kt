@@ -62,11 +62,6 @@ private fun PresentationResponse.addGroupRequirement(groupRequirement: GroupRequ
     groupRequirement.validate().getOrThrow()
     val requirements = groupRequirement.requirements
     for (requirement in requirements) {
-        try {
-            addRequirements(requirement)
-        } catch (exception: IdInVerifiedIdRequirementDoesNotMatchRequestException) {
-            // This will be thrown if a verified ID couldn't be matched which may happen
-            // with multiple VPs
-        }
+        addRequirements(requirement)
     }
 }

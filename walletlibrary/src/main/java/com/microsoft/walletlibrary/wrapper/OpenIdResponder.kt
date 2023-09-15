@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationReques
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.mappings.presentation.addRequirements
+import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.IdInVerifiedIdRequirementDoesNotMatchRequestException
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
@@ -25,17 +26,32 @@ object OpenIdResponder {
         requirement: Requirement
     ) {
         val presentationResponses = presentationRequest.getPresentationDefinitions().map { PresentationResponse(presentationRequest, it.id) }
-        var presentationMatched = false
-        for (presentationResponse in presentationResponses) {
-            try {
-                presentationResponse.addRequirements(requirement)
-                presentationMatched = true
-            } catch (exception: IdInVerifiedIdRequirementDoesNotMatchRequestException) {
-                // This will be thrown if a verified ID couldn't be matched
+        if (presentationResponses.size == 1) {
+            presentationResponses.first().addRequirements(requirement)
+        } else {
+            // due to multi VP format. The outer most requirement may be grouping all requirements
+            (requirement as? GroupRequirement)?.let {
+                    groupRequirement ->
+                groupRequirement.validate().getOrThrow()
+                // Each requirement maps to at most one response
+                val unmatchedPresentationResponses = mutableListOf<PresentationResponse>()
+                unmatchedPresentationResponses.addAll(presentationResponses)
+                groupRequirement.requirements.map {
+                    requirement ->
+                    // find/remove the first matching presentation
+                    val matchingPresentationResponse = unmatchedPresentationResponses.firstOrNull {
+                        presentationResponse ->
+                        try {
+                            presentationResponse.addRequirements(requirement)
+                            true
+                        } catch (exception: IdInVerifiedIdRequirementDoesNotMatchRequestException) {
+                            // Expected to throw for requirements in other responses
+                            false
+                        }
+                    } ?: throw IdInVerifiedIdRequirementDoesNotMatchRequestException()
+                    unmatchedPresentationResponses.remove(matchingPresentationResponse)
+                }
             }
-        }
-        if (!presentationMatched) {
-            throw IdInVerifiedIdRequirementDoesNotMatchRequestException("Id in VerifiedId Requirement does not match any id in request.")
         }
         val presentationResponseResult =
             VerifiableCredentialSdk.presentationService.sendResponse(presentationRequest, presentationResponses)
