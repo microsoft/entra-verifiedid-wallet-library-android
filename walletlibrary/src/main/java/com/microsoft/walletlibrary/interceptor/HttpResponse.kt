@@ -2,8 +2,12 @@ package com.microsoft.walletlibrary.interceptor
 
 data class HttpResponse (
     /**
+     * original http request
+     */
+    val request: HttpRequest,
+
+    /**
      * Status Code
-     * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
      */
     val statusCode: Int,
 

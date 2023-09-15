@@ -48,6 +48,7 @@ class ExternalInterceptor constructor(private val httpInterceptors: List<HttpInt
         }
 
         val externalResponse = HttpResponse(
+            request = externalRequest,
             statusCode = response.code,
             statusMessage = response.message,
             headers = convertHeaders(response.headers).toImmutableMap()
