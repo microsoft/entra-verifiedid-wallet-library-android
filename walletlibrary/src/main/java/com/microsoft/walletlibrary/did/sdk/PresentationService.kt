@@ -94,6 +94,7 @@ internal class PresentationService @Inject constructor(
     /**
      * Send a Presentation Response.
      *
+     * @param presentationRequest request being responded to
      * @param response PresentationResponse to be formed, signed, and sent.
      */
     suspend fun sendResponse(

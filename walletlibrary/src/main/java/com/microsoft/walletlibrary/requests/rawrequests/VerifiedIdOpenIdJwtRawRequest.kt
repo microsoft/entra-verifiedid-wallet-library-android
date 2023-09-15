@@ -21,7 +21,7 @@ internal class VerifiedIdOpenIdJwtRawRequest(
     override val rawRequest: PresentationRequest,
     override val requestType: RequestType = RequestType.PRESENTATION
 ): OpenIdRawRequest {
-    override fun mapToPresentationRequestContent(): PresentationRequestContent {
+    override fun mapToPresentationRequestContent() : PresentationRequestContent {
         if (rawRequest.content.state.isNullOrEmpty())
             throw MissingRequestStateException("Request State is missing in presentation request")
         if (rawRequest.content.redirectUrl.isEmpty())

@@ -59,7 +59,7 @@ internal class PresentationResponseFormatter @Inject constructor(
         }.map {
             VpTokenInResponse(it)
         }
-        val vpClaims =  PresentationResponseClaims(vpTokens)
+        val vpClaims = PresentationResponseClaims(vpTokens)
 
         val oidcResponseClaims = vpClaims.apply {
             subject = responder.id
@@ -111,7 +111,7 @@ internal class PresentationResponseFormatter @Inject constructor(
         responder: Identifier,
         nonce: String
     ): List<String> {
-        return presentationResponses.map{ response ->
+        return presentationResponses.map { response ->
             verifiablePresentationFormatter.createPresentation(
                 response.requestedVcPresentationSubmissionMap.values.toList<VerifiableCredential>(),
                 DEFAULT_VP_EXPIRATION_IN_SECONDS,

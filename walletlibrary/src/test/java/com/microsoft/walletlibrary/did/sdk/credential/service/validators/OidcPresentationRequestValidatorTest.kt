@@ -130,7 +130,7 @@ class OidcPresentationRequestValidatorTest {
         // Arrange
         setUpExpiration(86400)
         every { mockedPresentationRequest.getPresentationDefinitions() } returns
-                listOf( mockk {
+                listOf(mockk {
                     every { credentialPresentationInputDescriptors } returns listOf(mockk())
                 })
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
@@ -151,7 +151,7 @@ class OidcPresentationRequestValidatorTest {
         // Arrange
         setUpExpiration(86400)
         every { mockedPresentationRequest.getPresentationDefinitions() } returns
-                listOf( mockk {
+                listOf(mockk {
                     every { credentialPresentationInputDescriptors } returns listOf(mockk())
                 })
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
@@ -172,7 +172,7 @@ class OidcPresentationRequestValidatorTest {
         // Arrange
         setUpExpiration(86400)
         every { mockedPresentationRequest.getPresentationDefinitions() } returns
-                listOf( mockk {
+                listOf(mockk {
                     every { credentialPresentationInputDescriptors } returns listOf(mockk())
                 })
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
@@ -193,7 +193,7 @@ class OidcPresentationRequestValidatorTest {
         // Arrange
         setUpExpiration(86400)
         every { mockedPresentationRequest.getPresentationDefinitions() } returns
-            listOf( mockk {
+            listOf(mockk {
                 every { credentialPresentationInputDescriptors } returns emptyList()
             })
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
