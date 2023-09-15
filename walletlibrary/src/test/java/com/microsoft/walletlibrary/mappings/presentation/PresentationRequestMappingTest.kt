@@ -34,7 +34,7 @@ class PresentationRequestMappingTest {
     private fun setupInput(inputDescriptors: List<CredentialPresentationInputDescriptor>) {
         presentationRequest = mockk()
         every { presentationRequest.content } returns presentationRequestContent
-        every { presentationRequest.getPresentationDefinition() } returns presentationDefinition
+        every { presentationRequest.getPresentationDefinitions() } returns listOf(presentationDefinition)
         every { presentationRequest.entityName } returns expectedEntityName
         every { presentationRequest.linkedDomainResult } returns LinkedDomainVerified(
             expectedLinkedDomainSource
@@ -49,7 +49,7 @@ class PresentationRequestMappingTest {
     }
 
     private fun setupInputDescriptors(inputDescriptors: List<CredentialPresentationInputDescriptor>) {
-        every { presentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns inputDescriptors
+        every { presentationRequest.getPresentationDefinitions().first().credentialPresentationInputDescriptors } returns inputDescriptors
         for (inputDescriptor in inputDescriptors) {
             every { inputDescriptor.schemas } returns listOf(schema)
             every { inputDescriptor.id } returns expectedInputDescriptorId
