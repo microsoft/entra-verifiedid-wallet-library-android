@@ -31,22 +31,22 @@ internal class VerifiedIdOpenIdJwtRawRequest(
         val requirement = if (requirementsList.size == 1) {
             requirementsList.first()
         } else {
-            var groupRequirement = true
-            var groupOperator = GroupRequirementOperator.ALL
+            var groupRequirementRequired = true
+            var groupRequirementOperator = GroupRequirementOperator.ALL
             val requirements: List<Requirement> = requirementsList.map {
                 /// primary verifiable presentation
                 if (it is GroupRequirement) {
-                    groupRequirement = it.required
-                    groupOperator = it.requirementOperator
+                    groupRequirementRequired = it.required
+                    groupRequirementOperator = it.requirementOperator
                     return@map it.requirements
                 }
                 return@map listOf(it)
             }.flatten()
 
             GroupRequirement(
-                groupRequirement,
+                groupRequirementRequired,
                 requirements.toMutableList(),
-                groupOperator
+                groupRequirementOperator
             )
         }
         return PresentationRequestContent(
