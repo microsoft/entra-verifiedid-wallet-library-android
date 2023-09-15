@@ -10,7 +10,7 @@ open class HttpInterceptor {
      * Runs before an http request is made
      * @Param request the http request about to be made
      */
-    fun beforeRequest(request: HttpRequest) {
+    open fun beforeRequest(request: HttpRequest) {
         // no-op
     }
 
@@ -18,7 +18,7 @@ open class HttpInterceptor {
      * Runs after an http request is made
      * @Param response the http request about to be made
      */
-    fun onResponse(response: HttpResponse) {
+    open fun onResponse(response: HttpResponse) {
         // no-op
     }
 }
