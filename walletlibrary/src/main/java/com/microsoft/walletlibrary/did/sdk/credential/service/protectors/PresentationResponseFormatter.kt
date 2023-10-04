@@ -5,8 +5,9 @@
 
 package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
-import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.VpTokenInResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
@@ -26,41 +27,67 @@ internal class PresentationResponseFormatter @Inject constructor(
     private val signer: TokenSigner
     ) {
     fun formatResponse(
-        requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf(),
+        request: PresentationRequest,
         presentationResponse: PresentationResponse,
         responder: Identifier,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Pair<String, String> {
-        val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
-        val credentialPresentationSubmission = createAttestationsAndPresentationSubmission(presentationResponse)
+        val (id_token, vp_tokens) = this.formatResponses(
+            request,
+            listOf(presentationResponse),
+            responder,
+            expiryInSeconds
+        )
+        return Pair(id_token, vp_tokens.first())
+    }
 
-        val oidcResponseClaims = PresentationResponseClaims(VpTokenInResponse(credentialPresentationSubmission)).apply {
+    fun formatResponses(
+        request: PresentationRequest,
+        presentationResponses: List<PresentationResponse>,
+        responder: Identifier,
+        expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
+    ): Pair<String, List<String>> {
+        val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
+        val multipleVPs = presentationResponses.size > 1
+        val vpTokens = presentationResponses.mapIndexed {
+            index, it ->
+            if (multipleVPs) {
+                createAttestationsAndPresentationSubmission(it, index)
+            } else {
+                createAttestationsAndPresentationSubmission(it)
+            }
+        }.map {
+            VpTokenInResponse(it)
+        }
+        val vpClaims = PresentationResponseClaims(vpTokens)
+
+        val oidcResponseClaims = vpClaims.apply {
             subject = responder.id
-            audience = presentationResponse.audience
-            nonce = presentationResponse.request.content.nonce
+            audience = request.content.clientId
+            nonce = request.content.nonce
             responseCreationTime = issuedTime
             responseExpirationTime = expiryTime
         }
 
         val attestationResponse = createPresentations(
-            requestedVcPresentationSubmissionMap,
-            presentationResponse.request.content.clientId,
+            presentationResponses,
+            request.content.clientId,
             responder,
-            presentationResponse.request.content.nonce
+            request.content.nonce
         )
 
         val idToken = signContents(oidcResponseClaims, responder)
         return Pair(idToken, attestationResponse)
     }
 
-    private fun createAttestationsAndPresentationSubmission(presentationResponse: PresentationResponse): PresentationSubmission {
+    private fun createAttestationsAndPresentationSubmission(presentationResponse: PresentationResponse, index: Int? = null): PresentationSubmission {
         presentationResponse.requestedVcPresentationSubmissionMap.entries.indices
         val credentialPresentationSubmissionDescriptors =
             presentationResponse.requestedVcPresentationSubmissionMap.map { pair ->
                 PresentationSubmissionDescriptor(
                     pair.key.id,
                     Constants.VERIFIABLE_PRESENTATION_FORMAT,
-                    "$",
+                    if (index != null) { "$[$index]" } else { "$" },
                     PresentationSubmissionDescriptor(
                         pair.key.id,
                         Constants.VERIFIABLE_CREDENTIAL_FORMAT,
@@ -79,18 +106,20 @@ internal class PresentationResponseFormatter @Inject constructor(
     }
 
     private fun createPresentations(
-        requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
+        presentationResponses: List<PresentationResponse>,
         audience: String,
         responder: Identifier,
         nonce: String
-    ): String {
-        return verifiablePresentationFormatter.createPresentation(
-            requestedVcPresentationSubmissionMap.values.toList(),
-            DEFAULT_VP_EXPIRATION_IN_SECONDS,
-            audience,
-            responder,
-            nonce
-        )
+    ): List<String> {
+        return presentationResponses.map { response ->
+            verifiablePresentationFormatter.createPresentation(
+                response.requestedVcPresentationSubmissionMap.values.toList<VerifiableCredential>(),
+                DEFAULT_VP_EXPIRATION_IN_SECONDS,
+                audience,
+                responder,
+                nonce
+            )
+        }
     }
 
     private fun signContents(contents: PresentationResponseClaims, responder: Identifier): String {

@@ -63,7 +63,7 @@ internal class OidcPresentationRequestValidator @Inject constructor(private val 
     }
 
     private fun checkForInputInPresentationRequest(request: PresentationRequest) {
-        if (request.getPresentationDefinition().credentialPresentationInputDescriptors.isNullOrEmpty())
+        if (request.getPresentationDefinitions().map { it.credentialPresentationInputDescriptors.isNullOrEmpty() }.reduce { acc, it -> acc || it })
             throw MissingInputInRequestException("Input Descriptor is missing in presentation request.")
     }
 

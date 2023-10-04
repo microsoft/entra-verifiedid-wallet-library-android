@@ -21,6 +21,7 @@ import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
+import kotlin.test.assertTrue
 
 class IssuanceResponseMappingTest {
     private val mockIssuanceRequest: IssuanceRequest = mockk()
@@ -225,8 +226,7 @@ class IssuanceResponseMappingTest {
         val expectedCredentialType = "TestVc"
         val verifiedIdRequirement = VerifiedIdRequirement(
             "TestId",
-            listOf(expectedCredentialType),
-            VcTypeConstraint(expectedCredentialType)
+            listOf(expectedCredentialType)
         )
         val mockVerifiableCredential: VerifiableCredential = mockk()
         every { mockVerifiableCredential.raw } returns mockk()
@@ -240,6 +240,8 @@ class IssuanceResponseMappingTest {
         issuanceResponse.addRequirements(verifiedIdRequirement)
 
         // Assert
+        assertTrue(verifiedIdRequirement.constraint is VcTypeConstraint)
+        assertThat((verifiedIdRequirement.constraint as VcTypeConstraint).vcType).isEqualTo(expectedCredentialType)
         assertThat(issuanceResponse.requestedVcMap.size).isEqualTo(1)
     }
 
@@ -249,12 +251,13 @@ class IssuanceResponseMappingTest {
         val expectedCredentialType = "TestVc"
         val verifiedIdRequirement = VerifiedIdRequirement(
             "TestId",
-            listOf(expectedCredentialType),
-            VcTypeConstraint(expectedCredentialType)
+            listOf(expectedCredentialType)
         )
 
         // Act and Assert
-        assertThatThrownBy{
+        assertTrue(verifiedIdRequirement.constraint is VcTypeConstraint)
+        assertThat((verifiedIdRequirement.constraint as VcTypeConstraint).vcType).isEqualTo(expectedCredentialType)
+        assertThatThrownBy {
             issuanceResponse.addRequirements(verifiedIdRequirement)
         }.isInstanceOf(RequirementNotMetException::class.java)
     }

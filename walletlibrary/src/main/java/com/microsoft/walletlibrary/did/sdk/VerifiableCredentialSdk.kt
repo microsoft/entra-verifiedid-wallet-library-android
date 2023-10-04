@@ -48,7 +48,6 @@ internal object VerifiableCredentialSdk {
     @JvmStatic
     internal lateinit var identifierService: IdentifierService
 
-
     /**
      * Initializes VerifiableCredentialSdk
      *
@@ -58,6 +57,7 @@ internal object VerifiableCredentialSdk {
      * @param polymorphicJsonSerializers serializer module
      * @param registrationUrl url used to register DID
      * @param resolverUrl url used to resolve DID
+     * @param walletLibraryVersionInfo version of the library in use
      */
     // TODO(Change how version numbers are passed for headers when HTTP client layer is refactored)
     @JvmOverloads

@@ -5,6 +5,7 @@ package com.microsoft.walletlibrary.did.sdk
 import android.net.Uri
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
@@ -64,7 +65,7 @@ class PresentationServiceTest {
             ),
             recordPrivateCalls = true
         )
-    private val formattedResponse = Pair("FORMATTED_RESPONSE", "FORMATTED_RESPONSE")
+    private val formattedResponses = Pair("FORMATTED_RESPONSE", listOf("FORMATTED_RESPONSE"))
     private val expectedPresentationRequestString =
         """{
   "jti": "3941ff88-69d5-465b-be13-2fe9805efe21",
@@ -178,6 +179,7 @@ class PresentationServiceTest {
     @Ignore("Fix when request is generated with newer version")
     @Test
     fun `test to get Presentation Request successfully from valid request uri param`() {
+        // Arrange
         val mockUri = mockk<Uri>()
         mockPresentationRequestFromNetwork()
         mockIdentifierAndLinkedDomains()
@@ -188,6 +190,7 @@ class PresentationServiceTest {
         coJustRun { presentationRequestValidator.validate(any()) }
 
         runBlocking {
+            // act
             val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
             val actualPresentationRequestContent = (actualRequest as Result.Success).payload.content
@@ -195,6 +198,7 @@ class PresentationServiceTest {
                 PresentationRequestContent.serializer(),
                 actualPresentationRequestContent
             )
+            // assert
             assertThat(actualPresentationRequestString).isEqualTo(expectedPresentationRequestString)
             assertThat(actualRequest.payload.linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
             assertThat((actualRequest.payload.linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo(
@@ -208,6 +212,7 @@ class PresentationServiceTest {
     @Ignore("Fix when request is generated with newer version")
     @Test
     fun `test to get Presentation Request successfully from valid request param`() {
+        // arrange
         val mockUri = mockk<Uri>()
         mockPresentationRequestFromNetwork()
         mockIdentifierAndLinkedDomains()
@@ -221,6 +226,7 @@ class PresentationServiceTest {
         coJustRun { presentationRequestValidator.validate(any()) }
 
         runBlocking {
+            // act
             val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
             val actualPresentationRequestContent = (actualRequest as Result.Success).payload.content
@@ -228,6 +234,7 @@ class PresentationServiceTest {
                 PresentationRequestContent.serializer(),
                 actualPresentationRequestContent
             )
+            // assert
             assertThat(actualPresentationRequestString).isEqualTo(expectedPresentationRequestString)
             assertThat(actualRequest.payload.linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
             assertThat((actualRequest.payload.linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo(
@@ -240,6 +247,7 @@ class PresentationServiceTest {
 
     @Test
     fun `test to get Presentation Request failed from request param with invalid signature`() {
+        // arrange
         val mockUri = mockk<Uri>()
         mockPresentationRequestWithInvalidSignatureFromNetwork()
         mockIdentifierAndLinkedDomains()
@@ -250,7 +258,9 @@ class PresentationServiceTest {
         coJustRun { presentationRequestValidator.validate(any()) }
 
         runBlocking {
+            // act
             val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            // assert
             assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
             assertThat((actualRequest as Result.Failure).payload).isInstanceOf(
                 InvalidSignatureException::class.java)
@@ -259,6 +269,7 @@ class PresentationServiceTest {
 
     @Test
     fun `test to get Presentation Request failed from invalid param`() {
+        // arrange
         val mockUri = mockk<Uri>()
         mockPresentationRequestFromNetwork()
         mockIdentifierAndLinkedDomains()
@@ -269,45 +280,56 @@ class PresentationServiceTest {
         coJustRun { presentationRequestValidator.validate(any()) }
 
         runBlocking {
+            // act
             val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            // assert
             assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
             assertThat((actualRequest as Result.Failure).payload).isInstanceOf(PresentationException::class.java)
         }
     }
 
     @Test
-    fun `test to send Presentation Response`() {
+    fun `test to send multiple VP Presentation Response`() {
+        // arrange
         val expectedPresentationRequestContent =
             defaultTestSerializer.decodeFromString(PresentationRequestContent.serializer(), expectedPresentationRequestString)
         val presentationRequest = PresentationRequest(expectedPresentationRequestContent, LinkedDomainMissing)
-        val presentationResponse = PresentationResponse(presentationRequest)
+        val presentationResponse = presentationRequest.getPresentationDefinitions().map {
+            PresentationResponse(presentationRequest, it.id)
+        }
+        val presentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf()
+        presentationResponse.forEach { response ->
+            presentationSubmissionMap += response.requestedVcPresentationSubmissionMap
+        }
         every {
-            presentationResponseFormatter.formatResponse(
-                presentationResponse.requestedVcPresentationSubmissionMap,
+            presentationResponseFormatter.formatResponses(
+                presentationRequest,
                 presentationResponse,
                 masterIdentifier,
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
-        } returns formattedResponse
+        } returns formattedResponses
         every {
             presentationService["formAndSendResponse"](
+                presentationRequest,
                 presentationResponse,
                 masterIdentifier,
-                presentationResponse.requestedVcPresentationSubmissionMap,
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
         } returns Result.Success(Unit)
 
         runBlocking {
-            val presentedResponse = presentationService.sendResponse(presentationResponse)
+            // act
+            val presentedResponse = presentationService.sendResponse(presentationRequest, presentationResponse)
+            // assert
             assertThat(presentedResponse).isInstanceOf(Result.Success::class.java)
         }
 
         verify(exactly = 1) {
             presentationService["formAndSendResponse"](
+                presentationRequest,
                 presentationResponse,
                 masterIdentifier,
-                presentationResponse.requestedVcPresentationSubmissionMap,
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
         }

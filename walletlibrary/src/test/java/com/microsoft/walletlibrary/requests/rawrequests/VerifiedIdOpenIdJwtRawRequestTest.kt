@@ -47,7 +47,7 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         isSchemaEmpty: Boolean
     ) {
         every { mockPresentationRequest.content } returns mockPresentationRequestContent
-        every { mockPresentationRequest.getPresentationDefinition() } returns mockPresentationDefinition
+        every { mockPresentationRequest.getPresentationDefinitions() } returns listOf(mockPresentationDefinition)
         every { mockPresentationRequest.entityName } returns expectedEntityName
         every { mockPresentationRequest.linkedDomainResult } returns LinkedDomainVerified(
             expectedLinkedDomainSource
@@ -69,7 +69,10 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         inputDescriptors: List<CredentialPresentationInputDescriptor>,
         isSchemaEmpty: Boolean
     ) {
-        every { mockPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns inputDescriptors
+        every { mockPresentationRequest.getPresentationDefinitions() } returns
+                listOf(mockk {
+                    every { credentialPresentationInputDescriptors } returns inputDescriptors
+                })
         for (inputDescriptor in inputDescriptors) {
             every { inputDescriptor.id } returns expectedInputDescriptorId
             every { inputDescriptor.purpose } returns expectedPurpose
