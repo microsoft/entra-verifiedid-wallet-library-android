@@ -6,7 +6,7 @@
 package com.microsoft.walletlibrary.verifiedid
 
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
-import java.util.*
+import java.util.Date
 
 /**
  * Data model for VerifiedId

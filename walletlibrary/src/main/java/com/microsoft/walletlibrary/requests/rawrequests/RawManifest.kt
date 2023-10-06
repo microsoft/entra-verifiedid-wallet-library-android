@@ -18,7 +18,7 @@ import com.microsoft.walletlibrary.requests.IssuanceRequestContent
 internal class RawManifest(
     override val rawRequest: IssuanceRequest,
     override val requestType: RequestType = RequestType.ISSUANCE
-): RawRequest {
+) : RawRequest {
     internal fun mapToIssuanceRequestContent(): IssuanceRequestContent {
         return IssuanceRequestContent(
             rawRequest.getRequesterStyle(),

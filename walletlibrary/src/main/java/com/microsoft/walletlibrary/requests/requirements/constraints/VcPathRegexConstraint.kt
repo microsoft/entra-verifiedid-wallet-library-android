@@ -12,7 +12,8 @@ import kotlinx.serialization.json.Json
 import java.util.regex.Pattern
 
 internal class VcPathRegexConstraint(
-    internal val path: List<String>, internal val pattern: String
+    internal val path: List<String>,
+    internal val pattern: String
 ) : VerifiedIdConstraint {
     override fun doesMatch(verifiedId: VerifiedId): Boolean {
         if (verifiedId !is VerifiableCredential) return false
@@ -22,7 +23,9 @@ internal class VcPathRegexConstraint(
     }
 
     private fun matchAnyPathInFields(
-        pattern: String, path: String, verifiableCredentialJsonString: String
+        pattern: String,
+        path: String,
+        verifiableCredentialJsonString: String
     ): Boolean {
         if (pattern.isEmpty()) SdkLog.d("Empty pattern in filter.")
         val configuration =
