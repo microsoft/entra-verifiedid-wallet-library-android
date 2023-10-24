@@ -164,7 +164,7 @@ class FetchPresentationRequestNetworkOperationTest {
             val unwrapped = actual as Result.Success<PresentationRequestContent>
             assertThat(unwrapped.payload.nonce).isEqualTo(expectedNonce)
             assertThat(unwrapped.payload.clientId).isEqualTo(expectedClientId)
-            assertThat(unwrapped.payload.claims.vpTokensInRequest.size).isEqualTo(2)
+            assertThat(unwrapped.payload.claims.vpTokenInRequest.size).isEqualTo(2)
         }
     }
 }

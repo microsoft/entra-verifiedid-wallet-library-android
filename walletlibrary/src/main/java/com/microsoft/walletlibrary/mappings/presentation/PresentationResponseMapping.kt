@@ -32,22 +32,11 @@ private fun PresentationResponse.addVerifiedIdRequirement(verifiedIdRequirement:
             VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value
         )
     val matchingInputDescriptors =
-        request.getPresentationDefinitions().filter {
-            presentationDefinition ->
-            // Limit to only this response' presentationDefinition
-            presentationDefinition.id == this.requestedVcPresentationDefinitionId
-        }.map {
-            presentationDefinition ->
-            // Filter to only matching inputDescriptor(s)
-            presentationDefinition.credentialPresentationInputDescriptors
-                .filter {
-                    inputDescriptor ->
-                    inputDescriptor.id == verifiedIdRequirement.id
-                }
-        }.reduce {
-            allInputDescriptors, inputDescriptor ->
-            // Flatten the inputDescriptors into a single array
-            allInputDescriptors + inputDescriptor
+         request.getPresentationDefinitions().credentialPresentationInputDescriptors
+            .filter {
+                inputDescriptor ->
+                inputDescriptor.id == verifiedIdRequirement.id
+            }
         }
     if (matchingInputDescriptors.isEmpty())
         throw IdInVerifiedIdRequirementDoesNotMatchRequestException("Id in VerifiedId Requirement does not match the id in request.")

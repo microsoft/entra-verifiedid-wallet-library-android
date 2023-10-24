@@ -160,7 +160,7 @@ class PresentationResponseFormatterTest {
                 scope = "openid",
                 nonce = expectedNonce,
                 claims = Claims(
-                    vpTokensInRequest = listOf(
+                    vpTokenInRequest = listOf(
                         VpTokenInRequest(
                             PresentationDefinition(
                                 id = firstInputVPId,
@@ -241,7 +241,7 @@ class PresentationResponseFormatterTest {
                 scope = "openid",
                 nonce = expectedNonce,
                 claims = Claims(
-                    vpTokensInRequest = listOf(
+                    vpTokenInRequest = listOf(
                         VpTokenInRequest(
                             PresentationDefinition(
                                 id = firstInputVPId,
@@ -354,7 +354,7 @@ class PresentationResponseFormatterTest {
                 scope = "openid",
                 nonce = expectedNonce,
                 claims = Claims(
-                    vpTokensInRequest = listOf(
+                    vpTokenInRequest = listOf(
                         VpTokenInRequest(
                             PresentationDefinition(
                                 id = firstInputVPId,

@@ -14,26 +14,6 @@ import kotlinx.serialization.json.JsonTransformingSerializer
 
 @Serializable
 internal data class Claims(
-    @Serializable(with = VPTokenRequestSerializer::class)
     @SerialName("vp_token")
-    val vpTokensInRequest: List<VpTokenInRequest>
+    val vpTokenInRequest: VpTokenInRequest
 )
-
-internal class VPTokenRequestSerializer : JsonTransformingSerializer<List<VpTokenInRequest>>(ListSerializer(VpTokenInRequest.serializer())) {
-    override fun transformDeserialize(element: JsonElement): JsonElement {
-        return if (element !is JsonArray) {
-            JsonArray(listOf(element))
-        } else {
-            element
-        }
-    }
-
-    override fun transformSerialize(element: JsonElement): JsonElement {
-        val arrayElement = element as JsonArray
-        return if (arrayElement.count() == 1) {
-            arrayElement.first()
-        } else {
-            arrayElement
-        }
-    }
-}
