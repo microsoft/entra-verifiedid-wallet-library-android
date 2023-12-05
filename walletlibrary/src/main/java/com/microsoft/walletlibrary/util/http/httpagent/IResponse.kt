@@ -1,4 +1,4 @@
-package com.microsoft.walletlibrary.util.httpagent
+package com.microsoft.walletlibrary.util.http.httpagent
 
 import java.nio.ByteBuffer
 
