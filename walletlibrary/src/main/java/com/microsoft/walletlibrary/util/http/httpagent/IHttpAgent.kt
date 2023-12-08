@@ -5,10 +5,9 @@ import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.util.http.URLFormEncoding
 import javax.inject.Inject
 
-abstract class IHttpAgent constructor(
+public abstract class IHttpAgent constructor(
     private val userAgentInfo: String,
-    private val walletLibraryVersion: String,
-    private val correlationVectorService: CorrelationVectorService) {
+    private val walletLibraryVersionInfo: String) {
 
     class ClientError(val response: IResponse): Error() {}
     class ServerError(val response: IResponse): Error() {}
@@ -27,15 +26,11 @@ abstract class IHttpAgent constructor(
         a.toMutableMap().putAll(b)
         return a
     }
-    fun defaultHeaders(contentType: ContentType? = null, body: ByteArray? = null): Map<String, String> {
+    open fun defaultHeaders(contentType: ContentType? = null, body: ByteArray? = null): MutableMap<String, String> {
         val headers = mutableMapOf(
             Constants.USER_AGENT_HEADER to userAgentInfo,
-            Constants.WALLET_LIBRARY_VERSION_HEADER to walletLibraryVersion
+            Constants.WALLET_LIBRARY_VERSION_HEADER to walletLibraryVersionInfo
         )
-        correlationVectorService.incrementAndSave().let {
-                correlationVector ->
-            headers[Constants.CORRELATION_VECTOR_HEADER] =  correlationVector
-        }
         contentType?.let {
             headers[Constants.CONTENT_TYPE] = when (contentType) {
                 ContentType.Json -> { "application/json"}

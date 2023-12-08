@@ -6,10 +6,13 @@
 package com.microsoft.walletlibrary.did.sdk
 
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
 import com.microsoft.walletlibrary.did.sdk.di.DaggerSdkComponent
 import com.microsoft.walletlibrary.did.sdk.util.DifWordList
 import com.microsoft.walletlibrary.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
+import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 
@@ -71,10 +74,12 @@ internal object VerifiableCredentialSdk {
         resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers",
         walletLibraryVersionInfo: String = ""
     ) {
+        correlationVectorService = CorrelationVectorService( PreferenceManager.getDefaultSharedPreferences(context) )
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
             .userAgentInfo(userAgentInfo)
             .walletLibraryVersionInfo(walletLibraryVersionInfo)
+            .httpAgent(OkHttpAgent(userAgentInfo, walletLibraryVersionInfo, correlationVectorService))
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
             .polymorphicJsonSerializer(polymorphicJsonSerializers)

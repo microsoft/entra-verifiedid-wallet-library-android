@@ -1,6 +1,8 @@
 package com.microsoft.walletlibrary.util.http.httpagent
 
 import com.microsoft.walletlibrary.did.sdk.CorrelationVectorService
+import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk.correlationVectorService
+import com.microsoft.walletlibrary.did.sdk.util.Constants
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -9,13 +11,12 @@ import okhttp3.Response
 import okhttp3.ResponseBody
 import javax.inject.Inject
 
-class OkHttpAgent @Inject constructor(userAgentInfo: String,
-                  walletLibraryVersion: String,
-                  correlationVectorService: CorrelationVectorService
+internal class OkHttpAgent constructor(userAgentInfo: String,
+                                               walletLibraryVersionInfo: String,
+                  private val correlationVectorService: CorrelationVectorService
 ) : IHttpAgent(
     userAgentInfo,
-    walletLibraryVersion,
-    correlationVectorService
+    walletLibraryVersionInfo
 ) {
     val client: OkHttpClient = OkHttpClient()
 
@@ -44,6 +45,14 @@ class OkHttpAgent @Inject constructor(userAgentInfo: String,
         return toResponse(client.newCall(request).execute())
     }
 
+    override fun defaultHeaders(contentType: ContentType?, body: ByteArray?): MutableMap<String, String> {
+        val headers = super.defaultHeaders(contentType, body)
+        correlationVectorService.incrementAndSave().let {
+                correlationVector ->
+            headers[Constants.CORRELATION_VECTOR_HEADER] =  correlationVector
+        }
+        return headers
+    }
     private fun mapToHeaders(headersMap: Map<String, String>) : Headers {
         val builder = Headers.Builder()
         headersMap.forEach { (headerName, headerValue) ->
