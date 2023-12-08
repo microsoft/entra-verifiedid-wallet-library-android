@@ -8,6 +8,5 @@ import kotlinx.serialization.Serializable
 internal data class PinDetails(
     val length: Int,
     val type: String,
-    val salt: String? = null,
-    val testField: String
+    val salt: String? = null
 )
