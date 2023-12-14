@@ -3,10 +3,11 @@ package com.microsoft.walletlibrary.did.sdk.datasource.network.apis
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
-internal class HttpAgentApiProvider @Inject constructor(agent: IHttpAgent, json: Json) {
+internal class HttpAgentApiProvider @Inject constructor(@Named("agent") agent: IHttpAgent, json: Json) {
     // maybe refactor these into different interface apis?
     val presentationApis = HttpAgentPresentationApis(agent)
 

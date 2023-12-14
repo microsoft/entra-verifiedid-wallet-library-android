@@ -7,52 +7,49 @@ package com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperati
 
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
-import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.PostNetworkOperation
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ForbiddenException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidPinException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.IssuanceException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
-import retrofit2.Response
 
 internal class SendVerifiableCredentialIssuanceRequestNetworkOperation(
     url: String,
     serializedResponse: String,
-    apiProvider: ApiProvider,
+    private val apiProvider: HttpAgentApiProvider,
     private val jwtValidator: JwtValidator,
     private val serializer: Json
-) : PostNetworkOperation<IssuanceServiceResponse, VerifiableCredential>() {
-    override val call: suspend () -> Response<IssuanceServiceResponse> = { apiProvider.issuanceApis.sendResponse(url, serializedResponse) }
-
-    override suspend fun onSuccess(response: Response<IssuanceServiceResponse>): Result<VerifiableCredential> {
-        val jwsTokenString = response.body()?.vc ?: throw IssuanceException("No Verifiable Credential in Body.")
+) : PostNetworkOperation<VerifiableCredential>() {
+    override val call: suspend () -> Result<IResponse> = { apiProvider.issuanceApis.sendResponse(url, serializedResponse) }
+    override suspend fun toResult(response: IResponse): Result<VerifiableCredential> {
+        val issuanceResponse = apiProvider.issuanceApis.parseIssuance(response)
+        val jwsTokenString = issuanceResponse.vc
         return verifyAndUnWrapIssuanceResponse(jwsTokenString)
     }
 
-    override fun onFailure(response: Response<IssuanceServiceResponse>): Result<Nothing> {
-        val result = super.onFailure(response)
-        when (val exception = (result as Result.Failure).payload) {
-            is ForbiddenException -> {
-                val innerErrorCode = exception.innerErrorCodes?.substringBefore(",")
-                if (innerErrorCode == Constants.INVALID_PIN) {
-                    val invalidPinException = InvalidPinException(exception.message ?: "", false)
-                    invalidPinException.apply {
-                        correlationVector = exception.correlationVector
-                        errorBody = exception.errorBody
-                        errorCode = exception.errorCode
-                        innerErrorCodes = exception.innerErrorCodes
+    override fun onFailure(exception: Throwable): Result<VerifiableCredential> {
+        return super.onFailure(exception).onFailure {
+            when (it) {
+                is ForbiddenException -> {
+                    val innerErrorCode = it.innerErrorCodes?.substringBefore(",")
+                    if (innerErrorCode == Constants.INVALID_PIN) {
+                        val invalidPinException = InvalidPinException(exception.message ?: "", false)
+                        invalidPinException.apply {
+                            correlationVector = it.correlationVector
+                            errorBody = it.errorBody
+                            errorCode = it.errorCode
+                            innerErrorCodes = it.innerErrorCodes
+                        }
+                        return Result.failure(invalidPinException)
                     }
-                    return Result.Failure(invalidPinException)
                 }
             }
         }
-        return result
     }
 
     private suspend fun verifyAndUnWrapIssuanceResponse(jwsTokenString: String): Result<VerifiableCredential> {
@@ -60,6 +57,6 @@ internal class SendVerifiableCredentialIssuanceRequestNetworkOperation(
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not Valid on Issuance Response.")
         val verifiableCredentialContent = serializer.decodeFromString(VerifiableCredentialContent.serializer(), jwsToken.content())
-        return Result.Success(VerifiableCredential(verifiableCredentialContent.jti, jwsTokenString, verifiableCredentialContent))
+        return Result.success(VerifiableCredential(verifiableCredentialContent.jti, jwsTokenString, verifiableCredentialContent))
     }
 }

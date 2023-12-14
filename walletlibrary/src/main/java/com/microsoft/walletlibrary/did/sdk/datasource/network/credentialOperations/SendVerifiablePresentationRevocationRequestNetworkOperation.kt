@@ -6,31 +6,30 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations
 
 import com.microsoft.walletlibrary.did.sdk.credential.models.RevocationReceipt
-import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResponses.RevocationServiceResponse
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.PostNetworkOperation
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.RevocationException
+import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
-import retrofit2.Response
 
 internal class SendVerifiablePresentationRevocationRequestNetworkOperation(
     url: String,
     serializedResponse: String,
-    apiProvider: ApiProvider,
+    private val apiProvider: HttpAgentApiProvider,
     private val serializer: Json
-) : PostNetworkOperation<RevocationServiceResponse, RevocationReceipt>() {
-    override val call: suspend () -> Response<RevocationServiceResponse> =
+) : PostNetworkOperation<RevocationReceipt>() {
+    override val call: suspend () -> Result<IResponse> =
         { apiProvider.revocationApis.sendResponse(url, serializedResponse) }
 
-    override suspend fun onSuccess(response: Response<RevocationServiceResponse>): Result<RevocationReceipt> {
-        val receipts = response.body()?.receipt?.entries
-        if (receipts == null || receipts.isEmpty())
-            throw RevocationException("No Receipt in revocation response body")
+    override suspend fun toResult(response: IResponse): Result<RevocationReceipt> {
+        val revokeResponse = apiProvider.revocationApis.toResponse(response)
+        val receipts = revokeResponse.receipt.entries
+        if (receipts.isEmpty())
+            return Result.failure(RevocationException("No Receipt in revocation response body"))
         val serializedReceipt = receipts.first().value
         val revocationReceipt = unwrapRevocationReceipt(serializedReceipt, serializer)
-        return Result.Success(revocationReceipt)
+        return Result.success(revocationReceipt)
     }
 
     fun unwrapRevocationReceipt(signedReceipt: String, serializer: Json): RevocationReceipt {

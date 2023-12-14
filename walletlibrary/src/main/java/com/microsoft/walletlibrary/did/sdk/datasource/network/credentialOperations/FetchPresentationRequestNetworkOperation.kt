@@ -9,45 +9,41 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.Presen
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.GetNetworkOperation
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.DidInHeaderAndPayloadNotMatching
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ExpiredTokenException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.NotFoundException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
-import retrofit2.Response
 
 //TODO("improve onSuccess method to create receipt when this is spec'd out")
 internal class FetchPresentationRequestNetworkOperation(
     private val url: String,
-    private val apiProvider: ApiProvider,
+    private val apiProvider: HttpAgentApiProvider,
     private val jwtValidator: JwtValidator,
     private val serializer: Json
-) : GetNetworkOperation<String, PresentationRequestContent>() {
-    override val call: suspend () -> Response<String> = { apiProvider.presentationApis.getRequest(url) }
+) : GetNetworkOperation<PresentationRequestContent>() {
+    override val call: suspend () -> Result<IResponse> = { apiProvider.presentationApis.getRequest(url) }
 
-    override suspend fun onSuccess(response: Response<String>): Result<PresentationRequestContent> {
-        val jwsTokenString = response.body() ?: throw PresentationException("No Presentation Request in Body.")
+    override suspend fun toResult(response: IResponse): Result<PresentationRequestContent> {
+        val jwsTokenString = response.body.decodeToString()
         return verifyAndUnwrapPresentationRequest(jwsTokenString)
     }
 
-    override fun onFailure(response: Response<String>): Result<Nothing> {
-        val result = super.onFailure(response)
-        when (val exception = (result as Result.Failure).payload) {
-            is NotFoundException -> {
+    override fun onFailure(exception: Throwable): Result<PresentationRequestContent> {
+        return super.onFailure(exception).onFailure {
+            if (it is NotFoundException) {
                 val expiredTokenException = ExpiredTokenException(exception.message ?: "", false)
                 expiredTokenException.apply {
-                    correlationVector = exception.correlationVector
-                    errorBody = exception.errorBody
-                    errorCode = exception.errorCode
-                    innerErrorCodes = exception.innerErrorCodes
+                    correlationVector = it.correlationVector
+                    errorBody = it.errorBody
+                    errorCode = it.errorCode
+                    innerErrorCodes = it.innerErrorCodes
                 }
-                return Result.Failure(expiredTokenException)
+                return Result.failure(expiredTokenException)
             }
         }
-        return result
     }
 
     private suspend fun verifyAndUnwrapPresentationRequest(jwsTokenString: String): Result<PresentationRequestContent> {
@@ -57,6 +53,6 @@ internal class FetchPresentationRequestNetworkOperation(
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
         if (!jwtValidator.validateDidInHeaderAndPayload(jwsToken, presentationRequestContent.clientId))
             throw DidInHeaderAndPayloadNotMatching("DID used to sign the presentation request doesn't match the DID in presentation request.")
-        return Result.Success(presentationRequestContent)
+        return Result.success(presentationRequestContent)
     }
 }

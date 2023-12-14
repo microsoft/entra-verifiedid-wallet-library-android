@@ -1,11 +1,9 @@
 package com.microsoft.walletlibrary.util.http.httpagent
 
-import com.microsoft.walletlibrary.did.sdk.CorrelationVectorService
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.util.http.URLFormEncoding
-import javax.inject.Inject
 
-public abstract class IHttpAgent constructor(
+abstract class IHttpAgent constructor(
     private val userAgentInfo: String,
     private val walletLibraryVersionInfo: String) {
 

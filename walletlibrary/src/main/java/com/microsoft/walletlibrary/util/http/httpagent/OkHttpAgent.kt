@@ -1,15 +1,19 @@
 package com.microsoft.walletlibrary.util.http.httpagent
 
 import com.microsoft.walletlibrary.did.sdk.CorrelationVectorService
-import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk.correlationVectorService
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okhttp3.ResponseBody
-import javax.inject.Inject
+import java.io.IOException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 internal class OkHttpAgent constructor(userAgentInfo: String,
                                                walletLibraryVersionInfo: String,
@@ -27,7 +31,7 @@ internal class OkHttpAgent constructor(userAgentInfo: String,
             .headers(mapToHeaders(sendMap))
             .build()
 
-        return toResponse(client.newCall(request).execute())
+        return call(request)
     }
 
     override suspend fun post(
@@ -42,7 +46,7 @@ internal class OkHttpAgent constructor(userAgentInfo: String,
             .post(payload.toRequestBody())
             .build()
 
-        return toResponse(client.newCall(request).execute())
+        return call(request)
     }
 
     override fun defaultHeaders(contentType: ContentType?, body: ByteArray?): MutableMap<String, String> {
@@ -52,6 +56,20 @@ internal class OkHttpAgent constructor(userAgentInfo: String,
             headers[Constants.CORRELATION_VECTOR_HEADER] =  correlationVector
         }
         return headers
+    }
+
+    private suspend fun call(request: Request): Result<IResponse> {
+        return suspendCoroutine<Result<IResponse>> {
+            client.newCall(request).enqueue(object: Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    it.resumeWithException(e)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    it.resume(toResponse(response))
+                }
+            })
+        }
     }
     private fun mapToHeaders(headersMap: Map<String, String>) : Headers {
         val builder = Headers.Builder()
@@ -73,7 +91,7 @@ internal class OkHttpAgent constructor(userAgentInfo: String,
         return body.bytes()
     }
 
-    private fun toResponse(response: Response) : Result<IResponse> {
+    private fun toResponse(response: Response): Result<IResponse> {
         val body = response.body?.let {
             bodyToBuffer(it)
         } ?: ByteArray(0)
@@ -84,18 +102,18 @@ internal class OkHttpAgent constructor(userAgentInfo: String,
             body = body
         )
 
-        return when (response.code) {
+        when (response.code) {
             in 200..299 -> {
-                Result.success(abstractResponse)
+                return Result.success(abstractResponse)
             }
             in 400..499 -> {
-                Result.failure(ClientError(abstractResponse))
+                return Result.failure(ClientError(abstractResponse))
             }
             in 500..599 -> {
-                Result.failure(ServerError(abstractResponse))
+                return Result.failure(ServerError(abstractResponse))
             }
             else -> {
-                Result.failure(UnknownError())
+                return Result.failure(UnknownError())
             }
         }
 
