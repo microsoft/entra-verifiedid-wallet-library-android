@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.nimbusds.jose.jwk.JWK
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,7 +48,7 @@ internal class JwtValidator @Inject constructor(
     }
 
     private suspend fun resolvePublicKeyJwks(did: String, keyId: String): List<JWK> {
-        return when (val requesterDidDocument = resolver.resolve(did)) {
+        return when (val requesterDidDocument = resolver.resolve(did).toSDK()) {
             is Result.Success -> {
                 val publicKeys = requesterDidDocument.payload.verificationMethod
                 if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")

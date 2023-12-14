@@ -4,35 +4,32 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResp
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
+import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
-import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.Url
 
 internal class HttpAgentIssuanceApi(private val agent: IHttpAgent,
         private val json :Json) {
-    suspend fun getContract(overrideUrl: String): Result<ContractServiceResponse> {
+
+    fun parseContract(response: IResponse): ContractServiceResponse {
+        return json.decodeFromString(ContractServiceResponse.serializer(), response.body.decodeToString())
+    }
+    suspend fun getContract(overrideUrl: String): Result<IResponse> {
         return agent.get(overrideUrl, mapOf(
             "x-ms-sign-contract" to "true"
-        )).map {
-                response ->
-            json.decodeFromString(ContractServiceResponse.serializer(), response.body.decodeToString())
-        }
+        ))
     }
 
-    suspend fun sendResponse(overrideUrl: String, body: String): Result<IssuanceServiceResponse> {
+    fun parseIssuance(response: IResponse): IssuanceServiceResponse {
+        return json.decodeFromString(IssuanceServiceResponse.serializer(), response.body.decodeToString())
+    }
+
+    suspend fun sendResponse(overrideUrl: String, body: String): Result<IResponse> {
         return agent.post(overrideUrl, emptyMap(), body.encodeToByteArray())
-            .map { response ->
-                json.decodeFromString(IssuanceServiceResponse.serializer(), response.body.decodeToString())
-            }
     }
 
-    suspend fun sendCompletionResponse(overrideUrl: String, body: String): Result<Unit> {
+    suspend fun sendCompletionResponse(overrideUrl: String, body: String): Result<IResponse> {
         return agent.post(overrideUrl, mapOf(
             Constants.CONTENT_TYPE to "application/json"
         ), body.toByteArray())
-            .map { _ ->
-                Unit
-            }
     }
 }

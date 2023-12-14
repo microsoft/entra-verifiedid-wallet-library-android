@@ -7,13 +7,11 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomai
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.DomainLinkageCredentialValidator
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.linkedDomainsOperations.FetchWellKnownConfigDocumentNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.map
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import java.net.URL
 import javax.inject.Inject
@@ -21,33 +19,41 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LinkedDomainsService @Inject constructor(
-    private val apiProvider: ApiProvider,
+    private val apiProvider: HttpAgentApiProvider,
     private val resolver: Resolver,
     private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator
 ) {
     suspend fun fetchAndVerifyLinkedDomains(relyingPartyDid: String): Result<LinkedDomainResult> {
-        return runResultTry {
-            val domainUrls = getLinkedDomainsFromDid(relyingPartyDid).abortOnError()
-            verifyLinkedDomains(domainUrls, relyingPartyDid)
-        }
+        getLinkedDomainsFromDid(relyingPartyDid)
+            .onSuccess { domainUrls ->
+                return verifyLinkedDomains(domainUrls, relyingPartyDid)
+            }
+            .onFailure {
+                return Result.failure(it)
+            }
+        return Result.failure(SdkException(""))
     }
 
     private suspend fun verifyLinkedDomains(domainUrls: List<String>, relyingPartyDid: String): Result<LinkedDomainResult> {
-        return runResultTry {
-            if (domainUrls.isEmpty())
-                return@runResultTry Result.Success(LinkedDomainMissing)
-            val domainUrl = domainUrls.first()
-            val hostname = URL(domainUrl).host
-            val wellKnownConfigDocumentResult = getWellKnownConfigDocument(domainUrl)
-            if (wellKnownConfigDocumentResult is Result.Success) {
-                val wellKnownConfigDocument = wellKnownConfigDocumentResult.payload
-                wellKnownConfigDocument.linkedDids.forEach { linkedDidJwt ->
+        if (domainUrls.isEmpty())
+            return Result.success(LinkedDomainMissing)
+        val domainUrl = domainUrls.first()
+        val hostname = URL(domainUrl).host
+        return getWellKnownConfigDocument(domainUrl)
+            .map {
+                wellKnownConfigDocument ->
+                wellKnownConfigDocument.linkedDids.firstNotNullOf { linkedDidJwt ->
                     val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(linkedDidJwt, relyingPartyDid, domainUrl)
-                    if (isDomainLinked) return@runResultTry Result.Success(LinkedDomainVerified(hostname))
+                    if (isDomainLinked)
+                        LinkedDomainVerified(hostname)
+                    else
+                        null
                 }
-            } else SdkLog.d("Unable to fetch well-known config document from $domainUrl")
-            Result.Success(LinkedDomainUnVerified(hostname))
-        }
+            }.onFailure {
+                SdkLog.d("Unable to fetch well-known config document from $domainUrl")
+            }.recover {
+                LinkedDomainUnVerified(hostname)
+            }
     }
 
     private suspend fun getLinkedDomainsFromDid(relyingPartyDid: String): Result<List<String>> {
