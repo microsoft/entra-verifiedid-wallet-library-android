@@ -42,6 +42,7 @@ class VerifiedIdRequirement(
     internal var _verifiedId: VerifiedId? = null
 ) : Requirement {
 
+    // Readonly Verified ID that is currently fulfilling the requirement (if any)
     val verifiedId: VerifiedId?
         get() = this._verifiedId
 
