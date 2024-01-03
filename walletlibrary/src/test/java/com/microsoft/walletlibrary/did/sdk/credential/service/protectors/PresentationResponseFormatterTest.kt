@@ -180,7 +180,7 @@ class PresentationResponseFormatterTest {
         response.addRequirements(VerifiedIdRequirement(
             firstInputDefinitionId,
             types = listOf(firstVpTokenType),
-            verifiedId = walletCredentialOne
+            _verifiedId = walletCredentialOne
         ))
         val responses = listOf(response)
 
@@ -267,7 +267,7 @@ class PresentationResponseFormatterTest {
         responseOne.addRequirements(VerifiedIdRequirement(
             firstInputDefinitionId,
             types = listOf(firstVpTokenType),
-            verifiedId = walletCredentialOne
+            _verifiedId = walletCredentialOne
         ))
         val responseTwo =
             PresentationResponse(
@@ -277,7 +277,7 @@ class PresentationResponseFormatterTest {
         responseTwo.addRequirements(VerifiedIdRequirement(
             secondInputDefinitionId,
             types = listOf(secondVpTokenType),
-            verifiedId = walletCredentialTwo
+            _verifiedId = walletCredentialTwo
         ))
         val responses = listOf(responseOne, responseTwo)
 
@@ -374,12 +374,12 @@ class PresentationResponseFormatterTest {
         responseOne.addRequirements(VerifiedIdRequirement(
             firstInputDefinitionId,
             types = listOf(firstVpTokenType),
-            verifiedId = walletCredentialOne
+            _verifiedId = walletCredentialOne
         ))
         responseOne.addRequirements(VerifiedIdRequirement(
             secondInputDefinitionId,
             types = listOf(secondVpTokenType),
-            verifiedId = walletCredentialTwo
+            _verifiedId = walletCredentialTwo
         ))
         val responses = listOf(responseOne)
 
