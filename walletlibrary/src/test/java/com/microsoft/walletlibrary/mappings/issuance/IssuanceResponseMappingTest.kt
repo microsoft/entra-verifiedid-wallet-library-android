@@ -230,7 +230,7 @@ class IssuanceResponseMappingTest {
         val mockVerifiableCredential: VerifiableCredential = mockk()
         every { mockVerifiableCredential.raw } returns mockk()
         every { mockVerifiableCredential.types } returns listOf(expectedCredentialType)
-        verifiedIdRequirement.verifiedId = mockVerifiableCredential
+        verifiedIdRequirement._verifiedId = mockVerifiableCredential
         val mockPresentationAttestation: PresentationAttestation = mockk()
         every { mockIssuanceRequest.getAttestations().presentations } returns listOf(mockPresentationAttestation)
         every { mockPresentationAttestation.credentialType } returns expectedCredentialType

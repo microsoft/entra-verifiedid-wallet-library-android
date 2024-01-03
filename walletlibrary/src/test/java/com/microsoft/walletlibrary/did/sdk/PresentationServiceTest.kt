@@ -20,7 +20,6 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.did.sdk.identifier.models.payload.document.IdentifierDocumentService
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
-import com.microsoft.walletlibrary.did.sdk.internal.ImageLoader
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
@@ -50,7 +49,6 @@ class PresentationServiceTest {
     private val linkedDomainsService =
         spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
 
-    private val imageLoader: ImageLoader = mockk(relaxed = true)
     private val presentationService =
         spyk(
             PresentationService(
@@ -60,8 +58,7 @@ class PresentationServiceTest {
                 mockedJwtValidator,
                 presentationRequestValidator,
                 mockk(relaxed = true),
-                presentationResponseFormatter,
-                imageLoader
+                presentationResponseFormatter
             ),
             recordPrivateCalls = true
         )

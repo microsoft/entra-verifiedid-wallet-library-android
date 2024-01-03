@@ -41,8 +41,13 @@ class VerifiedIdRequirement(
     // Information needed for issuance from presentation.
     val issuanceOptions: List<VerifiedIdRequestInput> = mutableListOf(),
 
-    internal var verifiedId: VerifiedId? = null
+    internal var _verifiedId: VerifiedId? = null
 ) : Requirement {
+
+    // Readonly Verified ID that is currently fulfilling the requirement (if any)
+    val verifiedId: VerifiedId?
+        get() = this._verifiedId
+
     // Constraint that represents how the requirement is fulfilled
     internal var constraint: VerifiedIdConstraint = toVcTypeConstraint()
 
@@ -60,12 +65,12 @@ class VerifiedIdRequirement(
 
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate(): VerifiedIdResult<Unit> {
-        if (verifiedId == null)
+        if (_verifiedId == null)
             return RequirementNotMetException(
                 "Verified ID has not been set.",
                 VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value
             ).toVerifiedIdResult()
-        verifiedId?.let {
+        _verifiedId?.let {
             try {
                 constraint.matches(it)
             } catch (constraintException: RequirementValidationException) {
@@ -90,7 +95,7 @@ class VerifiedIdRequirement(
                 listOf(constraintException)
             ).toVerifiedIdResult()
         }
-        verifiedId = selectedVerifiedId
+        _verifiedId = selectedVerifiedId
         return VerifiedIdResult.success(Unit)
     }
 
