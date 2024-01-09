@@ -58,7 +58,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         requestResolverFactory.requestResolvers.addAll(requestResolvers)
 
         val requestHandlerFactory = RequestHandlerFactory()
-        registerRequestHandler(OpenIdRequestHandler())
+        registerRequestHandler(OpenIdRequestHandler(context, json = jsonSerializer))
         requestHandlerFactory.requestHandlers.addAll(requestHandlers)
 
         val vcSdkLogConsumer = WalletLibraryVCSDKLogConsumer(logger)
