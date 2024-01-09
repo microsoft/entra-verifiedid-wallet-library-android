@@ -5,6 +5,15 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
+import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.createIssuedAndExpiryTime
+import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
+import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
@@ -17,7 +26,12 @@ import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import kotlinx.serialization.json.Json
 import okhttp3.internal.filterList
+import java.util.UUID
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 /**
  * Represents information that describes Verified IDs required in order to complete a VerifiedID request.
@@ -44,12 +58,22 @@ class VerifiedIdRequirement(
     internal var _verifiedId: VerifiedId? = null
 ) : Requirement {
 
+    companion object {
+        private val SELF_SIGN_VALIDITY_INTERVAL = 5.toDuration(DurationUnit.MINUTES)
+    }
+
     // Readonly Verified ID that is currently fulfilling the requirement (if any)
     val verifiedId: VerifiedId?
         get() = this._verifiedId
 
     // Constraint that represents how the requirement is fulfilled
     internal var constraint: VerifiedIdConstraint = toVcTypeConstraint()
+
+    @Transient
+    internal lateinit var signer: TokenSigner
+
+    @Transient
+    internal lateinit var json: Json
 
     internal fun toVcTypeConstraint(): VerifiedIdConstraint {
         if (types.isEmpty() || types.filterList { isNotBlank() }
@@ -99,8 +123,62 @@ class VerifiedIdRequirement(
         return VerifiedIdResult.success(Unit)
     }
 
+    // Fulfills the requirement with a self signed verified ID containing the included claims
+    suspend fun fulfillWithClaims(claims: Map<String, String>): VerifiedIdResult<Unit> {
+        val primaryIdentifier = when (val primaryIdentifierResult = VerifiableCredentialSdk.identifierService.getMasterIdentifier()) {
+            is Result.Success -> {
+                primaryIdentifierResult.payload
+            }
+            is Result.Failure -> {
+                return VerifiedIdResult.failure(primaryIdentifierResult.payload)
+            }
+        }
+        val content = createSelfSignedContent(claims, primaryIdentifier)
+        val verifiedId = selfSignVerifiedId(content, primaryIdentifier)
+
+        return fulfill(verifiedId)
+    }
+
     // Retrieves list of Verified IDs from the provided list that matches this requirement.
     fun getMatches(verifiedIds: List<VerifiedId>): List<VerifiedId> {
         return verifiedIds.filter { constraint.doesMatch(it) }
+    }
+
+    // Creates verifiable credential contents for the requirement with the given claims and identifier
+    private fun createSelfSignedContent(claims: Map<String, String>, identifier: Identifier): VerifiableCredentialContent {
+        val descriptor = VerifiableCredentialDescriptor(
+            context = listOf(Constants.CONTEXT),
+            type = types,
+            credentialSubject = claims
+        )
+        // Unique headers for a short-lived self-signed verifiable credential.
+        val (issuedTime, expiryTime: Long) = createIssuedAndExpiryTime(SELF_SIGN_VALIDITY_INTERVAL.inWholeSeconds.toInt())
+        return VerifiableCredentialContent(
+            jti = UUID.randomUUID().toString(),
+            vc = descriptor,
+            sub = identifier.id,
+            iss = identifier.id,
+            iat = issuedTime,
+            exp = expiryTime
+        )
+    }
+
+    // Creates a self signed Verified ID from verifiable credential content and a signing identifier
+    private fun selfSignVerifiedId(content: VerifiableCredentialContent, identifier: Identifier): VerifiedId {
+        // Client API does not understand "credentialStatus: null" so a custom serializer must exclude the field.
+        val nonNullSerializer = Json(from = json) {
+            this.encodeDefaults = false
+        }
+        // Sign the data.
+        val serialized = nonNullSerializer.encodeToString(VerifiableCredentialContent.serializer(), content)
+        val rawCredential = signer.signWithIdentifier(serialized, identifier)
+        val verifiableCredential = VerifiableCredential(
+            content.jti,
+            rawCredential,
+            content
+        )
+        return com.microsoft.walletlibrary.verifiedid.VerifiableCredential(
+            verifiableCredential
+        )
     }
 }
