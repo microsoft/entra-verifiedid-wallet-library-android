@@ -101,4 +101,45 @@ class VerifiedIdRequirement(
     fun getMatches(verifiedIds: List<VerifiedId>): List<VerifiedId> {
         return verifiedIds.filter { constraint.doesMatch(it) }
     }
+
+    // Creates verifiable credential contents for the requirement with the given claims and identifier
+    private fun createSelfSignedContent(claims: Map<String, String>, identifier: Identifier): VerifiableCredentialContent {
+        val unifiedTypes = mutableSetOf<String>()
+        unifiedTypes.add(Constants.VERIFIABLE_CREDENTIAL_DEFAULT_TYPE)
+        unifiedTypes.addAll(types)
+        val descriptor = VerifiableCredentialDescriptor(
+            context = listOf(Constants.VP_CONTEXT_URL),
+            type = unifiedTypes.toList(),
+            credentialSubject = claims
+        )
+        // Unique headers for a short-lived self-signed verifiable credential.
+        val (issuedTime, expiryTime: Long) = createIssuedAndExpiryTime(SELF_SIGN_VALIDITY_INTERVAL.inWholeSeconds.toInt())
+        return VerifiableCredentialContent(
+            jti = UUID.randomUUID().toString(),
+            vc = descriptor,
+            sub = identifier.id,
+            iss = identifier.id,
+            iat = issuedTime,
+            exp = expiryTime
+        )
+    }
+
+    // Creates a self signed Verified ID from verifiable credential content and a signing identifier
+    private fun selfSignVerifiedId(content: VerifiableCredentialContent, identifier: Identifier): VerifiedId {
+        // Client API does not understand "credentialStatus: null" so a custom serializer must exclude the field.
+        val nonNullSerializer = Json(from = json) {
+            this.encodeDefaults = false
+        }
+        // Sign the data.
+        val serialized = nonNullSerializer.encodeToString(VerifiableCredentialContent.serializer(), content)
+        val rawCredential = signer.signWithIdentifier(serialized, identifier)
+        val verifiableCredential = VerifiableCredential(
+            content.jti,
+            rawCredential,
+            content
+        )
+        return com.microsoft.walletlibrary.verifiedid.VerifiableCredential(
+            verifiableCredential
+        )
+    }
 }
