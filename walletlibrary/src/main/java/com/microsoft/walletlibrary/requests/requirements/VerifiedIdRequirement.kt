@@ -146,9 +146,12 @@ class VerifiedIdRequirement(
 
     // Creates verifiable credential contents for the requirement with the given claims and identifier
     private fun createSelfSignedContent(claims: Map<String, String>, identifier: Identifier): VerifiableCredentialContent {
+        val unifiedTypes = mutableSetOf<String>()
+        unifiedTypes.add(Constants.VERIFIABLE_CREDENTIAL_DEFAULT_TYPE)
+        unifiedTypes.addAll(types)
         val descriptor = VerifiableCredentialDescriptor(
-            context = listOf(Constants.CONTEXT),
-            type = types,
+            context = listOf(Constants.VP_CONTEXT_URL),
+            type = unifiedTypes.toList(),
             credentialSubject = claims
         )
         // Unique headers for a short-lived self-signed verifiable credential.
