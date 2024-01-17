@@ -75,6 +75,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
             logConsumer = vcSdkLogConsumer,
             userAgentInfo = getUserAgent(context),
             walletLibraryVersionInfo = getWalletLibraryVersionInfo(),
+            httpAgent = httpAgent
 
         )
         return VerifiedIdClient(
