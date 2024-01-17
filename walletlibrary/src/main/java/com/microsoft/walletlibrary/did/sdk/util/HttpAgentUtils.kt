@@ -27,12 +27,12 @@ internal class HttpAgentUtils @Inject constructor(@Named("userAgentInfo") privat
             Constants.USER_AGENT_HEADER to userAgentInfo,
             Constants.WALLET_LIBRARY_VERSION_HEADER to walletLibraryVersionInfo
         )
-        contentType?.let {
-            headers[Constants.CONTENT_TYPE] = when (contentType) {
-                ContentType.Json -> { "application/json"}
-                ContentType.UrlFormEncoded -> { URLFormEncoding.mimeType }
-            }
+        headers[Constants.CONTENT_TYPE] = when (contentType) {
+            ContentType.Json -> { "application/json"}
+            ContentType.UrlFormEncoded -> { URLFormEncoding.mimeType }
+            else -> { "text/plain" }
         }
+
         body?.let {
             headers[Constants.CONTENT_LENGTH] = body.size.toString()
         }
