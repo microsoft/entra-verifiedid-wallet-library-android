@@ -1,7 +1,5 @@
 package com.microsoft.walletlibrary.util.http.httpagent
 
-import com.microsoft.walletlibrary.did.sdk.CorrelationVectorService
-import com.microsoft.walletlibrary.did.sdk.util.Constants
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Headers
@@ -15,20 +13,13 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-internal class OkHttpAgent constructor(userAgentInfo: String,
-                                               walletLibraryVersionInfo: String,
-                  private val correlationVectorService: CorrelationVectorService
-) : IHttpAgent(
-    userAgentInfo,
-    walletLibraryVersionInfo
-) {
+internal class OkHttpAgent : IHttpAgent() {
     val client: OkHttpClient = OkHttpClient()
 
     override suspend fun get(url: String, headers: Map<String, String>): Result<IResponse> {
-        val sendMap = combineMaps(headers, defaultHeaders())
         val request = Request.Builder()
             .url(url)
-            .headers(mapToHeaders(sendMap))
+            .headers(mapToHeaders(headers))
             .build()
 
         return call(request)
@@ -39,23 +30,13 @@ internal class OkHttpAgent constructor(userAgentInfo: String,
         headers: Map<String, String>,
         payload: ByteArray
     ): Result<IResponse> {
-        val sendMap = combineMaps(headers, defaultHeaders(body = payload))
         val request = Request.Builder()
             .url(url)
-            .headers(mapToHeaders(sendMap))
+            .headers(mapToHeaders(headers))
             .post(payload.toRequestBody())
             .build()
 
         return call(request)
-    }
-
-    override fun defaultHeaders(contentType: ContentType?, body: ByteArray?): MutableMap<String, String> {
-        val headers = super.defaultHeaders(contentType, body)
-        correlationVectorService.incrementAndSave().let {
-                correlationVector ->
-            headers[Constants.CORRELATION_VECTOR_HEADER] =  correlationVector
-        }
-        return headers
     }
 
     private suspend fun call(request: Request): Result<IResponse> {
@@ -102,20 +83,22 @@ internal class OkHttpAgent constructor(userAgentInfo: String,
             body = body
         )
 
-        when (response.code) {
+        return when (response.code) {
             in 200..299 -> {
-                return Result.success(abstractResponse)
+                Result.success(abstractResponse)
             }
+
             in 400..499 -> {
-                return Result.failure(ClientError(abstractResponse))
+                Result.failure(ClientError(abstractResponse))
             }
+
             in 500..599 -> {
-                return Result.failure(ServerError(abstractResponse))
+                Result.failure(ServerError(abstractResponse))
             }
+
             else -> {
-                return Result.failure(UnknownError())
+                Result.failure(UnknownError())
             }
         }
-
     }
 }

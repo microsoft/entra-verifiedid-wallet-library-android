@@ -1,0 +1,42 @@
+// Copyright (c) Microsoft Corporation. All rights reserved
+
+package com.microsoft.walletlibrary.did.sdk.util
+
+import com.microsoft.walletlibrary.did.sdk.CorrelationVectorService
+import com.microsoft.walletlibrary.util.http.URLFormEncoding
+import javax.inject.Inject
+import javax.inject.Named
+
+/**
+ * Internal Class to apply common headers
+ */
+internal class HttpAgentUtils @Inject constructor(@Named("userAgentInfo") private val userAgentInfo: String,
+                                                  @Named("walletLibraryVersionInfo") private val walletLibraryVersionInfo: String,
+                                                  private val correlationVectorService: CorrelationVectorService) {
+    enum class ContentType {
+        Json,
+        UrlFormEncoded
+    }
+
+    fun combineMaps(a: Map<String, String>, b: Map<String, String>): Map<String, String> {
+        a.toMutableMap().putAll(b)
+        return a
+    }
+    fun defaultHeaders(contentType: ContentType? = null, body: ByteArray? = null): MutableMap<String, String> {
+        val headers = mutableMapOf(
+            Constants.USER_AGENT_HEADER to userAgentInfo,
+            Constants.WALLET_LIBRARY_VERSION_HEADER to walletLibraryVersionInfo
+        )
+        contentType?.let {
+            headers[Constants.CONTENT_TYPE] = when (contentType) {
+                ContentType.Json -> { "application/json"}
+                ContentType.UrlFormEncoded -> { URLFormEncoding.mimeType }
+            }
+        }
+        body?.let {
+            headers[Constants.CONTENT_LENGTH] = body.size.toString()
+        }
+        return headers
+    }
+
+}

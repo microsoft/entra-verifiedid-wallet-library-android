@@ -6,8 +6,8 @@
 package com.microsoft.walletlibrary
 
 import android.content.Context
-import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import android.content.pm.PackageManager
+import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
@@ -18,6 +18,8 @@ import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.WalletLibraryVCSDKLogConsumer
+import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
+import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.json.Json
@@ -31,6 +33,7 @@ import kotlinx.serialization.modules.subclass
 class VerifiedIdClientBuilder(private val context: Context) {
 
     private var logger: WalletLibraryLogger = WalletLibraryLogger
+    private var httpAgent: IHttpAgent = OkHttpAgent()
     private val requestResolvers = mutableListOf<RequestResolver>()
     private val requestHandlers = mutableListOf<RequestHandler>()
     private val jsonSerializer = Json {
@@ -51,6 +54,11 @@ class VerifiedIdClientBuilder(private val context: Context) {
         logger.addConsumer(logConsumer)
     }
 
+    fun with(httpAgent: IHttpAgent): VerifiedIdClientBuilder {
+        this.httpAgent = httpAgent
+        return this
+    }
+
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
     fun build(): VerifiedIdClient {
         val requestResolverFactory = RequestResolverFactory()
@@ -66,7 +74,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
             context,
             logConsumer = vcSdkLogConsumer,
             userAgentInfo = getUserAgent(context),
-            walletLibraryVersionInfo = getWalletLibraryVersionInfo()
+            walletLibraryVersionInfo = getWalletLibraryVersionInfo(),
+
         )
         return VerifiedIdClient(
             requestResolverFactory,
