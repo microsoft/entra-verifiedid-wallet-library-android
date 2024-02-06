@@ -102,7 +102,6 @@ dependencies {
     //other
     implementation "androidx.preference:preference-ktx:$androidx_preference_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation "com.squareup.picasso:picasso:$picasso_version"
     implementation "com.jayway.jsonpath:json-path:$jsonpath_version"
 
     //noinspection GradleDependency

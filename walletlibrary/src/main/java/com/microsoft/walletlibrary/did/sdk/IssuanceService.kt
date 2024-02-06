@@ -20,7 +20,6 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperatio
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendIssuanceCompletionResponse
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
-import com.microsoft.walletlibrary.did.sdk.internal.ImageLoader
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
@@ -40,8 +39,7 @@ internal class IssuanceService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
-    private val serializer: Json,
-    private val imageLoader: ImageLoader
+    private val serializer: Json
 ) {
 
     /**
@@ -57,7 +55,6 @@ internal class IssuanceService @Inject constructor(
                 val contract = fetchContract(contractUrl).abortOnError()
                 val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError()
                 val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
-                imageLoader.loadRemoteImage(request)
                 Result.Success(request)
             }
         }

@@ -1,8 +1,8 @@
 package com.microsoft.walletlibrary.verifiedid
 
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
-import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import kotlinx.serialization.Serializable
 import java.util.Date
 
@@ -34,7 +34,7 @@ internal class VerifiableCredential(
         val claims = ArrayList<VerifiedIdClaim>()
         for ((claimIdentifier, claimValue) in claimValues) {
             val claimDescriptor = claimDescriptors["vc.credentialSubject.$claimIdentifier"]
-            claimDescriptor?.let { claims.add(VerifiedIdClaim(claimDescriptor.label, claimValue)) }
+            claimDescriptor?.let { claims.add(VerifiedIdClaim(claimDescriptor.label, claimValue, claimDescriptor.type)) }
                 ?: claims.add(VerifiedIdClaim(claimIdentifier, claimValue))
         }
         return claims

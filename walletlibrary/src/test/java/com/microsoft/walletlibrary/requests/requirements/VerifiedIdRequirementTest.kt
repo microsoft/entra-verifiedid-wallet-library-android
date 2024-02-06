@@ -45,6 +45,8 @@ class VerifiedIdRequirementTest {
         verifiedIdRequirement.fulfill(expectedVerifiedId)
 
         // Assert
+        assertThat(verifiedIdRequirement._verifiedId).isNotNull
+        assertThat(verifiedIdRequirement._verifiedId).isEqualTo(expectedVerifiedId)
         assertThat(verifiedIdRequirement.verifiedId).isNotNull
         assertThat(verifiedIdRequirement.verifiedId).isEqualTo(expectedVerifiedId)
     }
