@@ -9,6 +9,11 @@ import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.InputContract
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.CardDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.createIssuedAndExpiryTime
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
@@ -25,7 +30,6 @@ import com.microsoft.walletlibrary.util.RequirementValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import okhttp3.internal.filterList
@@ -180,7 +184,25 @@ class VerifiedIdRequirement(
             content
         )
         return com.microsoft.walletlibrary.verifiedid.VerifiableCredential(
-            verifiableCredential
+            verifiableCredential,
+            VerifiableCredentialContract(
+                id = "",
+                input = InputContract(
+                    credentialIssuer = content.iss,
+                    issuer = content.iss
+                ),
+                display = DisplayContract(
+                    card = CardDescriptor(
+                        title = "",
+                        issuedBy = "",
+                        backgroundColor = "",
+                        textColor = "",
+                        description = ""
+                    ),
+                    consent = ConsentDescriptor(instructions = ""),
+                    claims = emptyMap()
+                )
+            )
         )
     }
 }
