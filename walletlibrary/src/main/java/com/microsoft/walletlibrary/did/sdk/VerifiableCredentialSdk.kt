@@ -6,11 +6,13 @@
 package com.microsoft.walletlibrary.did.sdk
 
 import android.content.Context
+import androidx.preference.PreferenceManager
 import com.microsoft.walletlibrary.did.sdk.di.DaggerSdkComponent
 import com.microsoft.walletlibrary.did.sdk.util.DifWordList
 import com.microsoft.walletlibrary.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
-import com.microsoft.walletlibrary.interceptor.HttpInterceptor
+import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
+import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 
@@ -59,7 +61,7 @@ internal object VerifiableCredentialSdk {
      * @param registrationUrl url used to register DID
      * @param resolverUrl url used to resolve DID
      * @param walletLibraryVersionInfo version of the library in use
-     * @param interceptors HttpInterceptor to modify http request
+     * @param httpAgent IHttpAgent to use for making httpRequests
      */
     // TODO(Change how version numbers are passed for headers when HTTP client layer is refactored)
     @JvmOverloads
@@ -72,16 +74,17 @@ internal object VerifiableCredentialSdk {
         registrationUrl: String = "",
         resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers",
         walletLibraryVersionInfo: String = "",
-        interceptors: List<HttpInterceptor> = emptyList()
+        httpAgent: IHttpAgent = OkHttpAgent()
     ) {
+        correlationVectorService = CorrelationVectorService( PreferenceManager.getDefaultSharedPreferences(context) )
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
             .userAgentInfo(userAgentInfo)
             .walletLibraryVersionInfo(walletLibraryVersionInfo)
+            .httpAgent(httpAgent)
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
             .polymorphicJsonSerializer(polymorphicJsonSerializers)
-            .httpInterceptors(interceptors)
             .build()
 
         issuanceService = sdkComponent.issuanceService()

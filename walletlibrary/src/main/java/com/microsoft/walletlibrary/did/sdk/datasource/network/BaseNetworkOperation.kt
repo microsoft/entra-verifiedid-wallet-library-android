@@ -14,12 +14,13 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.LocalNetworkExceptio
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.NetworkException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.NotFoundException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.RedirectException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ServiceUnreachableException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.UnauthorizedException
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.did.sdk.util.logNetworkTime
-import retrofit2.Response
+import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
+import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import java.io.IOException
 
 /**
@@ -29,52 +30,56 @@ import java.io.IOException
  * In default methods, S == T, for no transformation takes place.
  * fire method will just return Result.Success(responseBody: S)
  */
-internal abstract class BaseNetworkOperation<S, T> {
+internal abstract class BaseNetworkOperation<T> {
 
-    abstract val call: suspend () -> Response<S>
+    abstract val call: suspend () -> Result<IResponse>
 
-    open suspend fun fire(): Result<T> {
+    abstract suspend fun toResult(response: IResponse): Result<T>
+
+    suspend inline fun fire(): Result<T> {
         try {
-            val response = logNetworkTime("${this::class.simpleName}") {
+            logNetworkTime("${this::class.simpleName}") {
                 call.invoke()
+            }.onSuccess {
+                return toResult(it)
+            }.onFailure {
+                return onFailure(it)
             }
-            if (response.isSuccessful) {
-                return onSuccess(response)
-            }
-            return onFailure(response)
         } catch (exception: IOException) {
-            return Result.Failure(LocalNetworkException("Failed to send request.", exception))
+            return Result.failure(LocalNetworkException("Failed to send request.", exception))
         }
-    }
-
-    open suspend fun onSuccess(response: Response<S>): Result<T> {
-        // TODO("how do we want to handle null bodies")
-        // TODO("how to not suppress this warning")
-        @Suppress("UNCHECKED_CAST")
-        val transformedPayload = (response.body() ?: throw LocalNetworkException("Body of Response is null.")) as T
-        return Result.Success(transformedPayload)
+        return Result.failure(SdkException("Failed to get a response"))
     }
 
     // TODO("what do we want our base to look like")
-    open fun onFailure(response: Response<S>): Result<Nothing> {
-        val responseBody = response.errorBody()?.string() ?: ""
+    open fun onFailure(exception: Throwable): Result<T> {
+        val response: IResponse = when (exception) {
+            is IHttpAgent.ClientError -> {
+                exception.response
+            }
+            is IHttpAgent.ServerError -> {
+                exception.response
+            }
+            else -> return Result.failure(NetworkException("Unknown Status code", true))
+        }
+        val responseBody = response.body.decodeToString()
         val errorMessage = NetworkErrorParser.extractErrorMessage(responseBody) ?: responseBody
-        val exception = when (response.code()) {
-            301, 302, 308 -> RedirectException(errorMessage, false)
-            401 -> UnauthorizedException(errorMessage, false)
-            400, 402 -> ClientException(errorMessage, false)
-            403 -> ForbiddenException(errorMessage, false)
-            404 -> NotFoundException(errorMessage, false)
-            500, 501, 502, 503 -> ServiceUnreachableException(errorMessage, true)
+        val error = when (response.status) {
+            301u, 302u, 308u -> RedirectException(errorMessage, false)
+            401u -> UnauthorizedException(errorMessage, false)
+            400u, 402u -> ClientException(errorMessage, false)
+            403u -> ForbiddenException(errorMessage, false)
+            404u -> NotFoundException(errorMessage, false)
+            500u, 501u, 502u, 503u -> ServiceUnreachableException(errorMessage, true)
             else -> NetworkException("Unknown Status code", true)
         }
-        exception.errorCode = response.code().toString()
-        exception.correlationVector = response.headers()[CORRELATION_VECTOR_HEADER]
-        exception.requestId = response.headers()[REQUEST_ID_HEADER]
-        exception.errorBody = responseBody
-        exception.innerErrorCodes = NetworkErrorParser.extractInnerErrorsCodes(exception.errorBody)
-        SdkLog.i("HttpError: ${exception.errorCode} body: ${exception.errorBody} cv: ${exception.correlationVector}", exception)
-        return Result.Failure(exception)
+        error.errorCode = response.status.toString()
+        error.correlationVector = response.headers[CORRELATION_VECTOR_HEADER]
+        error.requestId = response.headers[REQUEST_ID_HEADER]
+        error.errorBody = responseBody
+        error.innerErrorCodes = NetworkErrorParser.extractInnerErrorsCodes(error.errorBody)
+        SdkLog.i("HttpError: ${error.errorCode} body: ${error.errorBody} cv: ${error.correlationVector}", exception)
+        return Result.failure(error)
     }
 
     fun <S> onRetry(): Result<S> {

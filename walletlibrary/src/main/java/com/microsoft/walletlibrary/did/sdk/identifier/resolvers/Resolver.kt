@@ -8,8 +8,6 @@ package com.microsoft.walletlibrary.did.sdk.identifier.resolvers
 import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -18,13 +16,12 @@ internal class Resolver @Inject constructor(
     private val identifierRepository: IdentifierRepository
 ) {
     suspend fun resolve(identifier: String): Result<IdentifierDocument> {
-        return runResultTry {
-            when (val id = identifierRepository.resolveIdentifier(baseUrl, identifier)) {
-                is Result.Success -> {
-                    Result.Success(id.payload.didDocument)
-                }
-                is Result.Failure -> Result.Failure(ResolverException("Unable to resolve identifier $identifier", id.payload))
+        return identifierRepository.resolveIdentifier(baseUrl, identifier)
+            .map {
+                it.didDocument
             }
-        }
+            .onFailure {
+                return Result.failure(ResolverException("Unable to resolve identifier $identifier"))
+            }
     }
 }

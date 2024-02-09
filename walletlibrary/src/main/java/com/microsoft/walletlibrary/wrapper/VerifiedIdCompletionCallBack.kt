@@ -1,9 +1,8 @@
 package com.microsoft.walletlibrary.wrapper
 
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
-import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 
 /**
  * Wrapper class to wrap the send issuance completion callback to VC SDK.
@@ -19,7 +18,7 @@ object VerifiedIdCompletionCallBack {
             issuanceCompletionResponse,
             redirectUrl
         )
-        if (callbackResult is Result.Failure) {
+        if (callbackResult.isFailure) {
             WalletLibraryLogger.e("Unable to send issuance callback after issuance fails")
         }
     }

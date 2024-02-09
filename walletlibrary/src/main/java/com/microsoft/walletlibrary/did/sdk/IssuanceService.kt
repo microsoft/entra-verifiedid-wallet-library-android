@@ -15,15 +15,14 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.Issuanc
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.DigestAlgorithm
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendIssuanceCompletionResponse
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.toNative
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.did.sdk.util.logTime
 import kotlinx.coroutines.runBlocking
@@ -37,7 +36,7 @@ import javax.inject.Singleton
 internal class IssuanceService @Inject constructor(
     private val identifierService: IdentifierService,
     private val linkedDomainsService: LinkedDomainsService,
-    private val apiProvider: ApiProvider,
+    private val apiProvider: HttpAgentApiProvider,
     private val jwtValidator: JwtValidator,
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
     private val serializer: Json
@@ -53,14 +52,12 @@ internal class IssuanceService @Inject constructor(
         contractUrl: String,
         rootOfTrustResolver: RootOfTrustResolver? = null
     ): Result<IssuanceRequest> {
-        return runResultTry {
-            logTime("Issuance getRequest") {
-                val contract = fetchContract(contractUrl).abortOnError()
-                val linkedDomainResult =
-                    linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer, rootOfTrustResolver).abortOnError()
-                val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
-                Result.Success(request)
-            }
+        logTime("Issuance getRequest") {
+            val contract = fetchContract(contractUrl)
+                .getOrElse { return Result.failure(it) }
+            val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer)
+                .getOrElse { return Result.failure(it) }
+            return Result.success(IssuanceRequest(contract, contractUrl, linkedDomainResult))
         }
     }
 
@@ -82,12 +79,11 @@ internal class IssuanceService @Inject constructor(
 
     private fun getDidHash(): String {
         val did = runBlocking {
-            when (val result = identifierService.getMasterIdentifier()) {
-                is Result.Success -> result.payload.id
-                is Result.Failure -> {
-                    SdkLog.e("Could not get DID", result.payload)
-                    ""
-                }
+            identifierService.getMasterIdentifier().toNative().map{
+                it.id
+            }.getOrElse {
+                SdkLog.e("Could not get DID", it)
+                ""
             }
         }
         val digest = CryptoOperations.digest(did.toByteArray(), DigestAlgorithm.Sha512)
@@ -109,25 +105,23 @@ internal class IssuanceService @Inject constructor(
     suspend fun sendResponse(
         response: IssuanceResponse
     ): Result<VerifiableCredential> {
-        return runResultTry {
-            logTime("Issuance sendResponse") {
-                val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
-                val requestedVcMap = response.requestedVcMap
-                val verifiableCredential = formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
-                Result.Success(verifiableCredential)
-            }
+        return logTime("Issuance sendResponse") {
+            val masterIdentifier = identifierService.getMasterIdentifier()
+                .toNative().getOrElse {
+                    return Result.failure(it)
+                }
+            val requestedVcMap = response.requestedVcMap
+            formAndSendResponse(response, masterIdentifier, requestedVcMap)
         }
     }
 
     suspend fun sendCompletionResponse(completionResponse: IssuanceCompletionResponse, url: String): Result<Unit> {
-        return runResultTry {
-            logTime("Issuance sendCompletionResponse") {
-                SendIssuanceCompletionResponse(
-                    url,
-                    serializer.encodeToString(completionResponse),
-                    apiProvider
-                ).fire()
-            }
+        return logTime("Issuance sendCompletionResponse") {
+            SendIssuanceCompletionResponse(
+                url,
+                serializer.encodeToString(completionResponse),
+                apiProvider
+            ).fire()
         }
     }
 

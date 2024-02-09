@@ -8,7 +8,6 @@ package com.microsoft.walletlibrary.wrapper
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 import com.microsoft.walletlibrary.util.WalletLibraryException
@@ -26,13 +25,11 @@ internal object ManifestResolver {
         issuanceCallbackUrl: String? = null,
         rootOfTrustResolver: RootOfTrustResolver? = null
     ): RawManifest {
-        return when (val issuanceRequestResult =
-            VerifiableCredentialSdk.issuanceService.getRequest(uri, rootOfTrustResolver)) {
-            is Result.Success -> {
-                val request = issuanceRequestResult.payload
-                RawManifest(request)
-            }
-            is Result.Failure -> {
+        val issuanceRequest = VerifiableCredentialSdk.issuanceService.getRequest(uri, rootOfTrustResolver)
+            if (issuanceRequest.isSuccess) {
+                return RawManifest(issuanceRequest.getOrThrow())
+            } else {
+                val exception = issuanceRequest.exceptionOrNull()
                 val issuanceCompletionResponse = requestState?.let {
                     IssuanceCompletionResponse(
                         IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
@@ -54,9 +51,8 @@ internal object ManifestResolver {
                 }
                 throw VerifiedIdRequestFetchException(
                     "Unable to fetch issuance request",
-                    issuanceRequestResult.payload
+                    exception
                 )
-            }
         }
     }
 }
