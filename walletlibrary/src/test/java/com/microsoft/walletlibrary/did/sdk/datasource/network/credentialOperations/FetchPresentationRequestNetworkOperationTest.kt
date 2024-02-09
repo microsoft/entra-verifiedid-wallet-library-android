@@ -2,20 +2,18 @@ package com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperati
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import assertk.assertions.isInstanceOf
-import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import assertk.assertions.isTrue
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.util.defaultTestSerializer
+import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
-import retrofit2.Response
 
 class FetchPresentationRequestNetworkOperationTest {
     private val expectedNonce = "MqTyOoBtiLhoHAVmnkXLiw=="
@@ -138,9 +136,13 @@ class FetchPresentationRequestNetworkOperationTest {
     @Test
     fun FetchPresentationRequestNetworkOperation_withTwoVPTokens_SucceedsToResolvePresentationRequestContent() {
         // Arrange
-        val apiProvider: ApiProvider = mockk {
+        val apiProvider: HttpAgentApiProvider = mockk {
             every { presentationApis } returns mockk {
-                coEvery { getRequest(any()) } returns Response.success("I'm a fake token")
+                coEvery { getRequest(any()) } returns Result.success(IResponse(
+                    status = 200u,
+                    headers = emptyMap(),
+                    body = ("I'm a fake token").toByteArray(Charsets.UTF_8)
+                ))
             }
         }
         val jwtValidator: JwtValidator = mockk {
@@ -160,11 +162,11 @@ class FetchPresentationRequestNetworkOperationTest {
             val actual = operation.fire()
 
             // Assert
-            assertThat(actual).isInstanceOf(Result.Success::class.java)
-            val unwrapped = actual as Result.Success<PresentationRequestContent>
-            assertThat(unwrapped.payload.nonce).isEqualTo(expectedNonce)
-            assertThat(unwrapped.payload.clientId).isEqualTo(expectedClientId)
-            assertThat(unwrapped.payload.claims.vpTokensInRequest.size).isEqualTo(2)
+            assertThat(actual.isSuccess).isTrue()
+            val unwrapped = actual.getOrThrow()
+            assertThat(unwrapped.nonce).isEqualTo(expectedNonce)
+            assertThat(unwrapped.clientId).isEqualTo(expectedClientId)
+            assertThat(unwrapped.claims.vpTokensInRequest.size).isEqualTo(2)
         }
     }
 }

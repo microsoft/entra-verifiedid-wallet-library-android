@@ -6,6 +6,7 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
+import kotlin.Result as KotlinResult
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyType
 import io.mockk.coEvery
@@ -49,7 +50,7 @@ class JwtValidatorTest {
 
     @Test
     fun `valid signature is validated successfully`() {
-        coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
+        coEvery { mockedResolver.resolve(expectedDid) } returns KotlinResult.success(mockedIdentifierDocument)
         every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns true
         every { mockedJwsToken.keyId } returns expectedKid
         every { mockedIdentifierDocumentPublicKey.id } returns expectedKid
@@ -62,7 +63,7 @@ class JwtValidatorTest {
 
     @Test
     fun `invalid signature fails successfully`() {
-        coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
+        coEvery { mockedResolver.resolve(expectedDid) } returns KotlinResult.success(mockedIdentifierDocument)
         every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns false
         every { mockedJwsToken.keyId } returns expectedKid
         every { mockedIdentifierDocumentPublicKey.id } returns expectedKid
@@ -75,7 +76,7 @@ class JwtValidatorTest {
 
     @Test
     fun `throws when no key id specified`() {
-        coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
+        coEvery { mockedResolver.resolve(expectedDid) } returns KotlinResult.success(mockedIdentifierDocument)
         every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns true
         every { mockedJwsToken.keyId } returns null
         runBlocking {
@@ -91,7 +92,7 @@ class JwtValidatorTest {
     @Test
     fun `throws when unable to resolve identifier document`() {
         val expectedException = ValidatorException("test")
-        coEvery { mockedResolver.resolve(expectedDid) } returns Result.Failure(expectedException)
+        coEvery { mockedResolver.resolve(expectedDid) } returns KotlinResult.failure(expectedException)
         every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns true
         every { mockedJwsToken.keyId } returns expectedKid
         runBlocking {

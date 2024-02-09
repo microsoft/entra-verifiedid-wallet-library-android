@@ -2,8 +2,9 @@ package com.microsoft.walletlibrary.util.http.httpagent
 
 abstract class IHttpAgent {
 
-    class ClientError(val response: IResponse): Error() {}
-    class ServerError(val response: IResponse): Error() {}
+    open class HttpAgentError(val response: IResponse): Error() {}
+    class ClientError(response: IResponse): HttpAgentError(response) {}
+    class ServerError(response: IResponse): HttpAgentError(response) {}
 
     abstract suspend fun get(url: String, headers: Map<String, String>): Result<IResponse>
 

@@ -4,12 +4,13 @@ package com.microsoft.walletlibrary.did.sdk.datasource.repository
 
 import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.walletlibrary.did.sdk.datasource.db.dao.IdentifierDao
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations.ResolveIdentifierNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.NotFoundException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import kotlin.Result as KotlinResult
 import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
 import io.mockk.coEvery
 import io.mockk.coJustRun
@@ -33,7 +34,7 @@ class IdentifierRepositoryTest {
 
     init {
         val sdkDatabase: SdkDatabase = mockk()
-        val apiProvider: ApiProvider = mockk()
+        val apiProvider: HttpAgentApiProvider = mockk()
         every { sdkDatabase.identifierDao() } returns identifierDao
         identifierRepository = IdentifierRepository(sdkDatabase, apiProvider)
     }
@@ -87,11 +88,11 @@ class IdentifierRepositoryTest {
             "testIdentifierName"
         )
         mockkConstructor(ResolveIdentifierNetworkOperation::class)
-        coEvery { anyConstructed<ResolveIdentifierNetworkOperation>().fire() } returns Result.Success(expectedIdentifierDocument)
+        coEvery { anyConstructed<ResolveIdentifierNetworkOperation>().fire() } returns KotlinResult.success(expectedIdentifierDocument)
         runBlocking {
             val actualIdentifierDocument = identifierRepository.resolveIdentifier("testUrl", suppliedIdentifier.id)
             assertThat(actualIdentifierDocument).isInstanceOf(Result.Success::class.java)
-            assertThat((actualIdentifierDocument as Result.Success).payload.didDocument.id).isEqualTo(expectedIdentifier)
+            assertThat(actualIdentifierDocument.getOrNull()?.didDocument?.id).isEqualTo(expectedIdentifier)
         }
         coVerify(exactly = 1) {
             anyConstructed<ResolveIdentifierNetworkOperation>().fire()
@@ -109,7 +110,7 @@ class IdentifierRepositoryTest {
             "testIdentifierName"
         )
         mockkConstructor(ResolveIdentifierNetworkOperation::class)
-        coEvery { anyConstructed<ResolveIdentifierNetworkOperation>().fire() } returns Result.Failure(
+        coEvery { anyConstructed<ResolveIdentifierNetworkOperation>().fire() } returns KotlinResult.failure(
             NotFoundException(
                 "Not found",
                 true,
@@ -118,7 +119,7 @@ class IdentifierRepositoryTest {
         runBlocking {
             val actualIdentifierDocument = identifierRepository.resolveIdentifier("testUrl", suppliedIdentifier.id)
             assertThat(actualIdentifierDocument).isInstanceOf(Result.Failure::class.java)
-            assertThat((actualIdentifierDocument as Result.Failure).payload).isInstanceOf(
+            assertThat(actualIdentifierDocument.exceptionOrNull()).isInstanceOf(
                 NotFoundException::class.java)
         }
         coVerify(exactly = 1) {

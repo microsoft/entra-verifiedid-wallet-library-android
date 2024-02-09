@@ -3,6 +3,7 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations
 
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -11,7 +12,7 @@ import org.junit.Test
 import java.text.ParseException
 
 class SendVerifiablePresentationRevocationRequestNetworkOperationTest {
-    private val apiProvider: ApiProvider = mockk()
+    private val apiProvider: HttpAgentApiProvider = mockk()
     private val sendPresentationResponseNetworkOperation: SendVerifiablePresentationRevocationRequestNetworkOperation =
         SendVerifiablePresentationRevocationRequestNetworkOperation("", "", apiProvider, defaultTestSerializer)
     private val suppliedRevocationReceipt =
