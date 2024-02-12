@@ -13,8 +13,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-internal class OkHttpAgent : IHttpAgent() {
-    val client: OkHttpClient = OkHttpClient()
+class OkHttpAgent : IHttpAgent() {
+    var client: OkHttpClient = OkHttpClient()
 
     override suspend fun get(url: String, headers: Map<String, String>): Result<IResponse> {
         val request = Request.Builder()

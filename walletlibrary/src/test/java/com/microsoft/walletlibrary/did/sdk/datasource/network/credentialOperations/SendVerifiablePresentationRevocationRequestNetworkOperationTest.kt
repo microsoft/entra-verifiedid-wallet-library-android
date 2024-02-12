@@ -2,7 +2,6 @@
 
 package com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations
 
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
 import io.mockk.mockk
