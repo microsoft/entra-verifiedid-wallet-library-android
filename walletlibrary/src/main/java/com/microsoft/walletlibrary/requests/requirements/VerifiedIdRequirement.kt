@@ -21,7 +21,7 @@ import okhttp3.internal.filterList
 /**
  * Represents information that describes Verified IDs required in order to complete a VerifiedID request.
  */
-class VerifiedIdRequirement(
+open class VerifiedIdRequirement(
     internal val id: String?,
 
     // The types of Verified ID required.
@@ -83,7 +83,7 @@ class VerifiedIdRequirement(
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(selectedVerifiedId: VerifiedId): VerifiedIdResult<Unit> {
+    open fun fulfill(selectedVerifiedId: VerifiedId): VerifiedIdResult<Unit> {
         try {
             constraint.matches(selectedVerifiedId)
         } catch (constraintException: RequirementValidationException) {

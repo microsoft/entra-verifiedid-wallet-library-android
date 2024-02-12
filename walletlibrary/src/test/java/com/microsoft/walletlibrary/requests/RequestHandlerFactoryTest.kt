@@ -1,45 +1,51 @@
 package com.microsoft.walletlibrary.requests
 
-import com.microsoft.walletlibrary.requests.handlers.RequestHandler
+import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.util.HandlerMissingException
 import com.microsoft.walletlibrary.util.UnSupportedRawRequestException
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 
 class RequestHandlerFactoryTest {
-    private val firstMockRequestHandler: RequestHandler = mockk()
+    private val firstMockRequestProcessor: RequestProcessor = mockk()
     private val mockRawRequest: OpenIdRawRequest = mockk()
-    private val requestHandlerFactory = RequestHandlerFactory()
+    private val requestProcessorFactory = RequestProcessorFactory()
 
     private fun hasCompatibleHandler() {
-        every { firstMockRequestHandler.canHandle(mockRawRequest) } returns true
+        coEvery { firstMockRequestProcessor.canHandleRequest(mockRawRequest) } returns true
     }
 
     private fun doesNotHaveCompatibleHandler(mockRawRequest: OpenIdRawRequest) {
-        every { firstMockRequestHandler.canHandle(mockRawRequest) } returns false
+        coEvery { firstMockRequestProcessor.canHandleRequest(mockRawRequest) } returns false
     }
 
     @Test
     fun handler_RegisterOneHandler_Succeeds() {
         // Arrange
-        requestHandlerFactory.requestHandlers.add(firstMockRequestHandler)
+        requestProcessorFactory.requestProcessors.add(firstMockRequestProcessor)
         hasCompatibleHandler()
 
         // Act
-        val actualResult = requestHandlerFactory.getHandler(mockRawRequest)
+        runBlocking {
+            val actualResult = requestProcessorFactory.getHandler(mockRawRequest)
 
-        // Assert
-        assertThat(actualResult).isEqualTo(firstMockRequestHandler)
+            // Assert
+            assertThat(actualResult).isEqualTo(firstMockRequestProcessor)
+        }
     }
 
     @Test
     fun handler_NoHandlerRegistration_Throws() {
         // Act and Assert
-        assertThatThrownBy { requestHandlerFactory.getHandler(mockRawRequest) }.isInstanceOf(
+        assertThatThrownBy {
+            runBlocking {
+                requestProcessorFactory.getHandler(mockRawRequest)
+            } }.isInstanceOf(
             HandlerMissingException::class.java
         )
     }
@@ -47,11 +53,15 @@ class RequestHandlerFactoryTest {
     @Test
     fun handler_NoCompatibleResolver_Throws() {
         // Arrange
-        requestHandlerFactory.requestHandlers.add(firstMockRequestHandler)
+        requestProcessorFactory.requestProcessors.add(firstMockRequestProcessor)
         doesNotHaveCompatibleHandler(mockRawRequest)
 
         // Act and Assert
-        assertThatThrownBy { requestHandlerFactory.getHandler(mockRawRequest) }.isInstanceOf(
+        assertThatThrownBy {
+            runBlocking {
+                requestProcessorFactory.getHandler(mockRawRequest)
+            }
+        }.isInstanceOf(
             UnSupportedRawRequestException::class.java
         )
     }
@@ -59,16 +69,18 @@ class RequestHandlerFactoryTest {
     @Test
     fun handler_RegisterMultipleHandlers_Succeeds() {
         // Arrange
-        val secondMockRequestHandler: RequestHandler = mockk()
-        requestHandlerFactory.requestHandlers.add(firstMockRequestHandler)
-        requestHandlerFactory.requestHandlers.add(secondMockRequestHandler)
-        every { secondMockRequestHandler.canHandle(mockRawRequest) } returns false
+        val secondMockRequestHandler: RequestProcessor = mockk()
+        requestProcessorFactory.requestProcessors.add(firstMockRequestProcessor)
+        requestProcessorFactory.requestProcessors.add(secondMockRequestHandler)
+        coEvery { secondMockRequestHandler.canHandleRequest(mockRawRequest) } returns false
         hasCompatibleHandler()
 
         // Act
-        val actualResult = requestHandlerFactory.getHandler(mockRawRequest)
+        runBlocking {
+            val actualResult = requestProcessorFactory.getHandler(mockRawRequest)
 
-        // Assert
-        assertThat(actualResult).isEqualTo(firstMockRequestHandler)
+            // Assert
+            assertThat(actualResult).isEqualTo(firstMockRequestProcessor)
+        }
     }
 }

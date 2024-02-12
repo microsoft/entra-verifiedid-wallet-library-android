@@ -13,11 +13,12 @@ import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
-import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.handlers.OpenId4VCIRequestHandler
-import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
-import com.microsoft.walletlibrary.requests.handlers.RequestHandler
+import com.microsoft.walletlibrary.requests.RequestProcessorFactory
+import com.microsoft.walletlibrary.requests.VerifiedIdExtension
+import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
+import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.requests.resolvers.RequestResolver
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
@@ -43,8 +44,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
     private var logger: WalletLibraryLogger = WalletLibraryLogger
     private var httpAgent: IHttpAgent = OkHttpAgent()
     private val requestResolvers = mutableListOf<RequestResolver>()
-    private val requestHandlers = mutableListOf<RequestHandler>()
     private val previewFeatureFlagsSupported = mutableListOf<String>()
+    private val requestProcessors = mutableListOf<RequestProcessor>()
     private val jsonSerializer = Json {
         serializersModule = SerializersModule {
             polymorphic(VerifiedId::class) {
@@ -76,6 +77,12 @@ class VerifiedIdClientBuilder(private val context: Context) {
     // An optional method to provide a list of preview features to be supported by the client.
     fun with(previewFeatureFlagsToSupport: List<String>): VerifiedIdClientBuilder {
         previewFeatureFlagsSupported.addAll(previewFeatureFlagsToSupport)
+        return this
+    }
+
+    fun with(extension: VerifiedIdExtension): VerifiedIdClientBuilder {
+        // TODO: Add prefer headers to RequestResolverFactory
+        // TODO: lookup RequestProcessors by extension associated types and inject extensions
         return this
     }
 
@@ -112,21 +119,21 @@ class VerifiedIdClientBuilder(private val context: Context) {
         registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration))
         requestResolverFactory.requestResolvers.addAll(requestResolvers)
 
-        val requestHandlerFactory = RequestHandlerFactory()
-        registerRequestHandler(OpenIdRequestHandler())
+        val requestProcessorFactory = RequestProcessorFactory()
+        registerRequestHandler(OpenIdRequestProcessor())
         registerRequestHandler(OpenId4VCIRequestHandler(libraryConfiguration))
-        requestHandlerFactory.requestHandlers.addAll(requestHandlers)
+        requestProcessorFactory.requestProcessors.addAll(requestProcessors)
 
         return VerifiedIdClient(
             requestResolverFactory,
-            requestHandlerFactory,
+            requestProcessorFactory,
             logger,
             jsonSerializer
         )
     }
 
-    private fun registerRequestHandler(requestHandler: RequestHandler) {
-        requestHandlers.add(requestHandler)
+    private fun registerRequestHandler(requestProcessor: RequestProcessor) {
+        requestProcessors.add(requestProcessor)
     }
 
     private fun registerRequestResolver(requestResolver: RequestResolver) {
