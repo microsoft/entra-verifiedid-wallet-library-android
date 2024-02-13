@@ -5,8 +5,8 @@
 
 package com.microsoft.walletlibrary.requests.resolvers
 
-import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
-import com.microsoft.walletlibrary.requests.handlers.RequestHandler
+import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
+import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
@@ -21,8 +21,8 @@ import com.microsoft.walletlibrary.wrapper.OpenIdResolver
 internal class OpenIdURLRequestResolver: RequestResolver {
 
     // Indicates whether the raw request returned by this resolver can be handled by provided handler.
-    override fun canResolve(requestHandler: RequestHandler): Boolean {
-        if (requestHandler is OpenIdRequestHandler) return true
+    override fun canResolve(requestProcessor: RequestProcessor): Boolean {
+        if (requestProcessor is OpenIdRequestProcessor) return true
         return false
     }
 

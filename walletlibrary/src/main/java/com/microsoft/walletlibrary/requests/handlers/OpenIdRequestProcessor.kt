@@ -15,6 +15,7 @@ import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.requests.rawrequests.RawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
+import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.util.InputCastingException
 import com.microsoft.walletlibrary.util.RequirementCastingException
@@ -23,17 +24,38 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.ManifestResolver
 
 /**
- * OIDC protocol specific implementation of RequestHandler. It can handle OpenID raw request and returns a VerifiedIdRequest.
+ * OIDC protocol specific implementation of RequestProcessor. It can handle OpenID raw request and returns a VerifiedIdRequest.
  */
-internal class OpenIdRequestHandler: RequestHandler {
+class OpenIdRequestProcessor: RequestProcessor {
 
-    override suspend fun handleRequest(rawRequest: RawRequest): VerifiedIdRequest<*> {
+    /**
+     * Extensions to this RequestProcessor. All extensions should be called after initial request
+     * processing to mutate the request with additional input.
+     */
+    override var requestProcessors: List<RequestProcessorExtension> = emptyList()
+
+    /**
+     * Checks if the input can be processed
+     * @param rawRequest A primitive form of the request
+     * @return if the input is understood by the processor and can be processed
+     */
+    override suspend fun canHandleRequest(rawRequest: Any): Boolean {
+        // TODO: This and handleRequest need to be refactored to accept a string.
+        return rawRequest is OpenIdRawRequest
+    }
+
+    override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
         if (rawRequest !is OpenIdRawRequest)
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
         val presentationRequestContent = rawRequest.mapToPresentationRequestContent()
-        if (rawRequest.requestType == RequestType.ISSUANCE)
-            return handleIssuanceRequest(presentationRequestContent)
-        return handlePresentationRequest(presentationRequestContent, rawRequest)
+        var request = if (rawRequest.requestType == RequestType.ISSUANCE)
+            handleIssuanceRequest(presentationRequestContent)
+        else
+            handlePresentationRequest(presentationRequestContent, rawRequest)
+        this.requestProcessors.forEach { extension ->
+            request = extension.parse(rawRequest, request)
+        }
+        return request
     }
 
     private fun handlePresentationRequest(

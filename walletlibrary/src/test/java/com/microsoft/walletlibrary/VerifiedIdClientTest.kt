@@ -13,10 +13,10 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.d
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.Logo
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
-import com.microsoft.walletlibrary.requests.RequestHandlerFactory
+import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdPresentationRequest
-import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
+import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
@@ -43,12 +43,12 @@ import org.junit.Test
 
 class VerifiedIdClientTest {
     private val mockCorrelationVectorService: CorrelationVectorService = mockk()
-    private val openIdRequestHandler: OpenIdRequestHandler = mockk()
+    private val openIdRequestHandler: OpenIdRequestProcessor = mockk()
     private val openIdURLRequestResolver: OpenIdURLRequestResolver = mockk()
     private val presentationRequest: PresentationRequest = mockk()
     private val openIdPresentationRequest: OpenIdPresentationRequest = mockk()
     private val verifiedIdOpenIdJwtRawRequest = VerifiedIdOpenIdJwtRawRequest(presentationRequest)
-    private lateinit var requestHandlerFactory: RequestHandlerFactory
+    private lateinit var requestProcessorFactory: RequestProcessorFactory
     private lateinit var requestResolverFactory: RequestResolverFactory
 
     init {
@@ -64,19 +64,19 @@ class VerifiedIdClientTest {
     @Test
     fun createRequest_SuccessFromResolverAndHandler_ReturnsVerifiedIdRequest() {
         // Arrange
-        requestHandlerFactory = mockk()
+        requestProcessorFactory = mockk()
         requestResolverFactory = mockk()
         val verifiedIdClient =
             VerifiedIdClient(
                 requestResolverFactory,
-                requestHandlerFactory,
+                requestProcessorFactory,
                 WalletLibraryLogger,
                 defaultTestSerializer
             )
         val verifiedIdRequestURL: VerifiedIdRequestURL = mockk()
         every { requestResolverFactory.getResolver(verifiedIdRequestURL) } returns openIdURLRequestResolver
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) } returns verifiedIdOpenIdJwtRawRequest
-        every { requestHandlerFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
+        every { requestProcessorFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) } returns openIdPresentationRequest
 
         runBlocking {
@@ -94,17 +94,17 @@ class VerifiedIdClientTest {
     @Test
     fun createRequest_ExceptionFromResolverFactory_ReturnsFailure() {
         // Arrange
-        requestHandlerFactory = mockk()
+        requestProcessorFactory = mockk()
         requestResolverFactory = RequestResolverFactory()
         val verifiedIdClient = VerifiedIdClient(
             requestResolverFactory,
-            requestHandlerFactory,
+            requestProcessorFactory,
             WalletLibraryLogger,
             defaultTestSerializer
         )
         val verifiedIdRequestURL: VerifiedIdRequestURL = mockk()
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) } returns verifiedIdOpenIdJwtRawRequest
-        every { requestHandlerFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
+        every { requestProcessorFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) } returns openIdPresentationRequest
 
         runBlocking {
@@ -126,12 +126,12 @@ class VerifiedIdClientTest {
     @Test
     fun createRequest_ExceptionFromHandlerFactory_ReturnsFailure() {
         // Arrange
-        requestHandlerFactory = RequestHandlerFactory()
+        requestProcessorFactory = RequestProcessorFactory()
         requestResolverFactory = mockk()
         val verifiedIdClient =
             VerifiedIdClient(
                 requestResolverFactory,
-                requestHandlerFactory,
+                requestProcessorFactory,
                 WalletLibraryLogger,
                 defaultTestSerializer
             )
@@ -159,19 +159,19 @@ class VerifiedIdClientTest {
     @Test
     fun createRequest_ExceptionFromHandler_ReturnsFailure() {
         // Arrange
-        requestHandlerFactory = mockk()
+        requestProcessorFactory = mockk()
         requestResolverFactory = mockk()
         val verifiedIdClient =
             VerifiedIdClient(
                 requestResolverFactory,
-                requestHandlerFactory,
+                requestProcessorFactory,
                 WalletLibraryLogger,
                 defaultTestSerializer
             )
         val verifiedIdRequestURL: VerifiedIdRequestURL = mockk()
         every { requestResolverFactory.getResolver(verifiedIdRequestURL) } returns openIdURLRequestResolver
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) } returns verifiedIdOpenIdJwtRawRequest
-        every { requestHandlerFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
+        every { requestProcessorFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }.throws(
             UnSupportedProtocolException()
         )
@@ -195,12 +195,12 @@ class VerifiedIdClientTest {
     @Test
     fun createRequest_ExceptionFromResolver_ReturnsFailure() {
         // Arrange
-        requestHandlerFactory = mockk()
+        requestProcessorFactory = mockk()
         requestResolverFactory = mockk()
         val verifiedIdClient =
             VerifiedIdClient(
                 requestResolverFactory,
-                requestHandlerFactory,
+                requestProcessorFactory,
                 WalletLibraryLogger,
                 defaultTestSerializer
             )
@@ -209,7 +209,7 @@ class VerifiedIdClientTest {
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) }.throws(
             UnSupportedVerifiedIdRequestInputException()
         )
-        every { requestHandlerFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
+        every { requestProcessorFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) } returns openIdPresentationRequest
 
         runBlocking {
@@ -233,12 +233,12 @@ class VerifiedIdClientTest {
     @Test
     fun encode_ProvideVerifiableCredential_ReturnsEncodedString() {
         // Arrange
-        requestHandlerFactory = mockk()
+        requestProcessorFactory = mockk()
         requestResolverFactory = mockk()
         val verifiedIdClient =
             VerifiedIdClient(
                 requestResolverFactory,
-                requestHandlerFactory,
+                requestProcessorFactory,
                 WalletLibraryLogger,
                 defaultTestSerializer
             )
@@ -293,13 +293,13 @@ class VerifiedIdClientTest {
     @Test
     fun encode_ProvideInvalidVerifiableCredential_ThrowsException() {
         // Arrange
-        requestHandlerFactory = mockk()
+        requestProcessorFactory = mockk()
         requestResolverFactory = mockk()
         val serializer = mockk<Json>()
         val verifiedIdClient =
             VerifiedIdClient(
                 requestResolverFactory,
-                requestHandlerFactory,
+                requestProcessorFactory,
                 WalletLibraryLogger,
                 serializer
             )
@@ -353,12 +353,12 @@ class VerifiedIdClientTest {
     @Test
     fun decode_ProvideEncodedVerifiableCredential_ReturnsVerifiableCredentialObject() {
         // Arrange
-        requestHandlerFactory = mockk()
+        requestProcessorFactory = mockk()
         requestResolverFactory = mockk()
         val verifiedIdClient =
             VerifiedIdClient(
                 requestResolverFactory,
-                requestHandlerFactory,
+                requestProcessorFactory,
                 WalletLibraryLogger,
                 defaultTestSerializer
             )
@@ -411,13 +411,13 @@ class VerifiedIdClientTest {
     @Test
     fun decode_ProvideInvalidEncodedVerifiableCredential_ThrowsException() {
         // Arrange
-        requestHandlerFactory = mockk()
+        requestProcessorFactory = mockk()
         requestResolverFactory = mockk()
         val serializer = mockk<Json>()
         val verifiedIdClient =
             VerifiedIdClient(
                 requestResolverFactory,
-                requestHandlerFactory,
+                requestProcessorFactory,
                 WalletLibraryLogger,
                 serializer
             )
