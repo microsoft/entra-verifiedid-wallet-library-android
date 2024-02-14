@@ -34,7 +34,7 @@ internal class OpenIdPresentationRequest(
 
     private var additionalHeaders: Map<String, String>? = null
 
-    public fun setAdditionalHeaders(headers: Map<String, String>) {
+    override fun setAdditionalHeaders(headers: Map<String, String>) {
         this.additionalHeaders = headers
     }
 

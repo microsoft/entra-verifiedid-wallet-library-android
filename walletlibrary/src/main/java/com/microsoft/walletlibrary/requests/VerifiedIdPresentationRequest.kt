@@ -18,4 +18,6 @@ interface VerifiedIdPresentationRequest : VerifiedIdRequest<Unit> {
     override suspend fun complete(): VerifiedIdResult<Unit>
 
     fun getNonce(): String
+
+    fun setAdditionalHeaders(headers: Map<String, String>)
 }
