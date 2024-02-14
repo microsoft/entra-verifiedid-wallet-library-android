@@ -99,12 +99,14 @@ internal class PresentationService @Inject constructor(
      */
     suspend fun sendResponse(
         presentationRequest: PresentationRequest,
-        response: List<PresentationResponse>
+        response: List<PresentationResponse>,
+        additionalHeaders: Map<String, String>?
     ): Result<Unit> {
         return runResultTry {
             logTime("Presentation sendResponse") {
                 val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
-                formAndSendResponse(presentationRequest, response, masterIdentifier).abortOnError()
+                formAndSendResponse(presentationRequest, response, masterIdentifier,
+                    additionalHeaders = additionalHeaders).abortOnError()
             }
             Result.Success(Unit)
         }
@@ -114,7 +116,8 @@ internal class PresentationService @Inject constructor(
         presentationRequest: PresentationRequest,
         response: List<PresentationResponse>,
         responder: Identifier,
-        expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
+        expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS,
+        additionalHeaders: Map<String, String>?
     ): Result<Unit> {
         // split on number of responses
         if (response.size > 1) {
@@ -129,7 +132,8 @@ internal class PresentationService @Inject constructor(
                 idToken,
                 vpToken,
                 presentationRequest.content.state,
-                apiProvider
+                apiProvider,
+                additionalHeaders
             ).fire()
         } else {
             val (idToken, vpToken) = presentationResponseFormatter.formatResponse(
@@ -143,7 +147,8 @@ internal class PresentationService @Inject constructor(
                 idToken,
                 vpToken,
                 presentationRequest.content.state,
-                apiProvider
+                apiProvider,
+                additionalHeaders
             ).fire()
         }
     }

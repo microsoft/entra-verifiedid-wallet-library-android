@@ -10,7 +10,7 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import retrofit2.Response
 
-internal class SendPresentationResponseNetworkOperation(url: String, serializedIdToken: String, vpToken: String, state: String?, apiProvider: ApiProvider) :
+internal class SendPresentationResponseNetworkOperation(url: String, serializedIdToken: String, vpToken: String, state: String?, apiProvider: ApiProvider, additionalHeaders: Map<String, String>?) :
     PostNetworkOperation<String, Unit>() {
     override val call: suspend () -> Response<String> = {
         apiProvider.presentationApis.sendResponse(url, serializedIdToken, vpToken, state) }
@@ -21,7 +21,7 @@ internal class SendPresentationResponseNetworkOperation(url: String, serializedI
 }
 
 // The plural vp_token format
-internal class SendPresentationResponsesNetworkOperation(url: String, serializedIdToken: String, vpToken: List<String>, state: String?, apiProvider: ApiProvider) :
+internal class SendPresentationResponsesNetworkOperation(url: String, serializedIdToken: String, vpToken: List<String>, state: String?, apiProvider: ApiProvider, additionalHeaders: Map<String, String>?) :
     PostNetworkOperation<String, Unit>() {
     override val call: suspend () -> Response<String> = {
         apiProvider.presentationApis.sendResponses(url, serializedIdToken, vpToken, state) }
