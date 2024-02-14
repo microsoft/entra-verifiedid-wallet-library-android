@@ -13,7 +13,7 @@ import retrofit2.Response
 internal class SendPresentationResponseNetworkOperation(url: String, serializedIdToken: String, vpToken: String, state: String?, apiProvider: ApiProvider, additionalHeaders: Map<String, String>?) :
     PostNetworkOperation<String, Unit>() {
     override val call: suspend () -> Response<String> = {
-        apiProvider.presentationApis.sendResponse(url, serializedIdToken, vpToken, state) }
+        apiProvider.presentationApis.sendResponse(url, serializedIdToken, vpToken, state, additionalHeaders) }
 
     override suspend fun onSuccess(response: Response<String>): Result<Unit> {
         return Result.Success(Unit)
@@ -24,7 +24,7 @@ internal class SendPresentationResponseNetworkOperation(url: String, serializedI
 internal class SendPresentationResponsesNetworkOperation(url: String, serializedIdToken: String, vpToken: List<String>, state: String?, apiProvider: ApiProvider, additionalHeaders: Map<String, String>?) :
     PostNetworkOperation<String, Unit>() {
     override val call: suspend () -> Response<String> = {
-        apiProvider.presentationApis.sendResponses(url, serializedIdToken, vpToken, state) }
+        apiProvider.presentationApis.sendResponses(url, serializedIdToken, vpToken, state, additionalHeaders) }
 
     override suspend fun onSuccess(response: Response<String>): Result<Unit> {
         return Result.Success(Unit)
