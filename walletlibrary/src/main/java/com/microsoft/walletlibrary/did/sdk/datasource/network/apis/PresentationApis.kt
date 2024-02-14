@@ -27,7 +27,7 @@ internal interface PresentationApis {
         @Field("id_token") token: String,
         @Field("vp_token") vpToken: String,
         @Field("state") state: String?,
-        @HeaderMap additionalHeaders: Map<String, String>?,
+        @HeaderMap additionalHeaders: Map<String, String>,
     ): Response<String>
 
     @FormUrlEncoded
@@ -37,6 +37,6 @@ internal interface PresentationApis {
         @Field("id_token") token: String,
         @Field("vp_token") vpToken: List<String>,
         @Field("state") state: String?,
-        @HeaderMap additionalHeaders: Map<String, String>?,
+        @HeaderMap additionalHeaders: Map<String, String>,
     ): Response<String>
 }
