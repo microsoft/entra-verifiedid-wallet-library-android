@@ -31,6 +31,13 @@ internal class OpenIdPresentationRequest(
 
     val request: OpenIdRawRequest
 ) : VerifiedIdPresentationRequest {
+
+    private var additionalHeaders: Map<String, String>? = null
+
+    override fun setAdditionalHeaders(headers: Map<String, String>) {
+        this.additionalHeaders = headers
+    }
+
     // Indicates whether presentation request is satisfied on client side.
     override fun isSatisfied(): Boolean {
         val validationResult = requirement.validate()
@@ -41,7 +48,7 @@ internal class OpenIdPresentationRequest(
     // Completes the presentation request and returns Result with success status if successful.
     override suspend fun complete(): VerifiedIdResult<Unit> {
         return getResult {
-            OpenIdResponder.sendPresentationResponse(request.rawRequest, requirement)
+            OpenIdResponder.sendPresentationResponse(request.rawRequest, requirement, additionalHeaders)
         }
     }
 

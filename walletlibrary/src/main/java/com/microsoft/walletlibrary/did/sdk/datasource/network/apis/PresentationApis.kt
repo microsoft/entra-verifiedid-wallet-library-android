@@ -9,6 +9,7 @@ import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.HeaderMap
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Url
@@ -25,7 +26,8 @@ internal interface PresentationApis {
         @Url overrideUrl: String,
         @Field("id_token") token: String,
         @Field("vp_token") vpToken: String,
-        @Field("state") state: String?
+        @Field("state") state: String?,
+        @HeaderMap additionalHeaders: Map<String, String>,
     ): Response<String>
 
     @FormUrlEncoded
@@ -34,6 +36,7 @@ internal interface PresentationApis {
         @Url overrideUrl: String,
         @Field("id_token") token: String,
         @Field("vp_token") vpToken: List<String>,
-        @Field("state") state: String?
+        @Field("state") state: String?,
+        @HeaderMap additionalHeaders: Map<String, String>,
     ): Response<String>
 }
