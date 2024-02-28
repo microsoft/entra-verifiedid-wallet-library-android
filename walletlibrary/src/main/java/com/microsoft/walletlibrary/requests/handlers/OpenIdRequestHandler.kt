@@ -13,7 +13,6 @@ import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
-import com.microsoft.walletlibrary.requests.rawrequests.RawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.util.InputCastingException
@@ -26,8 +25,11 @@ import com.microsoft.walletlibrary.wrapper.ManifestResolver
  * OIDC protocol specific implementation of RequestHandler. It can handle OpenID raw request and returns a VerifiedIdRequest.
  */
 internal class OpenIdRequestHandler: RequestHandler {
+    override fun canHandle(rawRequest: Any): Boolean {
+        return rawRequest is OpenIdRawRequest
+    }
 
-    override suspend fun handleRequest(rawRequest: RawRequest): VerifiedIdRequest<*> {
+    override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
         if (rawRequest !is OpenIdRawRequest)
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
         val presentationRequestContent = rawRequest.mapToPresentationRequestContent()
