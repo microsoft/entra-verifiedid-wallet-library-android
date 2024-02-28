@@ -15,41 +15,6 @@ class OpenIdURLRequestResolverTest {
     private lateinit var mockVerifiedIdRequestInput: VerifiedIdRequestInput
     private lateinit var mockVerifiedIdRequestURL: VerifiedIdRequestURL
 
-/*    @Test
-    fun resolver_CanResolveHandler_ReturnsTrue() {
-        // Arrange
-        val mockOpenIdRequestHandler: OpenIdRequestHandler = mockk()
-
-        // Act
-        val actualResult = openIdURLRequestResolver.canResolve(mockOpenIdRequestHandler)
-
-        // Assert
-        assertThat(actualResult).isEqualTo(true)
-    }
-
-    @Test
-    fun resolver_CanResolveHandler_ReturnsFalse() {
-        // Arrange
-        class MockRequestHandler : RequestHandler {
-            override fun canHandle(rawRequest: Any): Boolean {
-                return true
-            }
-
-            override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
-                return mockk()
-            }
-
-        }
-
-        val mockRequestHandler = MockRequestHandler()
-
-        // Act
-        val actualResult = openIdURLRequestResolver.canResolve(mockRequestHandler)
-
-        // Assert
-        assertThat(actualResult).isEqualTo(false)
-    }*/
-
     @Test
     fun resolver_CanResolveInput_ReturnsTrue() {
         // Arrange
