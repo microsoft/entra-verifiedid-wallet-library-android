@@ -23,5 +23,8 @@ internal data class CredentialMetadata(
     val signed_metadata: String? = null,
 
     // A dictionary of Credential IDs to the corresponding contract.
-    val credential_configurations_supported: Map<String, CredentialConfiguration>? = null
+    val credential_configurations_supported: Map<String, CredentialConfiguration>? = null,
+
+    // Display information for the issuer.
+    val display: List<LocalizedIssuerDisplayDefinition>? = null,
 )

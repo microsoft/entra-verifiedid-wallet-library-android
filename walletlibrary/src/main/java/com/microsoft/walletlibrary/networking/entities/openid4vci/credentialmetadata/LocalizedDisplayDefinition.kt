@@ -16,6 +16,9 @@ internal data class LocalizedDisplayDefinition(
     // Metadata for the logo of the credential.
     val logo: LogoDisplayDefinition? = null,
 
+    // Description of the credential.
+    val description: String? = null,
+
     // Background color of the credential.
     val background_color: String? = null,
 

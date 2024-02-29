@@ -10,5 +10,5 @@ internal data class CredentialOfferGrants(
      * entries. MUST NOT be used otherwise. The value of this parameter MUST match with one of the
      * values in the authorization_servers array obtained from the Credential Issuer metadata.
      */
-    val authorization_server: String? = null
+    val authorization_server: String
 )
