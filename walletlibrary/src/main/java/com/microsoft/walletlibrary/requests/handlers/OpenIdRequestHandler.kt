@@ -25,10 +25,12 @@ import com.microsoft.walletlibrary.wrapper.ManifestResolver
  * OIDC protocol specific implementation of RequestHandler. It can handle OpenID raw request and returns a VerifiedIdRequest.
  */
 internal class OpenIdRequestHandler: RequestHandler {
+    // Indicates whether the provided raw request can be handled by this handler.
     override fun canHandle(rawRequest: Any): Boolean {
         return rawRequest is OpenIdRawRequest
     }
 
+    // Handle and process the provided raw request and returns a VerifiedIdRequest.
     override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
         if (rawRequest !is OpenIdRawRequest)
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")

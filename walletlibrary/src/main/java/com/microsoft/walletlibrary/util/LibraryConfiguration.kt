@@ -1,7 +1,7 @@
 package com.microsoft.walletlibrary.util
 
 /**
- * Configuration such as logger, preview feature flags etc. used by the library.
+ * Configuration such as preview feature flags used by the library.
  */
 internal class LibraryConfiguration(private val previewFeatureFlags: PreviewFeatureFlags) {
 

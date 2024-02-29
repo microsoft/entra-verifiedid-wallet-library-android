@@ -1,5 +1,8 @@
 package com.microsoft.walletlibrary.util
 
+/**
+ * Preview Features that are supported using feature flags.
+ */
 data class PreviewFeatureFlags(val previewFeatureFlags: List<String> = emptyList()) {
 
     private var supportedPreviewFeatureFlags =
@@ -11,6 +14,7 @@ data class PreviewFeatureFlags(val previewFeatureFlags: List<String> = emptyList
         }
     }
 
+    // Determine if requested preview feature is supported.
     fun isPreviewFeatureSupported(featureFlag: String): Boolean {
         return supportedPreviewFeatureFlags[featureFlag] ?: false
     }
