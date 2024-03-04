@@ -5,12 +5,11 @@
 
 package com.microsoft.walletlibrary.requests.resolvers
 
-import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
-import com.microsoft.walletlibrary.requests.handlers.RequestHandler
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
-import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.util.Constants
+import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
 
@@ -18,13 +17,7 @@ import com.microsoft.walletlibrary.wrapper.OpenIdResolver
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
-internal class OpenIdURLRequestResolver: RequestResolver {
-
-    // Indicates whether the raw request returned by this resolver can be handled by provided handler.
-    override fun canResolve(requestHandler: RequestHandler): Boolean {
-        if (requestHandler is OpenIdRequestHandler) return true
-        return false
-    }
+internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration): RequestResolver {
 
     // Indicates whether this resolver can resolve the provided input.
     override fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean {
@@ -34,10 +27,12 @@ internal class OpenIdURLRequestResolver: RequestResolver {
     }
 
     // Resolves the provided input and returns a raw request.
-    override suspend fun resolve(verifiedIdRequestInput: VerifiedIdRequestInput): OpenIdRawRequest {
+    override suspend fun resolve(verifiedIdRequestInput: VerifiedIdRequestInput): Any {
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) throw UnSupportedVerifiedIdRequestInputException(
             "Provided VerifiedIdRequestInput is not supported."
         )
+        if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN))
+            TODO("Not implemented")
         return OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString())
     }
 }
