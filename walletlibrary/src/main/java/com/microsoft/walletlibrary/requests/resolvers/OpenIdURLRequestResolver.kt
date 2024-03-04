@@ -30,7 +30,7 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) throw UnSupportedVerifiedIdRequestInputException(
             "Provided VerifiedIdRequestInput is not supported."
         )
-        if (libraryConfiguration.isPreviewFeatureEnabled(Constants.OPENID4VCI_ACCESS_TOKEN))
+        if (libraryConfiguration.isPreviewFeatureEnabled(Constants.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN))
             TODO("Not implemented")
         return OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString())
     }
