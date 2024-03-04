@@ -16,6 +16,8 @@ import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.requests.resolvers.RequestResolver
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
+import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.WalletLibraryVCSDKLogConsumer
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
@@ -36,6 +38,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
     private var httpAgent: IHttpAgent = OkHttpAgent()
     private val requestResolvers = mutableListOf<RequestResolver>()
     private val requestHandlers = mutableListOf<RequestHandler>()
+    private val previewFeatureFlagsSupported = mutableListOf<String>()
     private val jsonSerializer = Json {
         serializersModule = SerializersModule {
             polymorphic(VerifiedId::class) {
@@ -59,10 +62,18 @@ class VerifiedIdClientBuilder(private val context: Context) {
         return this
     }
 
+    // An optional method to provide a list of preview features to be supported by the client.
+    fun with(previewFeatureFlagsToSupport: List<String>) {
+        previewFeatureFlagsSupported.addAll(previewFeatureFlagsToSupport)
+    }
+
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
     fun build(): VerifiedIdClient {
+        val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
+        val libraryConfiguration = LibraryConfiguration(previewFeatureFlags)
+
         val requestResolverFactory = RequestResolverFactory()
-        registerRequestResolver(OpenIdURLRequestResolver())
+        registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration))
         requestResolverFactory.requestResolvers.addAll(requestResolvers)
 
         val requestHandlerFactory = RequestHandlerFactory()

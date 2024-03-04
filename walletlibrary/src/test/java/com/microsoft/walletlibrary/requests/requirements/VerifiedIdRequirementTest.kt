@@ -45,6 +45,8 @@ class VerifiedIdRequirementTest {
         verifiedIdRequirement.fulfill(expectedVerifiedId)
 
         // Assert
+        assertThat(verifiedIdRequirement._verifiedId).isNotNull
+        assertThat(verifiedIdRequirement._verifiedId).isEqualTo(expectedVerifiedId)
         assertThat(verifiedIdRequirement.verifiedId).isNotNull
         assertThat(verifiedIdRequirement.verifiedId).isEqualTo(expectedVerifiedId)
     }
@@ -150,7 +152,7 @@ class VerifiedIdRequirementTest {
         // Arrange
         val expectedVerifiedId: VerifiableCredential = mockk()
         every { expectedVerifiedId.types } returns listOf("WrongVcType")
-        verifiedIdRequirement.verifiedId = expectedVerifiedId
+        verifiedIdRequirement._verifiedId = expectedVerifiedId
 
         // Act
         val actualResult = verifiedIdRequirement.validate()
