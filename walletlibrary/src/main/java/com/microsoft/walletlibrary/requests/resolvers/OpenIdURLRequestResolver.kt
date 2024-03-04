@@ -9,6 +9,7 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.util.Constants
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
 
@@ -30,7 +31,7 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) throw UnSupportedVerifiedIdRequestInputException(
             "Provided VerifiedIdRequestInput is not supported."
         )
-        if (libraryConfiguration.isPreviewFeatureEnabled(Constants.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN))
+        if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN))
             TODO("Not implemented")
         return OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString())
     }
