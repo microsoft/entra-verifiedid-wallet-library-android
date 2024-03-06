@@ -7,23 +7,27 @@ package com.microsoft.walletlibrary.did.sdk.datasource.network.linkedDomainsOper
 
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResponses.LinkedDomainsResponse
 import com.microsoft.walletlibrary.did.sdk.datasource.network.GetNetworkOperation
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.Constants
-import retrofit2.Response
+import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import java.net.URL
 import javax.inject.Inject
 
-internal class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(val url: String, apiProvider: ApiProvider) :
-    GetNetworkOperation<LinkedDomainsResponse, LinkedDomainsResponse>() {
+internal class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(val url: String, private val apiProvider: HttpAgentApiProvider) :
+    GetNetworkOperation<LinkedDomainsResponse>() {
 
-    override val call: suspend () -> Response<LinkedDomainsResponse> =
+    override suspend fun toResult(response: IResponse): Result<LinkedDomainsResponse> {
+        return Result.success(apiProvider.linkedDomainsApis.toLinkedDomainsResponse(response))
+    }
+
+    override val call: suspend () -> Result<IResponse> =
         {
             val contextPath = URL(url)
             apiProvider.linkedDomainsApis.fetchWellKnownConfigDocument(
                 URL(
                     contextPath,
                     Constants.WELL_KNOWN_CONFIG_DOCUMENT_LOCATION
-                ).toURI()
+                ).toString()
             )
         }
 }

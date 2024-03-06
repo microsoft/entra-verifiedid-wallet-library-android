@@ -15,7 +15,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.Issuanc
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.DigestAlgorithm
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendIssuanceCompletionResponse
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
@@ -24,6 +24,7 @@ import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResol
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.did.sdk.util.logTime
 import kotlinx.coroutines.runBlocking
@@ -37,7 +38,7 @@ import javax.inject.Singleton
 internal class IssuanceService @Inject constructor(
     private val identifierService: IdentifierService,
     private val linkedDomainsService: LinkedDomainsService,
-    private val apiProvider: ApiProvider,
+    private val apiProvider: HttpAgentApiProvider,
     private val jwtValidator: JwtValidator,
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
     private val serializer: Json
@@ -57,7 +58,7 @@ internal class IssuanceService @Inject constructor(
             logTime("Issuance getRequest") {
                 val contract = fetchContract(contractUrl).abortOnError()
                 val linkedDomainResult =
-                    linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer, rootOfTrustResolver).abortOnError()
+                    linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer, rootOfTrustResolver).abortOnError().toSDK()
                 val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
                 Result.Success(request)
             }
@@ -126,7 +127,7 @@ internal class IssuanceService @Inject constructor(
                     url,
                     serializer.encodeToString(completionResponse),
                     apiProvider
-                ).fire()
+                ).fire().toSDK()
             }
         }
     }
@@ -149,6 +150,6 @@ internal class IssuanceService @Inject constructor(
             apiProvider,
             jwtValidator,
             serializer
-        ).fire()
+        ).fire().toSDK()
     }
 }

@@ -38,6 +38,8 @@ import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.WalletLibraryVCSDKLogConsumer
+import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
+import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.json.Json
@@ -51,6 +53,7 @@ import kotlinx.serialization.modules.subclass
 class VerifiedIdClientBuilder(private val context: Context) {
 
     private var logger: WalletLibraryLogger = WalletLibraryLogger
+    private var httpAgent: IHttpAgent = OkHttpAgent()
     private val requestResolvers = mutableListOf<RequestResolver>()
     private val requestProcessors = mutableListOf<RequestProcessor>()
     private val previewFeatureFlagsSupported = mutableListOf<String>()
@@ -104,6 +107,17 @@ class VerifiedIdClientBuilder(private val context: Context) {
         // TODO: Add prefer headers to RequestResolverFactory
         preferHeaders.addAll(extension.prefer)
         // TODO: lookup RequestProcessors by extension associated types and inject extensions
+        returh this
+    }
+    
+    fun with(httpAgent: IHttpAgent): VerifiedIdClientBuilder {
+        this.httpAgent = httpAgent
+        return this
+    }
+
+    // An optional method to provide a list of preview features to be supported by the client.
+    fun with(previewFeatureFlagsToSupport: List<String>): VerifiedIdClientBuilder {
+        previewFeatureFlagsSupported.addAll(previewFeatureFlagsToSupport)
         return this
     }
 
@@ -156,7 +170,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
             logConsumer = vcSdkLogConsumer,
             userAgentInfo = getUserAgent(context),
             walletLibraryVersionInfo = getWalletLibraryVersionInfo(),
-            interceptors = httpInterceptors
+            httpAgent = httpAgent
         )
         return VerifiedIdClient(
             requestResolverFactory,
