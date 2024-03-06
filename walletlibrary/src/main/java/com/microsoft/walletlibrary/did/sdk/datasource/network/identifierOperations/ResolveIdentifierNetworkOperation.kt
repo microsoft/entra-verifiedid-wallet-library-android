@@ -6,13 +6,16 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations
 
 import com.microsoft.walletlibrary.did.sdk.datasource.network.GetNetworkOperation
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
-import retrofit2.Response
+import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import javax.inject.Inject
 
-internal class ResolveIdentifierNetworkOperation @Inject constructor(apiProvider: ApiProvider, url: String, val identifier: String) :
-    GetNetworkOperation<IdentifierResponse, IdentifierResponse>() {
+internal class ResolveIdentifierNetworkOperation @Inject constructor(private val apiProvider: HttpAgentApiProvider, url: String, val identifier: String) :
+    GetNetworkOperation<IdentifierResponse>() {
 
-    override val call: suspend () -> Response<IdentifierResponse> = { apiProvider.identifierApi.resolveIdentifier("$url/$identifier") }
+    override val call: suspend () -> Result<IResponse> = { apiProvider.identifierApi.resolveIdentifier("$url/$identifier") }
+    override suspend fun toResult(response: IResponse): Result<IdentifierResponse> {
+        return Result.success(apiProvider.identifierApi.toIdentifierResponse(response))
+    }
 }

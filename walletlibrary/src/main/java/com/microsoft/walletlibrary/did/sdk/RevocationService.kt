@@ -6,18 +6,19 @@ import com.microsoft.walletlibrary.did.sdk.credential.models.RevocationReceipt
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.RevocationResponseFormatter
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.RevocationException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class RevocationService @Inject constructor(
-    private val apiProvider: ApiProvider,
+    private val apiProvider: HttpAgentApiProvider,
     private val identifierService: IdentifierService,
     private val revocationResponseFormatter: RevocationResponseFormatter,
     private val serializer: Json
@@ -53,6 +54,6 @@ internal class RevocationService @Inject constructor(
             formattedRevocationRequest,
             apiProvider,
             serializer
-        ).fire()
+        ).fire().toSDK()
     }
 }

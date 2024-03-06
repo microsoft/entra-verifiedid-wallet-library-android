@@ -13,6 +13,7 @@ import com.microsoft.walletlibrary.did.sdk.IssuanceService
 import com.microsoft.walletlibrary.did.sdk.LinkedDomainsService
 import com.microsoft.walletlibrary.did.sdk.PresentationService
 import com.microsoft.walletlibrary.did.sdk.RevocationService
+import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.serialization.modules.SerializersModule
@@ -63,6 +64,9 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun walletLibraryVersionInfo(@Named("walletLibraryVersionInfo") walletLibraryVersionInfo: String): Builder
+
+        @BindsInstance
+        fun httpAgent(@Named("agent") agent: IHttpAgent): Builder
 
         @BindsInstance
         fun polymorphicJsonSerializer(@Named("polymorphicJsonSerializer") jsonSerializer: SerializersModule): Builder
