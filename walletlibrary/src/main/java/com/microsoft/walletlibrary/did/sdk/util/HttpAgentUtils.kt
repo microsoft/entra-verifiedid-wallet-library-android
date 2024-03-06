@@ -23,6 +23,7 @@ internal class HttpAgentUtils @Inject constructor(@Named("userAgentInfo") privat
         combinedMap.putAll(b)
         return combinedMap
     }
+
     fun defaultHeaders(contentType: ContentType? = null, body: ByteArray? = null): MutableMap<String, String> {
         val headers = mutableMapOf(
             Constants.USER_AGENT_HEADER to userAgentInfo,
