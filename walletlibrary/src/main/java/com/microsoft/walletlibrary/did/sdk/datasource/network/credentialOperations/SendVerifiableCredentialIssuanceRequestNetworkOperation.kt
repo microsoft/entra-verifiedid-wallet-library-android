@@ -32,7 +32,7 @@ internal class SendVerifiableCredentialIssuanceRequestNetworkOperation(
         return verifyAndUnWrapIssuanceResponse(jwsTokenString)
     }
 
-    override fun onFailure(exception: Throwable): Result<VerifiableCredential> {
+    override fun onFailure(exception: Throwable): Result<Nothing> {
         return super.onFailure(exception).onFailure {
             when (it) {
                 is ForbiddenException -> {

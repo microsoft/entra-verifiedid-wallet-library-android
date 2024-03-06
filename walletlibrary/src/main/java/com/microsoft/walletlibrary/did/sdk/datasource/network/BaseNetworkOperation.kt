@@ -52,7 +52,7 @@ internal abstract class BaseNetworkOperation<T> {
     }
 
     // TODO("what do we want our base to look like")
-    open fun onFailure(exception: Throwable): Result<T> {
+    open fun onFailure(exception: Throwable): Result<Nothing> {
         val response: IResponse = when (exception) {
             is IHttpAgent.ClientException -> {
                 exception.response
