@@ -24,6 +24,7 @@ class OkHttpAgentTest {
 
     @Test
     fun testGet_withUrlAndHeaders_shouldCallClientWithRequest() {
+        // Arrange
         val request = slot<Request>()
         val callback = slot<Callback>()
 
@@ -47,13 +48,14 @@ class OkHttpAgentTest {
                         })
                         .build()
                     callback.captured.onResponse(this@mockk, responseBuilder)
-                    Unit
                 }
             }
         }
         runBlocking {
+            // Act
             val response = client.get(expectedURL, mapOf("header" to "it sure is"))
 
+            // Assert
             assertThat(request.captured.url.toString()).isEqualTo(expectedURL)
             assertThat(response.isSuccess).isTrue
             val unwrapped = response.getOrThrow()
@@ -65,6 +67,7 @@ class OkHttpAgentTest {
 
     @Test
     fun testPost_withUrlAndHeaders_shouldCallClientWithRequest() {
+        // Arrange
         val request = slot<Request>()
         val callback = slot<Callback>()
 
@@ -90,13 +93,14 @@ class OkHttpAgentTest {
                         })
                         .build()
                     callback.captured.onResponse(this@mockk, responseBuilder)
-                    Unit
                 }
             }
         }
         runBlocking {
+            // Act
             val response = client.post(expectedURL, mapOf("header" to "it sure is"), expectedPostPayload)
 
+            // Assert
             assertThat(request.captured.url.toString()).isEqualTo(expectedURL)
             assertThat(response.isSuccess).isTrue
             val unwrapped = response.getOrThrow()
