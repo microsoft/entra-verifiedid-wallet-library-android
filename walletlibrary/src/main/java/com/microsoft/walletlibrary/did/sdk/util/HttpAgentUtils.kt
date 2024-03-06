@@ -2,7 +2,6 @@
 
 package com.microsoft.walletlibrary.did.sdk.util
 
-import com.microsoft.walletlibrary.did.sdk.CorrelationVectorService
 import com.microsoft.walletlibrary.util.http.URLFormEncoding
 import javax.inject.Inject
 import javax.inject.Named
@@ -11,16 +10,16 @@ import javax.inject.Named
  * Internal Class to apply common headers
  */
 internal class HttpAgentUtils @Inject constructor(@Named("userAgentInfo") private val userAgentInfo: String,
-                                                  @Named("walletLibraryVersionInfo") private val walletLibraryVersionInfo: String,
-                                                  private val correlationVectorService: CorrelationVectorService) {
+                                                  @Named("walletLibraryVersionInfo") private val walletLibraryVersionInfo: String) {
     enum class ContentType {
         Json,
         UrlFormEncoded
     }
 
     fun combineMaps(a: Map<String, String>, b: Map<String, String>): Map<String, String> {
-        a.toMutableMap().putAll(b)
-        return a
+        val combinedMap = a.toMutableMap()
+        combinedMap.putAll(b)
+        return combinedMap
     }
     fun defaultHeaders(contentType: ContentType? = null, body: ByteArray? = null): MutableMap<String, String> {
         val headers = mutableMapOf(

@@ -8,6 +8,8 @@ package com.microsoft.walletlibrary
 import android.content.Context
 import android.content.pm.PackageManager
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
+import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
@@ -69,8 +71,15 @@ class VerifiedIdClientBuilder(private val context: Context) {
 
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
     fun build(): VerifiedIdClient {
+        val userAgentInfo = getUserAgent(context)
+        val walletLibraryVersionInfo = getWalletLibraryVersionInfo()
+        val apiProvider = HttpAgentApiProvider(
+            this.httpAgent,
+            HttpAgentUtils(userAgentInfo, walletLibraryVersionInfo),
+            jsonSerializer
+        )
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
-        val libraryConfiguration = LibraryConfiguration(previewFeatureFlags)
+        val libraryConfiguration = LibraryConfiguration(previewFeatureFlags, apiProvider, jsonSerializer)
 
         val requestResolverFactory = RequestResolverFactory()
         registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration))
@@ -84,8 +93,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
         VerifiableCredentialSdk.init(
             context,
             logConsumer = vcSdkLogConsumer,
-            userAgentInfo = getUserAgent(context),
-            walletLibraryVersionInfo = getWalletLibraryVersionInfo(),
+            userAgentInfo = userAgentInfo,
+            walletLibraryVersionInfo = walletLibraryVersionInfo,
             httpAgent = httpAgent
 
         )

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import com.microsoft.walletlibrary.VerifiedIdClient
 import com.microsoft.walletlibrary.VerifiedIdClientBuilder
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
@@ -15,10 +16,14 @@ import com.microsoft.walletlibrarydemo.db.entities.EncodedVerifiedId
 class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : ViewModel() {
     var verifiedIdRequest: VerifiedIdRequest<*>? = null
     var verifiedId: VerifiedId? = null
+    private var verifiedIdClient: VerifiedIdClient
+    private val verifiedIdDao = VerifiedIdDatabase.getInstance(context).verifiedIdDao()
 
     // VerifiedIdClientBuilder configures and returns a VerifiedIdClient.
-    private val verifiedIdClient = VerifiedIdClientBuilder(context).build()
-    private val verifiedIdDao = VerifiedIdDatabase.getInstance(context).verifiedIdDao()
+    init {
+        val builder = VerifiedIdClientBuilder(context)
+        verifiedIdClient = builder.build()
+    }
 
     enum class State(var value: String? = null) {
         INITIALIZED,

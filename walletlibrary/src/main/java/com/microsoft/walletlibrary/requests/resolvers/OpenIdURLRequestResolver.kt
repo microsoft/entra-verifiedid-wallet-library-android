@@ -5,11 +5,15 @@
 
 package com.microsoft.walletlibrary.requests.resolvers
 
+import android.net.Uri
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestNetworkOperation
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.util.Constants
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.PreviewFeatureFlags
+import com.microsoft.walletlibrary.util.RequestURIMissingException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
 
@@ -32,7 +36,42 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
             "Provided VerifiedIdRequestInput is not supported."
         )
         if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN))
-            TODO("Not implemented")
+            return resolveOpenId4VCIRequest(verifiedIdRequestInput)
         return OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString())
     }
+
+    private suspend fun resolveOpenId4VCIRequest(verifiedIdRequestInput: VerifiedIdRequestURL): Any {
+        val requestUri = getRequestUri(verifiedIdRequestInput.url)
+            ?: throw RequestURIMissingException("Request URI is not provided in ${verifiedIdRequestInput.url}.")
+        fetchOpenID4VCIRequest(requestUri)
+            .onSuccess { requestPayload ->
+                return try {
+                    val requestObject =
+                        libraryConfiguration.serializer.parseToJsonElement(requestPayload.decodeToString())
+                    requestObject
+                } catch (e: Exception) {
+                    val presentationRequestContent =
+                        libraryConfiguration.serializer.decodeFromString(
+                            PresentationRequestContent.serializer(),
+                            requestPayload.toString()
+                        )
+                    OpenIdResolver.validateRequest(presentationRequestContent)
+                }
+            }
+            .onFailure { throw RequestURIMissingException("Request fetch failed because of ${it.message}.") }
+        throw RequestURIMissingException("Request fetch failed.")
+    }
+
+    private fun getRequestUri(uri: Uri): String? {
+        var requestUriParameter = uri.getQueryParameter(Constants.REQUEST_URI)
+        if (requestUriParameter == null)
+            requestUriParameter = uri.getQueryParameter(Constants.CREDENTIAL_OFFER_URI)
+        return requestUriParameter
+    }
+
+    private suspend fun fetchOpenID4VCIRequest(url: String) =
+        FetchOpenID4VCIRequestNetworkOperation(
+            url,
+            libraryConfiguration.httpAgentApiProvider
+        ).fire()
 }
