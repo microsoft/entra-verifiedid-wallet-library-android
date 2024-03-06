@@ -6,12 +6,12 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.repository
 
 import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDatabase
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations.ResolveIdentifierNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import javax.inject.Inject
 
-internal class IdentifierRepository @Inject constructor(database: SdkDatabase, val apiProvider: ApiProvider) {
+internal class IdentifierRepository @Inject constructor(database: SdkDatabase, val apiProvider: HttpAgentApiProvider) {
     private val identifierDao = database.identifierDao()
 
     suspend fun resolveIdentifier(url: String, identifier: String) = ResolveIdentifierNetworkOperation(
