@@ -19,13 +19,15 @@ internal class HttpAgentUtils @Inject constructor(@Named("userAgentInfo") privat
     }
 
     fun combineMaps(a: Map<String, String>, b: Map<String, String>): Map<String, String> {
-        a.toMutableMap().putAll(b)
-        return a
+        val combinedMap = a.toMutableMap()
+        combinedMap.putAll(b)
+        return combinedMap
     }
     fun defaultHeaders(contentType: ContentType? = null, body: ByteArray? = null): MutableMap<String, String> {
         val headers = mutableMapOf(
             Constants.USER_AGENT_HEADER to userAgentInfo,
-            Constants.WALLET_LIBRARY_VERSION_HEADER to walletLibraryVersionInfo
+            Constants.WALLET_LIBRARY_VERSION_HEADER to walletLibraryVersionInfo,
+            Constants.CORRELATION_VECTOR_HEADER to correlationVectorService.incrementAndSave()
         )
         headers[Constants.CONTENT_TYPE] = when (contentType) {
             ContentType.Json -> { "application/json"}
