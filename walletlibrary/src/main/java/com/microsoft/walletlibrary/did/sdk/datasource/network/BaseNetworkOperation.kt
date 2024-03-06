@@ -25,10 +25,8 @@ import java.io.IOException
 
 /**
  * Base Network Operation class with default methods for all Network Operations.
- * S: The Response Body Type from the Service.
  * T: The Object transformed from the response body.
- * In default methods, S == T, for no transformation takes place.
- * fire method will just return Result.Success(responseBody: S)
+ * fire method will just return Result.Success(transformedResponseBody: T)
  */
 internal abstract class BaseNetworkOperation<T> {
 
