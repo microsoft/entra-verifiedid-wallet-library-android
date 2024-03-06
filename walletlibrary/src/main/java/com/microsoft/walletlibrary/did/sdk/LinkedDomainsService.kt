@@ -31,7 +31,7 @@ internal class LinkedDomainsService @Inject constructor(
             .onFailure {
                 return Result.failure(it)
             }
-        return Result.failure(SdkException(""))
+        return Result.failure(SdkException("Failed while verifying linked domains"))
     }
 
     private suspend fun verifyLinkedDomains(domainUrls: List<String>, relyingPartyDid: String): Result<LinkedDomainResult> {

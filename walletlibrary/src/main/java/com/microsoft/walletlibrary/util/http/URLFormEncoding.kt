@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.util.http
 
-import java.io.Serializable
+import com.microsoft.walletlibrary.util.WalletLibraryException
 import java.net.URLEncoder
 
 /**
@@ -11,7 +11,7 @@ object URLFormEncoding {
 
     /***
      * Encodes a map of string to  string, string?, or List<string> to URL Form Encoded payload
-     * @throws InvalidURLEncodeData if any other type is in the Map
+     * @throws URLEncodingException if any other type is in the Map
      */
     fun encode(data: Map<String, Any?>): ByteArray {
         val builder = StringBuilder()
@@ -46,19 +46,19 @@ object URLFormEncoding {
                                 // skip this value
                             }
                             else -> {
-                                throw InvalidURLEncodeData(key)
+                                throw URLEncodingException(key)
                             }
                         }
                     }
                 }
                 else -> {
-                    throw InvalidURLEncodeData(key)
+                    throw URLEncodingException(key)
                 }
             }
         }
         return builder.toString().toByteArray()
     }
 
-    class InvalidURLEncodeData(val keyName: String) : Error()
+    class URLEncodingException(val keyName: String) : WalletLibraryException()
 }
 

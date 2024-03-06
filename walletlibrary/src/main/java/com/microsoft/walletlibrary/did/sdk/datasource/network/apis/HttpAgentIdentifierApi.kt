@@ -13,6 +13,7 @@ internal class HttpAgentIdentifierApi(private val agent: IHttpAgent,
     fun toIdentifierResponse(response: IResponse): IdentifierResponse {
         return json.decodeFromString(IdentifierResponse.serializer(), response.body.decodeToString())
     }
+
     suspend fun resolveIdentifier(overrideUrl: String): Result<IResponse> {
         return agent.get(overrideUrl, httpAgentUtils.defaultHeaders())
     }

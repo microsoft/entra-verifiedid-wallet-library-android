@@ -14,8 +14,8 @@ internal class SendIssuanceCompletionResponse(
     serializedResponse: String,
     apiProvider: HttpAgentApiProvider
 ) : PostNetworkOperation<Unit>() {
-
     override val call: suspend () -> Result<IResponse> = { apiProvider.issuanceApis.sendCompletionResponse(url, serializedResponse) }
+
     override suspend fun toResult(response: IResponse): Result<Unit> {
         return Result.success(Unit)
     }

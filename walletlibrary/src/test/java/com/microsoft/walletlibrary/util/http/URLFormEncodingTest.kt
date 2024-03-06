@@ -40,7 +40,7 @@ internal class URLFormEncodingTest {
                 "Failure" to 1
             ))
             fail("Should have failed encoding.")
-        } catch (exception: URLFormEncoding.InvalidURLEncodeData) {
+        } catch (exception: URLFormEncoding.URLEncodingException) {
             assertThat(exception.keyName).isEqualTo("Failure")
         } catch (exception: Exception) {
             fail("Did not throw the expected error")
@@ -55,7 +55,7 @@ internal class URLFormEncodingTest {
                 "Test 2" to "123"
             ))
             fail("Should have failed encoding.")
-        } catch (exception: URLFormEncoding.InvalidURLEncodeData) {
+        } catch (exception: URLFormEncoding.URLEncodingException) {
             assertThat(exception.keyName).isEqualTo("Test 1")
         } catch (exception: Exception) {
             fail("Did not throw the expected error")

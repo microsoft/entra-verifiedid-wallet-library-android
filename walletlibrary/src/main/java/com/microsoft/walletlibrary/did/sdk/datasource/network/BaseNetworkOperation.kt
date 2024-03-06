@@ -54,10 +54,10 @@ internal abstract class BaseNetworkOperation<T> {
     // TODO("what do we want our base to look like")
     open fun onFailure(exception: Throwable): Result<T> {
         val response: IResponse = when (exception) {
-            is IHttpAgent.ClientError -> {
+            is IHttpAgent.ClientException -> {
                 exception.response
             }
-            is IHttpAgent.ServerError -> {
+            is IHttpAgent.ServerException -> {
                 exception.response
             }
             else -> return Result.failure(NetworkException("Unknown Status code", true))
@@ -65,12 +65,12 @@ internal abstract class BaseNetworkOperation<T> {
         val responseBody = response.body.decodeToString()
         val errorMessage = NetworkErrorParser.extractErrorMessage(responseBody) ?: responseBody
         val error = when (response.status) {
-            301u, 302u, 308u -> RedirectException(errorMessage, false)
-            401u -> UnauthorizedException(errorMessage, false)
-            400u, 402u -> ClientException(errorMessage, false)
-            403u -> ForbiddenException(errorMessage, false)
-            404u -> NotFoundException(errorMessage, false)
-            500u, 501u, 502u, 503u -> ServiceUnreachableException(errorMessage, true)
+            301, 302, 308 -> RedirectException(errorMessage, false)
+            401 -> UnauthorizedException(errorMessage, false)
+            400, 402 -> ClientException(errorMessage, false)
+            403 -> ForbiddenException(errorMessage, false)
+            404 -> NotFoundException(errorMessage, false)
+            500, 501, 502, 503 -> ServiceUnreachableException(errorMessage, true)
             else -> NetworkException("Unknown Status code", true)
         }
         error.errorCode = response.status.toString()

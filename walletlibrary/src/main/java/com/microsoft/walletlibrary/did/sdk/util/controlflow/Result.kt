@@ -25,9 +25,11 @@ internal fun <T> KotlinResult<T>.toSDK(): Result<T> {
     this.exceptionOrNull()?.let {
         if (it is SdkException) {
             return Result.Failure(it)
+        } else {
+            return Result.Failure(SdkException("Could not cast failure to SDK", it.cause))
         }
     }
-    return Result.Failure(SdkException("Could not cast failure to SDK"))
+    return Result.Failure(SdkException("Unknown exception"))
 }
 
 internal fun <S> Result<S>.toNative(): KotlinResult<S> {

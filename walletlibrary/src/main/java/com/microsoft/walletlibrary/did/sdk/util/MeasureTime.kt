@@ -34,18 +34,18 @@ internal inline fun logNetworkTime(name: String, block: () -> Result<IResponse>)
     val result = block().onSuccess {
         cvResponse = it.headers[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
         requestId = it.headers[Constants.REQUEST_ID_HEADER] ?: "none"
-        code = it.status.toInt()
+        code = it.status
     }.onFailure {
         when(it) {
-            is IHttpAgent.ClientError -> {
+            is IHttpAgent.ClientException -> {
                 cvResponse = it.response.headers[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
                 requestId = it.response.headers[Constants.REQUEST_ID_HEADER] ?: "none"
-                code = it.response.status.toInt()
+                code = it.response.status
             }
-            is IHttpAgent.ServerError -> {
+            is IHttpAgent.ServerException -> {
                 cvResponse = it.response.headers[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
                 requestId = it.response.headers[Constants.REQUEST_ID_HEADER] ?: "none"
-                code = it.response.status.toInt()
+                code = it.response.status
             }
         }
     }

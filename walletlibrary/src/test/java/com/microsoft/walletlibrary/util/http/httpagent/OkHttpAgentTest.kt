@@ -9,13 +9,13 @@ import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
-import org.assertj.core.api.Assertions.assertThat
 
 class OkHttpAgentTest {
-    private val clientMock = mockk<OkHttpClient>();
-    val client = OkHttpAgent();
+    private val clientMock = mockk<OkHttpClient>()
+    private val client = OkHttpAgent()
 
     @Before
     fun beforeAllTests() {
@@ -33,7 +33,7 @@ class OkHttpAgentTest {
         val expectedPayload = "This is a test".toByteArray(Charsets.UTF_8)
 
         every { clientMock.newCall(capture(request)) } answers {
-            mockk() {
+            mockk {
                 every { enqueue(capture(callback)) } answers {
                     assertThat(request.captured.headers["header"]).isEqualTo("it sure is")
                     val responseBuilder = Response.Builder()
@@ -57,11 +57,12 @@ class OkHttpAgentTest {
             assertThat(request.captured.url.toString()).isEqualTo(expectedURL)
             assertThat(response.isSuccess).isTrue
             val unwrapped = response.getOrThrow()
-            assertThat(unwrapped.status).isEqualTo(expectedStatusCode.toUInt())
+            assertThat(unwrapped.status).isEqualTo(expectedStatusCode)
             assertThat(unwrapped.body).isEqualTo(expectedPayload)
             assertThat(unwrapped.headers).isEqualTo(expectedHeaders)
         }
     }
+
     @Test
     fun testPost_withUrlAndHeaders_shouldCallClientWithRequest() {
         val request = slot<Request>()
@@ -74,7 +75,7 @@ class OkHttpAgentTest {
         val expectedPayload = "A post response should be here".toByteArray(Charsets.UTF_8)
 
         every { clientMock.newCall(capture(request)) } answers {
-            mockk() {
+            mockk {
                 every { enqueue(capture(callback)) } answers {
                     assertThat(request.captured.headers["header"]).isEqualTo("it sure is")
                     assertThat(request.captured.body?.contentLength()).isEqualTo(expectedPostPayload.size.toLong())
@@ -99,7 +100,7 @@ class OkHttpAgentTest {
             assertThat(request.captured.url.toString()).isEqualTo(expectedURL)
             assertThat(response.isSuccess).isTrue
             val unwrapped = response.getOrThrow()
-            assertThat(unwrapped.status).isEqualTo(expectedStatusCode.toUInt())
+            assertThat(unwrapped.status).isEqualTo(expectedStatusCode)
             assertThat(unwrapped.body).isEqualTo(expectedPayload)
             assertThat(unwrapped.headers).isEqualTo(expectedHeaders)
         }

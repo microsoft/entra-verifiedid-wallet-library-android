@@ -11,7 +11,6 @@ import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 
 internal class SendPresentationResponseNetworkOperation(url: String, serializedIdToken: String, vpToken: String, state: String?, apiProvider: HttpAgentApiProvider) :
     PostNetworkOperation<Unit>() {
-
     override val call: suspend () -> Result<IResponse> = {
         apiProvider.presentationApis.sendResponse(url, serializedIdToken, vpToken, state) }
 

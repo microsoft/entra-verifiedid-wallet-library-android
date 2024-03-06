@@ -14,6 +14,7 @@ internal class HttpAgentIssuanceApi(private val agent: IHttpAgent,
     fun parseContract(response: IResponse): ContractServiceResponse {
         return json.decodeFromString(ContractServiceResponse.serializer(), response.body.decodeToString())
     }
+
     suspend fun getContract(overrideUrl: String): Result<IResponse> {
         return agent.get(overrideUrl,
             httpAgentUtils.combineMaps(
