@@ -72,15 +72,29 @@ class VerifiedIdClientBuilder(private val context: Context) {
 
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
     fun build(): VerifiedIdClient {
+        val vcSdkLogConsumer = WalletLibraryVCSDKLogConsumer(logger)
         val userAgentInfo = getUserAgent(context)
         val walletLibraryVersionInfo = getWalletLibraryVersionInfo()
+        VerifiableCredentialSdk.init(
+            context,
+            logConsumer = vcSdkLogConsumer,
+            userAgentInfo = userAgentInfo,
+            walletLibraryVersionInfo = walletLibraryVersionInfo,
+            httpAgent = httpAgent
+        )
+
         val apiProvider = HttpAgentApiProvider(
             this.httpAgent,
-            HttpAgentUtils(userAgentInfo, walletLibraryVersionInfo),
+            HttpAgentUtils(
+                userAgentInfo,
+                walletLibraryVersionInfo,
+                VerifiableCredentialSdk.correlationVectorService
+            ),
             jsonSerializer
         )
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
-        val libraryConfiguration = LibraryConfiguration(previewFeatureFlags, apiProvider, jsonSerializer)
+        val libraryConfiguration =
+            LibraryConfiguration(previewFeatureFlags, apiProvider, jsonSerializer)
 
         val requestResolverFactory = RequestResolverFactory()
         registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration))
@@ -90,15 +104,6 @@ class VerifiedIdClientBuilder(private val context: Context) {
         registerRequestHandler(OpenIdRequestHandler())
         requestHandlerFactory.requestHandlers.addAll(requestHandlers)
 
-        val vcSdkLogConsumer = WalletLibraryVCSDKLogConsumer(logger)
-        VerifiableCredentialSdk.init(
-            context,
-            logConsumer = vcSdkLogConsumer,
-            userAgentInfo = userAgentInfo,
-            walletLibraryVersionInfo = walletLibraryVersionInfo,
-            httpAgent = httpAgent
-
-        )
         return VerifiedIdClient(
             requestResolverFactory,
             requestHandlerFactory,
@@ -122,7 +127,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
     private fun getUserAgent(applicationContext: Context): String {
         return try {
             val packageManager = applicationContext.packageManager
-            val applicationInfo = packageManager.getApplicationInfo(applicationContext.packageName, 0)
+            val applicationInfo =
+                packageManager.getApplicationInfo(applicationContext.packageName, 0)
             val appName = packageManager.getApplicationLabel(applicationInfo).toString()
             val packageInfo = packageManager.getPackageInfo(applicationContext.packageName, 0)
             appName + "/" + packageInfo.versionName
