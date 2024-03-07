@@ -31,7 +31,7 @@ internal class FetchPresentationRequestNetworkOperation(
         return verifyAndUnwrapPresentationRequest(jwsTokenString)
     }
 
-    override fun onFailure(exception: Throwable): Result<PresentationRequestContent> {
+    override fun onFailure(exception: Throwable): Result<Nothing> {
         return super.onFailure(exception).onFailure {
             if (it is NotFoundException) {
                 val expiredTokenException = ExpiredTokenException(exception.message ?: "", false)

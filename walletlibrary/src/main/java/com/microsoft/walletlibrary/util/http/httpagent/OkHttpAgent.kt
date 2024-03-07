@@ -78,7 +78,7 @@ class OkHttpAgent : IHttpAgent() {
         } ?: ByteArray(0)
 
         val abstractResponse = IResponse(
-            status = response.code.toUInt(),
+            status = response.code,
             headers = headersToMap(response.headers),
             body = body
         )
@@ -88,13 +88,13 @@ class OkHttpAgent : IHttpAgent() {
                 Result.success(abstractResponse)
             }
             in 400..499 -> {
-                Result.failure(ClientError(abstractResponse))
+                Result.failure(ClientException(abstractResponse))
             }
             in 500..599 -> {
-                Result.failure(ServerError(abstractResponse))
+                Result.failure(ServerException(abstractResponse))
             }
             else -> {
-                Result.failure(HttpAgentError(abstractResponse))
+                Result.failure(HttpAgentException(abstractResponse))
             }
         }
     }

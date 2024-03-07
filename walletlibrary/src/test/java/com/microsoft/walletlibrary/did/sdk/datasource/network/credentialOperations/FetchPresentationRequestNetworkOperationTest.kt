@@ -134,12 +134,12 @@ class FetchPresentationRequestNetworkOperationTest {
 }"""
 
     @Test
-    fun FetchPresentationRequestNetworkOperation_withTwoVPTokens_SucceedsToResolvePresentationRequestContent() {
+    fun fetchPresentationRequestNetworkOperation_withTwoVPTokens_SucceedsToResolvePresentationRequestContent() {
         // Arrange
         val apiProvider: HttpAgentApiProvider = mockk {
             every { presentationApis } returns mockk {
                 coEvery { getRequest(any()) } returns Result.success(IResponse(
-                    status = 200u,
+                    status = 200,
                     headers = emptyMap(),
                     body = ("I'm a fake token").toByteArray(Charsets.UTF_8)
                 ))

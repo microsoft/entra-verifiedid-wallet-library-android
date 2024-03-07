@@ -6,6 +6,10 @@ import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
 
+/**
+ * Api class to perform linked domains related network operations using the provided HttpAgent, utils
+ * and json serializer to convert the network response to Linked Domains related model.
+ */
 internal class HttpAgentLinkedDomainsApi(private val agent: IHttpAgent,
                                          private val httpAgentUtils: HttpAgentUtils,
                                          private val json : Json

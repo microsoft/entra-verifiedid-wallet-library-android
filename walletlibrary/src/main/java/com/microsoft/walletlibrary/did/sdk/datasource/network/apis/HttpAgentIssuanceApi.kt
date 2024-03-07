@@ -7,6 +7,10 @@ import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
 
+/**
+ * Api class to perform issuance related network operations using the provided HttpAgent, utils
+ * and json serializer to convert the network response to Issuance related model.
+ */
 internal class HttpAgentIssuanceApi(private val agent: IHttpAgent,
                                     private val httpAgentUtils: HttpAgentUtils,
                                     private val json :Json) {
@@ -14,6 +18,7 @@ internal class HttpAgentIssuanceApi(private val agent: IHttpAgent,
     fun parseContract(response: IResponse): ContractServiceResponse {
         return json.decodeFromString(ContractServiceResponse.serializer(), response.body.decodeToString())
     }
+
     suspend fun getContract(overrideUrl: String): Result<IResponse> {
         return agent.get(overrideUrl,
             httpAgentUtils.combineMaps(

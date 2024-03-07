@@ -65,8 +65,9 @@ class VerifiedIdClientBuilder(private val context: Context) {
     }
 
     // An optional method to provide a list of preview features to be supported by the client.
-    fun with(previewFeatureFlagsToSupport: List<String>) {
+    fun with(previewFeatureFlagsToSupport: List<String>): VerifiedIdClientBuilder {
         previewFeatureFlagsSupported.addAll(previewFeatureFlagsToSupport)
+        return this
     }
 
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
