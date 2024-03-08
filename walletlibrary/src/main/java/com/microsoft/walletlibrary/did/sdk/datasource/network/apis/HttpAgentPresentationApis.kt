@@ -20,14 +20,6 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
         )))
     }
 
-    suspend fun getOpenID4VCIRequest(overrideUrl: String): Result<IResponse> {
-        return agent.get(overrideUrl, httpAgentUtils.combineMaps(
-            httpAgentUtils.defaultHeaders(),
-            mapOf(
-                Constants.PREFER to "oid4vci-interop-profile-version=0.0.1"
-            )))
-    }
-
     suspend fun sendResponse(
         overrideUrl: String,
         token: String,
