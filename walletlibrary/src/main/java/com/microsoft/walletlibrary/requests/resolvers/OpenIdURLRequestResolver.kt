@@ -16,6 +16,7 @@ import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequestURIMissingException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
+import org.json.JSONObject
 
 /**
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
@@ -46,9 +47,8 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         fetchOpenID4VCIRequest(requestUri)
             .onSuccess { requestPayload ->
                 return try {
-                    val requestObject =
-                        libraryConfiguration.serializer.parseToJsonElement(requestPayload.decodeToString())
-                    requestObject
+                    JSONObject(requestPayload.decodeToString())
+                    requestPayload.decodeToString()
                 } catch (e: Exception) {
                     val presentationRequestContent =
                         libraryConfiguration.serializer.decodeFromString(
