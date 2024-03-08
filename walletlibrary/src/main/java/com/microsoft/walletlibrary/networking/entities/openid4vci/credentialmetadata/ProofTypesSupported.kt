@@ -8,5 +8,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ProofTypesSupported(
     // The type of proof that can be used to show ownership of keys bound to crypto binding method (ex. jwt).
-    val proof_types_supported: List<String>
+    val proof_signing_alg_values_supported: List<String>
 )
