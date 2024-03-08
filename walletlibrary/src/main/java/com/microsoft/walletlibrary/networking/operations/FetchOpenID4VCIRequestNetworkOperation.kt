@@ -8,7 +8,8 @@ internal class FetchOpenID4VCIRequestNetworkOperation(
     private val url: String,
     private val apiProvider: HttpAgentApiProvider
 ) : GetNetworkOperation<ByteArray>() {
-    override val call: suspend () -> Result<IResponse> = { apiProvider.presentationApis.getOpenID4VCIRequest(url) }
+    override val call: suspend () -> Result<IResponse> =
+        { apiProvider.openId4VciApi.getOpenID4VCIRequest(url) }
 
     override suspend fun toResult(response: IResponse): Result<ByteArray> {
         return Result.success(response.body)

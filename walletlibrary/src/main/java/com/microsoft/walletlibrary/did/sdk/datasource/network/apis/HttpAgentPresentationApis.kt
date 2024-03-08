@@ -20,14 +20,6 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
         )))
     }
 
-    suspend fun getOpenID4VCIRequest(overrideUrl: String): Result<IResponse> {
-        return agent.get(overrideUrl, httpAgentUtils.combineMaps(
-            httpAgentUtils.defaultHeaders(),
-            mapOf(
-                Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
-            )))
-    }
-
     suspend fun sendResponse(
         overrideUrl: String,
         token: String,

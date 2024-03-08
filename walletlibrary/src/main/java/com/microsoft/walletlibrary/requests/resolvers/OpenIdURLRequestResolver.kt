@@ -16,14 +16,14 @@ import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequestURIMissingException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
-import org.json.JSONArray
 import org.json.JSONObject
 
 /**
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
-internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration): RequestResolver {
+internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration) :
+    RequestResolver {
 
     // Indicates whether this resolver can resolve the provided input.
     override fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean {
@@ -75,17 +75,4 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
             url,
             libraryConfiguration.httpAgentApiProvider
         ).fire()
-}
-
-fun JSONObject.toMap(): Map<String, *> = keys().asSequence().associateWith {
-    when (val value = this[it]) {
-        is JSONArray -> {
-            val map = (0 until value.length()).associate { Pair(it.toString(), value[it]) }
-            JSONObject(map).toMap().values.toList()
-        }
-
-        is JSONObject -> value.toMap()
-        JSONObject.NULL -> null
-        else -> value
-    }
 }
