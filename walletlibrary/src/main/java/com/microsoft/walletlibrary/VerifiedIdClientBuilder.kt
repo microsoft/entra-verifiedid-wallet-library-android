@@ -12,6 +12,7 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiP
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
+import com.microsoft.walletlibrary.requests.handlers.OpenId4VCIRequestHandler
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
 import com.microsoft.walletlibrary.requests.handlers.RequestHandler
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
@@ -102,6 +103,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
 
         val requestHandlerFactory = RequestHandlerFactory()
         registerRequestHandler(OpenIdRequestHandler())
+        registerRequestHandler(OpenId4VCIRequestHandler(libraryConfiguration))
         requestHandlerFactory.requestHandlers.addAll(requestHandlers)
 
         return VerifiedIdClient(

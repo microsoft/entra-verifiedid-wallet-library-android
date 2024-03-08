@@ -24,7 +24,7 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
         return agent.get(overrideUrl, httpAgentUtils.combineMaps(
             httpAgentUtils.defaultHeaders(),
             mapOf(
-                Constants.PREFER to "oid4vci-interop-profile-version=0.0.1"
+                Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
             )))
     }
 
