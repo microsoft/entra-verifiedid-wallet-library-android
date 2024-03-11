@@ -9,6 +9,7 @@ import com.microsoft.walletlibrary.VerifiedIdClientBuilder
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrarydemo.db.VerifiedIdDatabase
 import com.microsoft.walletlibrarydemo.db.entities.EncodedVerifiedId
@@ -22,6 +23,7 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : V
     // VerifiedIdClientBuilder configures and returns a VerifiedIdClient.
     init {
         val builder = VerifiedIdClientBuilder(context)
+        builder.with(listOf(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN))
         verifiedIdClient = builder.build()
     }
 

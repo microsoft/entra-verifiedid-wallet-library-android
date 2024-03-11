@@ -12,9 +12,11 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.util.Constants
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequestURIMissingException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
 import org.json.JSONObject
 
@@ -59,8 +61,17 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
                     OpenIdResolver.validateRequest(presentationRequestContent)
                 }
             }
-            .onFailure { throw RequestURIMissingException("Request fetch failed because of ${it.message}.") }
-        throw RequestURIMissingException("Request fetch failed.")
+            .onFailure {
+                throw OpenId4VciRequestException(
+                    "Request fetch failed because of ${it.message}.",
+                    VerifiedIdExceptions.CREDENTIAL_OFFER_FETCH_EXCEPTION.value,
+                    it as Exception
+                )
+            }
+        throw OpenId4VciRequestException(
+            "Request fetch failed.",
+            VerifiedIdExceptions.CREDENTIAL_OFFER_FETCH_EXCEPTION.value
+        )
     }
 
     private fun getRequestUri(uri: Uri): String? {
