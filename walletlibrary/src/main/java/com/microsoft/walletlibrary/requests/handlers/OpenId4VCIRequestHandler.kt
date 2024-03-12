@@ -93,7 +93,6 @@ internal class OpenId4VCIRequestHandler(private val libraryConfiguration: Librar
         return credentialIssuer
     }
 
-
     private suspend fun getRootOfTrust(
         signedMetadata: String,
         credentialIssuer: String
