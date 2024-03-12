@@ -24,6 +24,7 @@ import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import kotlin.Result as KotlinResult
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.every
@@ -338,10 +339,10 @@ class PresentationServiceTest {
     }
 
     private fun mockIdentifierAndLinkedDomains() {
-        coEvery { linkedDomainsService.fetchAndVerifyLinkedDomains(any()) } returns Result.Success(
+        coEvery { linkedDomainsService.fetchAndVerifyLinkedDomains(any()) } returns KotlinResult.success(
             LinkedDomainVerified(mockedIdentifierDocumentServiceEndpoint)
         )
-        coEvery { mockedResolver.resolve(expectedEntityIdentifier) } returns Result.Success(mockedIdentifierDocument)
+        coEvery { mockedResolver.resolve(expectedEntityIdentifier) } returns KotlinResult.success(mockedIdentifierDocument)
         every { mockedIdentifierDocument.service } returns listOf(mockedIdentifierDocumentService)
         every { mockedIdentifierDocumentService.type } returns mockedIdentifierDocumentServiceType
         every { mockedIdentifierDocumentService.serviceEndpoint } returns listOf(mockedIdentifierDocumentServiceEndpoint)
@@ -349,13 +350,13 @@ class PresentationServiceTest {
 
     private fun mockPresentationRequestFromNetwork() {
         val expectedPresentationRequest = unwrapPresentationContent(expectedPresentationRequestJwt)
-        coEvery { anyConstructed<FetchPresentationRequestNetworkOperation>().fire() } returns Result.Success(expectedPresentationRequest)
+        coEvery { anyConstructed<FetchPresentationRequestNetworkOperation>().fire() } returns KotlinResult.success(expectedPresentationRequest)
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
     }
 
     private fun mockPresentationRequestWithInvalidSignatureFromNetwork() {
         val expectedPresentationRequest = unwrapPresentationContent(expectedPresentationRequestJwt)
-        coEvery { anyConstructed<FetchPresentationRequestNetworkOperation>().fire() } returns Result.Success(expectedPresentationRequest)
+        coEvery { anyConstructed<FetchPresentationRequestNetworkOperation>().fire() } returns KotlinResult.success(expectedPresentationRequest)
         coEvery { mockedJwtValidator.verifySignature(any()) } returns false
     }
 }

@@ -86,7 +86,7 @@ class VerifiedIdClientTest {
         val verifiedIdRequestURL: VerifiedIdRequestURL = mockk()
         every { requestResolverFactory.getResolver(verifiedIdRequestURL) } returns openIdURLRequestResolver
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) } returns verifiedIdOpenIdJwtRawRequest
-        every { requestHandlerFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
+        every { requestHandlerFactory.getHandler(verifiedIdOpenIdJwtRawRequest) } returns openIdRequestHandler
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) } returns openIdPresentationRequest
 
         runBlocking {
@@ -114,7 +114,7 @@ class VerifiedIdClientTest {
         )
         val verifiedIdRequestURL: VerifiedIdRequestURL = mockk()
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) } returns verifiedIdOpenIdJwtRawRequest
-        every { requestHandlerFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
+        every { requestHandlerFactory.getHandler(verifiedIdOpenIdJwtRawRequest) } returns openIdRequestHandler
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) } returns openIdPresentationRequest
 
         runBlocking {
@@ -181,7 +181,7 @@ class VerifiedIdClientTest {
         val verifiedIdRequestURL: VerifiedIdRequestURL = mockk()
         every { requestResolverFactory.getResolver(verifiedIdRequestURL) } returns openIdURLRequestResolver
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) } returns verifiedIdOpenIdJwtRawRequest
-        every { requestHandlerFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
+        every { requestHandlerFactory.getHandler(verifiedIdOpenIdJwtRawRequest) } returns openIdRequestHandler
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }.throws(
             UnSupportedProtocolException()
         )
@@ -219,7 +219,6 @@ class VerifiedIdClientTest {
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) }.throws(
             UnSupportedVerifiedIdRequestInputException()
         )
-        every { requestHandlerFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) } returns openIdPresentationRequest
 
         runBlocking {

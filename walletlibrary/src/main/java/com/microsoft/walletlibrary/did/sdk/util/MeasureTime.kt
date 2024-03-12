@@ -5,7 +5,8 @@ package com.microsoft.walletlibrary.did.sdk.util
 import com.microsoft.walletlibrary.did.sdk.util.MetricsConstants.DURATION
 import com.microsoft.walletlibrary.did.sdk.util.MetricsConstants.NAME
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
-import retrofit2.Response
+import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
+import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 
 internal object MetricsConstants {
     const val NAME = "eventName"
@@ -25,24 +26,39 @@ internal inline fun <R> logTime(name: String, block: () -> R): R {
     return result
 }
 
-internal inline fun <S> logNetworkTime(name: String, block: () -> Response<S>): Response<S> {
+internal inline fun logNetworkTime(name: String, block: () -> Result<IResponse>): Result<IResponse> {
     val start = System.currentTimeMillis()
-    val result = block()
+    var code = 0
+    var cvResponse = "none"
+    var requestId = "none"
+    val result = block().onSuccess {
+        cvResponse = it.headers[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
+        requestId = it.headers[Constants.REQUEST_ID_HEADER] ?: "none"
+        code = it.status
+    }.onFailure {
+        when(it) {
+            is IHttpAgent.ClientException -> {
+                cvResponse = it.response.headers[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
+                requestId = it.response.headers[Constants.REQUEST_ID_HEADER] ?: "none"
+                code = it.response.status
+            }
+            is IHttpAgent.ServerException -> {
+                cvResponse = it.response.headers[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
+                requestId = it.response.headers[Constants.REQUEST_ID_HEADER] ?: "none"
+                code = it.response.status
+            }
+        }
+    }
     val elapsedTime = System.currentTimeMillis() - start
-
-    val cvRequest = result.raw().request.headers[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
-    val cvResponse = result.raw().headers[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
-    val requestId = result.raw().headers[Constants.REQUEST_ID_HEADER] ?: "none"
 
     SdkLog.event(
         "DIDNetworkMetrics", mapOf(
             NAME to name,
             DURATION to "$elapsedTime",
-            "CV_request" to cvRequest,
             "CV_response" to cvResponse,
             "request_Id" to requestId,
-            "isSuccessful" to "${result.isSuccessful}",
-            "code" to "${result.code()}"
+            "isSuccessful" to "${result.isSuccess}",
+            "code" to "$code"
         )
     )
     return result

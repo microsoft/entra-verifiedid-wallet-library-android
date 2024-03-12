@@ -8,6 +8,7 @@ package com.microsoft.walletlibrary.wrapper
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
@@ -23,6 +24,23 @@ object OpenIdResolver {
     internal suspend fun getRequest(uri: String, rootOfTrustResolver: RootOfTrustResolver? = null): OpenIdRawRequest {
         when (val presentationRequestResult =
             VerifiableCredentialSdk.presentationService.getRequest(uri, rootOfTrustResolver)) {
+            is Result.Success -> {
+                val request = presentationRequestResult.payload
+                val requestType = getRequestType(request)
+                return VerifiedIdOpenIdJwtRawRequest(request, requestType)
+            }
+            is Result.Failure -> {
+                throw VerifiedIdRequestFetchException(
+                    "Unable to fetch presentation request",
+                    presentationRequestResult.payload
+                )
+            }
+        }
+    }
+
+    internal suspend fun validateRequest(requestContent: PresentationRequestContent): OpenIdRawRequest {
+        when (val presentationRequestResult =
+            VerifiableCredentialSdk.presentationService.validateRequest(requestContent)) {
             is Result.Success -> {
                 val request = presentationRequestResult.payload
                 val requestType = getRequestType(request)

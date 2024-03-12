@@ -14,7 +14,6 @@ import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
-import com.microsoft.walletlibrary.requests.rawrequests.RawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.util.InputCastingException
@@ -28,7 +27,13 @@ import com.microsoft.walletlibrary.wrapper.ManifestResolver
  */
 internal class OpenIdRequestHandler : RequestHandler {
 
-    override suspend fun handleRequest(rawRequest: RawRequest, rootOfTrustResolver: RootOfTrustResolver?): VerifiedIdRequest<*> {
+    // Indicates whether the provided raw request can be handled by this handler.
+    override fun canHandle(rawRequest: Any): Boolean {
+        return rawRequest is OpenIdRawRequest
+    }
+
+    // Handle and process the provided raw request and returns a VerifiedIdRequest.
+    override suspend fun handleRequest(rawRequest: Any, rootOfTrustResolver: RootOfTrustResolver?): VerifiedIdRequest<*> {
         if (rawRequest !is OpenIdRawRequest)
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
         val presentationRequestContent = rawRequest.mapToPresentationRequestContent()

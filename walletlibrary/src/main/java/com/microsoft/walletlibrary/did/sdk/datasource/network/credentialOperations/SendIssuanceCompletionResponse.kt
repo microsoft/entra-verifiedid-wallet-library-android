@@ -6,18 +6,17 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations
 
 import com.microsoft.walletlibrary.did.sdk.datasource.network.PostNetworkOperation
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
-import retrofit2.Response
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
+import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 
 internal class SendIssuanceCompletionResponse(
     url: String,
     serializedResponse: String,
-    apiProvider: ApiProvider
-) : PostNetworkOperation<Unit, Unit>() {
-    override val call: suspend () -> Response<Unit> = { apiProvider.issuanceApis.sendCompletionResponse(url, serializedResponse) }
+    apiProvider: HttpAgentApiProvider
+) : PostNetworkOperation<Unit>() {
+    override val call: suspend () -> Result<IResponse> = { apiProvider.issuanceApis.sendCompletionResponse(url, serializedResponse) }
 
-    override suspend fun onSuccess(response: Response<Unit>): Result<Unit> {
-        return Result.Success(Unit)
+    override suspend fun toResult(response: IResponse): Result<Unit> {
+        return Result.success(Unit)
     }
 }

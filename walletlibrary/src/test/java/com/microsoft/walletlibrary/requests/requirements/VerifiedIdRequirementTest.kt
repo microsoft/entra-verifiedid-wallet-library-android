@@ -152,7 +152,7 @@ class VerifiedIdRequirementTest {
         // Arrange
         val expectedVerifiedId: VerifiableCredential = mockk()
         every { expectedVerifiedId.types } returns listOf("WrongVcType")
-        verifiedIdRequirement.verifiedId = expectedVerifiedId
+        verifiedIdRequirement._verifiedId = expectedVerifiedId
 
         // Act
         val actualResult = verifiedIdRequirement.validate()

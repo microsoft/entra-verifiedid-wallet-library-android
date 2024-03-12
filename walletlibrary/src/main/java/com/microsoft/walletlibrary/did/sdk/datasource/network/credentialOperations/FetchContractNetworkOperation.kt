@@ -6,28 +6,26 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations
 
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResponses.ContractServiceResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.GetNetworkOperation
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.DidInHeaderAndPayloadNotMatching
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.IssuanceException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
-import retrofit2.Response
 
 internal class FetchContractNetworkOperation(
     val url: String,
-    apiProvider: ApiProvider,
+    private val apiProvider: HttpAgentApiProvider,
     private val jwtValidator: JwtValidator,
     private val serializer: Json
-) : GetNetworkOperation<ContractServiceResponse, VerifiableCredentialContract>() {
-    override val call: suspend () -> Response<ContractServiceResponse> = { apiProvider.issuanceApis.getContract(url) }
+) : GetNetworkOperation<VerifiableCredentialContract>() {
+    override val call: suspend () -> Result<IResponse> = { apiProvider.issuanceApis.getContract(url) }
 
-    override suspend fun onSuccess(response: Response<ContractServiceResponse>): Result<VerifiableCredentialContract> {
-        val jwsTokenString = response.body()?.token ?: throw IssuanceException("Contract was not found in response")
+    override suspend fun toResult(response: IResponse): Result<VerifiableCredentialContract> {
+        val contract = apiProvider.issuanceApis.parseContract(response)
+        val jwsTokenString = contract.token
         return verifyAndUnwrapContract(jwsTokenString)
     }
 
@@ -38,6 +36,6 @@ internal class FetchContractNetworkOperation(
             throw InvalidSignatureException("Signature is not valid on Issuance Request.")
         if (!jwtValidator.validateDidInHeaderAndPayload(jwsToken, verifiableCredentialContract.input.issuer))
             throw DidInHeaderAndPayloadNotMatching("DID used to sign the contract doesn't match the DID in the contract.")
-        return Result.Success(verifiableCredentialContract)
+        return Result.success(verifiableCredentialContract)
     }
 }

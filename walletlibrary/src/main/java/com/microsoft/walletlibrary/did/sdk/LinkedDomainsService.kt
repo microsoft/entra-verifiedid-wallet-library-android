@@ -7,15 +7,13 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomai
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.DomainLinkageCredentialValidator
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.linkedDomainsOperations.FetchWellKnownConfigDocumentNetworkOperation
+import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.map
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import java.net.URL
 import javax.inject.Inject
@@ -23,7 +21,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LinkedDomainsService @Inject constructor(
-    private val apiProvider: ApiProvider,
+    private val apiProvider: HttpAgentApiProvider,
     private val resolver: Resolver,
     private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator
 ) {
@@ -34,7 +32,7 @@ internal class LinkedDomainsService @Inject constructor(
     ): Result<LinkedDomainResult> {
         return try {
             val verifiedDomains = verifyLinkedDomainsUsingResolver(relyingPartyDid, rootOfTrustResolver)
-            Result.Success(verifiedDomains)
+            Result.success(verifiedDomains)
         } catch (ex: SdkException) {
             SdkLog.i(
                 "Linked Domains verification using resolver failed with exception $ex. " +
@@ -55,37 +53,64 @@ internal class LinkedDomainsService @Inject constructor(
     }
 
     private suspend fun verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid: String): Result<LinkedDomainResult> {
-        return runResultTry {
-            val domainUrls = getLinkedDomainsFromDid(relyingPartyDid).abortOnError()
-            verifyLinkedDomains(domainUrls, relyingPartyDid)
-        }
+        getLinkedDomainsFromDid(relyingPartyDid)
+            .onSuccess { domainUrls ->
+                return verifyLinkedDomains(domainUrls, relyingPartyDid)
+            }
+            .onFailure {
+                return Result.failure(it)
+            }
+        return Result.failure(SdkException("Failed while verifying linked domains"))
     }
 
-    private suspend fun verifyLinkedDomains(domainUrls: List<String>, relyingPartyDid: String): Result<LinkedDomainResult> {
-        return runResultTry {
-            if (domainUrls.isEmpty())
-                return@runResultTry Result.Success(LinkedDomainMissing)
-            val domainUrl = domainUrls.first()
-            val hostname = URL(domainUrl).host
-            val wellKnownConfigDocumentResult = getWellKnownConfigDocument(domainUrl)
-            if (wellKnownConfigDocumentResult is Result.Success) {
-                val wellKnownConfigDocument = wellKnownConfigDocumentResult.payload
-                wellKnownConfigDocument.linkedDids.forEach { linkedDidJwt ->
-                    val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(linkedDidJwt, relyingPartyDid, domainUrl)
-                    if (isDomainLinked) return@runResultTry Result.Success(LinkedDomainVerified(hostname))
+    internal suspend fun verifyLinkedDomains(
+        domainUrls: List<String>,
+        relyingPartyDid: String
+    ): Result<LinkedDomainResult> {
+        if (domainUrls.isEmpty())
+            return Result.success(LinkedDomainMissing)
+        val domainUrl = domainUrls.first()
+        val hostname = URL(domainUrl).host
+        return getWellKnownConfigDocument(domainUrl)
+            .map { wellKnownConfigDocument ->
+                wellKnownConfigDocument.linkedDids.firstNotNullOf { linkedDidJwt ->
+                    val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(
+                        linkedDidJwt,
+                        relyingPartyDid,
+                        domainUrl
+                    )
+                    if (isDomainLinked)
+                        LinkedDomainVerified(hostname)
+                    else
+                        null
                 }
-            } else SdkLog.i("Unable to fetch well-known config document from $domainUrl")
-            Result.Success(LinkedDomainUnVerified(hostname))
-        }
+            }.onFailure {
+                SdkLog.d("Unable to fetch well-known config document from $domainUrl")
+            }.recover {
+                LinkedDomainUnVerified(hostname)
+            }
     }
 
     private suspend fun getLinkedDomainsFromDid(relyingPartyDid: String): Result<List<String>> {
-        val didDocumentResult = resolver.resolve(relyingPartyDid)
+        val didDocumentResult = resolveIdentifierDocument(relyingPartyDid)
         return didDocumentResult.map { didDocument ->
-            val linkedDomainsServices =
-                didDocument.service.filter { service -> service.type.equals(Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE, true) }
-            linkedDomainsServices.map { it.serviceEndpoint }.flatten()
+            getLinkedDomainsFromDidDocument(didDocument)
         }
+    }
+
+    internal suspend fun resolveIdentifierDocument(relyingPartyDid: String): Result<IdentifierDocument> {
+        return resolver.resolve(relyingPartyDid)
+    }
+
+    internal fun getLinkedDomainsFromDidDocument(didDocument: IdentifierDocument): List<String> {
+        val linkedDomainsServices =
+            didDocument.service.filter { service ->
+                service.type.equals(
+                    Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE,
+                    true
+                )
+            }
+        return linkedDomainsServices.map { it.serviceEndpoint }.flatten()
     }
 
     private suspend fun getWellKnownConfigDocument(domainUrl: String) = FetchWellKnownConfigDocumentNetworkOperation(

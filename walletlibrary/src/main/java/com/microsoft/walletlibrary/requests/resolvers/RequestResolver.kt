@@ -6,9 +6,7 @@
 package com.microsoft.walletlibrary.requests.resolvers
 
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
-import com.microsoft.walletlibrary.requests.handlers.RequestHandler
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
-import com.microsoft.walletlibrary.requests.rawrequests.RawRequest
 
 /**
  * An implementation RequestResolver is specific to a certain type of RequestHandler and VerifiedIdRequestInput.
@@ -16,12 +14,9 @@ import com.microsoft.walletlibrary.requests.rawrequests.RawRequest
  */
 internal interface RequestResolver {
 
-    // Indicates whether the raw request returned by this resolver can be handled by provided handler.
-    fun canResolve(requestHandler: RequestHandler): Boolean
-
     // Indicates whether this resolver can resolve the provided input.
     fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean
 
     // Resolves the provided input and returns a raw request.
-    suspend fun resolve(verifiedIdRequestInput: VerifiedIdRequestInput, rootOfTrustResolver: RootOfTrustResolver? = null): RawRequest
+    suspend fun resolve(verifiedIdRequestInput: VerifiedIdRequestInput, rootOfTrustResolver: RootOfTrustResolver? = null): Any
 }
