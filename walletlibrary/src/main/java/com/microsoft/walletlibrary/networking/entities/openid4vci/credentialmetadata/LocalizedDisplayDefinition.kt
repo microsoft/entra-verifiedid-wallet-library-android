@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata
 
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdLogo
 import kotlinx.serialization.Serializable
 
 /**
@@ -24,4 +25,11 @@ internal data class LocalizedDisplayDefinition(
 
     // Text color of the credential.
     val text_color: String? = null
-)
+) {
+    fun transformToVerifiedIdLogo(): VerifiedIdLogo {
+        return VerifiedIdLogo(
+            logo?.uri ?: "",
+            logo?.alt_text ?: ""
+        )
+    }
+}

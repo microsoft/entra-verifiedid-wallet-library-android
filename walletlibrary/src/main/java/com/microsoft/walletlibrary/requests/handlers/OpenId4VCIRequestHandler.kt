@@ -53,8 +53,8 @@ internal class OpenId4VCIRequestHandler(private val libraryConfiguration: Librar
 
                 // Get only the supported credential configuration ids from the credential metadata from the list in credential offer.
                 val configIds = credentialOffer.credential_configuration_ids
-                val supportedCredentialConfigurationIds =
-                    credentialMetadata.getSupportedCredentialConfigurations(configIds)
+                val supportedCredentialConfigurationId =
+                    credentialMetadata.getSupportedCredentialConfigurations(configIds).first()
 
                 // Validate the authorization servers in the credential metadata.
                 credentialMetadata.validateAuthorizationServers(credentialOffer)
@@ -66,6 +66,8 @@ internal class OpenId4VCIRequestHandler(private val libraryConfiguration: Librar
                         credentialOffer.credential_issuer
                     )
                 }
+                val requesterStyle = credentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle()
+                val verifiedIdStyle = supportedCredentialConfigurationId.transformDisplayToVerifiedIdStyle(requesterStyle.name)
             }
             .onFailure {
                 throw OpenId4VciRequestException(
