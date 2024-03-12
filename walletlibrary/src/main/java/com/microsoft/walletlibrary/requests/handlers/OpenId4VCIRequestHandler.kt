@@ -5,6 +5,9 @@ import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffe
 import com.microsoft.walletlibrary.networking.operations.FetchCredentialMetadataNetworkOperation
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
+import com.microsoft.walletlibrary.requests.openid4vci.OpenId4VciIssuanceRequest
+import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
+import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
@@ -68,6 +71,15 @@ internal class OpenId4VCIRequestHandler(private val libraryConfiguration: Librar
                 }
                 val requesterStyle = credentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle()
                 val verifiedIdStyle = supportedCredentialConfigurationId.transformDisplayToVerifiedIdStyle(requesterStyle.name)
+                val requirement = transformToRequirement(supportedCredentialConfigurationId.scope, credentialOffer)
+                return OpenId4VciIssuanceRequest(
+                    requesterStyle,
+                    requirement,
+                    rootOfTrust!!,
+                    verifiedIdStyle,
+                    credentialOffer,
+                    credentialMetadata
+                )
             }
             .onFailure {
                 throw OpenId4VciRequestException(
@@ -76,7 +88,30 @@ internal class OpenId4VCIRequestHandler(private val libraryConfiguration: Librar
                     it as Exception
                 )
             }
-        TODO("Map data models and finally return VerifiedIdRequest.")
+        throw OpenId4VciValidationException(
+            "Failed to validate or transform credential metadata",
+            VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
+        )
+    }
+
+    private fun transformToRequirement(scope: String?, credentialOffer: CredentialOffer): Requirement {
+        val grants = credentialOffer.grants["authorization_code"] ?: throw OpenId4VciValidationException(
+            "Grant does not contain 'authorization_code' property.",
+            VerifiedIdExceptions.MALFORMED_CREDENTIAL_OFFER_EXCEPTION.value
+        )
+        if (scope == null) {
+            throw OpenId4VciValidationException(
+                "Credential configuration in credential metadata doesn't contain scope value.",
+                VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
+            )
+        }
+        return AccessTokenRequirement(
+            "",
+            configuration = grants.authorization_server,
+            resourceId = "",
+            scope = scope,
+            claims = emptyList()
+        )
     }
 
     private suspend fun fetchCredentialMetadata(metadataUrl: String): Result<CredentialMetadata> {
