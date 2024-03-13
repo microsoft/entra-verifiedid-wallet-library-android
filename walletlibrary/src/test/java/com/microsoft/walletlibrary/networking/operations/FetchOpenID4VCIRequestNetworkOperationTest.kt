@@ -26,16 +26,16 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
     """.trimIndent()
 
     @Test
-    fun fetchOpenID4VCIRequestNetworkOperationTest_withTwoVPTokens_SucceedsToResolvePresentationRequestContent() {
+    fun fetchOpenID4VCIRequestNetworkOperationTest_ResolveCredentialOffer_ReturnsCredentialOffer() {
         // Arrange
         val apiProvider: HttpAgentApiProvider = mockk {
-            every { presentationApis } returns mockk {
+            every { openId4VciApi } returns mockk {
                 coEvery { getOpenID4VCIRequest(any()) } returns Result.success(
                     IResponse(
-                    status = 200,
-                    headers = emptyMap(),
-                    body = expectedCredentialOffer.toByteArray(Charsets.UTF_8)
-                )
+                        status = 200,
+                        headers = emptyMap(),
+                        body = expectedCredentialOffer.toByteArray(Charsets.UTF_8)
+                    )
                 )
             }
         }

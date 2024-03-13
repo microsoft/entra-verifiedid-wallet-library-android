@@ -47,6 +47,7 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         fetchOpenID4VCIRequest(requestUri)
             .onSuccess { requestPayload ->
                 return try {
+                    // Checks if the result is a valid json, If not, fallback to old issuance flow.
                     JSONObject(requestPayload.decodeToString())
                     requestPayload.decodeToString()
                 } catch (e: Exception) {
@@ -58,6 +59,7 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
                     OpenIdResolver.validateRequest(presentationRequestContent)
                 }
             }
+                //TODO: Add error handling for the failure case.
             .onFailure { throw RequestURIMissingException("Request fetch failed because of ${it.message}.") }
         throw RequestURIMissingException("Request fetch failed.")
     }
