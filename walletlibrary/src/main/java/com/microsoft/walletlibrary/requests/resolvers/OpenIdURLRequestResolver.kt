@@ -7,6 +7,7 @@ package com.microsoft.walletlibrary.requests.resolvers
 
 import android.net.Uri
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestNetworkOperation
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
@@ -48,17 +49,20 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         fetchOpenID4VCIRequest(requestUri)
             .onSuccess { requestPayload ->
                 return try {
+                    // Checks if the result is a valid json, If not, fallback to old issuance flow.
                     JSONObject(requestPayload.decodeToString())
                     requestPayload.decodeToString()
                 } catch (e: Exception) {
+                    val jwsToken = JwsToken.deserialize(requestPayload.decodeToString())
                     val presentationRequestContent =
                         libraryConfiguration.serializer.decodeFromString(
                             PresentationRequestContent.serializer(),
-                            requestPayload.toString()
+                            jwsToken.content()
                         )
                     OpenIdResolver.validateRequest(presentationRequestContent)
                 }
             }
+                //TODO: Add error handling for the failure case.
             .onFailure { throw RequestURIMissingException("Request fetch failed because of ${it.message}.") }
         throw RequestURIMissingException("Request fetch failed.")
     }
