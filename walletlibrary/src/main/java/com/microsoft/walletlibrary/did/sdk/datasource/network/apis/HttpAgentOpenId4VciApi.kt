@@ -15,6 +15,7 @@ internal class HttpAgentOpenId4VciApi(
     private val httpAgentUtils: HttpAgentUtils,
     private val json: Json
 ) {
+
     suspend fun getOpenID4VCIRequest(overrideUrl: String): Result<IResponse> {
         return agent.get(
             overrideUrl,
