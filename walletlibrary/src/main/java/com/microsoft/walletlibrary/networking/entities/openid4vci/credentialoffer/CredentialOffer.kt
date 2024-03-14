@@ -11,7 +11,7 @@ internal data class CredentialOffer(
     val issuer_session: String,
 
     // The credential id that will be used to issue the Verified ID.
-    val credential_configurations_ids: List<String>,
+    val credential_configuration_ids: List<String>,
 
     // An object indicating to the Wallet the Grant Types the Credential Issuer's AS is prepared to process for this Credential Offer.
     val grants: Map<String, CredentialOfferGrants>
