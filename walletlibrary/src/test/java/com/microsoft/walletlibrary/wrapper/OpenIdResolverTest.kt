@@ -33,10 +33,15 @@ class OpenIdResolverTest {
         every { VerifiableCredentialSdk.presentationService } returns mockPresentationService
         if (!isFailure) {
             coEvery { mockPresentationService.getRequest(openIdUrl) } returns Result.Success(mockPresentationRequest)
+            coEvery { mockPresentationService.validateRequest(mockPresentationRequestContent) } returns Result.Success(mockPresentationRequest)
             every { mockPresentationRequest.content } returns mockPresentationRequestContent
             every { mockPresentationRequestContent.prompt } returns ""
-        } else
-            coEvery { mockPresentationService.getRequest(openIdUrl) } returns Result.Failure(SdkException())
+        } else {
+            coEvery { mockPresentationService.getRequest(openIdUrl) } returns Result.Failure(
+                SdkException()
+            )
+            coEvery { mockPresentationService.validateRequest(mockPresentationRequestContent) } returns Result.Failure(SdkException())
+        }
     }
 
     @Test
@@ -50,6 +55,32 @@ class OpenIdResolverTest {
             assertThat(actualResult.requestType).isEqualTo(RequestType.PRESENTATION)
             assertThat(actualResult.rawRequest).isEqualTo(mockPresentationRequest)
         }
+    }
+
+    @Test
+    fun resolveOpenIdRequest_ValidateRequestSuccessful_ReturnsRawRequestOfTypePresentation() {
+        runBlocking {
+            // Act
+            val actualResult = OpenIdResolver.validateRequest(mockPresentationRequestContent)
+
+            // Assert
+            assertThat(actualResult).isInstanceOf(VerifiedIdOpenIdJwtRawRequest::class.java)
+            assertThat(actualResult.requestType).isEqualTo(RequestType.PRESENTATION)
+            assertThat(actualResult.rawRequest).isEqualTo(mockPresentationRequest)
+        }
+    }
+
+    @Test
+    fun resolveOpenIdRequest_ValidateRequestFailure_ThrowsException() {
+        // Arrange
+        setupInput(true)
+
+        // Act and Assert
+        Assertions.assertThatThrownBy {
+            runBlocking {
+                OpenIdResolver.validateRequest(mockPresentationRequestContent)
+            }
+        }.isInstanceOf(VerifiedIdRequestFetchException::class.java)
     }
 
     @Test

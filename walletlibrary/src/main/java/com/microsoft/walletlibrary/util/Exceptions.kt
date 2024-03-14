@@ -41,6 +41,12 @@ class UnSupportedVerifiedIdRequestInputException(
     retryable: Boolean = false
 ) : WalletLibraryException(message, cause, retryable)
 
+class RequestURIMissingException(
+    message: String = "",
+    cause: Throwable? = null,
+    retryable: Boolean = false
+) : WalletLibraryException(message, cause, retryable)
+
 class VerifiedIdRequestFetchException(
     message: String = "",
     cause: Throwable? = null,

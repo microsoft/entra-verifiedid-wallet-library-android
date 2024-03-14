@@ -19,4 +19,6 @@ internal class HttpAgentApiProvider @Inject constructor(@Named("agent") agent: I
     val linkedDomainsApis = HttpAgentLinkedDomainsApi(agent, httpAgentUtils, json)
 
     val identifierApi = HttpAgentIdentifierApi(agent, httpAgentUtils, json)
+
+    val openId4VciApi = HttpAgentOpenId4VciApi(agent, httpAgentUtils, json)
 }

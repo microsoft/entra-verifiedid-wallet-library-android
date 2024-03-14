@@ -8,12 +8,20 @@ package com.microsoft.walletlibrary.requests.resolvers
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
+import android.net.Uri
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestNetworkOperation
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.util.Constants
+import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
+import com.microsoft.walletlibrary.util.RequestURIMissingException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
+import org.json.JSONObject
 
 /**
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
@@ -42,6 +50,9 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
             "Provided VerifiedIdRequestInput is not supported."
         )
         return OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString(), rootOfTrustResolver)
+        if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN))
+            return resolveOpenId4VCIRequest(verifiedIdRequestInput)
+        return OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString())
     }
 
     private suspend fun resolveOpenId4VCIRequest(verifiedIdRequestInput: VerifiedIdRequestURL): Any {

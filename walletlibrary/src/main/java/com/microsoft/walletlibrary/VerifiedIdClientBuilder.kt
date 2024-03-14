@@ -15,6 +15,9 @@ import com.microsoft.walletlibrary.identifier.IdentifierManager
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
+import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
+import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdExtension
 import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest
@@ -196,7 +199,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
     private fun getUserAgent(applicationContext: Context): String {
         return try {
             val packageManager = applicationContext.packageManager
-            val applicationInfo = packageManager.getApplicationInfo(applicationContext.packageName, 0)
+            val applicationInfo =
+                packageManager.getApplicationInfo(applicationContext.packageName, 0)
             val appName = packageManager.getApplicationLabel(applicationInfo).toString()
             val packageInfo = packageManager.getPackageInfo(applicationContext.packageName, 0)
             "Microsoft-Authenticator" + "/" + packageInfo.versionName

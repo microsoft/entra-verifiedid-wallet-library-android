@@ -47,6 +47,14 @@ internal class PresentationService @Inject constructor(
             logTime("Presentation getRequest") {
                 val uri = verifyUri(stringUri)
                 val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
+                return@logTime validateRequest(presentationRequestContent)
+            }
+        }
+    }
+
+    internal suspend fun validateRequest(presentationRequestContent: PresentationRequestContent): Result<PresentationRequest> {
+        return runResultTry {
+            logTime("Presentation validateRequest") {
                 val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId).toSDK().abortOnError()
                 val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
                 isRequestValid(request).abortOnError()
