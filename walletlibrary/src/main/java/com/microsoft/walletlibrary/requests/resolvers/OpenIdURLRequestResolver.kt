@@ -48,9 +48,10 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         fetchOpenID4VCIRequest(requestUri)
             .onSuccess { requestPayload ->
                 return try {
-                    // Checks if the result is a valid json, If not, fallback to old issuance flow.
-                    JSONObject(requestPayload.decodeToString())
-                    requestPayload.decodeToString()
+                    // Checks if the decoded string is a valid json, If not, fallback to old issuance flow.
+                    val requestPayloadString = requestPayload.decodeToString()
+                    JSONObject(requestPayloadString)
+                    requestPayloadString
                 } catch (e: Exception) {
                     val jwsToken = JwsToken.deserialize(requestPayload.decodeToString())
                     val presentationRequestContent =
