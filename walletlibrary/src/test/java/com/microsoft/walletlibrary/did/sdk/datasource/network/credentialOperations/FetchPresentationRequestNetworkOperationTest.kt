@@ -1,8 +1,5 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isTrue
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
@@ -13,6 +10,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class FetchPresentationRequestNetworkOperationTest {
@@ -162,7 +160,7 @@ class FetchPresentationRequestNetworkOperationTest {
             val actual = operation.fire()
 
             // Assert
-            assertThat(actual.isSuccess).isTrue()
+            assertThat(actual.isSuccess).isTrue
             val unwrapped = actual.getOrThrow()
             assertThat(unwrapped.nonce).isEqualTo(expectedNonce)
             assertThat(unwrapped.clientId).isEqualTo(expectedClientId)

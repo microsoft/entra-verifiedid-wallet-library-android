@@ -109,5 +109,4 @@ class OkHttpAgentTest {
             assertThat(unwrapped.headers).isEqualTo(expectedHeaders)
         }
     }
-
 }

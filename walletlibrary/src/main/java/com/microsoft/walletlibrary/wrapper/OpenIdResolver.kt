@@ -7,6 +7,7 @@ package com.microsoft.walletlibrary.wrapper
 
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
@@ -20,8 +21,17 @@ object OpenIdResolver {
 
     // Fetches the presentation request from VC SDK using the url and converts it to raw request.
     internal suspend fun getRequest(uri: String): OpenIdRawRequest {
-        when (val presentationRequestResult =
-            VerifiableCredentialSdk.presentationService.getRequest(uri)) {
+        val presentationRequestResult = VerifiableCredentialSdk.presentationService.getRequest(uri)
+        return handleRequestResult(presentationRequestResult)
+    }
+
+    internal suspend fun validateRequest(requestContent: PresentationRequestContent): OpenIdRawRequest {
+        val presentationRequestResult = VerifiableCredentialSdk.presentationService.validateRequest(requestContent)
+        return handleRequestResult(presentationRequestResult)
+    }
+
+    private fun handleRequestResult(presentationRequestResult: Result<PresentationRequest>): OpenIdRawRequest {
+        when (presentationRequestResult) {
             is Result.Success -> {
                 val request = presentationRequestResult.payload
                 val requestType = getRequestType(request)
