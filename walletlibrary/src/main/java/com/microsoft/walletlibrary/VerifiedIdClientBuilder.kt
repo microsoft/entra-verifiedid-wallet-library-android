@@ -32,6 +32,9 @@ import com.microsoft.walletlibrary.requests.requirements.PinRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.requests.handlers.OpenId4VCIRequestHandler
+import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
+import com.microsoft.walletlibrary.requests.handlers.RequestHandler
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.requests.resolvers.RequestResolver
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
