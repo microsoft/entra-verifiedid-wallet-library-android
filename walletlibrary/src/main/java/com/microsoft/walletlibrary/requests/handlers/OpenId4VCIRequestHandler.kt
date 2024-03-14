@@ -10,8 +10,7 @@ import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
-internal class OpenId4VCIRequestHandler(private val libraryConfiguration: LibraryConfiguration) :
-    RequestHandler {
+internal class OpenId4VCIRequestHandler(private val libraryConfiguration: LibraryConfiguration) : RequestHandler {
     private val signedMetadataProcessor = SignedMetadataProcessor(libraryConfiguration)
 
     // Indicates whether the provided raw request can be handled by this handler.
