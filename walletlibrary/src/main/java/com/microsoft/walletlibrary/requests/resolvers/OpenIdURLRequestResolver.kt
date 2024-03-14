@@ -23,8 +23,7 @@ import org.json.JSONObject
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
-internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration) :
-    RequestResolver {
+internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration): RequestResolver {
 
     // Indicates whether this resolver can resolve the provided input.
     override fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean {
