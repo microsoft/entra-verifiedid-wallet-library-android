@@ -18,8 +18,8 @@ internal class HttpAgentOpenId4VciApi(
 
     suspend fun getOpenID4VCIRequest(overrideUrl: String): Result<IResponse> {
         return agent.get(
-            overrideUrl, httpAgentUtils.combineMaps(
-                httpAgentUtils.defaultHeaders(),
+            overrideUrl,
+            combineAdditionalHeadersWithDefaultHeaders(
                 mapOf(
                     Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
                 )
@@ -30,12 +30,18 @@ internal class HttpAgentOpenId4VciApi(
     suspend fun getCredentialMetadata(overrideUrl: String): Result<IResponse> {
         return agent.get(
             overrideUrl,
-            httpAgentUtils.combineMaps(
-                httpAgentUtils.defaultHeaders(),
+            combineAdditionalHeadersWithDefaultHeaders(
                 mapOf(
                     Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
                 )
             )
+        )
+    }
+
+    private fun combineAdditionalHeadersWithDefaultHeaders(additionalHeaders: Map<String, String>): Map<String, String> {
+        return httpAgentUtils.combineMaps(
+            httpAgentUtils.defaultHeaders(),
+            additionalHeaders
         )
     }
 }
