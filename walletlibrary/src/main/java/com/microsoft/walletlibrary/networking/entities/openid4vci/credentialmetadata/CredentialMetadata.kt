@@ -75,7 +75,7 @@ internal data class CredentialMetadata(
         return supportedConfigIds
     }
 
-    fun validateCredentialMetadataAndSignedMetadata(credentialMetadata: CredentialMetadata) {
+    fun verifyIfCredentialIssuerAndSignedMetadataExist(credentialMetadata: CredentialMetadata) {
         if (credentialMetadata.credential_issuer == null)
             throw OpenId4VciValidationException(
                 "Credential metadata does not contain credential_issuer",
