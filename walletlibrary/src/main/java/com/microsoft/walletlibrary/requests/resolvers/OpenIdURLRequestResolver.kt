@@ -25,8 +25,7 @@ import org.json.JSONObject
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
-internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration) :
-    RequestResolver {
+internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration): RequestResolver {
 
     // Indicates whether this resolver can resolve the provided input.
     override fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean {
@@ -51,9 +50,10 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         fetchOpenID4VCIRequest(requestUri)
             .onSuccess { requestPayload ->
                 return try {
-                    // Checks if the result is a valid json, If not, fallback to old issuance flow.
-                    JSONObject(requestPayload.decodeToString())
-                    requestPayload.decodeToString()
+                    // Checks if the decoded string is a valid json, If not, fallback to old issuance flow.
+                    val requestPayloadString = requestPayload.decodeToString()
+                    JSONObject(requestPayloadString)
+                    requestPayloadString
                 } catch (e: Exception) {
                     val jwsToken = JwsToken.deserialize(requestPayload.decodeToString())
                     val presentationRequestContent =
