@@ -10,7 +10,7 @@ import kotlinx.coroutines.CancellationException
 
 typealias Success = Boolean
 
-internal sealed class Result<out S> {
+sealed class Result<out S> {
     class Success<out S>(val payload: S) : Result<S>()
     class Failure(val payload: SdkException) : Result<Nothing>()
 }

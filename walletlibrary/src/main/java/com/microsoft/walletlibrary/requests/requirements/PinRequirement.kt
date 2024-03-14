@@ -5,9 +5,12 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.walletlibrary.requests.handlers.RequestProcessorSerializer
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
+import com.microsoft.walletlibrary.verifiedid.VerifiedIdSerializer
+import kotlin.reflect.safeCast
 
 /**
  * Represents information that describes pin required in order to complete a VerifiedID request.
@@ -36,5 +39,13 @@ class PinRequirement(
     // Fulfills the requirement in the request with specified value.
     fun fulfill(pinValue: String) {
         pin = pinValue
+    }
+
+    @Throws
+    override fun <T: Any> serialize(
+        protocolSerializer: RequestProcessorSerializer,
+        verifiedIdSerializer: VerifiedIdSerializer<T>
+    ): T? {
+        return verifiedIdSerializer.serializedFormat.safeCast(pin)
     }
 }
