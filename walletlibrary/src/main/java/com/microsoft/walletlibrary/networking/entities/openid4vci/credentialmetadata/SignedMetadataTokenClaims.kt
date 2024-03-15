@@ -8,9 +8,9 @@ import kotlinx.serialization.Serializable
 data class SignedMetadataTokenClaims(
     val sub: String?,
     val iat: String?,
-    val exp: String?,
+    val exp: String? = null,
     val iss: String?,
-    val nbf: String?
+    val nbf: String? = null
 ) {
     fun validateSignedMetadataTokenClaims(expectedSubject: String, expectedIssuer: String) {
         validateSubject(expectedSubject)

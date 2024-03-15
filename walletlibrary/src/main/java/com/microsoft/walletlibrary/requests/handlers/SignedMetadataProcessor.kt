@@ -42,7 +42,7 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
                 "JWK with key id $kid not found in identifier document",
                 VerifiedIdExceptions.MALFORMED_SIGNED_METADATA_EXCEPTION.value
             )
-        validateSignedMetadata(jwsToken, jwk, credentialIssuer)
+        validateSignedMetadata(jwsToken, jwk, credentialIssuer, did)
 
         // Return the root of trust from the identifier document along with its verification status.
         return RootOfTrustResolver.resolveRootOfTrust(identifierDocument)
@@ -60,14 +60,14 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         }
     }
 
-    private fun validateSignedMetadata(jwsToken: JwsToken, jwk: JWK, credentialIssuer: String) {
+    private fun validateSignedMetadata(jwsToken: JwsToken, jwk: JWK, credentialIssuer: String, issuerDid:String) {
         try {
             verifySignature(jwsToken, jwk)
             val signedMetadataTokenClaims = libraryConfiguration.serializer.decodeFromString(
                 SignedMetadataTokenClaims.serializer(),
                 jwsToken.content()
             )
-            signedMetadataTokenClaims.validateSignedMetadataTokenClaims(credentialIssuer, jwk.keyID)
+            signedMetadataTokenClaims.validateSignedMetadataTokenClaims(credentialIssuer, issuerDid)
         } catch (exception: Exception) {
             throw OpenId4VciValidationException(
                 "Invalid signed metadata",
