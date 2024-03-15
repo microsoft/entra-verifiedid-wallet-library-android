@@ -31,6 +31,10 @@ class SignedMetadataProcessorTest {
     private val signedMetadataProcessor = spyk(SignedMetadataProcessor(mockLibraryConfiguration))
     private val signedMetadataString = "testSignedMetadata"
     private val credentialIssuer = "testCredentialIssuer"
+    private val mockIdentifierDocument = mockk<IdentifierDocument>()
+    private val mockJwsToken: JwsToken = mockk()
+    private val mockJwk = mockk<JWK>()
+    private val mockLinedDomainsService: LinkedDomainsService = mockk()
 
     init {
         mockkStatic(VerifiableCredentialSdk::class)
@@ -39,14 +43,15 @@ class SignedMetadataProcessorTest {
         mockkStatic("com.microsoft.walletlibrary.mappings.IdentifierDocumentMappingKt")
         mockkStatic("com.microsoft.walletlibrary.mappings.LinkedDomainMappingKt")
         mockkStatic("com.microsoft.walletlibrary.mappings.LinkedDomainsServiceExtensionKt")
+        every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinedDomainsService
+        every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
+        every { signedMetadataProcessor["deSerializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
     }
 
     @Test
     fun process_KeyIdMissing_ThrowsException() {
         // Arrange
-        val mockJwsToken = mockk<JwsToken>()
-        every { mockJwsToken.keyId } returns null
-        every { signedMetadataProcessor["deSerializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
+        mockJwsToken(null)
 
         runBlocking {
             // Act
@@ -68,9 +73,7 @@ class SignedMetadataProcessorTest {
     @Test
     fun process_DidMissingInKid_ThrowsException() {
         // Arrange
-        val mockJwsToken = mockk<JwsToken>()
-        every { mockJwsToken.keyId } returns "#signingKey-1"
-        every { signedMetadataProcessor["deSerializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
+        mockJwsToken("#signingKey-1")
 
         runBlocking {
             // Act
@@ -92,11 +95,7 @@ class SignedMetadataProcessorTest {
     @Test
     fun process_FailResolvingDocument_ThrowsException() {
         // Arrange
-        val mockJwsToken = mockk<JwsToken>()
-        every { mockJwsToken.keyId } returns "did:web:test#signingKey-1"
-        every { signedMetadataProcessor["deSerializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
-        val mockLinedDomainsService: LinkedDomainsService = mockk()
-        every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinedDomainsService
+        mockJwsToken("did:web:test#signingKey-1")
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } throws IdentifierDocumentResolutionException(
             "Unable to fetch identifier document"
         )
@@ -118,14 +117,9 @@ class SignedMetadataProcessorTest {
     @Test
     fun process_FailGetJwkFromDocument_ThrowsException() {
         // Arrange
-        val mockJwsToken = mockk<JwsToken>()
-        every { mockJwsToken.keyId } returns "did:web:test#signingKey-1"
-        every { signedMetadataProcessor["deSerializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
-        val mockLinedDomainsService: LinkedDomainsService = mockk()
-        every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinedDomainsService
-        val mockIdentifierDocument = mockk<IdentifierDocument>()
+        mockIdentifierDocument(null)
+        mockJwsToken("did:web:test#signingKey-1")
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
-        every { mockIdentifierDocument.getJwk("signingKey-1") } returns null
 
         runBlocking {
             // Act
@@ -147,16 +141,9 @@ class SignedMetadataProcessorTest {
     @Test
     fun process_FailSignatureVerification_ThrowsException() {
         // Arrange
-        val mockJwsToken = mockk<JwsToken>()
-        every { mockJwsToken.keyId } returns "did:web:test#signingKey-1"
-        every { signedMetadataProcessor["deSerializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
-        val mockLinedDomainsService: LinkedDomainsService = mockk()
-        every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinedDomainsService
-        val mockIdentifierDocument = mockk<IdentifierDocument>()
+        mockIdentifierDocument()
+        mockJwsToken("did:web:test#signingKey-1", passSignatureVerification = false)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
-        val mockJwk = mockk<JWK>()
-        every { mockIdentifierDocument.getJwk("signingKey-1") } returns mockJwk
-        every { mockJwsToken.verify(listOf(mockJwk)) } returns false
 
         runBlocking {
             // Act
@@ -184,22 +171,14 @@ class SignedMetadataProcessorTest {
     @Test
     fun process_FailSignedMetadataTokenDeserialization_ThrowsException() {
         // Arrange
-        val mockJwsToken = mockk<JwsToken>()
-        every { mockJwsToken.keyId } returns "did:web:test#signingKey-1"
-        every { signedMetadataProcessor["deSerializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
-        val mockLinedDomainsService: LinkedDomainsService = mockk()
-        every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinedDomainsService
-        val mockIdentifierDocument = mockk<IdentifierDocument>()
+        mockIdentifierDocument()
+        val mockJwsTokenContent = "testContent"
+        mockJwsToken("did:web:test#signingKey-1", mockJwsTokenContent)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
-        val mockJwk = mockk<JWK>()
-        every { mockIdentifierDocument.getJwk("signingKey-1") } returns mockJwk
-        every { mockJwsToken.content() } returns "testContent"
-        every { mockJwsToken.verify(listOf(mockJwk)) } returns true
-        every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         every {
             mockLibraryConfiguration.serializer.decodeFromString(
                 SignedMetadataTokenClaims.serializer(),
-                "testContent"
+                mockJwsTokenContent
             )
         } throws SerializationException("Mock SerializationException")
 
@@ -226,21 +205,11 @@ class SignedMetadataProcessorTest {
     @Test
     fun process_FailSignedMetadataTokenValidation_ThrowsException() {
         // Arrange
+        mockIdentifierDocument()
         val signedMetadataTokenClaimsString =
             """{"sub":"","iss": "did:web:testissuer","iat": 1707859806}""".trimIndent()
-        val mockJwsToken = mockk<JwsToken>()
-        every { mockJwsToken.keyId } returns "did:web:test#signingKey-1"
-        every { signedMetadataProcessor["deSerializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
-        val mockLinedDomainsService: LinkedDomainsService = mockk()
-        every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinedDomainsService
-        val mockIdentifierDocument = mockk<IdentifierDocument>()
+        mockJwsToken("did:web:test#signingKey-1", signedMetadataTokenClaimsString)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
-        val mockJwk = mockk<JWK>()
-        every { mockIdentifierDocument.getJwk("signingKey-1") } returns mockJwk
-        every { mockJwk.keyID } returns "did:web:test#signingKey-1"
-        every { mockJwsToken.content() } returns signedMetadataTokenClaimsString
-        every { mockJwsToken.verify(listOf(mockJwk)) } returns true
-        every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
 
         runBlocking {
             // Act
@@ -268,21 +237,11 @@ class SignedMetadataProcessorTest {
     @Test
     fun process_LinkedDomainsNotVerifiedByResolver_ReturnsUnverifiedRootOfTrust() {
         // Arrange
+        mockIdentifierDocument()
         val signedMetadataTokenClaimsString =
             """{"sub":"testCredentialIssuer","iss": "did:web:test","iat": 1707859806}""".trimIndent()
-        val mockJwsToken = mockk<JwsToken>()
-        every { mockJwsToken.keyId } returns "did:web:test#signingKey-1"
-        every { signedMetadataProcessor["deSerializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
-        val mockLinedDomainsService: LinkedDomainsService = mockk()
-        every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinedDomainsService
-        val mockIdentifierDocument = mockk<IdentifierDocument>()
+        mockJwsToken("did:web:test#signingKey-1", signedMetadataTokenClaimsString)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
-        val mockJwk = mockk<JWK>()
-        every { mockIdentifierDocument.getJwk("signingKey-1") } returns mockJwk
-        every { mockJwk.keyID } returns "did:web:test#signingKey-1"
-        every { mockJwsToken.content() } returns signedMetadataTokenClaimsString
-        every { mockJwsToken.verify(listOf(mockJwk)) } returns true
-        every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         coEvery { RootOfTrustResolver.resolveRootOfTrust(mockIdentifierDocument) } returns RootOfTrust(
             "unverifiedDomain",
             false
@@ -303,21 +262,11 @@ class SignedMetadataProcessorTest {
     @Test
     fun process_LinkedDomainsVerifiedByResolver_ReturnsVerifiedRootOfTrust() {
         // Arrange
+        mockIdentifierDocument()
         val signedMetadataTokenClaimsString =
             """{"sub":"testCredentialIssuer","iss": "did:web:test","iat": 1707859806}""".trimIndent()
-        val mockJwsToken = mockk<JwsToken>()
-        every { mockJwsToken.keyId } returns "did:web:test#signingKey-1"
-        every { signedMetadataProcessor["deSerializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
-        val mockLinedDomainsService: LinkedDomainsService = mockk()
-        every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinedDomainsService
-        val mockIdentifierDocument = mockk<IdentifierDocument>()
+        mockJwsToken("did:web:test#signingKey-1", signedMetadataTokenClaimsString)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
-        val mockJwk = mockk<JWK>()
-        every { mockIdentifierDocument.getJwk("signingKey-1") } returns mockJwk
-        every { mockJwk.keyID } returns "did:web:test#signingKey-1"
-        every { mockJwsToken.content() } returns signedMetadataTokenClaimsString
-        every { mockJwsToken.verify(listOf(mockJwk)) } returns true
-        every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         coEvery { RootOfTrustResolver.resolveRootOfTrust(mockIdentifierDocument) } returns RootOfTrust(
             "verifiedDomain",
             true
@@ -333,5 +282,23 @@ class SignedMetadataProcessorTest {
             assertThat(actualResult.source).isEqualTo("verifiedDomain")
             assertThat(actualResult.verified).isTrue
         }
+    }
+
+    private fun mockJwsToken(kid: String?, content: String? = null, passSignatureVerification: Boolean = true) {
+        every { mockJwsToken.keyId } returns kid
+        if (content != null) {
+            every { mockJwsToken.content() } returns content
+        }
+        every { mockJwsToken.verify(listOf(mockJwk)) } returns passSignatureVerification
+        kid?.let { mockJwk(it) }
+    }
+
+    private fun mockJwk(kid: String) {
+        every { mockJwk.keyID } returns kid
+    }
+
+    private fun mockIdentifierDocument(jwk: JWK? = mockJwk) {
+        val jwkToReturn = if (jwk == null) jwk else mockJwk
+        every { mockIdentifierDocument.getJwk("signingKey-1") } returns jwkToReturn
     }
 }
