@@ -42,7 +42,7 @@ internal data class CredentialMetadata(
                     .getFirstMatch(
                         arrayOf(language)
                     )?.let {
-                        return VerifiedIdManifestIssuerStyle(it.displayName)
+                        return VerifiedIdManifestIssuerStyle(displayDefinition.name ?: "")
                     }
             }
         }
@@ -75,15 +75,15 @@ internal data class CredentialMetadata(
         return supportedConfigIds
     }
 
-    fun verifyIfCredentialIssuerAndSignedMetadataExist(credentialMetadata: CredentialMetadata) {
-        if (credentialMetadata.credential_issuer == null)
+    fun verifyIfCredentialIssuerAndSignedMetadataExist() {
+        if (credential_issuer == null)
             throw OpenId4VciValidationException(
-                "Credential metadata does not contain credential_issuer",
+                "Credential metadata does not contain credential_issuer.",
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
             )
-        if (credentialMetadata.signed_metadata == null)
+        if (signed_metadata == null)
             throw OpenId4VciValidationException(
-                "Credential metadata does not contain signed_metadata",
+                "Credential metadata does not contain signed_metadata.",
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
             )
     }

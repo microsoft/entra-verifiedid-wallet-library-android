@@ -48,7 +48,7 @@ internal class OpenId4VCIRequestHandler(private val libraryConfiguration: Librar
         fetchCredentialMetadata(credentialOffer.credential_issuer)
             .onSuccess { credentialMetadata ->
                 // Validate Credential Metadata to verify if credential issuer and Signed Metadata exist.
-                credentialMetadata.verifyIfCredentialIssuerAndSignedMetadataExist(credentialMetadata)
+                credentialMetadata.verifyIfCredentialIssuerAndSignedMetadataExist()
 
                 // Get only the supported credential configuration ids from the credential metadata from the list in credential offer.
                 val configIds = credentialOffer.credential_configuration_ids
