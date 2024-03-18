@@ -45,7 +45,21 @@ class UnspecifiedVerifiedIdException(
     correlationId: String? = null
 ) : VerifiedIdException(message, code, correlationId)
 
-class OpenId4VciException(
+class OpenId4VciValidationException(
+    message: String,
+    code: String,
+    val innerError: Exception? = null,
+    correlationId: String? = null
+) : VerifiedIdException(message, code, correlationId)
+
+class TokenValidationException(
+    message: String,
+    code: String,
+    val innerError: Exception? = null,
+    correlationId: String? = null
+) : VerifiedIdException(message, code, correlationId)
+
+class OpenId4VciRequestException(
     message: String,
     code: String,
     val innerError: Exception? = null,
