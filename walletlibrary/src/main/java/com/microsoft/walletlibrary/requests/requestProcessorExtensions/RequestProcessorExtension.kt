@@ -11,7 +11,7 @@ interface RequestProcessorExtension {
     /**
      * Type of RequestProcessor this extension should be injected into
      */
-    abstract val associatedRequestProcessor: KClass<RequestProcessor>
+    abstract val associatedRequestProcessor: KClass<out RequestProcessor>
 
     /**
      * Extension to the associated RequestProcessor's parsing

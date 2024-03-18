@@ -16,7 +16,7 @@ sealed interface RequestProcessorSerializer {
      * Processes and serializes this requirement using Requirement.serialize
      * note: Requirement.Serialize must be called and is expected to call this method on any child requirements before returning
      */
-    fun <SerializedFormat> serialize(
+    fun <SerializedFormat: Any> serialize(
         requirement: Requirement,
         verifiedIdSerializer: VerifiedIdSerializer<SerializedFormat>
     ): Void
