@@ -9,6 +9,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomai
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.DomainLinkageCredentialValidator
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.linkedDomainsOperations.FetchWellKnownConfigDocumentNetworkOperation
+import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants
@@ -58,16 +59,22 @@ internal class LinkedDomainsService @Inject constructor(
         }
     }
 
-    private suspend fun verifyLinkedDomains(domainUrls: List<String>, relyingPartyDid: String): Result<LinkedDomainResult> {
+    internal suspend fun verifyLinkedDomains(
+        domainUrls: List<String>,
+        relyingPartyDid: String
+    ): Result<LinkedDomainResult> {
         if (domainUrls.isEmpty())
             return Result.success(LinkedDomainMissing)
         val domainUrl = domainUrls.first()
         val hostname = URL(domainUrl).host
         return getWellKnownConfigDocument(domainUrl)
-            .map {
-                wellKnownConfigDocument ->
+            .map { wellKnownConfigDocument ->
                 wellKnownConfigDocument.linkedDids.firstNotNullOf { linkedDidJwt ->
-                    val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(linkedDidJwt, relyingPartyDid, domainUrl)
+                    val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(
+                        linkedDidJwt,
+                        relyingPartyDid,
+                        domainUrl
+                    )
                     if (isDomainLinked)
                         LinkedDomainVerified(hostname)
                     else
@@ -79,16 +86,30 @@ internal class LinkedDomainsService @Inject constructor(
     }
 
     private suspend fun getLinkedDomainsFromDid(relyingPartyDid: String): Result<List<String>> {
-        val didDocumentResult = resolver.resolve(relyingPartyDid)
+        val didDocumentResult = resolveIdentifierDocument(relyingPartyDid)
         return didDocumentResult.map { didDocument ->
-            val linkedDomainsServices =
-                didDocument.service.filter { service -> service.type.equals(Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE, true) }
-            linkedDomainsServices.map { it.serviceEndpoint }.flatten()
+            getLinkedDomainsFromDidDocument(didDocument)
         }
     }
 
-    private suspend fun getWellKnownConfigDocument(domainUrl: String) = FetchWellKnownConfigDocumentNetworkOperation(
-        domainUrl,
-        apiProvider
-    ).fire()
+    internal suspend fun resolveIdentifierDocument(relyingPartyDid: String): Result<IdentifierDocument> {
+        return resolver.resolve(relyingPartyDid)
+    }
+
+    internal fun getLinkedDomainsFromDidDocument(didDocument: IdentifierDocument): List<String> {
+        val linkedDomainsServices =
+            didDocument.service.filter { service ->
+                service.type.equals(
+                    Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE,
+                    true
+                )
+            }
+        return linkedDomainsServices.map { it.serviceEndpoint }.flatten()
+    }
+
+    private suspend fun getWellKnownConfigDocument(domainUrl: String) =
+        FetchWellKnownConfigDocumentNetworkOperation(
+            domainUrl,
+            apiProvider
+        ).fire()
 }

@@ -53,6 +53,12 @@ class VerifiedIdRequestFetchException(
     retryable: Boolean = false
 ) : WalletLibraryException(message, cause, retryable)
 
+class IdentifierDocumentResolutionException(
+    message: String = "",
+    cause: Throwable? = null,
+    retryable: Boolean = false
+) : WalletLibraryException(message, cause, retryable)
+
 class VerifiedIdResponseCompletionException(
     message: String = "",
     cause: Throwable? = null,

@@ -17,9 +17,11 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.util.Constants
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequestURIMissingException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
 import org.json.JSONObject
 

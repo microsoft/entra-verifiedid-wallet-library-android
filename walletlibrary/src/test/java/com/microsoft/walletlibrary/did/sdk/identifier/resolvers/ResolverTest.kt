@@ -8,13 +8,13 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.LocalNetworkExceptio
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.NotFoundException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
-import kotlin.Result as KotlinResult
 import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import kotlin.Result as KotlinResult
 
 class ResolverTest {
     private val identifierRepository: IdentifierRepository = mockk()
