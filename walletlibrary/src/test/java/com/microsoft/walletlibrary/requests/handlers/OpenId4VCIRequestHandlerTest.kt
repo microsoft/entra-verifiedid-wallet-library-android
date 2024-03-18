@@ -1,15 +1,23 @@
 package com.microsoft.walletlibrary.requests.handlers
 
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.NetworkException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.OpenId4VciRequestException
+import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.defaultTestSerializer
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import kotlin.Result as KotlinResult
 
 class OpenId4VCIRequestHandlerTest {
     private val mockLibraryConfiguration = mockk<LibraryConfiguration>()
-    private val openId4VCIRequestHandler = OpenId4VCIRequestHandler(mockLibraryConfiguration)
+    private val openId4VCIRequestHandler = spyk(OpenId4VCIRequestHandler(mockLibraryConfiguration))
     private val expectedCredentialOfferString = """
         {
             "credential_issuer": "metadata_url",
@@ -31,7 +39,8 @@ class OpenId4VCIRequestHandlerTest {
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
 
         //Act
-        val actualCanHandleResult = openId4VCIRequestHandler.canHandle(expectedCredentialOfferString)
+        val actualCanHandleResult =
+            openId4VCIRequestHandler.canHandle(expectedCredentialOfferString)
 
         // Assert
         assertThat(actualCanHandleResult).isEqualTo(true)
@@ -66,9 +75,48 @@ class OpenId4VCIRequestHandlerTest {
     @Test
     fun canHandleTest_AnyFailureWithSerializer_ReturnsFalse() {
         //Act
-        val actualCanHandleResult = openId4VCIRequestHandler.canHandle(expectedCredentialOfferString)
+        val actualCanHandleResult =
+            openId4VCIRequestHandler.canHandle(expectedCredentialOfferString)
 
         // Assert
         assertThat(actualCanHandleResult).isEqualTo(false)
+    }
+
+    @Test
+    fun handleRequestTest_AnyFailureWithSerializer_ThrowsException() {
+        runBlocking {
+            //Act
+            val actualHandleRequestResult = runCatching {
+                openId4VCIRequestHandler.handleRequest(expectedCredentialOfferString)
+            }
+            // Assert
+            assertThat(actualHandleRequestResult.isFailure).isTrue
+            val actualException = actualHandleRequestResult.exceptionOrNull()
+            assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
+            assertThat(actualException?.message).contains("Failed to decode CredentialOffer")
+            assertThat((actualException as OpenId4VciValidationException).innerError).isNotNull
+        }
+    }
+
+    @Test
+    fun handleRequestTest_AnyFailureWithFetchingMetadata_ThrowsException() {
+        // Arrange
+        every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
+        coEvery { openId4VCIRequestHandler["fetchCredentialMetadata"]("metadata_url") } returns KotlinResult.failure<SdkException>(
+            NetworkException("Failed to fetch metadata", false)
+        )
+
+        runBlocking {
+            //Act
+            val actualHandleRequestResult = runCatching {
+                openId4VCIRequestHandler.handleRequest(expectedCredentialOfferString)
+            }
+            // Assert
+            assertThat(actualHandleRequestResult.isFailure).isTrue
+            val actualException = actualHandleRequestResult.exceptionOrNull()
+            assertThat(actualException).isInstanceOf(OpenId4VciRequestException::class.java)
+            assertThat(actualException?.message).contains("Failed to fetch credential metadata")
+            assertThat((actualException as OpenId4VciRequestException).innerError).isInstanceOf(NetworkException::class.java)
+        }
     }
 }
