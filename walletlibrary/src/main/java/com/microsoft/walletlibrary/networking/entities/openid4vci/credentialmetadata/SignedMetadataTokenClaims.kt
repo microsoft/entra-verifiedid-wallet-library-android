@@ -8,13 +8,15 @@ import kotlinx.serialization.Serializable
 data class SignedMetadataTokenClaims(
     val sub: String?,
     val iat: String?,
-    val exp: String?,
+    val exp: String? = null,
     val iss: String?,
-    val nbf: String?
+    val nbf: String? = null
 ) {
     fun validateSignedMetadataTokenClaims(expectedSubject: String, expectedIssuer: String) {
-        validateIssuer(expectedIssuer)
         validateSubject(expectedSubject)
+        validateIssuer(expectedIssuer)
+        validateIssuedAtTime()
+        validateExpiryTime()
     }
 
     private fun validateIssuer(expectedIssuer: String) {
@@ -45,5 +47,27 @@ data class SignedMetadataTokenClaims(
                 VerifiedIdExceptions.INVALID_PROPERTY_EXCEPTION.value
             )
         }
+    }
+
+    private fun validateIssuedAtTime() {
+        if (iat != null && iat.toLong() >= getCurrentTimeInSecondsWithSkew()) {
+            throw TokenValidationException(
+                "Issued at time is in the future.",
+                VerifiedIdExceptions.INVALID_PROPERTY_EXCEPTION.value
+            )
+        }
+    }
+
+    private fun validateExpiryTime() {
+        if (exp != null && exp.toLong() <= getCurrentTimeInSecondsWithSkew()) {
+            throw TokenValidationException(
+                "Token has expired.",
+                VerifiedIdExceptions.INVALID_PROPERTY_EXCEPTION.value
+            )
+        }
+    }
+
+    private fun getCurrentTimeInSecondsWithSkew(skew: Long = 300): Long {
+        return (System.currentTimeMillis() / 1000) + skew
     }
 }

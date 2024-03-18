@@ -13,8 +13,7 @@ import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
-internal class OpenId4VCIRequestHandler(private val libraryConfiguration: LibraryConfiguration) :
-    RequestHandler {
+internal class OpenId4VCIRequestHandler(private val libraryConfiguration: LibraryConfiguration) : RequestHandler {
     private val signedMetadataProcessor = SignedMetadataProcessor(libraryConfiguration)
 
     // Indicates whether the provided raw request can be handled by this handler.
@@ -51,8 +50,8 @@ internal class OpenId4VCIRequestHandler(private val libraryConfiguration: Librar
         // Fetch the credential metadata from the credential issuer in credential offer object.
         fetchCredentialMetadata(credentialOffer.credential_issuer)
             .onSuccess { credentialMetadata ->
-                // Validate Credential Metadata and Signed Metadata.
-                credentialMetadata.validateCredentialMetadataAndSignedMetadata(credentialMetadata)
+                // Validate Credential Metadata to verify if credential issuer and Signed Metadata exist.
+                credentialMetadata.verifyIfCredentialIssuerAndSignedMetadataExist()
 
                 // Get only the supported credential configuration ids from the credential metadata from the list in credential offer.
                 val configIds = credentialOffer.credential_configuration_ids
@@ -123,6 +122,7 @@ internal class OpenId4VCIRequestHandler(private val libraryConfiguration: Librar
         ).fire()
     }
 
+    // Build the credential metadata url from the provided credential issuer.
     private fun buildCredentialMetadataUrl(credentialIssuer: String): String {
         val suffix = "/.well-known/openid-credential-issuer"
         if (!credentialIssuer.endsWith(suffix))
