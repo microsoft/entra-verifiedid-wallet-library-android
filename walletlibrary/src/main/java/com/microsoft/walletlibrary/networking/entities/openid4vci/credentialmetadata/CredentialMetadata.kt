@@ -1,5 +1,12 @@
 package com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata
 
+import android.content.res.Resources
+import androidx.core.os.ConfigurationCompat
+import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
+import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
+import com.microsoft.walletlibrary.util.OpenId4VciValidationException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import kotlinx.serialization.Serializable
 
 /**
@@ -27,4 +34,63 @@ internal data class CredentialMetadata(
 
     // Display information for the issuer.
     val display: List<LocalizedIssuerDisplayDefinition>? = null,
-)
+) {
+
+    fun transformLocalizedIssuerDisplayDefinitionToRequesterStyle(): RequesterStyle {
+        val preferredLocalesList =
+            ConfigurationCompat.getLocales(Resources.getSystem().configuration)
+        for (index in 0 until preferredLocalesList.size()) {
+            val preferredLocale = preferredLocalesList[index]
+            display?.forEach { displayDefinition ->
+                displayDefinition.locale?.let { language ->
+                    if (language == preferredLocale?.language) {
+                        return VerifiedIdManifestIssuerStyle(displayDefinition.name ?: "")
+                    }
+                }
+            }
+        }
+        return VerifiedIdManifestIssuerStyle(display?.first()?.name ?: "")
+    }
+
+    fun validateAuthorizationServers(credentialOffer: CredentialOffer) {
+        if (authorization_servers.isNullOrEmpty()) {
+            throw OpenId4VciValidationException(
+                "Authorization servers property missing in credential metadata.",
+                VerifiedIdExceptions.INVALID_PROPERTY_EXCEPTION.value
+            )
+        }
+        credentialOffer.grants.forEach {
+            if (!authorization_servers.contains(it.value.authorization_server))
+                throw OpenId4VciValidationException(
+                    "Authorization server ${it.value.authorization_server} not found in Credential Metadata.",
+                    VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
+                )
+        }
+    }
+
+    fun getSupportedCredentialConfigurations(credentialConfigurationIds: List<String>): List<CredentialConfiguration> {
+        val supportedConfigIds = mutableListOf<CredentialConfiguration>()
+        if (credential_configurations_supported == null)
+            return supportedConfigIds
+        credentialConfigurationIds.forEach { id ->
+            credential_configurations_supported[id]?.let { supportedConfigIds.add(it) }
+        }
+        return supportedConfigIds
+    }
+
+    fun verifyIfCredentialIssuerExist() {
+        if (credential_issuer == null)
+            throw OpenId4VciValidationException(
+                "Credential metadata does not contain credential_issuer.",
+                VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
+            )
+    }
+
+    fun verifyIfSignedMetadataExist() {
+        if (signed_metadata == null)
+            throw OpenId4VciValidationException(
+                "Credential metadata does not contain signed_metadata.",
+                VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
+            )
+    }
+}

@@ -40,6 +40,9 @@ internal object VerifiableCredentialSdk {
     internal lateinit var presentationService: PresentationService
 
     @JvmStatic
+    internal lateinit var linkedDomainsService: LinkedDomainsService
+
+    @JvmStatic
     internal lateinit var revocationService: RevocationService
 
     @JvmStatic
@@ -88,6 +91,7 @@ internal object VerifiableCredentialSdk {
 
         issuanceService = sdkComponent.issuanceService()
         presentationService = sdkComponent.presentationService()
+        linkedDomainsService = sdkComponent.linkedDomainsService()
         revocationService = sdkComponent.revocationService()
         correlationVectorService = sdkComponent.correlationVectorService()
         identifierService = sdkComponent.identifierManager()
