@@ -32,16 +32,10 @@ internal data class CredentialConfiguration(
     // The types of proofs supported.
     val proof_types_supported: Map<String, ProofTypesSupported>? = null
 ) {
-    fun transformDisplayToVerifiedIdStyle(issuerName: String): VerifiedIdStyle {
+    fun getVerifiedIdStyleInPreferredLocale(issuerName: String): VerifiedIdStyle {
         val localizedDisplayDefinition = getPreferredLocalizedDisplayDefinition()
-        return BasicVerifiedIdStyle(
-            localizedDisplayDefinition?.name ?: "",
-            issuerName,
-            localizedDisplayDefinition?.background_color ?: "",
-            localizedDisplayDefinition?.text_color ?: "",
-            localizedDisplayDefinition?.description ?: "",
-            localizedDisplayDefinition?.transformToVerifiedIdLogo()
-        )
+        return localizedDisplayDefinition?.transformToVerifiedIdStyle(issuerName)
+            ?: BasicVerifiedIdStyle("", issuerName, "", "", "", null)
     }
 
     private fun getPreferredLocalizedDisplayDefinition(): LocalizedDisplayDefinition? {
