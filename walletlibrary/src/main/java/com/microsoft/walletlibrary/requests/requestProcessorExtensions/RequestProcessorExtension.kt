@@ -19,5 +19,5 @@ interface RequestProcessorExtension {
      * @param request RequestProcessor's base request to be updated
      * @return updated request with extension changes (if any)
      */
-    abstract fun <T> parse(rawRequest: Any, request: VerifiedIdRequest<T>): VerifiedIdRequest<T>
+    abstract fun <T> parse(rawRequest: Map<String, Any>, request: VerifiedIdRequest<T>): VerifiedIdRequest<T>
 }
