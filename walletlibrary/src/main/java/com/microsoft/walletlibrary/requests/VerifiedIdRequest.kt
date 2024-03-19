@@ -14,16 +14,7 @@ import com.microsoft.walletlibrary.util.VerifiedIdResult
  * requirements needed in order to complete a request and information about trust model of requester
  * like domain url and verification status.
  */
-interface VerifiedIdRequest<out T> {
-    // Attributes describing the requester (eg. name, logo).
-    val requesterStyle: RequesterStyle
-
-    // Information describing the requirements needed to complete the flow.
-    val requirement: Requirement
-
-    // Root of trust of the requester (eg. linked domains).
-    val rootOfTrust: RootOfTrust
-
+interface VerifiedIdRequest<out T>: VerifiedIdPartialRequest {
     // Indicates whether request is satisfied on client side.
     fun isSatisfied(): Boolean
 

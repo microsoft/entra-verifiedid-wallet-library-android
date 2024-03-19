@@ -14,27 +14,16 @@ import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 /**
  * Represents an incomplete mutable VerifiedID Request for RequestProcessorExtensions to modify.
  */
-data class VerifiedIdPartialRequest(
-    /**
-     * Display information for the requester
-     */
-    var requesterStyle: RequesterStyle,
+interface VerifiedIdPartialRequest {
+    // Attributes describing the requester (eg. name, logo).
+    val requesterStyle: RequesterStyle
 
-    /**
-     * Potential display information for the Verified ID being issued (if this is an issuance request)
-     */
-    var verifiedIdStyle: VerifiedIdStyle?,
+    // Information describing the requirements needed to complete the flow.
+    val requirement: Requirement
 
-    /**
-     * Requirement for this request
-     */
-    var requirement: Requirement,
+    // Root of trust of the requester (eg. linked domains).
+    val rootOfTrust: RootOfTrust
 
-    /**
-     * Root of trust resolved for this request
-     */
-    var rootOfTrust: RootOfTrust
-) {
     fun replaceRequirement(id: String, transformer: (VerifiedIdRequirement) -> Requirement): Boolean {
         return replaceRequirement(id, this.requirement, transformer)
     }
