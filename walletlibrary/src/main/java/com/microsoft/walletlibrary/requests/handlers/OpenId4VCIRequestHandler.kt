@@ -3,7 +3,6 @@ package com.microsoft.walletlibrary.requests.handlers
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.networking.operations.FetchCredentialMetadataNetworkOperation
-import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.openid4vci.OpenId4VciIssuanceRequest
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
@@ -14,6 +13,7 @@ import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
 internal class OpenId4VCIRequestHandler(private val libraryConfiguration: LibraryConfiguration) : RequestHandler {
+
     private val signedMetadataProcessor = SignedMetadataProcessor(libraryConfiguration)
 
     // Indicates whether the provided raw request can be handled by this handler.
@@ -51,22 +51,25 @@ internal class OpenId4VCIRequestHandler(private val libraryConfiguration: Librar
         fetchCredentialMetadata(credentialOffer.credential_issuer)
             .onSuccess { credentialMetadata ->
                 // Validate Credential Metadata to verify if credential issuer and Signed Metadata exist.
-                credentialMetadata.verifyIfCredentialIssuerAndSignedMetadataExist()
+                credentialMetadata.verifyIfCredentialIssuerExist()
+                credentialMetadata.verifyIfSignedMetadataExist()
 
                 // Get only the supported credential configuration ids from the credential metadata from the list in credential offer.
                 val configIds = credentialOffer.credential_configuration_ids
-                val supportedCredentialConfigurationId =
-                    credentialMetadata.getSupportedCredentialConfigurations(configIds).first()
+                val supportedCredentialConfigurationIds =
+                    credentialMetadata.getSupportedCredentialConfigurations(configIds)
+                if (supportedCredentialConfigurationIds.isEmpty())
+                    throw OpenId4VciValidationException(
+                        "Request does not contain supported credential configuration.",
+                        VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value)
+                val supportedCredentialConfigurationId = supportedCredentialConfigurationIds.first()
 
                 // Validate the authorization servers in the credential metadata.
                 credentialMetadata.validateAuthorizationServers(credentialOffer)
 
                 // Get the root of trust from the signed metadata.
                 val rootOfTrust = credentialMetadata.signed_metadata?.let {
-                    getRootOfTrust(
-                        it,
-                        credentialOffer.credential_issuer
-                    )
+                    signedMetadataProcessor.process(it, credentialOffer.credential_issuer)
                 }
                 val requesterStyle = credentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle()
                 val verifiedIdStyle = supportedCredentialConfigurationId.transformDisplayToVerifiedIdStyle(requesterStyle.name)
@@ -128,12 +131,5 @@ internal class OpenId4VCIRequestHandler(private val libraryConfiguration: Librar
         if (!credentialIssuer.endsWith(suffix))
             return credentialIssuer + suffix
         return credentialIssuer
-    }
-
-    private suspend fun getRootOfTrust(
-        signedMetadata: String,
-        credentialIssuer: String
-    ): RootOfTrust {
-        return signedMetadataProcessor.process(signedMetadata, credentialIssuer)
     }
 }

@@ -36,15 +36,18 @@ internal data class CredentialMetadata(
     // Display information for the issuer.
     val display: List<LocalizedIssuerDisplayDefinition>? = null,
 ) {
+
     fun transformLocalizedIssuerDisplayDefinitionToRequesterStyle(): RequesterStyle {
-        display?.forEach { displayDefinition ->
-            displayDefinition.locale?.let { language ->
-                ConfigurationCompat.getLocales(Resources.getSystem().configuration)
-                    .getFirstMatch(
-                        arrayOf(language)
-                    )?.let {
+        val preferredLocalesList =
+            ConfigurationCompat.getLocales(Resources.getSystem().configuration)
+        for (index in 0 until preferredLocalesList.size()) {
+            val preferredLocale = preferredLocalesList[index]
+            display?.forEach { displayDefinition ->
+                displayDefinition.locale?.let { language ->
+                    if (language == preferredLocale?.language) {
                         return VerifiedIdManifestIssuerStyle(displayDefinition.name ?: "")
                     }
+                }
             }
         }
         return VerifiedIdManifestIssuerStyle(display?.first()?.name ?: "")
@@ -77,12 +80,15 @@ internal data class CredentialMetadata(
         return supportedConfigIds
     }
 
-    fun verifyIfCredentialIssuerAndSignedMetadataExist() {
+    fun verifyIfCredentialIssuerExist() {
         if (credential_issuer == null)
             throw OpenId4VciValidationException(
                 "Credential metadata does not contain credential_issuer.",
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
             )
+    }
+
+    fun verifyIfSignedMetadataExist() {
         if (signed_metadata == null)
             throw OpenId4VciValidationException(
                 "Credential metadata does not contain signed_metadata.",

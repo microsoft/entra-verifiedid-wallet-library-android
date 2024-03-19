@@ -20,8 +20,8 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
 
     // Deserializes the provided signed metadata from credential metadata, verifies its integrity
     // validates it and processes it to return the root of trust.
-    suspend fun process(signedMetadata: String, credentialIssuer: String): RootOfTrust {
-        val jwsToken = deSerializeSignedMetadata(signedMetadata)
+    internal suspend fun process(signedMetadata: String, credentialIssuer: String): RootOfTrust {
+        val jwsToken = deserializeSignedMetadata(signedMetadata)
 
         // Extract the DID and Key ID from the signed metadata token header.
         val kid = jwsToken.keyId ?: throw OpenId4VciValidationException(
@@ -48,7 +48,7 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         return RootOfTrustResolver.resolveRootOfTrust(identifierDocument)
     }
 
-    private fun deSerializeSignedMetadata(signedMetadata: String): JwsToken {
+    private fun deserializeSignedMetadata(signedMetadata: String): JwsToken {
         return try {
             JwsToken.deserialize(signedMetadata)
         } catch (exception: Exception) {
@@ -85,6 +85,4 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
             )
         }
     }
-
-
 }

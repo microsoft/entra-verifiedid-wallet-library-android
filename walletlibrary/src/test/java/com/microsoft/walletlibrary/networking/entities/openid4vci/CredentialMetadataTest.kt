@@ -4,11 +4,11 @@ import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmeta
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOfferGrants
-import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.Test
 
 class CredentialMetadataTest {
@@ -91,7 +91,7 @@ class CredentialMetadataTest {
         )
 
         // Act
-        credentialMetadata.validateAuthorizationServers(credentialOffer)
+        assertThatCode { credentialMetadata.validateAuthorizationServers(credentialOffer) }.doesNotThrowAnyException()
     }
 
     @Test
@@ -115,7 +115,9 @@ class CredentialMetadataTest {
         val actualException = actualResult.exceptionOrNull()
         assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
         assertThat(actualException?.message).isEqualTo("Authorization server $authorizationServer1 not found in Credential Metadata.")
-        assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value)
+        assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
+            VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
+        )
     }
 
     @Test
@@ -133,17 +135,19 @@ class CredentialMetadataTest {
         val actualException = actualResult.exceptionOrNull()
         assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
         assertThat(actualException?.message).isEqualTo("Authorization servers property missing in credential metadata.")
-        assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(VerifiedIdExceptions.INVALID_PROPERTY_EXCEPTION.value)
+        assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
+            VerifiedIdExceptions.INVALID_PROPERTY_EXCEPTION.value
+        )
     }
 
     @Test
-    fun verifyIfCredentialIssuerAndSignedMetadataExist_NoCredentialIssuer_ThrowsException() {
+    fun verifyIfCredentialIssuerExist_NoCredentialIssuer_ThrowsException() {
         // Arrange
         val credentialMetadata = CredentialMetadata()
 
         // Act
         val actualResult = runCatching {
-            credentialMetadata.verifyIfCredentialIssuerAndSignedMetadataExist()
+            credentialMetadata.verifyIfCredentialIssuerExist()
         }
 
         // Assert
@@ -151,17 +155,19 @@ class CredentialMetadataTest {
         val actualException = actualResult.exceptionOrNull()
         assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
         assertThat(actualException?.message).isEqualTo("Credential metadata does not contain credential_issuer.")
-        assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value)
+        assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
+            VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
+        )
     }
 
     @Test
-    fun verifyIfCredentialIssuerAndSignedMetadataExist_NoSignedMetadata_ThrowsException() {
+    fun verifyIfSignedMetadataExist_NoSignedMetadata_ThrowsException() {
         // Arrange
         val credentialMetadata = CredentialMetadata(credential_issuer = "credential_issuer")
 
         // Act
         val actualResult = runCatching {
-            credentialMetadata.verifyIfCredentialIssuerAndSignedMetadataExist()
+            credentialMetadata.verifyIfSignedMetadataExist()
         }
 
         // Assert
@@ -169,19 +175,8 @@ class CredentialMetadataTest {
         val actualException = actualResult.exceptionOrNull()
         assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
         assertThat(actualException?.message).isEqualTo("Credential metadata does not contain signed_metadata.")
-        assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value)
-    }
-
-    @Test
-    fun transformIssuerStyle_NoDisplayDefinition_ReturnsRequesterStyleWithNoIssuerName() {
-        // Arrange
-        val credentialMetadata = CredentialMetadata()
-
-        // Act
-        val actualResult = credentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle()
-
-        // Assert
-        assertThat(actualResult).isInstanceOf(VerifiedIdManifestIssuerStyle::class.java)
-        assertThat(actualResult.name).isEmpty()
+        assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
+            VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
+        )
     }
 }
