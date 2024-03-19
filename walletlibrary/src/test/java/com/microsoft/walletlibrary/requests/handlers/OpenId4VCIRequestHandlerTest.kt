@@ -29,6 +29,10 @@ import kotlin.Result as KotlinResult
 class OpenId4VCIRequestHandlerTest {
     private val mockLibraryConfiguration = mockk<LibraryConfiguration>()
     private val mockSignedMetadataProcessor = mockk<SignedMetadataProcessor>()
+    private val mockCredentialMetadata = mockk<CredentialMetadata>()
+    private val mockCredentialOffer = mockk<CredentialOffer>()
+    private val mockCredentialConfiguration = mockk<CredentialConfiguration>()
+    private val mockCredentialOfferGrants = mockk<CredentialOfferGrants>()
     private val openId4VCIRequestHandler =
         spyk(OpenId4VCIRequestHandler(mockLibraryConfiguration, mockSignedMetadataProcessor))
     private val expectedCredentialOfferString = """
@@ -45,79 +49,6 @@ class OpenId4VCIRequestHandlerTest {
             }
         }
     """.trimIndent()
-    private val expectedCredentialMetadataString = """{
-    "isEsts": true,
-    "credential_configurations_supported": {
-        "credential_id": {
-            "format": "jwt_vc_json",
-            "credential_definition": {
-                "type": [
-                    "VerifiableCredential",
-                    "TestVC"
-                ],
-                "credential_subject": {
-                    "vc.credentialSubject.givenName": {
-                        "display": [
-                            {
-                                "locale": "en-US",
-                                "name": "Name"
-                            }
-                        ],
-                        "value_type": "String"
-                    },
-                    "vc.credentialSubject.preferredLanguage": {
-                        "display": [
-                            {
-                                "locale": "en-US",
-                                "name": "Preferred language"
-                            }
-                        ],
-                        "value_type": "String"
-                    }
-                }
-            },
-            "cryptographic_binding_methods_supported": [
-                "did:web"
-            ],
-            "cryptographic_suites_supported": [
-                "ES256K"
-            ],
-            "display": [
-                {
-                    "name": "Test VC",
-                    "background_color": "#000000",
-                    "description": "Test VC description",
-                    "locale": "en-US",
-                    "logo": {
-                        "uri": "testuri",
-                        "alt_text": "Default verified employee logo"
-                    },
-                    "text_color": "#FFFFFF"
-                }
-            ],
-            "proof_types_supported": {
-                "jwt": {
-                    "proof_signing_alg_values_supported": [
-                        "jwt"
-                    ]
-                }
-            },
-            "scope": "test_scope"
-        }
-    },
-    "credential_endpoint": "credential_endpoint",
-    "credential_issuer": "metadata_url",
-    "authorization_servers": [
-        "authorization_server/token"
-    ],
-    "display": [
-        {
-            "name": "TestIssuer"
-        }
-    ],
-    "notification_endpoint": "notification_endpoint",
-    "signed_metadata": "signed_metadata",
-}"""
 
     @Test
     fun canHandleTest_ValidCredentialOfferAsString_ReturnsTrue() {
@@ -212,7 +143,6 @@ class OpenId4VCIRequestHandlerTest {
     fun handleRequestTest_ValidateCredentialMetadataNoCredentialIssuer_ThrowsException() {
         // Arrange
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
-        val mockCredentialMetadata = mockk<CredentialMetadata>()
         coEvery { openId4VCIRequestHandler["fetchCredentialMetadata"]("metadata_url") } returns KotlinResult.success(
             mockCredentialMetadata
         )
@@ -241,7 +171,6 @@ class OpenId4VCIRequestHandlerTest {
     fun handleRequestTest_ValidateCredentialMetadataNoSignedMetadata_ThrowsException() {
         // Arrange
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
-        val mockCredentialMetadata = mockk<CredentialMetadata>()
         coEvery { openId4VCIRequestHandler["fetchCredentialMetadata"]("metadata_url") } returns KotlinResult.success(
             mockCredentialMetadata
         )
@@ -271,8 +200,6 @@ class OpenId4VCIRequestHandlerTest {
     fun handleRequestTest_GetSupportedConfigurationIdsEmptyConfig_ThrowsException() {
         // Arrange
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
-        val mockCredentialOffer = mockk<CredentialOffer>()
-        val mockCredentialMetadata = mockk<CredentialMetadata>()
         every { mockCredentialOffer.credential_issuer } returns "metadata_url"
         coEvery { openId4VCIRequestHandler["fetchCredentialMetadata"]("metadata_url") } returns KotlinResult.success(
             mockCredentialMetadata
@@ -301,42 +228,64 @@ class OpenId4VCIRequestHandlerTest {
     }
 
     @Test
-    fun handleRequestTest_ReturnUnverifiedRootOfTrust_ReturnsRootOfTrustInRequest() {
+    fun handleRequestTest_validVerifiedIdTransformations_ReturnsVerifiedIdRequest() {
         // Arrange
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
-        val mockCredentialOffer = mockk<CredentialOffer>()
-        val mockCredentialMetadata = mockk<CredentialMetadata>()
-        val mockCredentialConfiguration = mockk<CredentialConfiguration>()
-        every { mockCredentialOffer.credential_issuer } returns "metadata_url"
+        mockCredentialMetadata()
+        mockCredentialOffer()
+        mockCredentialConfiguration()
         coEvery { openId4VCIRequestHandler["fetchCredentialMetadata"]("metadata_url") } returns KotlinResult.success(
             mockCredentialMetadata
         )
         every { openId4VCIRequestHandler["decodeCredentialOffer"](expectedCredentialOfferString) } returns mockCredentialOffer
-        justRun { mockCredentialMetadata.verifyIfCredentialIssuerExist() }
-        justRun { mockCredentialMetadata.verifyIfSignedMetadataExist() }
-        justRun { mockCredentialMetadata.validateAuthorizationServers(mockCredentialOffer) }
-        every { mockCredentialOffer.credential_configuration_ids } returns listOf("credential_id")
-        every { mockCredentialMetadata.getSupportedCredentialConfigurations(listOf("credential_id")) } returns listOf(
-            mockCredentialConfiguration
-        )
-        every { mockCredentialConfiguration.scope } returns "scope"
-        every { mockCredentialMetadata.signed_metadata } returns "signed_metadata"
-        every { mockCredentialMetadata.credential_issuer } returns "metadata_url"
         coEvery {
             mockSignedMetadataProcessor.process(
                 any(),
                 any()
             )
         } returns RootOfTrust("root_of_trust", false)
-        val mockRequesterStyle = mockk<VerifiedIdManifestIssuerStyle>()
-        val mockVerifiedIdStyle = mockk<BasicVerifiedIdStyle>()
+
+        runBlocking {
+            //Act
+            val actualHandleRequestResult =
+                runCatching { openId4VCIRequestHandler.handleRequest(expectedCredentialOfferString) }
+
+            // Assert
+            assertThat(actualHandleRequestResult.isSuccess).isTrue
+            val actualVerifiedIdRequest = actualHandleRequestResult.getOrNull()
+            assertThat(actualVerifiedIdRequest).isNotNull
+            assertThat(actualVerifiedIdRequest).isInstanceOf(OpenId4VciIssuanceRequest::class.java)
+            assertThat(actualVerifiedIdRequest?.requirement).isInstanceOf(AccessTokenRequirement::class.java)
+            assertThat((actualVerifiedIdRequest?.requirement as AccessTokenRequirement).scope).isEqualTo(
+                "scope/.default"
+            )
+            assertThat((actualVerifiedIdRequest.requirement as AccessTokenRequirement).resourceId).isEqualTo(
+                "scope"
+            )
+            assertThat((actualVerifiedIdRequest.requirement as AccessTokenRequirement).configuration).isEqualTo(
+                mockCredentialOfferGrants.authorization_server
+            )
+        }
+    }
+
+    @Test
+    fun handleRequestTest_AuthorizationCodeGrantMissing_ThrowsException() {
+        // Arrange
+        every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
+        mockCredentialMetadata()
+        mockCredentialOfferMissingGrant()
+        mockCredentialConfiguration()
+        coEvery { openId4VCIRequestHandler["fetchCredentialMetadata"]("metadata_url") } returns KotlinResult.success(
+            mockCredentialMetadata
+        )
+        every { openId4VCIRequestHandler["decodeCredentialOffer"](expectedCredentialOfferString) } returns mockCredentialOffer
+        coEvery {
+            mockSignedMetadataProcessor.process(
+                any(),
+                any()
+            )
+        } returns RootOfTrust("root_of_trust", false)
         val mockAccessTokenRequirement = mockk<AccessTokenRequirement>()
-        val mockCredentialOfferGrants = mockk<CredentialOfferGrants>()
-        every { mockCredentialOffer.grants["authorization_code"] } returns mockCredentialOfferGrants
-        every { mockCredentialOfferGrants.authorization_server } returns "authorization_server"
-        every { mockRequesterStyle.name } returns "Issuer Name"
-        every { mockCredentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle() } returns mockRequesterStyle
-        every { mockCredentialConfiguration.getVerifiedIdStyleInPreferredLocale(any()) } returns mockVerifiedIdStyle
         every {
             openId4VCIRequestHandler["transformToRequirement"](
                 mockCredentialConfiguration.scope,
@@ -350,9 +299,93 @@ class OpenId4VCIRequestHandlerTest {
                 runCatching { openId4VCIRequestHandler.handleRequest(expectedCredentialOfferString) }
 
             // Assert
-            assertThat(actualHandleRequestResult.isSuccess).isTrue
-            val actualException = actualHandleRequestResult.getOrNull()
-            assertThat(actualException).isInstanceOf(OpenId4VciIssuanceRequest::class.java)
+            assertThat(actualHandleRequestResult.isFailure).isTrue
+            val actualException = actualHandleRequestResult.exceptionOrNull()
+            assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
+            assertThat(actualException?.message).contains("Grant does not contain 'authorization_code' property.")
+            assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
+                VerifiedIdExceptions.MALFORMED_CREDENTIAL_OFFER_EXCEPTION.value
+            )
         }
+    }
+
+    @Test
+    fun handleRequestTest_NullScope_ThrowsException() {
+        // Arrange
+        every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
+        mockCredentialMetadata()
+        mockCredentialOffer()
+        mockCredentialConfigurationNullScope()
+        coEvery { openId4VCIRequestHandler["fetchCredentialMetadata"]("metadata_url") } returns KotlinResult.success(
+            mockCredentialMetadata
+        )
+        every { openId4VCIRequestHandler["decodeCredentialOffer"](expectedCredentialOfferString) } returns mockCredentialOffer
+        coEvery {
+            mockSignedMetadataProcessor.process(
+                any(),
+                any()
+            )
+        } returns RootOfTrust("root_of_trust", false)
+        val mockAccessTokenRequirement = mockk<AccessTokenRequirement>()
+        every {
+            openId4VCIRequestHandler["transformToRequirement"](
+                mockCredentialConfiguration.scope,
+                mockCredentialOffer
+            )
+        } returns mockAccessTokenRequirement
+
+        runBlocking {
+            //Act
+            val actualHandleRequestResult =
+                runCatching { openId4VCIRequestHandler.handleRequest(expectedCredentialOfferString) }
+
+            // Assert
+            assertThat(actualHandleRequestResult.isFailure).isTrue
+            val actualException = actualHandleRequestResult.exceptionOrNull()
+            assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
+            assertThat(actualException?.message).contains("Credential configuration in credential metadata doesn't contain scope value.")
+            assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
+                VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
+            )
+        }
+    }
+
+    private fun mockCredentialMetadata() {
+        val mockRequesterStyle = mockk<VerifiedIdManifestIssuerStyle>()
+        justRun { mockCredentialMetadata.verifyIfCredentialIssuerExist() }
+        justRun { mockCredentialMetadata.verifyIfSignedMetadataExist() }
+        justRun { mockCredentialMetadata.validateAuthorizationServers(mockCredentialOffer) }
+        every { mockCredentialMetadata.signed_metadata } returns "signed_metadata"
+        every { mockCredentialMetadata.credential_issuer } returns "metadata_url"
+        every { mockCredentialMetadata.getSupportedCredentialConfigurations(listOf("credential_id")) } returns listOf(
+            mockCredentialConfiguration
+        )
+        every { mockCredentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle() } returns mockRequesterStyle
+        every { mockRequesterStyle.name } returns "Issuer Name"
+    }
+
+    private fun mockCredentialOffer() {
+        every { mockCredentialOffer.credential_issuer } returns "metadata_url"
+        every { mockCredentialOffer.credential_configuration_ids } returns listOf("credential_id")
+        every { mockCredentialOffer.grants["authorization_code"] } returns mockCredentialOfferGrants
+        every { mockCredentialOfferGrants.authorization_server } returns "authorization_server"
+    }
+
+    private fun mockCredentialOfferMissingGrant() {
+        every { mockCredentialOffer.credential_issuer } returns "metadata_url"
+        every { mockCredentialOffer.credential_configuration_ids } returns listOf("credential_id")
+        every { mockCredentialOffer.grants["authorization_code"] } returns null
+    }
+
+    private fun mockCredentialConfiguration() {
+        val mockVerifiedIdStyle = mockk<BasicVerifiedIdStyle>()
+        every { mockCredentialConfiguration.scope } returns "scope"
+        every { mockCredentialConfiguration.getVerifiedIdStyleInPreferredLocale(any()) } returns mockVerifiedIdStyle
+    }
+
+    private fun mockCredentialConfigurationNullScope() {
+        val mockVerifiedIdStyle = mockk<BasicVerifiedIdStyle>()
+        every { mockCredentialConfiguration.scope } returns null
+        every { mockCredentialConfiguration.getVerifiedIdStyleInPreferredLocale(any()) } returns mockVerifiedIdStyle
     }
 }
