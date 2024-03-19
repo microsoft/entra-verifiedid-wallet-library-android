@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.requests.handlers
 
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.networking.operations.FetchCredentialMetadataNetworkOperation
@@ -32,7 +33,7 @@ internal class OpenId4VCIRequestHandler(private val libraryConfiguration: Librar
     }
 
     // Handle and process the provided raw request and returns a VerifiedIdRequest.
-    override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
+    override suspend fun handleRequest(rawRequest: Any, rootOfTrustResolver: RootOfTrustResolver?): VerifiedIdRequest<*> {
         val credentialOffer: CredentialOffer
         try {
             // Deserialize the raw request to a CredentialOffer object.
@@ -78,7 +79,9 @@ internal class OpenId4VCIRequestHandler(private val libraryConfiguration: Librar
                     rootOfTrust!!,
                     verifiedIdStyle,
                     credentialOffer,
-                    credentialMetadata
+                    credentialMetadata,
+                    supportedCredentialConfigurationId,
+                    libraryConfiguration
                 )
             }
             .onFailure {
@@ -108,8 +111,8 @@ internal class OpenId4VCIRequestHandler(private val libraryConfiguration: Librar
         return AccessTokenRequirement(
             "",
             configuration = grants.authorization_server,
-            resourceId = "",
-            scope = scope,
+            resourceId = scope,
+            scope = "$scope/.default",
             claims = emptyList()
         )
     }

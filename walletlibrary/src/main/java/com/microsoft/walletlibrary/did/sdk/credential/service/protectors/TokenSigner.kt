@@ -18,11 +18,14 @@ import javax.inject.Singleton
 internal class TokenSigner @Inject constructor(
     private val keyStore: EncryptedKeyStore
 ) {
-    fun signWithIdentifier(payload: String, identifier: Identifier): String {
+    fun signWithIdentifier(payload: String, identifier: Identifier, type: String? = null): String {
         val token = JwsToken(payload, JWSAlgorithm.ES256K)
+        val openid4vci = JOSEObjectType("openid4vci-proof+jwt")
+        val typeHeader = type?.let { openid4vci } ?: JOSEObjectType.JWT
         // adding kid value to header.
         val header = JWSHeader.Builder(JWSAlgorithm.ES256K)
-            .type(JOSEObjectType.JWT)
+//            .customParam("typ", typeHeader)
+            .type(typeHeader)
             .keyID("${identifier.id}#${identifier.signatureKeyReference}")
             .build()
         val privateKey = keyStore.getKey(identifier.signatureKeyReference)

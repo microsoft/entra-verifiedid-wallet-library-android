@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary.did.sdk.datasource.network.apis
 
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
+import com.microsoft.walletlibrary.networking.entities.openid4vci.request.RawOpenID4VCIRequest
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
@@ -36,6 +37,20 @@ internal class HttpAgentOpenId4VciApi(
                     Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
                 )
             )
+        )
+    }
+
+    suspend fun postOpenID4VCIRequest(overrideUrl: String, rawOpenID4VCIRequest: String, accessToken: String): Result<IResponse> {
+        val bodyBytes = rawOpenID4VCIRequest.encodeToByteArray()
+        return agent.post(
+            overrideUrl,
+            httpAgentUtils.combineMaps(
+                httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.Json, bodyBytes),
+                mapOf(
+                    Constants.AUTHORIZATION to "Bearer $accessToken",
+                )
+            ),
+            bodyBytes
         )
     }
 }

@@ -8,6 +8,8 @@ package com.microsoft.walletlibrary
 import android.content.Context
 import android.content.pm.PackageManager
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
+import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
+import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
@@ -21,6 +23,7 @@ import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.handlers.OpenId4VCIRequestHandler
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
 import com.microsoft.walletlibrary.requests.handlers.RequestHandler
+import com.microsoft.walletlibrary.requests.openid4vci.OpenId4VciIssuanceRequest
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
@@ -41,6 +44,7 @@ import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.WalletLibraryVCSDKLogConsumer
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
+import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.json.Json
@@ -62,6 +66,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         serializersModule = SerializersModule {
             polymorphic(VerifiedId::class) {
                 subclass(VerifiableCredential::class)
+                subclass(OpenId4VciVerifiedId::class)
             }
             polymorphic(VerifiedIdStyle::class) {
                 subclass(BasicVerifiedIdStyle::class)
@@ -138,8 +143,10 @@ class VerifiedIdClientBuilder(private val context: Context) {
             jsonSerializer
         )
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
+        val keyStore = EncryptedKeyStore(context)
+        val tokenSigner = TokenSigner(keyStore)
         val libraryConfiguration =
-            LibraryConfiguration(previewFeatureFlags, apiProvider, jsonSerializer)
+            LibraryConfiguration(previewFeatureFlags, apiProvider, jsonSerializer, keyStore, tokenSigner)
 
         val requestResolverFactory = RequestResolverFactory()
         registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration))

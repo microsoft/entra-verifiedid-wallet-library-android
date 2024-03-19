@@ -8,6 +8,8 @@ package com.microsoft.walletlibrary.requests.resolvers
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import android.net.Uri
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestNetworkOperation
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
@@ -57,10 +59,11 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
                     JSONObject(requestPayload.decodeToString())
                     requestPayload.decodeToString()
                 } catch (e: Exception) {
+                    val jwsToken = JwsToken.deserialize(requestPayload.decodeToString())
                     val presentationRequestContent =
                         libraryConfiguration.serializer.decodeFromString(
                             PresentationRequestContent.serializer(),
-                            requestPayload.toString()
+                            jwsToken.content()
                         )
                     OpenIdResolver.validateRequest(presentationRequestContent)
                 }

@@ -60,6 +60,12 @@ class VerifiedIdResponseCompletionException(
     retryable: Boolean = false
 ) : WalletLibraryException(message, cause, retryable)
 
+class IdentifierFetchException(
+    message: String = "",
+    cause: Throwable? = null,
+    retryable: Boolean = false
+) : WalletLibraryException(message, cause, retryable)
+
 class OpenIdResponseCompletionException(
     message: String = "",
     cause: Throwable? = null,

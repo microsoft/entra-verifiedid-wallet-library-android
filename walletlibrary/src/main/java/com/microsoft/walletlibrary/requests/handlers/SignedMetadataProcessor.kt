@@ -14,7 +14,7 @@ import com.microsoft.walletlibrary.wrapper.RootOfTrustResolver
 import com.nimbusds.jose.jwk.JWK
 
 internal class SignedMetadataProcessor(private val libraryConfiguration: LibraryConfiguration) {
-    suspend fun process(signedMetadata: String, credentialIssuer: String): RootOfTrust {
+    internal suspend fun process(signedMetadata: String, credentialIssuer: String): RootOfTrust {
         val jwsToken = try {
             JwsToken.deserialize(signedMetadata)
         } catch (exception: Exception) {
