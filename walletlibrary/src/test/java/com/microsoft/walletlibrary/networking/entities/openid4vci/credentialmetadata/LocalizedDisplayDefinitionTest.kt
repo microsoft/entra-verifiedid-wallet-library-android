@@ -8,7 +8,7 @@ class LocalizedDisplayDefinitionTest {
 
     @Test
     fun transformToVerifiedIdLogo_ValidLogo_ReturnsVerifiedIdLogoWithValidValues() {
-        //Arrange
+        // Arrange
         val localizedDisplayDefinition = LocalizedDisplayDefinition(
             "name",
             "locale",
@@ -17,16 +17,18 @@ class LocalizedDisplayDefinitionTest {
             "background_color",
             "text_color"
         )
-        //Act
+
+        // Act
         val result = localizedDisplayDefinition.transformToVerifiedIdLogo()
-        //Assert
+
+        // Assert
         assertThat(result.url).isEqualTo("uri")
         assertThat(result.altText).isEqualTo("alt_text")
     }
 
     @Test
     fun transformToVerifiedIdLogo_NullLogo_ReturnsVerifiedIdLogoWithEmptyValues() {
-        //Arrange
+        // Arrange
         val localizedDisplayDefinition = LocalizedDisplayDefinition(
             "name",
             "locale",
@@ -35,16 +37,17 @@ class LocalizedDisplayDefinitionTest {
             "background_color",
             "text_color"
         )
-        //Act
+        // Act
         val result = localizedDisplayDefinition.transformToVerifiedIdLogo()
-        //Assert
+
+        // Assert
         assertThat(result.url).isEqualTo("")
         assertThat(result.altText).isEqualTo("")
     }
 
     @Test
     fun transformToVerifiedIdLogo_NullUriForLogo_ReturnsVerifiedIdLogoWithEmptyUri() {
-        //Arrange
+        // Arrange
         val localizedDisplayDefinition = LocalizedDisplayDefinition(
             "name",
             "locale",
@@ -53,16 +56,18 @@ class LocalizedDisplayDefinitionTest {
             "background_color",
             "text_color"
         )
-        //Act
+
+        // Act
         val result = localizedDisplayDefinition.transformToVerifiedIdLogo()
-        //Assert
+
+        // Assert
         assertThat(result.url).isEqualTo("")
         assertThat(result.altText).isEqualTo("alt_text")
     }
 
     @Test
     fun transformToVerifiedIdLogoNullAltTestForLogo_ReturnsVerifiedIdLogoWithEmptyAltText() {
-        //Arrange
+        // Arrange
         val localizedDisplayDefinition = LocalizedDisplayDefinition(
             "name",
             "locale",
@@ -71,16 +76,18 @@ class LocalizedDisplayDefinitionTest {
             "background_color",
             "text_color"
         )
-        //Act
+
+        // Act
         val result = localizedDisplayDefinition.transformToVerifiedIdLogo()
-        //Assert
+
+        // Assert
         assertThat(result.url).isEqualTo("uri")
         assertThat(result.altText).isEqualTo("")
     }
 
     @Test
     fun transformToVerifiedIdStyle_ValidValues_ReturnsBasicVerifiedIdStyleWithValidValues() {
-        //Arrange
+        // Arrange
         val localizedDisplayDefinition = LocalizedDisplayDefinition(
             "name",
             "locale",
@@ -89,9 +96,11 @@ class LocalizedDisplayDefinitionTest {
             "background_color",
             "text_color"
         )
-        //Act
+
+        // Act
         val result = localizedDisplayDefinition.transformToVerifiedIdStyle("issuerName")
-        //Assert
+
+        // Assert
         assertThat(result).isInstanceOf(BasicVerifiedIdStyle::class.java)
         assertThat((result as BasicVerifiedIdStyle).name).isEqualTo("name")
         assertThat(result.issuer).isEqualTo("issuerName")
@@ -105,7 +114,7 @@ class LocalizedDisplayDefinitionTest {
 
     @Test
     fun transformToVerifiedIdStyle_nullLogo_ReturnsBasicVerifiedIdStyleWithEmptyLogoValues() {
-        //Arrange
+        // Arrange
         val localizedDisplayDefinition = LocalizedDisplayDefinition(
             "name",
             "locale",
@@ -114,9 +123,11 @@ class LocalizedDisplayDefinitionTest {
             "background_color",
             "text_color"
         )
-        //Act
+
+        // Act
         val result = localizedDisplayDefinition.transformToVerifiedIdStyle("issuerName")
-        //Assert
+
+        // Assert
         assertThat(result).isInstanceOf(BasicVerifiedIdStyle::class.java)
         assertThat((result as BasicVerifiedIdStyle).name).isEqualTo("name")
         assertThat(result.issuer).isEqualTo("issuerName")
@@ -130,18 +141,13 @@ class LocalizedDisplayDefinitionTest {
 
     @Test
     fun transformToVerifiedIdStyle_nullValues_ReturnsBasicVerifiedIdStyleWithEmptyValues() {
-        //Arrange
-        val localizedDisplayDefinition = LocalizedDisplayDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
-        //Act
+        // Arrange
+        val localizedDisplayDefinition = LocalizedDisplayDefinition()
+
+        // Act
         val result = localizedDisplayDefinition.transformToVerifiedIdStyle("issuerName")
-        //Assert
+
+        // Assert
         assertThat(result).isInstanceOf(BasicVerifiedIdStyle::class.java)
         assertThat((result as BasicVerifiedIdStyle).name).isEqualTo("")
         assertThat(result.issuer).isEqualTo("issuerName")
