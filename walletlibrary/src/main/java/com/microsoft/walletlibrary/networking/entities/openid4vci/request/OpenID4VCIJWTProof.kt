@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class OpenID4VCIJWTProof(
     // The format that the proof is in.
-    val proof_type: String = "jwt",
+    val proof_type: String,
 
     // The proof in JWT format.
     val jwt: String
