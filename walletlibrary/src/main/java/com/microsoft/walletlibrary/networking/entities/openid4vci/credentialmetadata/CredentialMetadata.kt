@@ -8,6 +8,7 @@ import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import kotlinx.serialization.Serializable
+import java.net.URL
 
 /**
  * The metadata of the credential issuer.
@@ -59,8 +60,9 @@ internal data class CredentialMetadata(
                 VerifiedIdExceptions.INVALID_PROPERTY_EXCEPTION.value
             )
         }
+        val authorizationServerHosts = authorization_servers.map {getAuthorizationServerPath(it)}
         credentialOffer.grants.forEach {
-            if (!authorization_servers.contains(it.value.authorization_server))
+            if (!authorizationServerHosts.contains(getAuthorizationServerPath(it.value.authorization_server)))
                 throw OpenId4VciValidationException(
                     "Authorization server ${it.value.authorization_server} not found in Credential Metadata.",
                     VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
@@ -92,5 +94,12 @@ internal data class CredentialMetadata(
                 "Credential metadata does not contain signed_metadata.",
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
             )
+    }
+
+    private fun getAuthorizationServerPath(authorizationServer: String): String {
+        val authorizationServerUrl = URL(authorizationServer)
+        val authorizationServerPath = authorizationServerUrl.path.split("/")
+        val authorizationServerTenant = if (authorizationServerPath.size > 1) authorizationServerPath[1] else ""
+        return authorizationServerUrl.host + authorizationServerTenant
     }
 }
