@@ -16,14 +16,13 @@ import java.nio.charset.StandardCharsets
 internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfiguration: LibraryConfiguration) {
     suspend fun format(credentialOffer: CredentialOffer, credentialEndpoint: String, accessToken: String): RawOpenID4VCIRequest {
         val configurationId = credentialOffer.credential_configuration_ids.first()
-        val jwtProof = formatProofAndSign(credentialOffer, credentialEndpoint, accessToken)
+        val jwtProof = formatProofAndSign(credentialEndpoint, accessToken)
         val proof = OpenID4VCIJWTProof("jwt", jwt = jwtProof)
         return RawOpenID4VCIRequest(configurationId, credentialOffer.issuer_session, proof)
     }
 
-    private suspend fun formatProofAndSign(credentialOffer: CredentialOffer, credentialEndpoint: String, accessToken: String): String {
+    private suspend fun formatProofAndSign(credentialEndpoint: String, accessToken: String): String {
         val identifier = IdentifierManager.getMasterIdentifier()
-        val signingKeys = libraryConfiguration.keyStore.getKey(identifier.signatureKeyReference)
         val accessTokenHash =
             Base64.encodeToString(CryptoOperations.digest(accessToken.toByteArray(StandardCharsets.UTF_8), DigestAlgorithm.Sha256), Constants.BASE64_URL_SAFE)
         val claims = OpenID4VCIJWTProofClaims(
@@ -36,8 +35,7 @@ internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfigurati
     }
 
     private fun signContents(contents: OpenID4VCIJWTProofClaims, responder: Identifier): String {
-        val serializedResponseContent = libraryConfiguration.serializer.encodeToString(
-            OpenID4VCIJWTProofClaims.serializer(), contents)
-        return libraryConfiguration.signer.signWithIdentifier(serializedResponseContent, responder, "openid4vci-proof+jwt")
+        val serializedResponseContent = libraryConfiguration.serializer.encodeToString(OpenID4VCIJWTProofClaims.serializer(), contents)
+        return libraryConfiguration.signer.signWithIdentifier(serializedResponseContent, responder, com.microsoft.walletlibrary.util.Constants.OPENID4VCI_TYPE_HEADER)
     }
 }

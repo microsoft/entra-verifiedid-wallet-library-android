@@ -15,9 +15,6 @@ internal data class CredentialSubjectDefinition(
     val value_type: String? = null
 ) {
     fun getPreferredLocalizedDisplayDefinition(): LocalizedDisplayDefinition? {
-        if (display == null) {
-            return null
-        }
         val preferredLanguages = ConfigurationCompat.getLocales(Resources.getSystem().configuration)
         val preferredLanguagesSize = preferredLanguages.size()
         for (i in 0 until preferredLanguagesSize) {
