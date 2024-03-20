@@ -5,7 +5,9 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.walletlibrary.requests.handlers.RequestProcessorSerializer
 import com.microsoft.walletlibrary.util.VerifiedIdResult
+import com.microsoft.walletlibrary.verifiedid.VerifiedIdSerializer
 
 /**
  * Represents the necessary information required in order to complete a Verified ID request (issuance or presentation).
@@ -16,4 +18,15 @@ interface Requirement {
 
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     fun validate(): VerifiedIdResult<Unit>
+
+    /**
+     * Serializes the requirement into its raw format.
+     * If this requirement is composed or an aggregate of other requirements, MUST call the protocolSerializer's serialize function on all used requirements.
+     * returns the raw format for a given SerializedFormat type (if it has output).
+     */
+    @Throws
+    fun <T: Any> serialize(
+        protocolSerializer: RequestProcessorSerializer,
+        verifiedIdSerializer: VerifiedIdSerializer<T>
+    ): T?
 }

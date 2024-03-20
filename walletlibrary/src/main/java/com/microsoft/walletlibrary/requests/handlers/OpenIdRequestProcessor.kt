@@ -9,6 +9,7 @@ import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.PresentationRequestContent
+import com.microsoft.walletlibrary.requests.VerifiedIdPartialRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
@@ -48,12 +49,12 @@ class OpenIdRequestProcessor: RequestProcessor {
         if (rawRequest !is OpenIdRawRequest)
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
         val presentationRequestContent = rawRequest.mapToPresentationRequestContent()
-        var request = if (rawRequest.requestType == RequestType.ISSUANCE)
+        var request: VerifiedIdRequest<*> = if (rawRequest.requestType == RequestType.ISSUANCE)
             handleIssuanceRequest(presentationRequestContent)
         else
             handlePresentationRequest(presentationRequestContent, rawRequest)
         this.requestProcessors.forEach { extension ->
-            request = extension.parse(rawRequest, request)
+            request = extension.parse(rawRequest, request as VerifiedIdPartialRequest) as VerifiedIdRequest<*>
         }
         return request
     }
