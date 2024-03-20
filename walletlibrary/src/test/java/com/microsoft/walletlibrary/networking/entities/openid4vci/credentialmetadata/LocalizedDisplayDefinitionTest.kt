@@ -66,7 +66,7 @@ class LocalizedDisplayDefinitionTest {
     }
 
     @Test
-    fun transformToVerifiedIdLogoNullAltTestForLogo_ReturnsVerifiedIdLogoWithEmptyAltText() {
+    fun transformToVerifiedIdLogo_NullAltTestForLogo_ReturnsVerifiedIdLogoWithEmptyAltText() {
         // Arrange
         val localizedDisplayDefinition = LocalizedDisplayDefinition(
             "name",
@@ -113,7 +113,7 @@ class LocalizedDisplayDefinitionTest {
     }
 
     @Test
-    fun transformToVerifiedIdStyle_nullLogo_ReturnsBasicVerifiedIdStyleWithEmptyLogoValues() {
+    fun transformToVerifiedIdStyle_NullLogo_ReturnsBasicVerifiedIdStyleWithEmptyLogoValues() {
         // Arrange
         val localizedDisplayDefinition = LocalizedDisplayDefinition(
             "name",
@@ -140,7 +140,7 @@ class LocalizedDisplayDefinitionTest {
     }
 
     @Test
-    fun transformToVerifiedIdStyle_nullValues_ReturnsBasicVerifiedIdStyleWithEmptyValues() {
+    fun transformToVerifiedIdStyle_NullValues_ReturnsBasicVerifiedIdStyleWithEmptyValues() {
         // Arrange
         val localizedDisplayDefinition = LocalizedDisplayDefinition()
 

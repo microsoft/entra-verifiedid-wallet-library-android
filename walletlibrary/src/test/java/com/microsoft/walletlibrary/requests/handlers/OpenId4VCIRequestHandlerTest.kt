@@ -228,7 +228,7 @@ class OpenId4VCIRequestHandlerTest {
     }
 
     @Test
-    fun handleRequestTest_validVerifiedIdTransformations_ReturnsVerifiedIdRequest() {
+    fun handleRequestTest_ValidVerifiedIdTransformations_ReturnsVerifiedIdRequest() {
         // Arrange
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         mockCredentialMetadata()
