@@ -2,8 +2,10 @@ package com.microsoft.walletlibrary.requests.openid4vci
 
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
 import com.microsoft.walletlibrary.networking.entities.openid4vci.RawOpenID4VCIResponse
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
@@ -25,6 +27,7 @@ import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.getResult
 import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import com.microsoft.walletlibrary.wrapper.IdentifierDocumentResolver
 
 internal class OpenId4VciIssuanceRequest(
     // Attributes describing the requester (eg. name, logo).
@@ -60,7 +63,6 @@ internal class OpenId4VciIssuanceRequest(
 
     override fun isSatisfied(): Boolean {
         val validationResult = requirement.validate()
-        // TODO("Add logging")
         return !validationResult.isFailure
     }
 
@@ -71,7 +73,10 @@ internal class OpenId4VciIssuanceRequest(
     private suspend fun sendIssuanceRequest(): RawOpenID4VCIResponse {
         val accessToken =
             (requirement as? AccessTokenRequirement)?.accessToken
-                ?: throw OpenId4VciValidationException("Access token is missing in requirement.", "accesstoken-missing")
+                ?: throw OpenId4VciValidationException(
+                    "Access token is missing in requirement.",
+                    "accesstoken-missing"
+                )
 
         val credentialEndpoint = credentialMetadata.credential_endpoint
             ?: throw OpenId4VciValidationException(
@@ -82,19 +87,26 @@ internal class OpenId4VciIssuanceRequest(
         val rawRequest = requestFormatter.format(credentialOffer, credentialEndpoint, accessToken)
         PostOpenID4VCINetworkOperation(
             credentialEndpoint,
-            libraryConfiguration.serializer.encodeToString(RawOpenID4VCIRequest.serializer(), rawRequest),
+            libraryConfiguration.serializer.encodeToString(
+                RawOpenID4VCIRequest.serializer(),
+                rawRequest
+            ),
             accessToken,
             libraryConfiguration.httpAgentApiProvider,
             libraryConfiguration.serializer
         ).fire().onSuccess { response -> return response }
             .onFailure {
-                throw OpenId4VciRequestException("Failed to send issuance request. ${it.message}", "post-failure")
+                throw OpenId4VciRequestException(
+                    "Failed to send issuance request. ${it.message}",
+                    "post-failure"
+                )
             }
         throw OpenId4VciRequestException("Failed to send issuance request.", "unknown")
     }
 
-    private fun mapToVerifiedId(rawResponse: RawOpenID4VCIResponse): VerifiedId {
-        val issuerName = credentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle().name
+    private suspend fun mapToVerifiedId(rawResponse: RawOpenID4VCIResponse): VerifiedId {
+        val issuerName =
+            credentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle().name
         val credential = rawResponse.credential ?: throw OpenId4VciValidationException(
             "Credential is missing in response.",
             "No credential"
@@ -107,11 +119,32 @@ internal class OpenId4VciIssuanceRequest(
         )
     }
 
-    private fun verifyAndUnWrapIssuanceResponse(jwsTokenString: String): VerifiableCredential {
+    private suspend fun verifyAndUnWrapIssuanceResponse(jwsTokenString: String): VerifiableCredential {
         val jwsToken = JwsToken.deserialize(jwsTokenString)
-/*        if (!jwtValidator.verifySignature(jwsToken))
-            throw InvalidSignatureException("Signature is not Valid on Issuance Response.")*/
-        val verifiableCredentialContent = libraryConfiguration.serializer.decodeFromString(VerifiableCredentialContent.serializer(), jwsToken.content())
-        return VerifiableCredential(verifiableCredentialContent.jti, jwsTokenString, verifiableCredentialContent)
+        if (!verifySignature(jwsToken))
+            throw InvalidSignatureException("Signature is not Valid on Issuance Response.")
+        val verifiableCredentialContent = libraryConfiguration.serializer.decodeFromString(
+            VerifiableCredentialContent.serializer(), jwsToken.content()
+        )
+        return VerifiableCredential(
+            verifiableCredentialContent.jti,
+            jwsTokenString,
+            verifiableCredentialContent
+        )
+    }
+
+    private suspend fun verifySignature(jwsToken: JwsToken): Boolean {
+        val (didInHeader: String?, keyIdInHeader: String) = getDidAndKeyIdFromHeader(jwsToken)
+        if (didInHeader == null) throw ValidatorException("JWS contains no DID")
+        val identifierDocument = IdentifierDocumentResolver.resolveIdentifierDocument(didInHeader)
+        val publicKeys = identifierDocument.verificationMethod
+        if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")
+        val publicKeysJwk = publicKeys.filter { publicKey -> JwaCryptoHelper.extractDidAndKeyId(publicKey.id).second == keyIdInHeader }.map { it.publicKeyJwk }
+        return jwsToken.verify(publicKeysJwk)
+    }
+
+    private fun getDidAndKeyIdFromHeader(token: JwsToken): Pair<String?, String> {
+        token.keyId?.let { kid -> return JwaCryptoHelper.extractDidAndKeyId(kid) }
+        throw ValidatorException("JWS contains no key id")
     }
 }

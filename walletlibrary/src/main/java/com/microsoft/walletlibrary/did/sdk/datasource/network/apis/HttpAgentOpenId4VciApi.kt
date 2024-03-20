@@ -16,14 +16,13 @@ internal class HttpAgentOpenId4VciApi(
     private val httpAgentUtils: HttpAgentUtils,
     private val json: Json
 ) {
+
     suspend fun getOpenID4VCIRequest(overrideUrl: String): Result<IResponse> {
         return agent.get(
             overrideUrl,
-            httpAgentUtils.combineMaps(
-                httpAgentUtils.defaultHeaders(),
-                mapOf(
-                    Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
-                )
+            combineAdditionalHeadersWithDefaultHeaders(
+                mapOf(Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE),
+                httpAgentUtils.defaultHeaders()
             )
         )
     }
@@ -31,26 +30,31 @@ internal class HttpAgentOpenId4VciApi(
     suspend fun getCredentialMetadata(overrideUrl: String): Result<IResponse> {
         return agent.get(
             overrideUrl,
-            httpAgentUtils.combineMaps(
-                httpAgentUtils.defaultHeaders(),
-                mapOf(
-                    Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
-                )
+            combineAdditionalHeadersWithDefaultHeaders(
+                mapOf(Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE),
+                httpAgentUtils.defaultHeaders()
             )
         )
     }
 
-    suspend fun postOpenID4VCIRequest(overrideUrl: String, rawOpenID4VCIRequest: String, accessToken: String): Result<IResponse> {
+    suspend fun postOpenID4VCIRequest(
+        overrideUrl: String,
+        rawOpenID4VCIRequest: String,
+        accessToken: String
+    ): Result<IResponse> {
         val bodyBytes = rawOpenID4VCIRequest.encodeToByteArray()
         return agent.post(
             overrideUrl,
-            httpAgentUtils.combineMaps(
-                httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.Json, bodyBytes),
-                mapOf(
-                    Constants.AUTHORIZATION to "Bearer $accessToken",
-                )
+            combineAdditionalHeadersWithDefaultHeaders(
+                mapOf(Constants.AUTHORIZATION to "Bearer $accessToken"),
+                httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.Json, bodyBytes)
             ),
             bodyBytes
         )
     }
+
+    private fun combineAdditionalHeadersWithDefaultHeaders(
+        additionalHeaders: Map<String, String>,
+        defaultHeaders: Map<String, String>
+    ) = httpAgentUtils.combineMaps(defaultHeaders, additionalHeaders)
 }

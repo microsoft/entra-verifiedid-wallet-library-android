@@ -9,7 +9,6 @@ import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResol
 import android.net.Uri
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestNetworkOperation
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
@@ -27,8 +26,7 @@ import org.json.JSONObject
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
-internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration) :
-    RequestResolver {
+internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration): RequestResolver {
 
     // Indicates whether this resolver can resolve the provided input.
     override fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean {
@@ -56,8 +54,10 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         fetchOpenID4VCIRequest(requestUri)
             .onSuccess { requestPayload ->
                 return try {
-                    JSONObject(requestPayload.decodeToString())
-                    requestPayload.decodeToString()
+                    // Checks if the decoded string is a valid json, If not, fallback to old issuance flow.
+                    val requestPayloadString = requestPayload.decodeToString()
+                    JSONObject(requestPayloadString)
+                    requestPayloadString
                 } catch (e: Exception) {
                     val jwsToken = JwsToken.deserialize(requestPayload.decodeToString())
                     val presentationRequestContent =

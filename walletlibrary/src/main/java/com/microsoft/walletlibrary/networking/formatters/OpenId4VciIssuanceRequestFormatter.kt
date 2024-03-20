@@ -1,5 +1,3 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
-
 package com.microsoft.walletlibrary.networking.formatters
 
 import android.util.Base64
@@ -18,19 +16,21 @@ import java.nio.charset.StandardCharsets
 internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfiguration: LibraryConfiguration) {
     suspend fun format(credentialOffer: CredentialOffer, credentialEndpoint: String, accessToken: String): RawOpenID4VCIRequest {
         val configurationId = credentialOffer.credential_configuration_ids.first()
-        val jwtProof = formatProofAndSign(credentialOffer, credentialEndpoint, accessToken)
+        val jwtProof = formatProofAndSign(credentialEndpoint, accessToken)
         val proof = OpenID4VCIJWTProof("jwt", jwt = jwtProof)
         return RawOpenID4VCIRequest(configurationId, credentialOffer.issuer_session, proof)
     }
 
-    private suspend fun formatProofAndSign(credentialOffer: CredentialOffer, credentialEndpoint: String, accessToken: String): String {
+    private suspend fun formatProofAndSign(credentialEndpoint: String, accessToken: String): String {
         val identifier = IdentifierManager.getMasterIdentifier()
-        val signingKeys = libraryConfiguration.keyStore.getKey(identifier.signatureKeyReference)
         val accessTokenHash =
-            Base64.encodeToString(CryptoOperations.digest(accessToken.toByteArray(StandardCharsets.UTF_8), DigestAlgorithm.Sha256), Constants.BASE64_URL_SAFE)
+            Base64.encodeToString(
+                CryptoOperations.digest(accessToken.toByteArray(StandardCharsets.UTF_8), DigestAlgorithm.Sha256),
+                Constants.BASE64_URL_SAFE
+            )
         val claims = OpenID4VCIJWTProofClaims(
             aud = credentialEndpoint,
-            iat = (System.currentTimeMillis()/1000).toString(),
+            iat = (System.currentTimeMillis() / 1000).toString(),
             sub = identifier.id,
             at_hash = accessTokenHash
         )

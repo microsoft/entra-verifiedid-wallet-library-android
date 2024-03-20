@@ -36,15 +36,18 @@ internal data class CredentialMetadata(
     // Display information for the issuer.
     val display: List<LocalizedIssuerDisplayDefinition>? = null,
 ) {
+
     fun transformLocalizedIssuerDisplayDefinitionToRequesterStyle(): RequesterStyle {
-        display?.forEach { displayDefinition ->
-            displayDefinition.locale?.let { language ->
-                ConfigurationCompat.getLocales(Resources.getSystem().configuration)
-                    .getFirstMatch(
-                        arrayOf(language)
-                    )?.let {
-                        return VerifiedIdManifestIssuerStyle(it.displayName)
+        val preferredLocalesList =
+            ConfigurationCompat.getLocales(Resources.getSystem().configuration)
+        for (index in 0 until preferredLocalesList.size()) {
+            val preferredLocale = preferredLocalesList[index]
+            display?.forEach { displayDefinition ->
+                displayDefinition.locale?.let { language ->
+                    if (language == preferredLocale?.language) {
+                        return VerifiedIdManifestIssuerStyle(displayDefinition.name ?: "")
                     }
+                }
             }
         }
         return VerifiedIdManifestIssuerStyle(display?.first()?.name ?: "")
@@ -57,9 +60,9 @@ internal data class CredentialMetadata(
                 VerifiedIdExceptions.INVALID_PROPERTY_EXCEPTION.value
             )
         }
-        val authorizationServerHosts = authorization_servers.map { URL(it).host }
+        val authorizationServerHosts = authorization_servers.map {getAuthorizationServerPath(it)}
         credentialOffer.grants.forEach {
-            if (!authorizationServerHosts.contains(URL(it.value.authorization_server).host))
+            if (!authorizationServerHosts.contains(getAuthorizationServerPath(it.value.authorization_server)))
                 throw OpenId4VciValidationException(
                     "Authorization server ${it.value.authorization_server} not found in Credential Metadata.",
                     VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
@@ -77,16 +80,26 @@ internal data class CredentialMetadata(
         return supportedConfigIds
     }
 
-    fun validateCredentialMetadataAndSignedMetadata(credentialMetadata: CredentialMetadata) {
-        if (credentialMetadata.credential_issuer == null)
+    fun verifyIfCredentialIssuerExist() {
+        if (credential_issuer == null)
             throw OpenId4VciValidationException(
-                "Credential metadata does not contain credential_issuer",
+                "Credential metadata does not contain credential_issuer.",
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
             )
-        if (credentialMetadata.signed_metadata == null)
+    }
+
+    fun verifyIfSignedMetadataExist() {
+        if (signed_metadata == null)
             throw OpenId4VciValidationException(
-                "Credential metadata does not contain signed_metadata",
+                "Credential metadata does not contain signed_metadata.",
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
             )
+    }
+
+    private fun getAuthorizationServerPath(authorizationServer: String): String {
+        val authorizationServerUrl = URL(authorizationServer)
+        val authorizationServerPath = authorizationServerUrl.path.split("/")
+        val authorizationServerTenant = if (authorizationServerPath.size > 1) authorizationServerPath[1] else ""
+        return authorizationServerUrl.host + authorizationServerTenant
     }
 }
