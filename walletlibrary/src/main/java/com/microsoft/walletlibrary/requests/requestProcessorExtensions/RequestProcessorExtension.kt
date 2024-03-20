@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.requests.requestProcessorExtensions
 
-import com.microsoft.walletlibrary.requests.VerifiedIdRequest
+import com.microsoft.walletlibrary.requests.VerifiedIdPartialRequest
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import kotlin.reflect.KClass
 
@@ -11,7 +11,7 @@ interface RequestProcessorExtension {
     /**
      * Type of RequestProcessor this extension should be injected into
      */
-    abstract val associatedRequestProcessor: KClass<RequestProcessor>
+    abstract val associatedRequestProcessor: KClass<out RequestProcessor>
 
     /**
      * Extension to the associated RequestProcessor's parsing
@@ -19,5 +19,5 @@ interface RequestProcessorExtension {
      * @param request RequestProcessor's base request to be updated
      * @return updated request with extension changes (if any)
      */
-    abstract fun <T> parse(rawRequest: Any, request: VerifiedIdRequest<T>): VerifiedIdRequest<T>
+    abstract fun parse(rawRequest: Any, request: VerifiedIdPartialRequest): VerifiedIdPartialRequest
 }

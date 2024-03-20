@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.requests
 
+import com.microsoft.walletlibrary.ExtensionConfiguration
 import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 
 /**
@@ -14,5 +15,5 @@ interface VerifiedIdExtension {
     /**
      * List of RequestProcessorExtension to be injected into RequestProcessors
      */
-    val requestProcessorExtensions: List<RequestProcessorExtension>?
+    fun createRequestProcessorExtensions(configuration: ExtensionConfiguration): List<RequestProcessorExtension>?
 }

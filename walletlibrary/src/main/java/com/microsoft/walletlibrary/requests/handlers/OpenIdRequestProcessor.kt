@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.PresentationRequestContent
+import com.microsoft.walletlibrary.requests.VerifiedIdPartialRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
@@ -54,7 +55,7 @@ class OpenIdRequestProcessor: RequestProcessor {
         else
             handlePresentationRequest(presentationRequestContent, rawRequest)
         this.requestProcessors.forEach { extension ->
-            request = extension.parse(rawRequest, request)
+            request = extension.parse(rawRequest, request as VerifiedIdPartialRequest) as VerifiedIdRequest<*>
         }
         return request
     }
