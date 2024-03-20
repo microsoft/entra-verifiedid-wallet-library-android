@@ -39,7 +39,7 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         val identifierDocument = IdentifierDocumentResolver.resolveIdentifierDocument(did)
         val jwk = identifierDocument.getJwk(keyId)
             ?: throw OpenId4VciValidationException(
-                "JWK with key id $kid not found in identifier document",
+                "JWK with key id $keyId not found in identifier document",
                 VerifiedIdExceptions.MALFORMED_SIGNED_METADATA_EXCEPTION.value
             )
         validateSignedMetadata(jwsToken, jwk, credentialIssuer, did)
