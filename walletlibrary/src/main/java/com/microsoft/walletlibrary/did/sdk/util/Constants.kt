@@ -61,6 +61,7 @@ internal object Constants {
     const val CONTENT_TYPE = "Content-Type"
     const val CONTENT_LENGTH = "Content-Length"
     const val PREFER = "Prefer"
+    const val AUTHORIZATION = "Authorization"
 
     // Error Codes for network calls
     const val INVALID_PIN = "token_validation.invalid_openid_token_hint_pin"

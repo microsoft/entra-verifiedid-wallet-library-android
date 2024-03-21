@@ -122,7 +122,9 @@ internal class OpenId4VCIRequestHandler(
             rootOfTrust,
             verifiedIdStyle,
             credentialOffer,
-            credentialMetadata
+            credentialMetadata,
+            credentialConfiguration,
+            libraryConfiguration
         )
     }
 

@@ -20,9 +20,8 @@ internal class HttpAgentOpenId4VciApi(
         return agent.get(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
-                mapOf(
-                    Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
-                )
+                mapOf(Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE),
+                httpAgentUtils.defaultHeaders()
             )
         )
     }
@@ -31,17 +30,30 @@ internal class HttpAgentOpenId4VciApi(
         return agent.get(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
-                mapOf(
-                    Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
-                )
+                mapOf(Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE),
+                httpAgentUtils.defaultHeaders()
             )
         )
     }
 
-    private fun combineAdditionalHeadersWithDefaultHeaders(additionalHeaders: Map<String, String>): Map<String, String> {
-        return httpAgentUtils.combineMaps(
-            httpAgentUtils.defaultHeaders(),
-            additionalHeaders
+    suspend fun postOpenID4VCIRequest(
+        overrideUrl: String,
+        rawOpenID4VCIRequest: String,
+        accessToken: String
+    ): Result<IResponse> {
+        val bodyBytes = rawOpenID4VCIRequest.encodeToByteArray()
+        return agent.post(
+            overrideUrl,
+            combineAdditionalHeadersWithDefaultHeaders(
+                mapOf(Constants.AUTHORIZATION to "Bearer $accessToken"),
+                httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.Json, bodyBytes)
+            ),
+            bodyBytes
         )
     }
+
+    private fun combineAdditionalHeadersWithDefaultHeaders(
+        additionalHeaders: Map<String, String>,
+        defaultHeaders: Map<String, String>
+    ) = httpAgentUtils.combineMaps(defaultHeaders, additionalHeaders)
 }

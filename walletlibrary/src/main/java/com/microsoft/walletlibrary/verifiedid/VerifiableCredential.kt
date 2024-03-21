@@ -22,7 +22,7 @@ internal class VerifiableCredential(
     @Serializable(with = DateSerializer::class)
     override val expiresOn = raw.contents.exp?.let { Date(it * 1000L) }
 
-    val types = raw.contents.vc.type
+    override val types = raw.contents.vc.type
 
     override val style = contract.display.toVerifiedIdStyle()
 
