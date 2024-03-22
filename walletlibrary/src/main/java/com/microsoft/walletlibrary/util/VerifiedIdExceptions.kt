@@ -5,5 +5,13 @@ enum class VerifiedIdExceptions(val value: String) {
     REQUIREMENT_NOT_MET_EXCEPTION("requirement_not_met"),
     MALFORMED_INPUT_EXCEPTION("malformed_input"),
     USER_CANCELED_EXCEPTION("user_canceled"),
-    UNSPECIFIED_EXCEPTION("unspecified_error")
+    UNSPECIFIED_EXCEPTION("unspecified_error"),
+    CREDENTIAL_OFFER_FETCH_EXCEPTION("credential_offer_fetch_error"),
+    CREDENTIAL_METADATA_FETCH_EXCEPTION("credential_metadata_fetch_error"),
+    MALFORMED_CREDENTIAL_OFFER_EXCEPTION("malformed_credential_offer"),
+    MALFORMED_CREDENTIAL_METADATA_EXCEPTION("malformed_credential_metadata"),
+    MALFORMED_SIGNED_METADATA_EXCEPTION("malformed_signed_metadata"),
+    INVALID_SIGNATURE_EXCEPTION("invalid_signature"),
+    INVALID_PROPERTY_EXCEPTION("invalid_property"),
+    DOCUMENT_RESOLUTION_EXCEPTION("document_resolution_error"),
 }

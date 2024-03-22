@@ -10,7 +10,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.Present
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendPresentationResponsesNetworkOperation
@@ -21,6 +21,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureExce
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.microsoft.walletlibrary.did.sdk.util.logTime
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -33,7 +34,7 @@ internal class PresentationService @Inject constructor(
     private val serializer: Json,
     private val jwtValidator: JwtValidator,
     private val presentationRequestValidator: PresentationRequestValidator,
-    private val apiProvider: ApiProvider,
+    private val apiProvider: HttpAgentApiProvider,
     private val presentationResponseFormatter: PresentationResponseFormatter
 ) {
 
@@ -42,7 +43,15 @@ internal class PresentationService @Inject constructor(
             logTime("Presentation getRequest") {
                 val uri = verifyUri(stringUri)
                 val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
-                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId).abortOnError()
+                return@logTime validateRequest(presentationRequestContent)
+            }
+        }
+    }
+
+    internal suspend fun validateRequest(presentationRequestContent: PresentationRequestContent): Result<PresentationRequest> {
+        return runResultTry {
+            logTime("Presentation validateRequest") {
+                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId).toSDK().abortOnError()
                 val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
                 isRequestValid(request).abortOnError()
                 Result.Success(request)
@@ -64,7 +73,7 @@ internal class PresentationService @Inject constructor(
             return verifyAndUnwrapPresentationRequestFromQueryParam(requestParameter)
         val requestUriParameter = uri.getQueryParameter("request_uri")
         if (requestUriParameter != null)
-            return fetchRequest(requestUriParameter)
+            return fetchRequest(requestUriParameter).toSDK()
         return Result.Failure(PresentationException("No query parameter 'request' nor 'request_uri' is passed."))
     }
 
@@ -124,7 +133,7 @@ internal class PresentationService @Inject constructor(
                 vpToken,
                 presentationRequest.content.state,
                 apiProvider
-            ).fire()
+            ).fire().toSDK()
         } else {
             val (idToken, vpToken) = presentationResponseFormatter.formatResponse(
                 request = presentationRequest,
@@ -138,7 +147,7 @@ internal class PresentationService @Inject constructor(
                 vpToken,
                 presentationRequest.content.state,
                 apiProvider
-            ).fire()
+            ).fire().toSDK()
         }
     }
 }

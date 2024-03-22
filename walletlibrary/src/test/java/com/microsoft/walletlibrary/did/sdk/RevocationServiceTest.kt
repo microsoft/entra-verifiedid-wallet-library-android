@@ -9,6 +9,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.Revocat
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import kotlin.Result as KotlinResult
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -44,7 +45,7 @@ class RevocationServiceTest {
     fun `revoke verifiable presentation successfully with correct params`() {
         val expectedRevocationRequest = RevocationRequest(verifiableCredential, masterIdentifier, revokeRpList, revokeReason)
         val expectedRevocationReceipt: RevocationReceipt = mockk()
-        coEvery { anyConstructed<SendVerifiablePresentationRevocationRequestNetworkOperation>().fire() } returns Result.Success(
+        coEvery { anyConstructed<SendVerifiablePresentationRevocationRequestNetworkOperation>().fire() } returns KotlinResult.success(
             expectedRevocationReceipt
         )
 

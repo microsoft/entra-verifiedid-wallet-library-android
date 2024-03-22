@@ -14,6 +14,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import kotlin.Result as KotlinResult
 
 class ResolverTest {
     private val identifierRepository: IdentifierRepository = mockk()
@@ -27,18 +28,18 @@ class ResolverTest {
     @Test
     fun successfulResolutionTest() {
         val resolver = Resolver("", identifierRepository)
-        coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns Result.Success(expectedIdentifierResponse)
+        coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(expectedIdentifierResponse)
         runBlocking {
             val actualIdentifierDocument = resolver.resolve(expectedIdentifier)
             assertThat(actualIdentifierDocument).isInstanceOf(Result.Success::class.java)
-            assertThat((actualIdentifierDocument as Result.Success).payload.id).isEqualTo(expectedIdentifier)
+            assertThat(actualIdentifierDocument.getOrNull()?.id).isEqualTo(expectedIdentifier)
         }
     }
 
     @Test
     fun failedResolutionInvalidIdTest() {
         val resolver = Resolver("", identifierRepository)
-        coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier) } returns Result.Failure(
+        coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier) } returns KotlinResult.failure(
             NotFoundException(
                 "Not Found",
                 true,
@@ -47,8 +48,8 @@ class ResolverTest {
         runBlocking {
             val actualResult = resolver.resolve(invalidIdentifier)
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
-            assertThat((actualResult as Result.Failure).payload).isInstanceOf(ResolverException::class.java)
-            assertThat(actualResult.payload.cause).isInstanceOf(NotFoundException::class.java)
+            assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
+            assertThat(actualResult.exceptionOrNull()?.cause).isInstanceOf(NotFoundException::class.java)
         }
     }
 
@@ -60,12 +61,12 @@ class ResolverTest {
                 "invalidUrl",
                 expectedIdentifier
             )
-        } returns Result.Failure(LocalNetworkException("Failed to send request."))
+        } returns KotlinResult.failure(LocalNetworkException("Failed to send request."))
         runBlocking {
             val actualResult = resolver.resolve(expectedIdentifier)
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
-            assertThat((actualResult as Result.Failure).payload).isInstanceOf(ResolverException::class.java)
-            assertThat(actualResult.payload.cause).isInstanceOf(LocalNetworkException::class.java)
+            assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
+            assertThat(actualResult.exceptionOrNull()?.cause).isInstanceOf(LocalNetworkException::class.java)
         }
     }
 }

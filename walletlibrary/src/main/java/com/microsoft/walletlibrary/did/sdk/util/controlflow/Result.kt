@@ -7,12 +7,40 @@ package com.microsoft.walletlibrary.did.sdk.util.controlflow
 
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import kotlinx.coroutines.CancellationException
+import kotlin.Result as KotlinResult
 
 typealias Success = Boolean
 
 sealed class Result<out S> {
     class Success<out S>(val payload: S) : Result<S>()
     class Failure(val payload: SdkException) : Result<Nothing>()
+}
+
+internal fun <T> KotlinResult<T>.toSDK(): Result<T> {
+    if (this.isSuccess) {
+        this.getOrNull()?.let {
+            return Result.Success<T>(it)
+        }
+    }
+    this.exceptionOrNull()?.let {
+        if (it is SdkException) {
+            return Result.Failure(it)
+        } else {
+            return Result.Failure(SdkException("Could not cast failure to SDK", it.cause))
+        }
+    }
+    return Result.Failure(SdkException("Unknown exception"))
+}
+
+internal fun <S> Result<S>.toNative(): KotlinResult<S> {
+    return when (this) {
+        is Result.Success<S> -> {
+            KotlinResult.success(this.payload)
+        }
+        is Result.Failure -> {
+            KotlinResult.failure(this.payload)
+        }
+    }
 }
 
 internal fun <U, T> Result<T>.map(transform: (T) -> U): Result<U> =

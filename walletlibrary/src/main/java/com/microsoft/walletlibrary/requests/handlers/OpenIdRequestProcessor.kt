@@ -14,7 +14,6 @@ import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
-import com.microsoft.walletlibrary.requests.rawrequests.RawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
@@ -45,6 +44,7 @@ class OpenIdRequestProcessor: RequestProcessor {
         return rawRequest is OpenIdRawRequest
     }
 
+    // Handle and process the provided raw request and returns a VerifiedIdRequest.
     override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
         if (rawRequest !is OpenIdRawRequest)
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
