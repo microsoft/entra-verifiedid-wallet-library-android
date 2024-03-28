@@ -18,15 +18,16 @@ import com.microsoft.walletlibrary.util.MissingCallbackUrlException
 import com.microsoft.walletlibrary.util.MissingRequestStateException
 
 internal class VerifiedIdOpenIdJwtRawRequest(
-    override val rawRequest: PresentationRequest,
-    override val requestType: RequestType = RequestType.PRESENTATION
+    override val presentationRequest: PresentationRequest,
+    override val requestType: RequestType = RequestType.PRESENTATION,
+    override val rawRequest: Any
 ): OpenIdRawRequest {
     override fun mapToPresentationRequestContent() : PresentationRequestContent {
-        if (rawRequest.content.state.isNullOrEmpty())
+        if (presentationRequest.content.state.isNullOrEmpty())
             throw MissingRequestStateException("Request State is missing in presentation request")
-        if (rawRequest.content.redirectUrl.isEmpty())
+        if (presentationRequest.content.redirectUrl.isEmpty())
             throw MissingCallbackUrlException("Callback url is missing in presentation request")
-        val requirementsList = rawRequest.getPresentationDefinitions().map { it.toRequirement() }
+        val requirementsList = presentationRequest.getPresentationDefinitions().map { it.toRequirement() }
         val requirement = if (requirementsList.size == 1) {
             requirementsList.first()
         } else {
@@ -37,17 +38,17 @@ internal class VerifiedIdOpenIdJwtRawRequest(
             )
         }
         return PresentationRequestContent(
-            rawRequest.getRequesterStyle(),
+            presentationRequest.getRequesterStyle(),
             requirement,
-            rawRequest.linkedDomainResult.toRootOfTrust(),
-            rawRequest.content.idTokenHint?.let {
+            presentationRequest.linkedDomainResult.toRootOfTrust(),
+            presentationRequest.content.idTokenHint?.let {
                 InjectedIdToken(
                     it,
-                    rawRequest.content.pinDetails?.toPinRequirement()
+                    presentationRequest.content.pinDetails?.toPinRequirement()
                 )
             },
-            rawRequest.content.redirectUrl,
-            rawRequest.content.state
+            presentationRequest.content.redirectUrl,
+            presentationRequest.content.state
         )
     }
 }

@@ -10,9 +10,11 @@ import kotlin.reflect.KClass
 /**
  * Defines the behavior of serializing a Verified ID
  */
-sealed interface VerifiedIdSerializer<SerializedFormat : Any> {
+sealed interface VerifiedIdSerializer<SerializedFormat> {
 
-    val serializedFormat: KClass<SerializedFormat>
+    class VerifiedIdSerializationNotSupported: Error() {
+
+    }
 
     /**
      * Serialize the given verifiedID into the SerializedFormat

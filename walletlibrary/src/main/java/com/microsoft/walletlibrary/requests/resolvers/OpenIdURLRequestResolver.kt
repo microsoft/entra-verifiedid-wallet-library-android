@@ -19,14 +19,13 @@ import com.microsoft.walletlibrary.wrapper.OpenIdResolver
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
-internal class OpenIdURLRequestResolver : RequestResolver {
+internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration, private val preferHeader: List<String>): RequestResolver {
 
     // Indicates whether the raw request returned by this resolver can be handled by provided handler.
     override fun canResolve(requestProcessor: RequestProcessor): Boolean {
         if (requestProcessor is OpenIdRequestProcessor) return true
         return false
     }
-
     // Indicates whether this resolver can resolve the provided input.
     override fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean {
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) return false
@@ -44,4 +43,51 @@ internal class OpenIdURLRequestResolver : RequestResolver {
         )
         return OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString(), rootOfTrustResolver)
     }
+
+    private suspend fun resolveOpenId4VCIRequest(verifiedIdRequestInput: VerifiedIdRequestURL): Any {
+        val requestUri = getRequestUri(verifiedIdRequestInput.url)
+            ?: throw RequestURIMissingException("Request URI is not provided in ${verifiedIdRequestInput.url}.")
+        fetchOpenID4VCIRequest(requestUri)
+            .onSuccess { requestPayload ->
+                return try {
+                    // Checks if the decoded string is a valid json, If not, fallback to old issuance flow.
+                    val requestPayloadString = requestPayload.decodeToString()
+                    JSONObject(requestPayloadString)
+                    requestPayloadString
+                } catch (e: Exception) {
+                    val jwsToken = JwsToken.deserialize(requestPayload.decodeToString())
+                    val presentationRequestContent =
+                        libraryConfiguration.serializer.decodeFromString(
+                            PresentationRequestContent.serializer(),
+                            jwsToken.content()
+                        )
+                    OpenIdResolver.validateRequest(presentationRequestContent, jwsToken.content())
+                }
+            }
+            .onFailure {
+                throw OpenId4VciRequestException(
+                    "Request fetch failed because of ${it.message}.",
+                    VerifiedIdExceptions.CREDENTIAL_OFFER_FETCH_EXCEPTION.value,
+                    it as Exception
+                )
+            }
+        throw OpenId4VciRequestException(
+            "Request fetch failed.",
+            VerifiedIdExceptions.CREDENTIAL_OFFER_FETCH_EXCEPTION.value
+        )
+    }
+
+    private fun getRequestUri(uri: Uri): String? {
+        var requestUriParameter = uri.getQueryParameter(Constants.REQUEST_URI)
+        if (requestUriParameter == null)
+            requestUriParameter = uri.getQueryParameter(Constants.CREDENTIAL_OFFER_URI)
+        return requestUriParameter
+    }
+
+    private suspend fun fetchOpenID4VCIRequest(url: String) =
+        FetchOpenID4VCIRequestNetworkOperation(
+            url,
+            preferHeader,
+            libraryConfiguration.httpAgentApiProvider
+        ).fire()
 }

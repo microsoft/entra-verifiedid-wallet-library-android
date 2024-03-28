@@ -5,9 +5,12 @@
 
 package com.microsoft.walletlibrary.did.sdk.identifier
 
+import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 
 internal interface IdentifierManager {
     suspend fun getMasterIdentifier(): Result<Identifier>
+
+    fun getTokenSigner(): TokenSigner
 }

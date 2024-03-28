@@ -21,51 +21,16 @@ class PresentationExchangeVerifiedIdRequirement(
     purpose: String = "",
     // Information needed for issuance from presentation.
     issuanceOptions: List<VerifiedIdRequestInput> = mutableListOf(),
-
-    /**
-     * Presentation Exchange Input Descriptor ID for this request
-     * @see https://identity.foundation/presentation-exchange/spec/v2.0.0/#input-descriptor
-     */
-    val inputDescriptorId: String,
-
-    /**
-     * Presentation Exchange format
-     */
-    val format: PresentationExchangeVerifiedIdFormat = PresentationExchangeVerifiedIdFormat.JWT_VC,
-
-    /**
-     * List of other input_descriptor IDs this credential should NOT form a presentation object with
-     */
-    val exclusivePresentationWith: List<String>?
-) : VerifiedIdRequirement(id, types, encrypted, required, purpose, issuanceOptions) {
-    /**
-     * Credential submission to be encoded into the presentation
-     */
-    internal var encodedSubmission: String? = ""
-
-    override fun fulfill(selectedVerifiedId: VerifiedId): VerifiedIdResult<Unit> {
-        val response = super.fulfill(selectedVerifiedId)
-        return if (response.isSuccess) {
-            // handle encodedSubmission if possible, else throw
-            when (verifiedId) {
-                is VerifiableCredential -> {
-                    encodedSubmission = (verifiedId as VerifiableCredential).raw.raw
-                    response
-                }
-                else -> {
-                    VerifiedIdResult.failure(RequirementValidationException("Unsupported Verified ID Format"))
-                }
-            }
-        } else {
-            // failure by VerifiedIdRequirements, can be returned directly
-            response
-        }
-    }
-}
-
-/**
- * Format of the Verified ID fulfilling the requirement
- */
-enum class PresentationExchangeVerifiedIdFormat {
-    JWT_VC
-}
+    // Presentation Exchange Input Descriptor ID for this request
+    override val inputDescriptorId: String,
+    // Presentation Exchange format
+    override val format: PresentationExchangeVerifiedIdFormat = PresentationExchangeVerifiedIdFormat.JWT_VC,
+    // List of other input_descriptor IDs this credential should NOT form a presentation object with
+    override val exclusivePresentationWith: List<String>? = null,
+) : VerifiedIdRequirement(
+    id,
+    types,
+    encrypted,
+    required,
+    purpose,
+    issuanceOptions), PresentationExchangeRequirement {}
