@@ -32,7 +32,7 @@ class ExtensionIdentifierManager internal constructor(private val identifierMana
         types: Array<String>
     ): VerifiedId? {
         try {
-            var vcTypes = listOf(Constants.VC_DATA_MODEL_TYPE)
+            val vcTypes = mutableListOf(Constants.VC_DATA_MODEL_TYPE)
             vcTypes += types
             val vcDescriptor = VerifiableCredentialDescriptor(
                 listOf(Constants.VC_DATA_MODEL_CONTEXT), vcTypes, claims

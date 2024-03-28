@@ -12,6 +12,7 @@ import com.microsoft.walletlibrary.requests.PresentationRequestContent
  * Represents the OpenID raw request and the request type.
  */
 internal interface OpenIdRawRequest: RawRequest {
-    override val rawRequest: PresentationRequest
+    val presentationRequest: PresentationRequest
+
     fun mapToPresentationRequestContent(): PresentationRequestContent
 }

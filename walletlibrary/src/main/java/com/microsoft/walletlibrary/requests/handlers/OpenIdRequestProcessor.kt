@@ -18,6 +18,8 @@ import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.util.InputCastingException
+import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequirementCastingException
 import com.microsoft.walletlibrary.util.UnSupportedProtocolException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
@@ -26,7 +28,7 @@ import com.microsoft.walletlibrary.wrapper.ManifestResolver
 /**
  * OIDC protocol specific implementation of RequestProcessor. It can handle OpenID raw request and returns a VerifiedIdRequest.
  */
-internal class OpenIdRequestProcessor: RequestProcessor {
+internal class OpenIdRequestProcessor (private val libraryConfiguration: LibraryConfiguration): RequestProcessor {
     /**
      * Extensions to this RequestProcessor. All extensions should be called after initial request
      * processing to mutate the request with additional input.
@@ -43,6 +45,7 @@ internal class OpenIdRequestProcessor: RequestProcessor {
         return rawRequest is OpenIdRawRequest
     }
 
+    // Handle and process the provided raw request and returns a VerifiedIdRequest.
     override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
         if (rawRequest !is OpenIdRawRequest)
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
@@ -61,11 +64,25 @@ internal class OpenIdRequestProcessor: RequestProcessor {
         presentationRequestContent: PresentationRequestContent,
         rawRequest: OpenIdRawRequest
     ): VerifiedIdRequest<Unit> {
-        return OpenIdPresentationRequest(
+        var partialRequest = VerifiedIdPartialRequest(
             presentationRequestContent.requesterStyle,
             presentationRequestContent.requirement,
-            presentationRequestContent.rootOfTrust,
-            rawRequest
+            presentationRequestContent.rootOfTrust
+        )
+        if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PROCESSOR_EXTENSION_SUPPORT)) {
+            this.requestProcessors.forEach { extension ->
+                partialRequest = extension.parse(
+                    rawRequest.rawRequest,
+                    partialRequest
+                )
+            }
+        }
+        return OpenIdPresentationRequest(
+            partialRequest.requesterStyle,
+            partialRequest.requirement,
+            partialRequest.rootOfTrust,
+            rawRequest,
+            libraryConfiguration
         )
     }
 

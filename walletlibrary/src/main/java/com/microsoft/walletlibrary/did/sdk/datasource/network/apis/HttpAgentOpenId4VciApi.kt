@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary.did.sdk.datasource.network.apis
 
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
+import com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
 import com.microsoft.walletlibrary.util.http.URLFormEncoding
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
@@ -16,15 +17,16 @@ internal class HttpAgentOpenId4VciApi(
     private val httpAgentUtils: HttpAgentUtils,
     private val json: Json
 ) {
-    companion object {
-        const val OPENID4VCI_INTER_OP_PROFILE = "oid4vci-interop-profile-version=0.0.1"
-    }
 
-    suspend fun getOpenID4VCIRequest(overrideUrl: String): Result<IResponse> {
+    suspend fun getOpenID4VCIRequest(overrideUrl: String, preferHeaders: List<String>): Result<IResponse> {
+        val headers = mutableListOf(OPENID4VCI_INTER_OP_PROFILE)
+        headers.addAll(preferHeaders)
         return agent.get(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
-                mapOf(Constants.PREFER to OPENID4VCI_INTER_OP_PROFILE),
+                mapOf(
+                    Constants.PREFER to httpAgentUtils.formatPreferValues(headers)
+                ),
                 httpAgentUtils.defaultHeaders()
             )
         )

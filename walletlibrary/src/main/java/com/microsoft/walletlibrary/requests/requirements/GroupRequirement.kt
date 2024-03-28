@@ -40,8 +40,8 @@ class GroupRequirement(
     }
 
     @Throws
-    override fun <T: Any> serialize(
-        protocolSerializer: RequestProcessorSerializer,
+    override suspend fun <T> serialize(
+        protocolSerializer: RequestProcessorSerializer<T>,
         verifiedIdSerializer: VerifiedIdSerializer<T>
     ): T? {
         when (this.requirementOperator) {
