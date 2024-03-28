@@ -25,8 +25,8 @@ interface Requirement {
      * returns the raw format for a given SerializedFormat type (if it has output).
      */
     @Throws
-    fun <T: Any> serialize(
-        protocolSerializer: RequestProcessorSerializer,
+    suspend fun <T> serialize(
+        protocolSerializer: RequestProcessorSerializer<T>,
         verifiedIdSerializer: VerifiedIdSerializer<T>
     ): T?
 }

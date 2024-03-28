@@ -55,10 +55,10 @@ class IdTokenRequirement(
     }
 
     @Throws
-    override fun <T: Any> serialize(
-        protocolSerializer: RequestProcessorSerializer,
+    override suspend fun <T> serialize(
+        protocolSerializer: RequestProcessorSerializer<T>,
         verifiedIdSerializer: VerifiedIdSerializer<T>
     ): T? {
-        return verifiedIdSerializer.serializedFormat.safeCast(idToken)
+        return null
     }
 }

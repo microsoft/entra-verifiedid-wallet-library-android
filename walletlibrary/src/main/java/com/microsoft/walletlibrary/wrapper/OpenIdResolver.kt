@@ -22,20 +22,20 @@ object OpenIdResolver {
     // Fetches the presentation request from VC SDK using the url and converts it to raw request.
     internal suspend fun getRequest(uri: String): OpenIdRawRequest {
         val presentationRequestResult = VerifiableCredentialSdk.presentationService.getRequest(uri)
-        return handleRequestResult(presentationRequestResult)
+        return handleRequestResult(presentationRequestResult, "")
     }
 
-    internal suspend fun validateRequest(requestContent: PresentationRequestContent): OpenIdRawRequest {
+    internal suspend fun validateRequest(requestContent: PresentationRequestContent, rawRequest: Any): OpenIdRawRequest {
         val presentationRequestResult = VerifiableCredentialSdk.presentationService.validateRequest(requestContent)
-        return handleRequestResult(presentationRequestResult)
+        return handleRequestResult(presentationRequestResult, rawRequest)
     }
 
-    private fun handleRequestResult(presentationRequestResult: Result<PresentationRequest>): OpenIdRawRequest {
+    private fun handleRequestResult(presentationRequestResult: Result<PresentationRequest>, rawRequest: Any): OpenIdRawRequest {
         when (presentationRequestResult) {
             is Result.Success -> {
                 val request = presentationRequestResult.payload
                 val requestType = getRequestType(request)
-                return VerifiedIdOpenIdJwtRawRequest(request, requestType)
+                return VerifiedIdOpenIdJwtRawRequest(request, requestType, rawRequest)
             }
             is Result.Failure -> {
                 throw VerifiedIdRequestFetchException(

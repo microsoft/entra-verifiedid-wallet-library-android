@@ -16,12 +16,14 @@ internal class HttpAgentOpenId4VciApi(
     private val json: Json
 ) {
 
-    suspend fun getOpenID4VCIRequest(overrideUrl: String): Result<IResponse> {
+    suspend fun getOpenID4VCIRequest(overrideUrl: String, preferHeaders: List<String>): Result<IResponse> {
+        val headers = mutableListOf(com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE)
+        headers.addAll(preferHeaders)
         return agent.get(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
                 mapOf(
-                    Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
+                    Constants.PREFER to httpAgentUtils.formatPreferValues(headers)
                 )
             )
         )

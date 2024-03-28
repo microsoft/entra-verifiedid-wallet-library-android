@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
+import com.microsoft.walletlibrary.identifier.IdentifierManager
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdExtension
@@ -43,6 +44,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
     private val requestResolvers = mutableListOf<RequestResolver>()
     private val requestProcessors = mutableListOf<RequestProcessor>()
     private val previewFeatureFlagsSupported = mutableListOf<String>()
+    private var preferHeaders = mutableListOf<String>()
     private val jsonSerializer = Json {
         serializersModule = SerializersModule {
             polymorphic(VerifiedId::class) {
@@ -63,6 +65,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
 
     fun with(extension: VerifiedIdExtension): VerifiedIdClientBuilder {
         // TODO: Add prefer headers to RequestResolverFactory
+        preferHeaders.addAll(extension.prefer)
         // TODO: lookup RequestProcessors by extension associated types and inject extensions
         return this
     }
@@ -100,16 +103,24 @@ class VerifiedIdClientBuilder(private val context: Context) {
             ),
             jsonSerializer
         )
+
+        val identifierManager = IdentifierManager(VerifiableCredentialSdk.identifierService)
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
         val libraryConfiguration =
-            LibraryConfiguration(previewFeatureFlags, apiProvider, jsonSerializer)
+            LibraryConfiguration(previewFeatureFlags,
+                apiProvider,
+                jsonSerializer,
+                identifierManager,
+                identifierManager.getTokenSigner(),
+                logger
+                )
 
         val requestResolverFactory = RequestResolverFactory()
-        registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration))
+        registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration, preferHeaders))
         requestResolverFactory.requestResolvers.addAll(requestResolvers)
 
         val requestProcessorFactory = RequestProcessorFactory()
-        registerRequestHandler(OpenIdRequestProcessor())
+        registerRequestHandler(OpenIdRequestProcessor(libraryConfiguration))
         registerRequestHandler(OpenId4VCIRequestHandler(libraryConfiguration))
         requestProcessorFactory.requestProcessors.addAll(requestProcessors)
 
