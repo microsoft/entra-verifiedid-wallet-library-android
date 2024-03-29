@@ -72,7 +72,7 @@ internal class PresentationExchangeResponseBuilder(
     }
     suspend fun buildIdToken(definitionId: String,
                              clientId: String,
-                             nonce: String,
+                             requestNonce: String,
                              ttlInSeconds: Int = 3600): String {
         val exception = libraryConfiguration.identifierManager.getMasterIdentifier().toNative().map { identifier ->
             val (issuedTime, expiryTime) = createIssuedAndExpiryTime(ttlInSeconds)
@@ -94,7 +94,7 @@ internal class PresentationExchangeResponseBuilder(
             val oidcResponseClaims = vpClaims.apply {
                 subject = identifier.id
                 audience = clientId
-                nonce
+                nonce = requestNonce
                 responseCreationTime = issuedTime
                 responseExpirationTime = expiryTime
             }
