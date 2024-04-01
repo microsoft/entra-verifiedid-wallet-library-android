@@ -72,8 +72,8 @@ internal class OpenIdPresentationRequest(
                         request.presentationRequest.content.state
                     )
                 }
-                if (result.isSuccess) {
-
+                result.exceptionOrNull()?.let {
+                    throw it
                 }
             } else {
                 OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement)
