@@ -146,7 +146,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         val keyStore = EncryptedKeyStore(context)
         val tokenSigner = TokenSigner(keyStore)
         val libraryConfiguration =
-            LibraryConfiguration(previewFeatureFlags, apiProvider, jsonSerializer, keyStore, tokenSigner)
+            LibraryConfiguration(previewFeatureFlags, apiProvider, jsonSerializer, tokenSigner)
 
         val requestResolverFactory = RequestResolverFactory()
         registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration))

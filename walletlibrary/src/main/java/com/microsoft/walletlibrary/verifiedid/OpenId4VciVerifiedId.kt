@@ -30,7 +30,7 @@ internal class OpenId4VciVerifiedId(
     override fun getClaims(): ArrayList<VerifiedIdClaim> {
         val claimValues = raw.contents.vc.credentialSubject
 
-        // TODO("Add support for type and path in Claims)
+        // TODO("Add support for path in Claims)
         val claims = ArrayList<VerifiedIdClaim>()
         for ((claimIdentifier, claimValue) in claimValues) {
             claims.add(createVerifiedIdClaim(claimIdentifier, claimValue))

@@ -22,6 +22,7 @@ import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
+import com.microsoft.walletlibrary.util.UserCanceledException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.getResult
@@ -55,7 +56,7 @@ internal class OpenId4VciIssuanceRequest(
 
     override suspend fun complete(): VerifiedIdResult<VerifiedId> {
         val result = getResult {
-            val response = sendIssuanceRequest()
+            val response = formatAndSendIssuanceRequest()
             mapToVerifiedId(response)
         }
         return result
@@ -67,15 +68,20 @@ internal class OpenId4VciIssuanceRequest(
     }
 
     override suspend fun cancel(message: String?): VerifiedIdResult<Unit> {
-        TODO("Not yet implemented")
+        return getResult {
+            throw UserCanceledException(
+                message ?: "User Canceled",
+                VerifiedIdExceptions.USER_CANCELED_EXCEPTION.value
+            )
+        }
     }
 
-    private suspend fun sendIssuanceRequest(): RawOpenID4VCIResponse {
+    private suspend fun formatAndSendIssuanceRequest(): RawOpenID4VCIResponse {
         val accessToken =
             (requirement as? AccessTokenRequirement)?.accessToken
                 ?: throw OpenId4VciValidationException(
                     "Access token is missing in requirement.",
-                    "accesstoken-missing"
+                    VerifiedIdExceptions.REQUEST_CREATION_EXCEPTION.value
                 )
 
         val credentialEndpoint = credentialMetadata.credential_endpoint
@@ -85,6 +91,14 @@ internal class OpenId4VciIssuanceRequest(
             )
 
         val rawRequest = requestFormatter.format(credentialOffer, credentialEndpoint, accessToken)
+        return sendIssuanceRequest(credentialEndpoint, rawRequest, accessToken)
+    }
+
+    private suspend fun sendIssuanceRequest(
+        credentialEndpoint: String,
+        rawRequest: RawOpenID4VCIRequest,
+        accessToken: String
+    ): RawOpenID4VCIResponse {
         PostOpenID4VCINetworkOperation(
             credentialEndpoint,
             libraryConfiguration.serializer.encodeToString(
@@ -94,14 +108,18 @@ internal class OpenId4VciIssuanceRequest(
             accessToken,
             libraryConfiguration.httpAgentApiProvider,
             libraryConfiguration.serializer
-        ).fire().onSuccess { response -> return response }
+        ).fire()
+            .onSuccess { response -> return response }
             .onFailure {
                 throw OpenId4VciRequestException(
                     "Failed to send issuance request. ${it.message}",
-                    "post-failure"
+                    VerifiedIdExceptions.REQUEST_SEND_EXCEPTION.value
                 )
             }
-        throw OpenId4VciRequestException("Failed to send issuance request.", "unknown")
+        throw OpenId4VciRequestException(
+            "Failed to send issuance request.",
+            VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value
+        )
     }
 
     private suspend fun mapToVerifiedId(rawResponse: RawOpenID4VCIResponse): VerifiedId {
@@ -109,7 +127,7 @@ internal class OpenId4VciIssuanceRequest(
             credentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle().name
         val credential = rawResponse.credential ?: throw OpenId4VciValidationException(
             "Credential is missing in response.",
-            "No credential"
+            VerifiedIdExceptions.INVALID_PROPERTY_EXCEPTION.value
         )
         val raw = verifyAndUnWrapIssuanceResponse(credential)
         return OpenId4VciVerifiedId(
@@ -134,17 +152,19 @@ internal class OpenId4VciIssuanceRequest(
     }
 
     private suspend fun verifySignature(jwsToken: JwsToken): Boolean {
-        val (didInHeader: String?, keyIdInHeader: String) = getDidAndKeyIdFromHeader(jwsToken)
+        val kid = jwsToken.keyId ?: throw ValidatorException("JWS contains no key id")
+        val (didInHeader: String?, keyIdInHeader: String) = getDidAndKeyIdFromHeader(kid)
         if (didInHeader == null) throw ValidatorException("JWS contains no DID")
         val identifierDocument = IdentifierDocumentResolver.resolveIdentifierDocument(didInHeader)
         val publicKeys = identifierDocument.verificationMethod
         if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")
-        val publicKeysJwk = publicKeys.filter { publicKey -> JwaCryptoHelper.extractDidAndKeyId(publicKey.id).second == keyIdInHeader }.map { it.publicKeyJwk }
+        val publicKeysJwk =
+            publicKeys.filter { publicKey -> getDidAndKeyIdFromHeader(publicKey.id).second == keyIdInHeader }
+                .map { it.publicKeyJwk }
         return jwsToken.verify(publicKeysJwk)
     }
 
-    private fun getDidAndKeyIdFromHeader(token: JwsToken): Pair<String?, String> {
-        token.keyId?.let { kid -> return JwaCryptoHelper.extractDidAndKeyId(kid) }
-        throw ValidatorException("JWS contains no key id")
+    private fun getDidAndKeyIdFromHeader(kid: String): Pair<String?, String> {
+        return JwaCryptoHelper.extractDidAndKeyId(kid)
     }
 }
