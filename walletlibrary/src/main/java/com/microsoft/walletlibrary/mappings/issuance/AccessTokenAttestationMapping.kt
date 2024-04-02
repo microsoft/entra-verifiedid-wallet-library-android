@@ -16,8 +16,8 @@ internal fun AccessTokenAttestation.toAccessTokenRequirement(): AccessTokenRequi
         "",
         this.configuration,
         this.redirectUri,
-        this.scope,
         this.resourceId,
+        this.scope,
         this.claims.map { it.toRequestedClaim() },
         this.encrypted,
         this.required
