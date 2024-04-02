@@ -110,7 +110,7 @@ internal class PresentationService @Inject constructor(
     suspend fun sendResponse(
         presentationRequest: PresentationRequest,
         response: List<PresentationResponse>,
-        additionalHeaders: Map<String, String>?
+        additionalHeaders: Map<String, String>? = null
     ): Result<Unit> {
         return runResultTry {
             logTime("Presentation sendResponse") {

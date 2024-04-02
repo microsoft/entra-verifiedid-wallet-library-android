@@ -25,7 +25,7 @@ object OpenIdResponder {
     internal suspend fun sendPresentationResponse(
         presentationRequest: PresentationRequest,
         requirement: Requirement,
-        additionalHeaders: Map<String, String>?
+        additionalHeaders: Map<String, String>? = null
     ) {
         val presentationResponses = presentationRequest.getPresentationDefinitions().map { PresentationResponse(presentationRequest, it.id) }
         if (presentationResponses.size == 1) {
