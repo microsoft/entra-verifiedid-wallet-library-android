@@ -14,4 +14,6 @@ enum class VerifiedIdExceptions(val value: String) {
     INVALID_SIGNATURE_EXCEPTION("invalid_signature"),
     INVALID_PROPERTY_EXCEPTION("invalid_property"),
     DOCUMENT_RESOLUTION_EXCEPTION("document_resolution_error"),
+    REQUEST_CREATION_EXCEPTION("request_creation_error"),
+    REQUEST_SEND_EXCEPTION("request_send_error")
 }

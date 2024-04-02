@@ -3,7 +3,6 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
 import com.nimbusds.jose.jwk.ECKey
 import io.mockk.every
 import io.mockk.mockk
