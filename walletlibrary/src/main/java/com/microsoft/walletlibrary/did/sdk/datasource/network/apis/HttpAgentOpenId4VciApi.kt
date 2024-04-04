@@ -37,6 +37,9 @@ internal class HttpAgentOpenId4VciApi(
         )
     }
 
+    suspend fun getOpenIdWellKnownConfig(overrideUrl: String): Result<IResponse> =
+        agent.get(overrideUrl, httpAgentUtils.defaultHeaders())
+
     suspend fun postOpenID4VCIRequest(
         overrideUrl: String,
         rawOpenID4VCIRequest: String,
@@ -60,15 +63,14 @@ internal class HttpAgentOpenId4VciApi(
         overrideUrl: String,
         grantType: String,
         preAuthorizedCode: String,
-        txCode: String
+        txCode: String?
     ): Result<IResponse> {
-        val body = URLFormEncoding.encode(
-            mapOf<String, Any?>(
-                "grant_type" to grantType,
-                "pre-authorized_code" to preAuthorizedCode,
-                "tx_code" to txCode
-            )
+        val bodyToBeEncoded = mutableMapOf<String, Any?>(
+            "grant_type" to grantType,
+            "pre-authorized_code" to preAuthorizedCode,
         )
+        txCode?.let { bodyToBeEncoded["tx_code"] = it }
+        val body = URLFormEncoding.encode(bodyToBeEncoded)
         return agent.post(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
