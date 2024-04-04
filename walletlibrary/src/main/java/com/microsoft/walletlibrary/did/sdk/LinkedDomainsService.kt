@@ -32,7 +32,7 @@ internal class LinkedDomainsService @Inject constructor(
     ): Result<LinkedDomainResult> {
         return try {
             val verifiedDomains = verifyLinkedDomainsUsingResolver(relyingPartyDid, rootOfTrustResolver)
-            Result.Success(verifiedDomains)
+            Result.success(verifiedDomains)
         } catch (ex: SdkException) {
             SdkLog.i(
                 "Linked Domains verification using resolver failed with exception $ex. " +
@@ -53,10 +53,9 @@ internal class LinkedDomainsService @Inject constructor(
     }
 
     private suspend fun verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid: String): Result<LinkedDomainResult> {
-        return runResultTry {
-            val domainUrls = getLinkedDomainsFromDid(relyingPartyDid).abortOnError()
-            verifyLinkedDomains(domainUrls, relyingPartyDid)
-        }
+        return getLinkedDomainsFromDid(relyingPartyDid).map {
+            verifyLinkedDomains(it, relyingPartyDid)
+        }.getOrThrow()
     }
 
     internal suspend fun verifyLinkedDomains(
@@ -80,9 +79,10 @@ internal class LinkedDomainsService @Inject constructor(
                     else
                         null
                 }
-            } else SdkLog.i("Unable to fetch well-known config document from $domainUrl")
-            Result.Success(LinkedDomainUnVerified(hostname))
-        }
+            }.mapCatching {
+                SdkLog.i("Unable to fetch well-known config document from $domainUrl")
+                LinkedDomainUnVerified(hostname)
+            }
     }
 
     private suspend fun getLinkedDomainsFromDid(relyingPartyDid: String): Result<List<String>> {

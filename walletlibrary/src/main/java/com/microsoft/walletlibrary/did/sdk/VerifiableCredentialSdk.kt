@@ -88,7 +88,6 @@ internal object VerifiableCredentialSdk {
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
             .polymorphicJsonSerializer(polymorphicJsonSerializers)
-            .httpInterceptors(interceptors)
             .build()
 
         issuanceService = sdkComponent.issuanceService()

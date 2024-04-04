@@ -6,25 +6,24 @@
 package com.microsoft.walletlibrary
 
 import android.content.Context
-import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import android.content.pm.PackageManager
+import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
-import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
+import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.identifier.IdentifierManager
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
-import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
-import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
-import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdExtension
 import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdPresentationRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
+import com.microsoft.walletlibrary.requests.handlers.OpenId4VCIRequestHandler
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
+import com.microsoft.walletlibrary.requests.handlers.SignedMetadataProcessor
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
@@ -32,9 +31,6 @@ import com.microsoft.walletlibrary.requests.requirements.PinRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
-import com.microsoft.walletlibrary.requests.handlers.OpenId4VCIRequestHandler
-import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
-import com.microsoft.walletlibrary.requests.handlers.RequestHandler
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.requests.resolvers.RequestResolver
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
@@ -42,6 +38,8 @@ import com.microsoft.walletlibrary.requests.styles.OpenIdVerifierStyle
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
+import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.WalletLibraryVCSDKLogConsumer
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
@@ -113,7 +111,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         // TODO: Add prefer headers to RequestResolverFactory
         preferHeaders.addAll(extension.prefer)
         // TODO: lookup RequestProcessors by extension associated types and inject extensions
-        returh this
+        return this
     }
     
     fun with(httpAgent: IHttpAgent): VerifiedIdClientBuilder {
@@ -167,17 +165,9 @@ class VerifiedIdClientBuilder(private val context: Context) {
 
         val requestProcessorFactory = RequestProcessorFactory()
         registerRequestHandler(OpenIdRequestProcessor(libraryConfiguration))
-        registerRequestHandler(OpenId4VCIRequestHandler(libraryConfiguration))
+        registerRequestHandler(OpenId4VCIRequestHandler(libraryConfiguration, SignedMetadataProcessor(libraryConfiguration)))
         requestProcessorFactory.requestProcessors.addAll(requestProcessors)
 
-        val vcSdkLogConsumer = WalletLibraryVCSDKLogConsumer(logger)
-        VerifiableCredentialSdk.init(
-            context,
-            logConsumer = vcSdkLogConsumer,
-            userAgentInfo = getUserAgent(context),
-            walletLibraryVersionInfo = getWalletLibraryVersionInfo(),
-            httpAgent = httpAgent
-        )
         return VerifiedIdClient(
             requestResolverFactory,
             requestProcessorFactory,

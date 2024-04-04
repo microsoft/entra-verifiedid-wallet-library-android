@@ -142,6 +142,7 @@ internal class PresentationService @Inject constructor(
                 apiProvider,
                 additionalHeaders
             ).fire().toSDK()
+
         } else {
             val (idToken, vpToken) = presentationResponseFormatter.formatResponse(
                 request = presentationRequest,

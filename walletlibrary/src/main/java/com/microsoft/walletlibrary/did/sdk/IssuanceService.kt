@@ -54,13 +54,12 @@ internal class IssuanceService @Inject constructor(
         contractUrl: String,
         rootOfTrustResolver: RootOfTrustResolver? = null
     ): Result<IssuanceRequest> {
-        return runResultTry {
-            logTime("Issuance getRequest") {
-                val contract = fetchContract(contractUrl).abortOnError()
+        return logTime("Issuance getRequest") {
+            runResultTry {
+                val contract = fetchContract(contractUrl).getOrThrow()
                 val linkedDomainResult =
-                    linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer, rootOfTrustResolver).abortOnError().toSDK()
-                val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
-                Result.Success(request)
+                    linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer, rootOfTrustResolver).getOrThrow()
+                Result.Success(IssuanceRequest(contract, contractUrl, linkedDomainResult))
             }
         }
     }

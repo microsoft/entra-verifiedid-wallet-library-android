@@ -71,7 +71,5 @@ internal interface SdkComponent {
         @BindsInstance
         fun polymorphicJsonSerializer(@Named("polymorphicJsonSerializer") jsonSerializer: SerializersModule): Builder
 
-        @BindsInstance
-        fun httpInterceptors(@Named("httpInterceptors") httpInterceptors: List<HttpInterceptor>): Builder
     }
 }

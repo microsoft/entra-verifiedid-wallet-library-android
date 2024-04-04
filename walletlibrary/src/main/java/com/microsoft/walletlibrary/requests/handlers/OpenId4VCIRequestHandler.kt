@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.requests.handlers
 
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
@@ -19,11 +20,11 @@ internal class OpenId4VCIRequestHandler(
     private val signedMetadataProcessor: SignedMetadataProcessor = SignedMetadataProcessor(
         libraryConfiguration
     )
-) : RequestHandler {
+) : RequestProcessor {
 
     // Indicates whether the provided raw request can be handled by this handler.
     // This method checks if the raw request can be cast to CredentialOffer successfully, and if it contains the required fields.
-    override fun canHandle(rawRequest: Any): Boolean {
+    override fun canHandleRequest(rawRequest: Any): Boolean {
         return try {
             libraryConfiguration.serializer.decodeFromString(
                 CredentialOffer.serializer(),
@@ -36,7 +37,7 @@ internal class OpenId4VCIRequestHandler(
     }
 
     // Handle and process the provided raw request and returns a VerifiedIdRequest.
-    override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
+    override suspend fun handleRequest(rawRequest: Any, rootOfTrustResolver: RootOfTrustResolver? = null): VerifiedIdRequest<*> {
         val credentialOffer = decodeCredentialOffer(rawRequest)
 
         // Fetch the credential metadata from the credential issuer in credential offer object.
