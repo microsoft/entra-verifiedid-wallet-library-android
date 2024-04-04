@@ -30,7 +30,7 @@ object URLFormEncoding {
                         firstKeyPair = false
                     }
                 }
-                is Array<*> -> {
+                is List<*> -> {
                     value.iterator().forEach { arrayValue ->
                         when (arrayValue) {
                             is String -> {
