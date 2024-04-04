@@ -15,7 +15,6 @@ import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
-import com.microsoft.walletlibrary.requests.rawrequests.RawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
@@ -52,7 +51,7 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
         if (rawRequest !is OpenIdRawRequest)
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
         val presentationRequestContent = rawRequest.mapToPresentationRequestContent()
-        var request = if (rawRequest.requestType == RequestType.ISSUANCE)
+        return if (rawRequest.requestType == RequestType.ISSUANCE)
             handleIssuanceRequest(presentationRequestContent, rootOfTrustResolver)
         else
             handlePresentationRequest(presentationRequestContent, rawRequest)

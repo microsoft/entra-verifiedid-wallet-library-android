@@ -18,6 +18,7 @@ import com.microsoft.walletlibrary.util.getResult
 import com.microsoft.walletlibrary.verifiedid.StringVerifiedIdSerializer
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 /**
  * Presentation request specific to OpenId protocol.
@@ -35,7 +36,8 @@ internal class OpenIdPresentationRequest(
 
     val request: OpenIdRawRequest,
 
-    private val libraryConfiguration: LibraryConfiguration
+    @Transient
+    private val libraryConfiguration: LibraryConfiguration? = null
 ) : VerifiedIdPresentationRequest {
 
     private var additionalHeaders: Map<String, String>? = null
@@ -54,38 +56,44 @@ internal class OpenIdPresentationRequest(
     // Completes the presentation request and returns Result with success status if successful.
     override suspend fun complete(): VerifiedIdResult<Unit> {
         return getResult {
-            if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT)) {
-                val builder = PresentationExchangeResponseBuilder(libraryConfiguration)
-                builder.serialize(requirement, StringVerifiedIdSerializer)
-                val vpTokens = builder.buildVpTokens(
-                    request.presentationRequest.content.clientId,
-                    request.presentationRequest.content.nonce)
-                val idToken = builder.buildIdToken(
-                    request.presentationRequest.getPresentationDefinitions().first().id,
-                    request.presentationRequest.content.clientId,
-                    request.presentationRequest.content.nonce,
-                )
+            if (libraryConfiguration != null) {
+                if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT)) {
+                    val builder = PresentationExchangeResponseBuilder(libraryConfiguration)
+                    builder.serialize(requirement, StringVerifiedIdSerializer)
+                    val vpTokens = builder.buildVpTokens(
+                        request.presentationRequest.content.clientId,
+                        request.presentationRequest.content.nonce)
+                    val idToken = builder.buildIdToken(
+                        request.presentationRequest.getPresentationDefinitions().first().id,
+                        request.presentationRequest.content.clientId,
+                        request.presentationRequest.content.nonce,
+                    )
 
-                val result = if (vpTokens.size > 1) {
-                    libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponses(
-                        request.presentationRequest.content.redirectUrl,
-                        idToken,
-                        vpTokens,
-                        request.presentationRequest.content.state
-                    )
+                    val result = if (vpTokens.size > 1) {
+                        libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponses(
+                            request.presentationRequest.content.redirectUrl,
+                            idToken,
+                            vpTokens,
+                            request.presentationRequest.content.state,
+                            emptyMap()
+                        )
+                    } else {
+                        libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponse(
+                            request.presentationRequest.content.redirectUrl,
+                            idToken,
+                            vpTokens.first(),
+                            request.presentationRequest.content.state,
+                            emptyMap()
+                        )
+                    }
+                    result.exceptionOrNull()?.let {
+                        throw it
+                    }
                 } else {
-                    libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponse(
-                        request.presentationRequest.content.redirectUrl,
-                        idToken,
-                        vpTokens.first(),
-                        request.presentationRequest.content.state
-                    )
-                }
-                result.exceptionOrNull()?.let {
-                    throw it
+                    OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, emptyMap())
                 }
             } else {
-                OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement)
+                OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, emptyMap())
             }
         }
     }
@@ -100,6 +108,6 @@ internal class OpenIdPresentationRequest(
     }
 
     override fun getNonce(): String {
-        return request.rawRequest.content.nonce
+        return request.presentationRequest.content.nonce
     }
 }
