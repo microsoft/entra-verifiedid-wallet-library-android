@@ -7,11 +7,11 @@ import kotlin.reflect.KClass
 /**
  * Extension to an existing RequestProcessor to parse additional input fields for request parameters
  */
-interface RequestProcessorExtension {
+interface RequestProcessorExtension<T> {
     /**
      * Type of RequestProcessor this extension should be injected into
      */
-    abstract val associatedRequestProcessor: KClass<out RequestProcessor>
+    abstract val associatedRequestProcessor: KClass<out RequestProcessor<T>>
 
     /**
      * Extension to the associated RequestProcessor's parsing
@@ -19,5 +19,5 @@ interface RequestProcessorExtension {
      * @param request RequestProcessor's base request to be updated
      * @return updated request with extension changes (if any)
      */
-    abstract fun parse(rawRequest: Any, request: VerifiedIdPartialRequest): VerifiedIdPartialRequest
+    abstract fun parse(rawRequest: T, request: VerifiedIdPartialRequest): VerifiedIdPartialRequest
 }

@@ -43,7 +43,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
     private var logger: WalletLibraryLogger = WalletLibraryLogger
     private var httpAgent: IHttpAgent = OkHttpAgent()
     private val requestResolvers = mutableListOf<RequestResolver>()
-    private val requestProcessors = mutableListOf<RequestProcessor>()
+    private val requestProcessors = mutableListOf<RequestProcessor<*>>()
     private val previewFeatureFlagsSupported = mutableListOf<String>()
     private var preferHeaders = mutableListOf<String>()
     private val jsonSerializer = Json {
@@ -141,7 +141,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         )
     }
 
-    private fun registerRequestHandler(requestProcessor: RequestProcessor) {
+    private fun registerRequestHandler(requestProcessor: RequestProcessor<*>) {
         requestProcessors.add(requestProcessor)
     }
 

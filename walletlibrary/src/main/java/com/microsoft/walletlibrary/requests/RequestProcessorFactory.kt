@@ -13,10 +13,10 @@ import com.microsoft.walletlibrary.util.UnSupportedRawRequestException
  * RequestHandlerFactory holds a list of RequestProcessor objects and returns a handler which is compatible with the provided request resolver.
  */
 class RequestProcessorFactory {
-    internal val requestProcessors = mutableListOf<RequestProcessor>()
+    internal val requestProcessors = mutableListOf<RequestProcessor<*>>()
 
     // Returns the first request handler that supports the provided raw request.
-    internal suspend fun getHandler(rawRequest: Any): RequestProcessor {
+    internal suspend fun getHandler(rawRequest: Any): RequestProcessor<*> {
         if (requestProcessors.isEmpty()) throw HandlerMissingException("No request handler is registered")
         val compatibleRequestHandlers = requestProcessors.filter { it.canHandleRequest(rawRequest) }
         if (compatibleRequestHandlers.isEmpty()) throw UnSupportedRawRequestException("No registered request handler can handle this raw request")
