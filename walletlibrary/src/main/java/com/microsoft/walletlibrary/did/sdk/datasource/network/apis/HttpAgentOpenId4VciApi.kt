@@ -2,7 +2,7 @@ package com.microsoft.walletlibrary.did.sdk.datasource.network.apis
 
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
-import com.microsoft.walletlibrary.networking.entities.openid4vci.request.RawOpenID4VCIRequest
+import com.microsoft.walletlibrary.util.http.URLFormEncoding
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
@@ -37,6 +37,9 @@ internal class HttpAgentOpenId4VciApi(
         )
     }
 
+    suspend fun getOpenIdWellKnownConfig(overrideUrl: String): Result<IResponse> =
+        agent.get(overrideUrl, httpAgentUtils.defaultHeaders())
+
     suspend fun postOpenID4VCIRequest(
         overrideUrl: String,
         rawOpenID4VCIRequest: String,
@@ -46,10 +49,35 @@ internal class HttpAgentOpenId4VciApi(
         return agent.post(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
-                mapOf(Constants.AUTHORIZATION to "Bearer $accessToken"),
+                mapOf(
+                    Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE,
+                    Constants.AUTHORIZATION to "Bearer $accessToken"
+                ),
                 httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.Json, bodyBytes)
             ),
             bodyBytes
+        )
+    }
+
+    suspend fun postOpenID4VCIPreAuthToken(
+        overrideUrl: String,
+        grantType: String,
+        preAuthorizedCode: String,
+        txCode: String?
+    ): Result<IResponse> {
+        val bodyToBeEncoded = mutableMapOf<String, Any?>(
+            "grant_type" to grantType,
+            "pre-authorized_code" to preAuthorizedCode,
+        )
+        txCode?.let { bodyToBeEncoded["tx_code"] = it }
+        val body = URLFormEncoding.encode(bodyToBeEncoded)
+        return agent.post(
+            overrideUrl,
+            combineAdditionalHeadersWithDefaultHeaders(
+                mapOf(Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE),
+                httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.UrlFormEncoded, body)
+            ),
+            body
         )
     }
 
