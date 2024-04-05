@@ -29,6 +29,8 @@ internal class OpenId4VciVerifiedId(
     @Serializable(with = DateSerializer::class)
     override val expiresOn = raw.contents.exp?.let { Date(it * 1000L) }
 
+    val types = raw.contents.vc.type
+
     override val style = credentialConfiguration.getVerifiedIdStyleInPreferredLocale(issuerName)
 
     override fun getClaims(): ArrayList<VerifiedIdClaim> {

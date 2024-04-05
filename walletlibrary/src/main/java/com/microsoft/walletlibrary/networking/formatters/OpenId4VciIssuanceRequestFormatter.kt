@@ -38,19 +38,17 @@ internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfigurati
         accessToken: String
     ): String {
         val identifier = IdentifierManager.getMasterIdentifier()
-        val accessTokenHash =
-            Base64.encodeToString(
-                CryptoOperations.digest(
-                    accessToken.toByteArray(StandardCharsets.UTF_8),
-                    DigestAlgorithm.Sha256
-                ),
-                Constants.BASE64_URL_SAFE
-            )
+        val accessTokenHash = CryptoOperations.digest(
+            accessToken.toByteArray(StandardCharsets.US_ASCII),
+            DigestAlgorithm.Sha256
+        )
+        val accessTokenPrefix = accessTokenHash.copyOfRange(0, 16)
+        val encodedAccessToken = Base64.encodeToString(accessTokenPrefix, Constants.BASE64_URL_SAFE)
         val claims = OpenID4VCIJWTProofClaims(
             aud = credentialEndpoint,
             iat = (System.currentTimeMillis() / 1000).toString(),
             sub = identifier.id,
-            at_hash = accessTokenHash
+            at_hash = encodedAccessToken
         )
         return signContents(claims, identifier)
     }
