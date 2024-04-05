@@ -6,7 +6,6 @@
 package com.microsoft.walletlibrary.requests
 
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
-import com.microsoft.walletlibrary.requests.resolvers.RequestResolver
 import com.microsoft.walletlibrary.util.HandlerMissingException
 import com.microsoft.walletlibrary.util.UnSupportedResolverException
 
@@ -19,7 +18,7 @@ class RequestProcessorFactory {
     // Returns the first request handler that supports the provided raw request.
     internal suspend fun getHandler(rawRequest: Any): RequestProcessor<*> {
         if (requestProcessors.isEmpty()) throw HandlerMissingException("No request handler is registered")
-        val compatibleRequestHandlers = requestProcessors.filter { requestResolver.canResolve(it) }
+        val compatibleRequestHandlers = requestProcessors.filter { it.canHandleRequest(rawRequest) }
         if (compatibleRequestHandlers.isEmpty()) throw UnSupportedResolverException("No compatible request resolver is registered")
         return compatibleRequestHandlers.first()
     }

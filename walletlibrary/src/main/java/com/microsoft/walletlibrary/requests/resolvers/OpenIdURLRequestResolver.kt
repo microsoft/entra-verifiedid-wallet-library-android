@@ -10,8 +10,6 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.Presen
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestNetworkOperation
-import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
-import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.util.Constants
@@ -31,11 +29,6 @@ import org.json.JSONObject
  */
 internal class OpenIdURLRequestResolver(private val libraryConfiguration: LibraryConfiguration, private val preferHeader: List<String>): RequestResolver {
 
-    // Indicates whether the raw request returned by this resolver can be handled by provided handler.
-    override fun canResolve(requestProcessor: RequestProcessor): Boolean {
-        if (requestProcessor is OpenIdRequestProcessor) return true
-        return false
-    }
     // Indicates whether this resolver can resolve the provided input.
     override fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean {
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) return false

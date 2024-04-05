@@ -7,8 +7,8 @@ package com.microsoft.walletlibrary.wrapper
 
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
@@ -24,7 +24,7 @@ object OpenIdResolver {
     internal suspend fun getRequest(uri: String, rootOfTrustResolver: RootOfTrustResolver? = null): OpenIdProcessedRequest {
         val presentationRequestResult =
             VerifiableCredentialSdk.presentationService.getRequest(uri, rootOfTrustResolver)
-        return handleRequestResult(presentationRequestResult, "")
+        return handleRequestResult(presentationRequestResult, emptyMap())
     }
 
     internal suspend fun validateRequest(requestContent: PresentationRequestContent, rawRequest: Map<String, Any>): OpenIdProcessedRequest {
