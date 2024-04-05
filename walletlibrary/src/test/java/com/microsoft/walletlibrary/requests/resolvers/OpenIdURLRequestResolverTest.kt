@@ -6,7 +6,7 @@ import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestNetworkOperation
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
-import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
+import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
@@ -113,7 +113,7 @@ class OpenIdURLRequestResolverTest {
             val actualResult = openIdURLRequestResolver.resolve(mockVerifiedIdRequestURL)
 
             // Assert
-            assertThat(actualResult).isInstanceOf(OpenIdRawRequest::class.java)
+            assertThat(actualResult).isInstanceOf(OpenIdProcessedRequest::class.java)
         }
     }
 

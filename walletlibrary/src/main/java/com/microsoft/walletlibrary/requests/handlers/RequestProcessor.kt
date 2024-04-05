@@ -11,12 +11,12 @@ import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestPr
 /**
  * An implementation of RequestProcessor is protocol specific. It can handle and process the raw request and returns a VerifiedIdRequest.
  */
-interface RequestProcessor {
+interface RequestProcessor <T> {
     /**
      * Extensions to this RequestProcessor. All extensions should be called after initial request
      * processing to mutate the request with additional input.
      */
-    var requestProcessors: List<RequestProcessorExtension>
+    var requestProcessors: List<RequestProcessorExtension<T>>
 
     /**
      * Handle and process the provided raw request and returns a VerifiedIdRequest.

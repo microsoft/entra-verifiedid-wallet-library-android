@@ -20,8 +20,8 @@ import com.microsoft.walletlibrary.util.MissingRequestStateException
 internal class VerifiedIdOpenIdJwtRawRequest(
     override val presentationRequest: PresentationRequest,
     override val requestType: RequestType = RequestType.PRESENTATION,
-    override val rawRequest: Any
-): OpenIdRawRequest {
+    override val rawRequest: Map<String, Any>
+): OpenIdProcessedRequest {
     override fun mapToPresentationRequestContent() : PresentationRequestContent {
         if (presentationRequest.content.state.isNullOrEmpty())
             throw MissingRequestStateException("Request State is missing in presentation request")

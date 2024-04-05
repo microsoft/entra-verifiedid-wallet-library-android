@@ -7,6 +7,7 @@ import com.microsoft.walletlibrary.networking.operations.FetchCredentialMetadata
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.openid4vci.OpenId4VciIssuanceRequest
+import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
@@ -15,17 +16,18 @@ import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
+
 internal class OpenId4VCIRequestHandler(
     private val libraryConfiguration: LibraryConfiguration,
     private val signedMetadataProcessor: SignedMetadataProcessor = SignedMetadataProcessor(
         libraryConfiguration
     )
-) : RequestProcessor {
+) : RequestProcessor<OpenIdRawRequest> {
 
     /**
      * Extensions to the OpenId4vci Request Processor
      */
-    public override var requestProcessors: List<RequestProcessorExtension> = emptyList()
+    public override var requestProcessors: List<RequestProcessorExtension<OpenIdRawRequest>> = emptyList()
 
     // Indicates whether the provided raw request can be handled by this handler.
     // This method checks if the raw request can be cast to CredentialOffer successfully, and if it contains the required fields.

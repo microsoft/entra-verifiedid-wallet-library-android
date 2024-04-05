@@ -15,5 +15,5 @@ interface VerifiedIdExtension {
     /**
      * List of RequestProcessorExtension to be injected into RequestProcessors
      */
-    fun createRequestProcessorExtensions(configuration: ExtensionConfiguration): List<RequestProcessorExtension>?
+    fun createRequestProcessorExtensions(configuration: ExtensionConfiguration): List<RequestProcessorExtension<*>>?
 }

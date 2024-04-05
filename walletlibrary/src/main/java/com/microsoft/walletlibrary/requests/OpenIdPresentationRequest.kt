@@ -5,7 +5,7 @@
 
 package com.microsoft.walletlibrary.requests
 
-import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
+import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.serializer.PresentationExchangeResponseBuilder
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
@@ -31,7 +31,7 @@ internal class OpenIdPresentationRequest(
     // Root of trust of the requester (eg. linked domains).
     override val rootOfTrust: RootOfTrust,
 
-    val request: OpenIdRawRequest,
+    val request: OpenIdProcessedRequest,
 
     private val libraryConfiguration: LibraryConfiguration
 ) : VerifiedIdPresentationRequest {
