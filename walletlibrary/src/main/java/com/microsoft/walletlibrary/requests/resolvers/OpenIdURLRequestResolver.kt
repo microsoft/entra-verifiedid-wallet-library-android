@@ -22,6 +22,7 @@ import com.microsoft.walletlibrary.util.RequestURIMissingException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
+import com.nimbusds.jose.JWSObject
 import org.json.JSONObject
 
 /**
@@ -67,13 +68,13 @@ internal class OpenIdURLRequestResolver(private val libraryConfiguration: Librar
                     JSONObject(requestPayloadString)
                     requestPayloadString
                 } catch (e: Exception) {
-                    val jwsToken = JwsToken.deserialize(requestPayload.decodeToString())
+                    val jwsToken = JWSObject.parse(requestPayload.decodeToString())
                     val presentationRequestContent =
                         libraryConfiguration.serializer.decodeFromString(
                             PresentationRequestContent.serializer(),
-                            jwsToken.content()
+                            JwsToken(jwsToken).content()
                         )
-                    OpenIdResolver.validateRequest(presentationRequestContent, jwsToken.content())
+                    OpenIdResolver.validateRequest(presentationRequestContent, jwsToken.payload.toJSONObject())
                 }
             }
             .onFailure {

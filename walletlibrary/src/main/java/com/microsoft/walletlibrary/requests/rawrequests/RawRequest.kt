@@ -10,5 +10,4 @@ package com.microsoft.walletlibrary.requests.rawrequests
  */
 interface RawRequest {
     val requestType: RequestType
-    val rawRequest: Any
 }

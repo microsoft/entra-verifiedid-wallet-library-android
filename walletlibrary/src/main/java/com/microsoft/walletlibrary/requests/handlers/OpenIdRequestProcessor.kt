@@ -6,6 +6,7 @@
 package com.microsoft.walletlibrary.requests.handlers
 
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
@@ -13,6 +14,7 @@ import com.microsoft.walletlibrary.requests.PresentationRequestContent
 import com.microsoft.walletlibrary.requests.VerifiedIdPartialRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
+import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
@@ -29,13 +31,14 @@ import com.microsoft.walletlibrary.wrapper.ManifestResolver
 /**
  * OIDC protocol specific implementation of RequestProcessor. It can handle OpenID raw request and returns a VerifiedIdRequest.
  */
-class OpenIdRequestProcessor internal constructor(private val libraryConfiguration: LibraryConfiguration): RequestProcessor {
+class OpenIdRequestProcessor internal constructor(private val libraryConfiguration: LibraryConfiguration): RequestProcessor<OpenIdRawRequest> {
+
 
     /**
      * Extensions to this RequestProcessor. All extensions should be called after initial request
      * processing to mutate the request with additional input.
      */
-    override var requestProcessors: List<RequestProcessorExtension> = emptyList()
+    override var requestProcessors: List<RequestProcessorExtension<OpenIdRawRequest>> = emptyList()
 
     /**
      * Checks if the input can be processed
@@ -44,11 +47,12 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
      */
     override suspend fun canHandleRequest(rawRequest: Any): Boolean {
         // TODO: This and handleRequest need to be refactored to accept a string.
-        return rawRequest is OpenIdRawRequest
+        return rawRequest is OpenIdProcessedRequest
     }
 
+    // Handle and process the provided raw request and returns a VerifiedIdRequest.
     override suspend fun handleRequest(rawRequest: Any, rootOfTrustResolver: RootOfTrustResolver?): VerifiedIdRequest<*> {
-        if (rawRequest !is OpenIdRawRequest)
+        if (rawRequest !is OpenIdProcessedRequest)
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
         val presentationRequestContent = rawRequest.mapToPresentationRequestContent()
         return if (rawRequest.requestType == RequestType.ISSUANCE)
@@ -59,7 +63,7 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
 
     private fun handlePresentationRequest(
         presentationRequestContent: PresentationRequestContent,
-        rawRequest: OpenIdRawRequest
+        rawRequest: OpenIdProcessedRequest
     ): VerifiedIdRequest<Unit> {
         var partialRequest = VerifiedIdPartialRequest(
             presentationRequestContent.requesterStyle,
