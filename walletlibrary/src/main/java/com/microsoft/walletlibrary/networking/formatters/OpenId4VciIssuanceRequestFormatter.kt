@@ -29,7 +29,7 @@ internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfigurati
         }
         val configurationId = credentialOffer.credential_configuration_ids.first()
         val jwtProof = formatProofAndSign(credentialEndpoint, accessToken)
-        val proof = OpenID4VCIJWTProof("jwt", jwtProof)
+        val proof = OpenID4VCIJWTProof(jwtProof)
         return RawOpenID4VCIRequest(configurationId, credentialOffer.issuer_session, proof)
     }
 

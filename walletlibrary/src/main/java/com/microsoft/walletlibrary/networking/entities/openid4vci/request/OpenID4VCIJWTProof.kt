@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.networking.entities.openid4vci.request
 
+import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.Serializable
 
 /**
@@ -7,9 +8,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 internal data class OpenID4VCIJWTProof(
-    // The format that the proof is in.
-    val proof_type: String,
-
     // The proof in JWT format.
-    val jwt: String
+    val jwt: String,
+
+    // The format that the proof is in.
+    @EncodeDefault
+    val proof_type: String = "jwt"
 )
