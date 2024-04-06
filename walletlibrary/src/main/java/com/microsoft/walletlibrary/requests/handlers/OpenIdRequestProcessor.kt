@@ -6,7 +6,6 @@
 package com.microsoft.walletlibrary.requests.handlers
 
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
-import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
@@ -18,6 +17,7 @@ import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
+import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.util.InputCastingException
@@ -47,12 +47,12 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
      */
     override suspend fun canHandleRequest(rawRequest: Any): Boolean {
         // TODO: This and handleRequest need to be refactored to accept a string.
-        return rawRequest is OpenIdProcessedRequest
+        return rawRequest is VerifiedIdOpenIdJwtRawRequest
     }
 
     // Handle and process the provided raw request and returns a VerifiedIdRequest.
     override suspend fun handleRequest(rawRequest: Any, rootOfTrustResolver: RootOfTrustResolver?): VerifiedIdRequest<*> {
-        if (rawRequest !is OpenIdProcessedRequest)
+        if (rawRequest !is VerifiedIdOpenIdJwtRawRequest)
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
         val presentationRequestContent = rawRequest.mapToPresentationRequestContent()
         return if (rawRequest.requestType == RequestType.ISSUANCE)
