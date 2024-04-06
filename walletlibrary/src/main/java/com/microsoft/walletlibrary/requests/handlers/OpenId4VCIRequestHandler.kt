@@ -29,7 +29,7 @@ internal class OpenId4VCIRequestHandler(
      * Extensions to this RequestProcessor. All extensions should be called after initial request
      * processing to mutate the request with additional input.
      */
-    public override var requestProcessors: List<RequestProcessorExtension<OpenIdRawRequest>> = emptyList()
+    public override var requestProcessors: MutableList<RequestProcessorExtension<OpenIdRawRequest>> = mutableListOf()
 
     // Indicates whether the provided raw request can be handled by this handler.
     // This method checks if the raw request can be cast to CredentialOffer successfully, and if it contains the required fields.
