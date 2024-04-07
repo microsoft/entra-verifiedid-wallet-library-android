@@ -21,10 +21,23 @@ import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 object OpenIdResolver {
 
     // Fetches the presentation request from VC SDK using the url and converts it to raw request.
-    internal suspend fun getRequest(uri: String, rootOfTrustResolver: RootOfTrustResolver? = null): OpenIdProcessedRequest {
+    internal suspend fun getRequest(uri: String, rootOfTrustResolver: RootOfTrustResolver? = null, preferHeaders: List<String>): OpenIdProcessedRequest {
         val presentationRequestResult =
-            VerifiableCredentialSdk.presentationService.getRequest(uri, rootOfTrustResolver)
-        return handleRequestResult(presentationRequestResult, emptyMap())
+            VerifiableCredentialSdk.presentationService.getRequest(uri, rootOfTrustResolver, preferHeaders)
+
+        when (presentationRequestResult) {
+            is Result.Success -> {
+                val request = presentationRequestResult.payload.first
+                val requestType = getRequestType(request)
+                return VerifiedIdOpenIdJwtRawRequest(request, requestType, presentationRequestResult.payload.second)
+            }
+            is Result.Failure -> {
+                throw VerifiedIdRequestFetchException(
+                    "Unable to fetch presentation request",
+                    presentationRequestResult.payload
+                )
+            }
+        }
     }
 
     internal suspend fun validateRequest(requestContent: PresentationRequestContent, rawRequest: Map<String, Any>): OpenIdProcessedRequest {

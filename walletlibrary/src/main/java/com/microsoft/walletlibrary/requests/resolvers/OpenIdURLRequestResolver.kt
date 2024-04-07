@@ -47,7 +47,7 @@ internal class OpenIdURLRequestResolver(private val libraryConfiguration: Librar
         return if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN))
             resolveOpenId4VCIRequest(verifiedIdRequestInput)
         else
-            OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString(), rootOfTrustResolver)
+            OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString(), rootOfTrustResolver, preferHeader)
     }
 
     private suspend fun resolveOpenId4VCIRequest(verifiedIdRequestInput: VerifiedIdRequestURL): Any {
