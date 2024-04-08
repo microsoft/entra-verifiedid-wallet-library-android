@@ -5,10 +5,8 @@ import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmeta
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOfferGrant
-import com.microsoft.walletlibrary.networking.entities.openid4vci.request.OpenID4VCIPreAuthTokenRequest
 import com.microsoft.walletlibrary.networking.operations.FetchCredentialMetadataNetworkOperation
 import com.microsoft.walletlibrary.networking.operations.FetchOpenIdWellKnownConfigNetworkOperation
-import com.microsoft.walletlibrary.networking.operations.PostOpenID4VCIPreAuthNetworkOperation
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.openid4vci.OpenId4VciIssuanceRequest
@@ -17,6 +15,7 @@ import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator
 import com.microsoft.walletlibrary.requests.requirements.OpenId4VCIPinRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
+import com.microsoft.walletlibrary.requests.resolvers.OpenID4VCIPreAuthAccessTokenResolver
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
@@ -224,11 +223,20 @@ internal class OpenId4VCIRequestHandler(
         accessTokenEndpoint: String
     ): Requirement {
         val pinDetails = grant.tx_code
-        val openId4VCIPinRequirement = if (pinDetails != null) {
-            OpenId4VCIPinRequirement(pinDetails.length, pinDetails.input_mode)
-        } else OpenId4VCIPinRequirement()
-        fetchAccessTokenForPreAuthFlow(grant, openId4VCIPinRequirement, accessTokenEndpoint)
-        return openId4VCIPinRequirement
+        return if (grant.user_pin_required != null && grant.user_pin_required == false) {
+            val openId4VCIPinRequirement = OpenId4VCIPinRequirement(pinSet = false)
+            openId4VCIPinRequirement.libraryConfiguration = libraryConfiguration
+            openId4VCIPinRequirement.accessTokenEndpoint = accessTokenEndpoint
+            openId4VCIPinRequirement.preAuthorizedCode = grant.preAuthorizedCode
+            OpenID4VCIPreAuthAccessTokenResolver(libraryConfiguration).resolve(grant.preAuthorizedCode, openId4VCIPinRequirement, accessTokenEndpoint)
+            openId4VCIPinRequirement
+        } else {
+            val openId4VCIPinRequirement = OpenId4VCIPinRequirement(pinSet = true)
+            openId4VCIPinRequirement.libraryConfiguration = libraryConfiguration
+            openId4VCIPinRequirement.accessTokenEndpoint = accessTokenEndpoint
+            openId4VCIPinRequirement.preAuthorizedCode = grant.preAuthorizedCode
+            return openId4VCIPinRequirement
+        }
     }
 
     private suspend fun fetchCredentialMetadata(metadataUrl: String): Result<CredentialMetadata> {
@@ -246,44 +254,5 @@ internal class OpenId4VCIRequestHandler(
         if (!credentialIssuer.endsWith(suffix))
             return credentialIssuer + suffix
         return credentialIssuer
-    }
-
-    private suspend fun fetchAccessTokenForPreAuthFlow(
-        credentialOfferGrant: CredentialOfferGrant,
-        openId4VCIPinRequirement: OpenId4VCIPinRequirement,
-        accessTokenEndpoint: String
-    ) {
-        if (credentialOfferGrant.preAuthorizedCode == null) {
-            throw OpenId4VciValidationException(
-                "pre authorization code is not set.",
-                VerifiedIdExceptions.INVALID_PROPERTY_EXCEPTION.value
-            )
-        }
-        PostOpenID4VCIPreAuthNetworkOperation(
-            accessTokenEndpoint,
-            OpenID4VCIPreAuthTokenRequest(
-                "urn:ietf:params:oauth:grant-type:pre-authorized_code",
-                credentialOfferGrant.preAuthorizedCode
-            ),
-            libraryConfiguration.httpAgentApiProvider,
-            libraryConfiguration.serializer
-        ).fire()
-            .onSuccess { openID4VCIPreAuthTokenResponse ->
-                openID4VCIPreAuthTokenResponse.access_token?.let {
-                    openId4VCIPinRequirement.fulfillAccessToken(
-                        it
-                    )
-                } ?: throw OpenId4VciValidationException(
-                    "Access token retrieval failed for Pre Auth flow.",
-                    VerifiedIdExceptions.INVALID_PROPERTY_EXCEPTION.value
-                )
-            }
-            .onFailure {
-                throw OpenId4VciRequestException(
-                    "Failed to fetch access token for Pre Auth flow",
-                    VerifiedIdExceptions.REQUEST_CREATION_EXCEPTION.value,
-                    it as Exception
-                )
-            }
     }
 }

@@ -23,5 +23,7 @@ internal data class CredentialOfferGrant(
     val preAuthorizedCode: String? = null,
 
     // Pin requirements for the credential.
-    val tx_code: CredentialOfferPinDetails? = null
+    val tx_code: CredentialOfferPinDetails? = null,
+
+    val user_pin_required: Boolean? = null
 )
