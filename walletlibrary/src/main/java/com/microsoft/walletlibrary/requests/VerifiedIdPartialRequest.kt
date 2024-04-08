@@ -14,16 +14,33 @@ import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 /**
  * Represents an incomplete mutable VerifiedID Request for RequestProcessorExtensions to modify.
  */
-class VerifiedIdPartialRequest (
-    // Attributes describing the requester (eg. name, logo).
+data class VerifiedIdPartialRequest(
+    /**
+     * Display information for the requester
+     */
     var requesterStyle: RequesterStyle,
-    // Information describing the requirements needed to complete the flow.
+
+    /**
+     * Potential display information for the Verified ID being issued (if this is an issuance request)
+     */
+    var verifiedIdStyle: VerifiedIdStyle?,
+
+    /**
+     * Requirement for this request
+     */
     var requirement: Requirement,
-    // Root of trust of the requester (eg. linked domains).
+
+    /**
+     * Root of trust resolved for this request
+     */
     var rootOfTrust: RootOfTrust
 ) {
     fun replaceRequirement(id: String, transformer: (VerifiedIdRequirement) -> Requirement): Boolean {
         return replaceRequirement(id, this.requirement, transformer)
+    }
+
+    fun removeRequirement(id: String): Boolean {
+        return removeRequirement(id, this.requirement)
     }
 
     private fun replaceRequirement(
@@ -42,5 +59,21 @@ class VerifiedIdPartialRequest (
             }
         }
         return false
+    }
+
+    private fun removeRequirement(
+        id: String,
+        requirement: Requirement
+    ): Boolean {
+        return when (requirement) {
+            is GroupRequirement -> {
+                val sizeBeforeOp = requirement.requirements.size
+                requirement.requirements.removeIf { it is VerifiedIdRequirement && it.id == id }
+                sizeBeforeOp > requirement.requirements.size
+            }
+            else -> {
+                false
+            }
+        }
     }
 }
