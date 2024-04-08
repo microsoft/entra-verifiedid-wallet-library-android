@@ -66,6 +66,7 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
     ): VerifiedIdRequest<Unit> {
         var partialRequest = VerifiedIdPartialRequest(
             presentationRequestContent.requesterStyle,
+            null,
             presentationRequestContent.requirement,
             presentationRequestContent.rootOfTrust
         )
