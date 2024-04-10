@@ -14,14 +14,12 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
-import com.nimbusds.jose.JOSEObjectType
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.JWSHeader
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.UUID
 
-class ExtensionIdentifierManager internal constructor(private val identifierManager: IdentifierManager) {
+class ExtensionIdentifierManager internal constructor(private val identifierManager: IdentifierManager, private val signer: TokenSigner, private val serializer: Json) {
     internal object Constants {
         const val VC_DATA_MODEL_CONTEXT = "https://www.w3.org/2018/credentials/v1"
         const val VC_DATA_MODEL_TYPE = "VerifiableCredential"
@@ -32,7 +30,7 @@ class ExtensionIdentifierManager internal constructor(private val identifierMana
         types: Array<String>
     ): VerifiedId? {
         try {
-            var vcTypes = listOf(Constants.VC_DATA_MODEL_TYPE)
+            val vcTypes = mutableListOf(Constants.VC_DATA_MODEL_TYPE)
             vcTypes += types
             val vcDescriptor = VerifiableCredentialDescriptor(
                 listOf(Constants.VC_DATA_MODEL_CONTEXT), vcTypes, claims
@@ -48,33 +46,25 @@ class ExtensionIdentifierManager internal constructor(private val identifierMana
                 }
             } ?: return null
 
-            // TODO produce VerifiedId
-            return null
-            /*
-            val signingKey = identifier.didDocumentKeys.first ?: return null
             val (issuedTime, expiryTime) = createIssuedAndExpiryTime(5 * 60)    // 5 minutes
+            val jti = UUID.randomUUID().toString()
             val content = VerifiableCredentialContent(
-                UUID.randomUUID().toString(),
+                jti,
                 vcDescriptor,
                 identifier.id,
                 identifier.id,
                 issuedTime,
                 expiryTime
             )
-            val signer = TokenSigner()
-            val vcToken = signer.signWithIdentifier(
-                Json.encodeToString(
-                    VerifiableCredentialContent.serializer(), content
-                ), identifier
-            )
-            return VerifiableCredential()
-             */
+            val jsonContent = serializer.encodeToString (content)
+            val vcToken = signer.signWithIdentifier(jsonContent, identifier)
+            return VerifiableCredential(com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential(
+                jti,
+                vcToken,
+                content
+            ))
         } catch (_: Exception) {
             return null
         }
-    }
-
-    private fun createTokenHeader(keyId: String): JWSHeader {
-        return JWSHeader.Builder(JWSAlgorithm.ES256K).type(JOSEObjectType.JWT).keyID(keyId).build()
     }
 }

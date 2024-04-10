@@ -26,29 +26,27 @@ internal class PresentationExchangeResponseBuilder(
         requirement: Requirement,
         verifiedIdSerializer: VerifiedIdSerializer<String>
     ) {
-        requirement.serialize(this, verifiedIdSerializer)?.let {
+        requirement.serialize(this, verifiedIdSerializer)?.let { rawCredential ->
             when (requirement) {
                 is PresentationExchangeRequirement -> {
-                    requirement.serialize(this, verifiedIdSerializer)?.let { rawCredential ->
-                        // try adding requirement to a group
-                        vpTokens.forEach {
-                            if (it.canIncludeInGroup(requirement)) {
-                                it.include(requirement, rawCredential)
-                                return@let
-                            }
+                    // try adding requirement to a group
+                    vpTokens.forEach {
+                        if (it.canIncludeInGroup(requirement)) {
+                            it.include(requirement, rawCredential)
+                            return
                         }
-                        // create a new group
-                        val exception =
-                            libraryConfiguration.identifierManager.getMasterIdentifier().toNative().map { identifier ->
-                                val group = PresentationExchangeSubmissionGroup(identifier)
-                                group.include(requirement, rawCredential)
-                                vpTokens.add(group)
-                                return@let
-                            }.exceptionOrNull()
+                    }
+                    // create a new group
+                    val exception =
+                        libraryConfiguration.identifierManager.getMasterIdentifier().toNative().map { identifier ->
+                            val group = PresentationExchangeSubmissionGroup(identifier)
+                            group.include(requirement, rawCredential)
+                            vpTokens.add(group)
+                            return
+                        }.exceptionOrNull()
 
-                        if (exception != null) {
-                            throw exception
-                        }
+                    if (exception != null) {
+                        throw exception
                     }
                 }
                 else -> {

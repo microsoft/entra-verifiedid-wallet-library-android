@@ -5,7 +5,12 @@ package com.microsoft.walletlibrary.did.sdk.credential.models
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.JsonTransformingSerializer
+import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * We currently only support Strings as values of claims contained under credentialSubject:.
@@ -37,7 +42,11 @@ internal object CredentialSubjectSerializer :
         if (element !is JsonObject) throw SerializationException("CredentialSubject has to be a JSON object")
         val newContent = HashMap<String, JsonElement>()
         element.entries.forEach { entry ->
-            newContent[entry.key] = serializer.decodeFromString(JsonElement.serializer(), entry.value.jsonPrimitive.content)
+            try {
+                newContent[entry.key] = serializer.decodeFromString(JsonElement.serializer(), entry.value.jsonPrimitive.content)
+            } catch (e: SerializationException) {
+                newContent[entry.key] = entry.value.jsonPrimitive
+            }
         }
         return JsonObject(newContent)
     }

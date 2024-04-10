@@ -5,7 +5,7 @@
 
 package com.microsoft.walletlibrary
 
-import com.microsoft.walletlibrary.did.sdk.identifier.IdentifierManager
+import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 
 /**
@@ -23,8 +23,8 @@ class ExtensionConfiguration private constructor(
     val identifierManager: ExtensionIdentifierManager
 ) {
 
-    internal constructor(logger: WalletLibraryLogger, identifierManager: IdentifierManager) : this(
-        logger,
-        ExtensionIdentifierManager(identifierManager)
+    internal constructor(libraryConfiguration: LibraryConfiguration) : this(
+        libraryConfiguration.logger,
+        ExtensionIdentifierManager(libraryConfiguration.identifierManager, libraryConfiguration.tokenSigner, libraryConfiguration.serializer)
     )
 }

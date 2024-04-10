@@ -164,7 +164,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration, preferHeaders))
         requestResolverFactory.requestResolvers.addAll(requestResolvers)
 
-        val config = ExtensionConfiguration(logger, identifierManager)
+        val config = ExtensionConfiguration(libraryConfiguration)
         val extensions: List<RequestProcessorExtension<*>> = extensionBuilders.mapNotNull { it.createRequestProcessorExtensions(config) }.flatMap { it }
 
         val requestProcessorFactory = RequestProcessorFactory()
