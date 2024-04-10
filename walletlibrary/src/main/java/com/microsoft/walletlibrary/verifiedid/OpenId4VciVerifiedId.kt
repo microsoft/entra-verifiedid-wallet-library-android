@@ -7,10 +7,18 @@ import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmeta
 import kotlinx.serialization.Serializable
 import java.util.Date
 
+/**
+ * Holds the information related to a VerifiedID issued using OpenID4VCI like the claims, issued and expiry dates.
+ */
 @Serializable
 internal class OpenId4VciVerifiedId(
+    // The deserialized Verifiable Credential received during issuance.
     val raw: VerifiableCredential,
+
+    // Name of the issuer.
     val issuerName: String,
+
+    // Information about the issuer and credential issued.
     val credentialConfiguration: CredentialConfiguration
 ) : VerifiedId {
     override val id = raw.jti
@@ -21,9 +29,9 @@ internal class OpenId4VciVerifiedId(
     @Serializable(with = DateSerializer::class)
     override val expiresOn = raw.contents.exp?.let { Date(it * 1000L) }
 
-    override val style = credentialConfiguration.getVerifiedIdStyleInPreferredLocale(issuerName)
+    val types = raw.contents.vc.type
 
-    override val types: List<String> = raw.contents.vc.type
+    override val style = credentialConfiguration.getVerifiedIdStyleInPreferredLocale(issuerName)
 
     override fun getClaims(): ArrayList<VerifiedIdClaim> {
         val claimValues = raw.contents.vc.credentialSubject
@@ -40,9 +48,14 @@ internal class OpenId4VciVerifiedId(
         val claimDefinitions = credentialConfiguration.credential_definition?.credentialSubject
         val claimDisplayDefinition = claimDefinitions?.get("vc.credentialSubject.$claimReference")
             ?: return VerifiedIdClaim(claimReference, claimValue, null)
-        val localizedDisplayDefinition = claimDisplayDefinition.getPreferredLocalizedDisplayDefinition()
+        val localizedDisplayDefinition =
+            claimDisplayDefinition.getPreferredLocalizedDisplayDefinition()
         return if (localizedDisplayDefinition?.name != null)
-            VerifiedIdClaim(localizedDisplayDefinition.name, claimValue, claimDisplayDefinition.value_type)
+            VerifiedIdClaim(
+                localizedDisplayDefinition.name,
+                claimValue,
+                claimDisplayDefinition.value_type
+            )
         else
             VerifiedIdClaim(claimReference, claimValue, claimDisplayDefinition.value_type)
     }

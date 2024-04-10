@@ -29,7 +29,11 @@ internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfigurati
         }
         val configurationId = credentialOffer.credential_configuration_ids.first()
         val jwtProof = formatProofAndSign(credentialEndpoint, accessToken)
+<<<<<<< HEAD
         val proof = OpenID4VCIJWTProof("jwt", jwtProof)
+=======
+        val proof = OpenID4VCIJWTProof(jwtProof)
+>>>>>>> dev
         return RawOpenID4VCIRequest(configurationId, credentialOffer.issuer_session, proof)
     }
 
@@ -38,6 +42,7 @@ internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfigurati
         accessToken: String
     ): String {
         val identifier = IdentifierManager.getMasterIdentifier()
+<<<<<<< HEAD
         val accessTokenHash =
             Base64.encodeToString(
                 CryptoOperations.digest(
@@ -46,11 +51,23 @@ internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfigurati
                 ),
                 Constants.BASE64_URL_SAFE
             )
+=======
+        val accessTokenHash = CryptoOperations.digest(
+            accessToken.toByteArray(StandardCharsets.US_ASCII),
+            DigestAlgorithm.Sha256
+        )
+        val accessTokenPrefix = accessTokenHash.copyOfRange(0, 16)
+        val encodedAccessToken = Base64.encodeToString(accessTokenPrefix, Constants.BASE64_URL_SAFE)
+>>>>>>> dev
         val claims = OpenID4VCIJWTProofClaims(
             aud = credentialEndpoint,
             iat = (System.currentTimeMillis() / 1000).toString(),
             sub = identifier.id,
+<<<<<<< HEAD
             at_hash = accessTokenHash
+=======
+            at_hash = encodedAccessToken
+>>>>>>> dev
         )
         return signContents(claims, identifier)
     }

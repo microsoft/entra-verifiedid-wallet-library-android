@@ -16,12 +16,19 @@ internal class HttpAgentOpenId4VciApi(
     private val httpAgentUtils: HttpAgentUtils,
     private val json: Json
 ) {
+    companion object {
+        const val OPENID4VCI_INTER_OP_PROFILE = "oid4vci-interop-profile-version=0.0.1"
+    }
 
     suspend fun getOpenID4VCIRequest(overrideUrl: String): Result<IResponse> {
         return agent.get(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
+<<<<<<< HEAD
                 mapOf(Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE),
+=======
+                mapOf(Constants.PREFER to OPENID4VCI_INTER_OP_PROFILE),
+>>>>>>> dev
                 httpAgentUtils.defaultHeaders()
             )
         )
@@ -31,15 +38,22 @@ internal class HttpAgentOpenId4VciApi(
         return agent.get(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
+<<<<<<< HEAD
                 mapOf(Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE),
+=======
+                mapOf(Constants.PREFER to OPENID4VCI_INTER_OP_PROFILE),
+>>>>>>> dev
                 httpAgentUtils.defaultHeaders()
             )
         )
     }
 
+<<<<<<< HEAD
     suspend fun getOpenIdWellKnownConfig(overrideUrl: String): Result<IResponse> =
         agent.get(overrideUrl, httpAgentUtils.defaultHeaders())
 
+=======
+>>>>>>> dev
     suspend fun postOpenID4VCIRequest(
         overrideUrl: String,
         rawOpenID4VCIRequest: String,
@@ -50,8 +64,13 @@ internal class HttpAgentOpenId4VciApi(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
                 mapOf(
+<<<<<<< HEAD
                     Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE,
                     Constants.AUTHORIZATION to "Bearer $accessToken"
+=======
+                    Constants.AUTHORIZATION to "Bearer $accessToken",
+                    Constants.PREFER to OPENID4VCI_INTER_OP_PROFILE
+>>>>>>> dev
                 ),
                 httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.Json, bodyBytes)
             ),
@@ -59,6 +78,7 @@ internal class HttpAgentOpenId4VciApi(
         )
     }
 
+<<<<<<< HEAD
     suspend fun postOpenID4VCIPreAuthToken(
         overrideUrl: String,
         grantType: String,
@@ -81,6 +101,8 @@ internal class HttpAgentOpenId4VciApi(
         )
     }
 
+=======
+>>>>>>> dev
     private fun combineAdditionalHeadersWithDefaultHeaders(
         additionalHeaders: Map<String, String>,
         defaultHeaders: Map<String, String>

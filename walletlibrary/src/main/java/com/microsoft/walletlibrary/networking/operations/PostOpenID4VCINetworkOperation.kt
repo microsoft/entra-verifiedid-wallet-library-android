@@ -8,6 +8,13 @@ import com.microsoft.walletlibrary.networking.entities.openid4vci.RawOpenID4VCIR
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
 
+<<<<<<< HEAD
+=======
+/**
+ * Network operation to make a post call to issuer with OpenID4VCI request and access token
+ * to receive the credential.
+ */
+>>>>>>> dev
 internal class PostOpenID4VCINetworkOperation(
     private val url: String,
     private val serializedToken: String,

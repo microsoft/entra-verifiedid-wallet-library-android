@@ -25,7 +25,7 @@ import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.UserCanceledException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.defaultTestSerializer
-import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
 import com.nimbusds.jose.jwk.JWK
 import io.mockk.coEvery
 import io.mockk.every
@@ -252,9 +252,9 @@ class OpenId4VciIssuanceRequestTest {
             // Assert
             assertThat(actualResult.isSuccess).isTrue
             val actualVerifiedId = actualResult.getOrNull()
-            assertThat(actualVerifiedId).isInstanceOf(VerifiedId::class.java)
-            assertThat(actualVerifiedId?.id).isEqualTo("mockVcId")
-            assertThat(actualVerifiedId?.types).contains("VerifiableCredential")
+            assertThat(actualVerifiedId).isInstanceOf(OpenId4VciVerifiedId::class.java)
+            assertThat((actualVerifiedId as OpenId4VciVerifiedId).id).isEqualTo("mockVcId")
+            assertThat(actualVerifiedId.types).contains("VerifiableCredential")
         }
     }
 
