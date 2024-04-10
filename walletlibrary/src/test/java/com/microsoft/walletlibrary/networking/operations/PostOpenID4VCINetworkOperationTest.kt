@@ -1,8 +1,8 @@
 package com.microsoft.walletlibrary.networking.operations
 
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
-import com.microsoft.walletlibrary.util.defaultTestSerializer
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ClientException
+import com.microsoft.walletlibrary.util.defaultTestSerializer
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import io.mockk.coEvery
