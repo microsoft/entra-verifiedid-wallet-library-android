@@ -44,8 +44,8 @@ internal class OpenId4VciVerifiedId(
             ?: return VerifiedIdClaim(claimReference, claimValue, null)
         val localizedDisplayDefinition = claimDisplayDefinition.getPreferredLocalizedDisplayDefinition()
         return if (localizedDisplayDefinition?.name != null)
-            VerifiedIdClaim(localizedDisplayDefinition.name, claimValue)
+            VerifiedIdClaim(localizedDisplayDefinition.name, claimValue, claimDisplayDefinition.value_type)
         else
-            VerifiedIdClaim(claimReference, claimValue,)
+            VerifiedIdClaim(claimReference, claimValue,claimDisplayDefinition.value_type)
     }
 }
