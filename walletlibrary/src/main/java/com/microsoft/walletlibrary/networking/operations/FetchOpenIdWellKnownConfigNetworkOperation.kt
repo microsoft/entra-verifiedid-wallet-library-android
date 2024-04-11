@@ -6,6 +6,9 @@ import com.microsoft.walletlibrary.networking.entities.openid4vci.wellknownconfi
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
 
+/**
+ * Network operation to fetch the token endpoint from openId well known configuration for the issuer.
+ */
 internal class FetchOpenIdWellKnownConfigNetworkOperation(
     private val url: String,
     private val apiProvider: HttpAgentApiProvider,
