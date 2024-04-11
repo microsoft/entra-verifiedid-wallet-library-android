@@ -4,6 +4,7 @@ import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmeta
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.networking.operations.FetchCredentialMetadataNetworkOperation
+import com.microsoft.walletlibrary.networking.operations.FetchOpenIdWellKnownConfigNetworkOperation
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.openid4vci.OpenId4VciIssuanceRequest
@@ -105,7 +106,7 @@ internal class OpenId4VCIRequestHandler(
         return supportedCredentialConfigurationIds.first()
     }
 
-    private fun transformToVerifiedIdRequest(
+    private suspend fun transformToVerifiedIdRequest(
         credentialMetadata: CredentialMetadata,
         credentialConfiguration: CredentialConfiguration,
         credentialOffer: CredentialOffer,
@@ -115,7 +116,14 @@ internal class OpenId4VCIRequestHandler(
             credentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle()
         val verifiedIdStyle =
             credentialConfiguration.getVerifiedIdStyleInPreferredLocale(requesterStyle.name)
-        val requirement = transformToRequirement(credentialConfiguration.scope, credentialOffer)
+        val accessTokenEndpoint = fetchAccessTokenEndpointFromOpenIdWellKnownConfig(
+            credentialMetadata.credential_issuer ?: ""
+        )
+        val requirement = transformToRequirement(
+            credentialConfiguration.scope,
+            credentialOffer,
+            accessTokenEndpoint
+        )
         return OpenId4VciIssuanceRequest(
             requesterStyle,
             requirement,
@@ -140,9 +148,31 @@ internal class OpenId4VCIRequestHandler(
         credentialMetadata.validateAuthorizationServers(credentialOffer)
     }
 
+    private suspend fun fetchAccessTokenEndpointFromOpenIdWellKnownConfig(credentialIssuer: String): String {
+        val openIdWellKnownUrl = "$credentialIssuer/.well-known/openid-configuration"
+        FetchOpenIdWellKnownConfigNetworkOperation(
+            openIdWellKnownUrl,
+            libraryConfiguration.httpAgentApiProvider,
+            libraryConfiguration.serializer
+        ).fire()
+            .onSuccess { return it.token_endpoint }
+            .onFailure {
+                throw OpenId4VciRequestException(
+                    "Failed to fetch OpenId well-known configuration ${it.message}",
+                    VerifiedIdExceptions.OPENID_WELL_KNOWN_CONFIG_FETCH_EXCEPTION.value,
+                    it as Exception
+                )
+            }
+        throw OpenId4VciRequestException(
+            "Failed to fetch OpenId well-known configuration.",
+            VerifiedIdExceptions.OPENID_WELL_KNOWN_CONFIG_FETCH_EXCEPTION.value
+        )
+    }
+
     private fun transformToRequirement(
         scope: String?,
-        credentialOffer: CredentialOffer
+        credentialOffer: CredentialOffer,
+        accessTokenEndpoint: String
     ): Requirement {
         val grants =
             credentialOffer.grants["authorization_code"] ?: throw OpenId4VciValidationException(
