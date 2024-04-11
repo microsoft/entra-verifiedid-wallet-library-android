@@ -26,13 +26,11 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
         vpToken: String,
         state: String?
     ): Result<IResponse> {
-        val body = URLFormEncoding.encode(
-            mapOf<String, Any?>(
-                "id_token" to token,
-                "vp_token" to vpToken,
-                "state" to state
-            )
-        )
+        val body = URLFormEncoding.encode(mapOf<String, Any?>(
+            "id_token" to token,
+            "vp_token" to vpToken,
+            "state" to state
+        ))
         return agent.post(
             overrideUrl,
             httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.UrlFormEncoded, body),

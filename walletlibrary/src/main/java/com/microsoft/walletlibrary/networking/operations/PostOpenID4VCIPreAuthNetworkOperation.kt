@@ -7,6 +7,10 @@ import com.microsoft.walletlibrary.networking.entities.openid4vci.request.OpenID
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
 
+/**
+ * Network operation to make a post call to token endpoint with information that is shared by issuer
+ * earlier like grant type, pre authorized code and user provided pin if any to receive the access token.
+ */
 internal class PostOpenID4VCIPreAuthNetworkOperation(
     private val url: String,
     private val openID4VCIPreAuthTokenRequest: OpenID4VCIPreAuthTokenRequest,
