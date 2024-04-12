@@ -33,12 +33,6 @@ import com.microsoft.walletlibrary.wrapper.ManifestResolver
  */
 class OpenIdRequestProcessor internal constructor(private val libraryConfiguration: LibraryConfiguration): RequestProcessor<OpenIdRawRequest> {
 
-<<<<<<< HEAD:walletlibrary/src/main/java/com/microsoft/walletlibrary/requests/handlers/OpenIdRequestHandler.kt
-    // Indicates whether the provided raw request can be handled by this handler.
-    override fun canHandle(rawRequest: Any): Boolean {
-        return rawRequest is OpenIdRawRequest
-=======
-
     /**
      * Extensions to this RequestProcessor. All extensions should be called after initial request
      * processing to mutate the request with additional input.
@@ -53,16 +47,11 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
     override suspend fun canHandleRequest(rawRequest: Any): Boolean {
         // TODO: This and handleRequest need to be refactored to accept a string.
         return rawRequest is VerifiedIdOpenIdJwtRawRequest
->>>>>>> logirvin/facecheck-v2:walletlibrary/src/main/java/com/microsoft/walletlibrary/requests/handlers/OpenIdRequestProcessor.kt
     }
 
     // Handle and process the provided raw request and returns a VerifiedIdRequest.
     override suspend fun handleRequest(rawRequest: Any, rootOfTrustResolver: RootOfTrustResolver?): VerifiedIdRequest<*> {
-<<<<<<< HEAD:walletlibrary/src/main/java/com/microsoft/walletlibrary/requests/handlers/OpenIdRequestHandler.kt
-        if (rawRequest !is OpenIdRawRequest)
-=======
         if (rawRequest !is VerifiedIdOpenIdJwtRawRequest)
->>>>>>> logirvin/facecheck-v2:walletlibrary/src/main/java/com/microsoft/walletlibrary/requests/handlers/OpenIdRequestProcessor.kt
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
         val presentationRequestContent = rawRequest.mapToPresentationRequestContent()
         return if (rawRequest.requestType == RequestType.ISSUANCE)

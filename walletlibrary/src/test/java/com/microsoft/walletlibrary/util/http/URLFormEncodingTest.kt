@@ -103,7 +103,6 @@ internal class URLFormEncodingTest {
         }.isInstanceOf(URLFormEncoding.URLEncodingException::class.java)
     }
 
-<<<<<<< HEAD
     @Test
     fun testEncode_withPreAuthTokenRequest_ReturnsEncodedString() {
         // Arrange
@@ -119,6 +118,4 @@ internal class URLFormEncodingTest {
         assertThat(actualString).isNotEmpty()
         assertThat(actualString).isEqualTo("grant_type=grant+type&pre-authorized_code=code&tx_code=pin")
     }
-=======
->>>>>>> logirvin/facecheck-v2
 }
