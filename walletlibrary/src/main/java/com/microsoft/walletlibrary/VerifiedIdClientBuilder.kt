@@ -27,6 +27,7 @@ import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.WalletLibraryVCSDKLogConsumer
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
+import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.json.Json
@@ -48,6 +49,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         serializersModule = SerializersModule {
             polymorphic(VerifiedId::class) {
                 subclass(VerifiableCredential::class)
+                subclass(OpenId4VciVerifiedId::class)
             }
             polymorphic(VerifiedIdStyle::class) {
                 subclass(BasicVerifiedIdStyle::class)
