@@ -12,7 +12,7 @@ import com.microsoft.walletlibrary.util.WalletLibraryLogger
  * Utilities such as logger, identityManager that are configured in builder and
  * all of library will use.
  */
-class ExtensionConfiguration private constructor(
+class ExtensionConfiguration internal constructor(
     /**
      * Logs and metrics class
      */
