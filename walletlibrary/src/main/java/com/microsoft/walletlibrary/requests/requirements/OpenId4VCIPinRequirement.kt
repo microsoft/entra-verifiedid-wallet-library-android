@@ -5,6 +5,7 @@ import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
+import com.microsoft.walletlibrary.util.getResult
 
 class OpenId4VCIPinRequirement(
     val length: Int? = null,
@@ -31,7 +32,13 @@ class OpenId4VCIPinRequirement(
         this.pin = pin
         libraryConfiguration?.let { libraryConfiguration ->
             accessTokenEndpoint?.let {
-                OpenID4VCIPreAuthAccessTokenResolver(libraryConfiguration).resolve(preAuthorizedCode, this, it)
+                getResult {
+                    OpenID4VCIPreAuthAccessTokenResolver(libraryConfiguration).resolve(
+                        preAuthorizedCode,
+                        this,
+                        it
+                    )
+                }
             }
         }
     }

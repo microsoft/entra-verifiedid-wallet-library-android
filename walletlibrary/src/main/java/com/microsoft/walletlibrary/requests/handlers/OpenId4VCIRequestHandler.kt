@@ -10,8 +10,6 @@ import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.openid4vci.OpenId4VciIssuanceRequest
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
-import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
-import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperator
 import com.microsoft.walletlibrary.requests.requirements.OpenId4VCIPinRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.resolvers.OpenID4VCIPreAuthAccessTokenResolver
@@ -179,23 +177,16 @@ internal class OpenId4VCIRequestHandler(
         credentialOffer: CredentialOffer,
         accessTokenEndpoint: String
     ): Requirement {
-        val requirements = mutableListOf<Requirement>()
         var grant = credentialOffer.grants["authorization_code"]
-        grant?.let { requirements.add(transformToAccessTokenRequirement(it, scope)) }
+        grant?.let { return transformToAccessTokenRequirement(it, scope) }
 
         grant = credentialOffer.grants["urn:ietf:params:oauth:grant-type:pre-authorized_code"]
-        grant?.let { requirements.add(transformToPreAuthRequirement(it, accessTokenEndpoint)) }
+        grant?.let { return transformToPreAuthRequirement(it, accessTokenEndpoint) }
 
-        return if (requirements.isEmpty()) {
-            throw OpenId4VciValidationException(
-                "There is no requirement in the credential offer",
-                VerifiedIdExceptions.REQUIREMENT_MISSING_EXCEPTION.value
-            )
-        } else if (requirements.size == 1) {
-            requirements.first()
-        } else {
-            GroupRequirement(true, requirements, GroupRequirementOperator.ALL)
-        }
+        throw OpenId4VciValidationException(
+            "There is no valid grant in the credential offer",
+            VerifiedIdExceptions.REQUIREMENT_MISSING_EXCEPTION.value
+        )
     }
 
     private fun transformToAccessTokenRequirement(
@@ -224,7 +215,11 @@ internal class OpenId4VCIRequestHandler(
         val pinDetails = grant.tx_code
         return if (pinDetails != null) {
             val openId4VCIPinRequirement =
-                OpenId4VCIPinRequirement(pinSet = true, length = pinDetails.length, type = pinDetails.input_mode)
+                OpenId4VCIPinRequirement(
+                    pinSet = true,
+                    length = pinDetails.length,
+                    type = pinDetails.input_mode
+                )
             openId4VCIPinRequirement.libraryConfiguration = libraryConfiguration
             openId4VCIPinRequirement.accessTokenEndpoint = accessTokenEndpoint
             openId4VCIPinRequirement.preAuthorizedCode = grant.preAuthorizedCode

@@ -82,11 +82,11 @@ internal class OpenId4VciIssuanceRequest(
             is AccessTokenRequirement -> requirement.accessToken
             is OpenId4VCIPinRequirement -> requirement.accessToken
             else -> throw OpenId4VciValidationException(
-                "Access token is missing in requirement.",
+                "Requirement is not an auth or pre-auth flow. Access token is missing.",
                 VerifiedIdExceptions.REQUEST_CREATION_EXCEPTION.value
             )
         } ?: throw OpenId4VciValidationException(
-            "Access token is missing in requirement.",
+            "Requirement is not an auth or pre-auth flow. Access token is missing.",
             VerifiedIdExceptions.REQUEST_CREATION_EXCEPTION.value
         )
 
