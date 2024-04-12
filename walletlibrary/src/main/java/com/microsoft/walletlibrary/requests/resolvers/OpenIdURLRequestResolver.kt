@@ -47,11 +47,11 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN)
             || libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_PRE_AUTH)
         )
-            return resolveOpenId4VCIRequest(verifiedIdRequestInput)
+            return resolveOpenId4VCIRequest(verifiedIdRequestInput, rootOfTrustResolver)
         return OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString())
     }
 
-    private suspend fun resolveOpenId4VCIRequest(verifiedIdRequestInput: VerifiedIdRequestURL): Any {
+    private suspend fun resolveOpenId4VCIRequest(verifiedIdRequestInput: VerifiedIdRequestURL, rootOfTrustResolver: RootOfTrustResolver?): Any {
         val requestUri = getRequestUri(verifiedIdRequestInput.url)
             ?: throw RequestURIMissingException("Request URI is not provided in ${verifiedIdRequestInput.url}.")
         fetchOpenID4VCIRequest(requestUri)
@@ -68,7 +68,7 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
                             PresentationRequestContent.serializer(),
                             jwsToken.content()
                         )
-                    OpenIdResolver.validateRequest(presentationRequestContent)
+                    OpenIdResolver.validateRequest(presentationRequestContent, rootOfTrustResolver)
                 }
             }
             .onFailure {
