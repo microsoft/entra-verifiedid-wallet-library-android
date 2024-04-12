@@ -57,7 +57,7 @@ internal class OpenId4VCIRequestHandler(
 
                 // Get the root of trust from the signed metadata.
                 val rootOfTrust = credentialMetadata.signed_metadata?.let {
-                    signedMetadataProcessor.process(it, credentialOffer.credential_issuer)
+                    signedMetadataProcessor.process(it, credentialOffer.credential_issuer, rootOfTrustResolver)
                 } ?: RootOfTrust("", false)
 
                 return transformToVerifiedIdRequest(
@@ -223,18 +223,23 @@ internal class OpenId4VCIRequestHandler(
         accessTokenEndpoint: String
     ): Requirement {
         val pinDetails = grant.tx_code
-        return if (grant.user_pin_required != null && grant.user_pin_required == false) {
+        return if (pinDetails != null) {
+            val openId4VCIPinRequirement =
+                OpenId4VCIPinRequirement(pinSet = true, length = pinDetails.length, type = pinDetails.input_mode)
+            openId4VCIPinRequirement.libraryConfiguration = libraryConfiguration
+            openId4VCIPinRequirement.accessTokenEndpoint = accessTokenEndpoint
+            openId4VCIPinRequirement.preAuthorizedCode = grant.preAuthorizedCode
+            openId4VCIPinRequirement
+        } else {
             val openId4VCIPinRequirement = OpenId4VCIPinRequirement(pinSet = false)
             openId4VCIPinRequirement.libraryConfiguration = libraryConfiguration
             openId4VCIPinRequirement.accessTokenEndpoint = accessTokenEndpoint
             openId4VCIPinRequirement.preAuthorizedCode = grant.preAuthorizedCode
-            OpenID4VCIPreAuthAccessTokenResolver(libraryConfiguration).resolve(grant.preAuthorizedCode, openId4VCIPinRequirement, accessTokenEndpoint)
-            openId4VCIPinRequirement
-        } else {
-            val openId4VCIPinRequirement = OpenId4VCIPinRequirement(pinSet = true)
-            openId4VCIPinRequirement.libraryConfiguration = libraryConfiguration
-            openId4VCIPinRequirement.accessTokenEndpoint = accessTokenEndpoint
-            openId4VCIPinRequirement.preAuthorizedCode = grant.preAuthorizedCode
+            OpenID4VCIPreAuthAccessTokenResolver(libraryConfiguration).resolve(
+                grant.preAuthorizedCode,
+                openId4VCIPinRequirement,
+                accessTokenEndpoint
+            )
             return openId4VCIPinRequirement
         }
     }

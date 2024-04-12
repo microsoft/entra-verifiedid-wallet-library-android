@@ -63,7 +63,7 @@ internal class LinkedDomainsService @Inject constructor(
         return Result.failure(SdkException("Failed while verifying linked domains"))
     }
 
-    internal suspend fun verifyLinkedDomains(
+    private suspend fun verifyLinkedDomains(
         domainUrls: List<String>,
         relyingPartyDid: String
     ): Result<LinkedDomainResult> {
@@ -102,7 +102,7 @@ internal class LinkedDomainsService @Inject constructor(
         return resolver.resolve(relyingPartyDid)
     }
 
-    internal fun getLinkedDomainsFromDidDocument(didDocument: IdentifierDocument): List<String> {
+    private fun getLinkedDomainsFromDidDocument(didDocument: IdentifierDocument): List<String> {
         val linkedDomainsServices =
             didDocument.service.filter { service ->
                 service.type.equals(
