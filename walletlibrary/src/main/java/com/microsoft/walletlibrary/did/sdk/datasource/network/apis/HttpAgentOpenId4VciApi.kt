@@ -20,11 +20,13 @@ internal class HttpAgentOpenId4VciApi(
         const val OPENID4VCI_INTER_OP_PROFILE = "oid4vci-interop-profile-version=0.0.1"
     }
 
-    suspend fun getOpenID4VCIRequest(overrideUrl: String): Result<IResponse> {
+    suspend fun getOpenID4VCIRequest(overrideUrl: String, preferHeaders: List<String>): Result<IResponse> {
+        val headers = mutableListOf(OPENID4VCI_INTER_OP_PROFILE)
+        headers.addAll(preferHeaders)
         return agent.get(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
-                mapOf(Constants.PREFER to OPENID4VCI_INTER_OP_PROFILE),
+                mapOf(Constants.PREFER to httpAgentUtils.formatPreferValues(headers)),
                 httpAgentUtils.defaultHeaders()
             )
         )

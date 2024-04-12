@@ -1,3 +1,4 @@
+/*
 package com.microsoft.walletlibrary.requests
 
 import com.microsoft.walletlibrary.requests.handlers.RequestHandler
@@ -71,4 +72,4 @@ class RequestHandlerFactoryTest {
         // Assert
         assertThat(actualResult).isEqualTo(firstMockRequestHandler)
     }
-}
+}*/

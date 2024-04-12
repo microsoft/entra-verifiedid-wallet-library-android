@@ -23,6 +23,6 @@ internal fun PresentationDefinition.toRequirement(): Requirement {
         GroupRequirement(
             true,
             this.credentialPresentationInputDescriptors.map { it.toVerifiedIdRequirement() }.toMutableList(),
-            GroupRequirementOperator.ANY
+            GroupRequirementOperator.ALL
         )
 }

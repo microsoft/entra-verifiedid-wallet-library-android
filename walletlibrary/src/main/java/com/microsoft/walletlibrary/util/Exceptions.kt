@@ -17,12 +17,11 @@ class HandlerMissingException(
     retryable: Boolean = false
 ) : WalletLibraryException(message, cause, retryable)
 
-class UnSupportedRawRequestException(
+class UnSupportedResolverException(
     message: String = "",
     cause: Throwable? = null,
     retryable: Boolean = false
 ) : WalletLibraryException(message, cause, retryable)
-
 
 class ResolverMissingException(
     message: String = "",

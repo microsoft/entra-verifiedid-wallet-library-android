@@ -18,7 +18,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 internal class RawManifest(
-    override val rawRequest: IssuanceRequest,
+    val rawRequest: IssuanceRequest,
     override val requestType: RequestType = RequestType.ISSUANCE
 ) : RawRequest {
     internal fun mapToIssuanceRequestContent(): IssuanceRequestContent {

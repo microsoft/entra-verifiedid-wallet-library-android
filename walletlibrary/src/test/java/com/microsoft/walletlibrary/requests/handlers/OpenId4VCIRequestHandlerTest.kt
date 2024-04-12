@@ -55,12 +55,14 @@ class OpenId4VCIRequestHandlerTest {
         // Arrange
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
 
-        //Act
-        val actualCanHandleResult =
-            openId4VCIRequestHandler.canHandle(expectedCredentialOfferString)
+        runBlocking {
+            //Act
+            val actualCanHandleResult =
+                openId4VCIRequestHandler.canHandleRequest(expectedCredentialOfferString)
 
-        // Assert
-        assertThat(actualCanHandleResult).isEqualTo(true)
+            // Assert
+            assertThat(actualCanHandleResult).isEqualTo(true)
+        }
     }
 
     @Test
@@ -69,11 +71,13 @@ class OpenId4VCIRequestHandlerTest {
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         val invalidCredentialOfferString = "invalid_credential_offer"
 
-        //Act
-        val actualCanHandleResult = openId4VCIRequestHandler.canHandle(invalidCredentialOfferString)
+        runBlocking {
+            //Act
+            val actualCanHandleResult = openId4VCIRequestHandler.canHandleRequest(invalidCredentialOfferString)
 
-        // Assert
-        assertThat(actualCanHandleResult).isEqualTo(false)
+            // Assert
+            assertThat(actualCanHandleResult).isEqualTo(false)
+        }
     }
 
     @Test
@@ -82,21 +86,25 @@ class OpenId4VCIRequestHandlerTest {
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         val invalidCredentialOfferString = ""
 
-        //Act
-        val actualCanHandleResult = openId4VCIRequestHandler.canHandle(invalidCredentialOfferString)
+        runBlocking {
+            //Act
+            val actualCanHandleResult = openId4VCIRequestHandler.canHandleRequest(invalidCredentialOfferString)
 
-        // Assert
-        assertThat(actualCanHandleResult).isEqualTo(false)
+            // Assert
+            assertThat(actualCanHandleResult).isEqualTo(false)
+        }
     }
 
     @Test
     fun canHandleTest_AnyFailureWithSerializer_ReturnsFalse() {
-        //Act
-        val actualCanHandleResult =
-            openId4VCIRequestHandler.canHandle(expectedCredentialOfferString)
+        runBlocking {
+            //Act
+            val actualCanHandleResult =
+                openId4VCIRequestHandler.canHandleRequest(expectedCredentialOfferString)
 
-        // Assert
-        assertThat(actualCanHandleResult).isEqualTo(false)
+            // Assert
+            assertThat(actualCanHandleResult).isEqualTo(false)
+        }
     }
 
     @Test

@@ -13,17 +13,21 @@ import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
+import com.microsoft.walletlibrary.identifier.IdentifierManager
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
+import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
+import com.microsoft.walletlibrary.requests.VerifiedIdExtension
 import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdPresentationRequest
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.handlers.OpenId4VCIRequestHandler
-import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestHandler
-import com.microsoft.walletlibrary.requests.handlers.RequestHandler
-import com.microsoft.walletlibrary.requests.openid4vci.OpenId4VciIssuanceRequest
+import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
+import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
+import com.microsoft.walletlibrary.requests.handlers.SignedMetadataProcessor
+import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
@@ -51,6 +55,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
+import org.jetbrains.annotations.TestOnly
 
 /**
  * Entry point to Wallet Library - VerifiedIdClientBuilder configures the builder with required and optional configurations.
@@ -60,8 +65,10 @@ class VerifiedIdClientBuilder(private val context: Context) {
     private var logger: WalletLibraryLogger = WalletLibraryLogger
     private var httpAgent: IHttpAgent = OkHttpAgent()
     private val requestResolvers = mutableListOf<RequestResolver>()
-    private val requestHandlers = mutableListOf<RequestHandler>()
+    private val requestProcessors = mutableListOf<RequestProcessor<*>>()
     private val previewFeatureFlagsSupported = mutableListOf<String>()
+    private var preferHeaders = mutableListOf<String>()
+    private val extensionBuilders = mutableListOf<VerifiedIdExtension>()
     private val jsonSerializer = Json {
         serializersModule = SerializersModule {
             polymorphic(VerifiedId::class) {
@@ -114,14 +121,51 @@ class VerifiedIdClientBuilder(private val context: Context) {
         return this
     }
 
+    fun with(extension: VerifiedIdExtension): VerifiedIdClientBuilder {
+        preferHeaders.addAll(extension.prefer)
+        extensionBuilders.add(extension)
+        return this
+    }
+
     // An optional method to provide a list of preview features to be supported by the client.
     fun with(previewFeatureFlagsToSupport: List<String>): VerifiedIdClientBuilder {
         previewFeatureFlagsSupported.addAll(previewFeatureFlagsToSupport)
         return this
     }
 
+    // Build the extension configuration for use in extension testing
+    @TestOnly
+    fun buildExtensionConfiguration(): ExtensionConfiguration {
+        val libraryConfiguration = buildLibraryConfiguration()
+        return ExtensionConfiguration(libraryConfiguration)
+    }
+
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
     fun build(): VerifiedIdClient {
+        val libraryConfiguration = buildLibraryConfiguration()
+        val requestResolverFactory = RequestResolverFactory()
+        registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration, preferHeaders))
+        requestResolverFactory.requestResolvers.addAll(requestResolvers)
+
+        val config = ExtensionConfiguration(libraryConfiguration)
+        val extensions: List<RequestProcessorExtension<*>> =
+            extensionBuilders.mapNotNull { it.createRequestProcessorExtensions(config) }.flatMap { it }
+
+        val requestProcessorFactory = RequestProcessorFactory()
+        registerRequestHandler(OpenIdRequestProcessor(libraryConfiguration), extensions)
+        registerRequestHandler(OpenId4VCIRequestHandler(libraryConfiguration, SignedMetadataProcessor(libraryConfiguration)), extensions)
+        requestProcessorFactory.requestProcessors.addAll(requestProcessors)
+
+        return VerifiedIdClient(
+            requestResolverFactory,
+            requestProcessorFactory,
+            logger,
+            jsonSerializer,
+            rootOfTrustResolver
+        )
+    }
+
+    private fun buildLibraryConfiguration(): LibraryConfiguration {
         val vcSdkLogConsumer = WalletLibraryVCSDKLogConsumer(logger)
         val userAgentInfo = getUserAgent(context)
         val walletLibraryVersionInfo = getWalletLibraryVersionInfo()
@@ -142,32 +186,31 @@ class VerifiedIdClientBuilder(private val context: Context) {
             ),
             jsonSerializer
         )
+
+        val identifierManager = IdentifierManager(VerifiableCredentialSdk.identifierService)
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
-        val keyStore = EncryptedKeyStore(context)
-        val tokenSigner = TokenSigner(keyStore)
-        val libraryConfiguration =
-            LibraryConfiguration(previewFeatureFlags, apiProvider, jsonSerializer, tokenSigner)
-
-        val requestResolverFactory = RequestResolverFactory()
-        registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration))
-        requestResolverFactory.requestResolvers.addAll(requestResolvers)
-
-        val requestHandlerFactory = RequestHandlerFactory()
-        registerRequestHandler(OpenIdRequestHandler())
-        registerRequestHandler(OpenId4VCIRequestHandler(libraryConfiguration))
-        requestHandlerFactory.requestHandlers.addAll(requestHandlers)
-
-        return VerifiedIdClient(
-            requestResolverFactory,
-            requestHandlerFactory,
-            logger,
+        return LibraryConfiguration(
+            previewFeatureFlags,
+            apiProvider,
             jsonSerializer,
-            rootOfTrustResolver
+            identifierManager,
+            identifierManager.getTokenSigner(),
+            logger
         )
     }
 
-    private fun registerRequestHandler(requestHandler: RequestHandler) {
-        requestHandlers.add(requestHandler)
+    private inline fun <reified T> registerRequestHandler(
+        requestProcessor: RequestProcessor<T>,
+        extensions: List<RequestProcessorExtension<*>>
+    ) {
+        for (extension in extensions) {
+            if (extension.associatedRequestProcessor.isInstance(requestProcessor)) {
+                // associatedType has the same <T> parameter for this cast
+                @Suppress("UNCHECKED_CAST")
+                requestProcessor.requestProcessors.add(extension as RequestProcessorExtension<T>)
+            }
+        }
+        requestProcessors.add(requestProcessor)
     }
 
     private fun registerRequestResolver(requestResolver: RequestResolver) {

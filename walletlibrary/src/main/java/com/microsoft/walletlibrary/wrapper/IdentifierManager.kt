@@ -1,3 +1,4 @@
+/*
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 package com.microsoft.walletlibrary.wrapper
@@ -21,4 +22,4 @@ internal object IdentifierManager {
         }
 
     }
-}
+}*/

@@ -53,14 +53,9 @@ internal class LinkedDomainsService @Inject constructor(
     }
 
     private suspend fun verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid: String): Result<LinkedDomainResult> {
-        getLinkedDomainsFromDid(relyingPartyDid)
-            .onSuccess { domainUrls ->
-                return verifyLinkedDomains(domainUrls, relyingPartyDid)
-            }
-            .onFailure {
-                return Result.failure(it)
-            }
-        return Result.failure(SdkException("Failed while verifying linked domains"))
+        return getLinkedDomainsFromDid(relyingPartyDid).map {
+            verifyLinkedDomains(it, relyingPartyDid)
+        }.getOrThrow()
     }
 
     private suspend fun verifyLinkedDomains(
@@ -84,9 +79,8 @@ internal class LinkedDomainsService @Inject constructor(
                     else
                         null
                 }
-            }.onFailure {
-                SdkLog.d("Unable to fetch well-known config document from $domainUrl")
-            }.recover {
+            }.mapCatching {
+                SdkLog.i("Unable to fetch well-known config document from $domainUrl")
                 LinkedDomainUnVerified(hostname)
             }
     }
@@ -113,8 +107,9 @@ internal class LinkedDomainsService @Inject constructor(
         return linkedDomainsServices.map { it.serviceEndpoint }.flatten()
     }
 
-    private suspend fun getWellKnownConfigDocument(domainUrl: String) = FetchWellKnownConfigDocumentNetworkOperation(
-        domainUrl,
-        apiProvider
-    ).fire()
+    private suspend fun getWellKnownConfigDocument(domainUrl: String) =
+        FetchWellKnownConfigDocumentNetworkOperation(
+            domainUrl,
+            apiProvider
+        ).fire()
 }

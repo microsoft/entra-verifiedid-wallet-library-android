@@ -5,14 +5,16 @@ import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.DigestAlgorithm
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.networking.entities.openid4vci.request.OpenID4VCIJWTProof
 import com.microsoft.walletlibrary.networking.entities.openid4vci.request.OpenID4VCIJWTProofClaims
 import com.microsoft.walletlibrary.networking.entities.openid4vci.request.RawOpenID4VCIRequest
+import com.microsoft.walletlibrary.util.IdentifierFetchException
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
-import com.microsoft.walletlibrary.wrapper.IdentifierManager
 import java.nio.charset.StandardCharsets
 
 internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfiguration: LibraryConfiguration) {
@@ -37,7 +39,15 @@ internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfigurati
         credentialEndpoint: String,
         accessToken: String
     ): String {
-        val identifier = IdentifierManager.getMasterIdentifier()
+        val identifier = when (val result = libraryConfiguration.identifierManager.getMasterIdentifier()) {
+            is Result.Success -> result.payload
+            is Result.Failure -> {
+                throw IdentifierFetchException(
+                    "Unable to fetch master identifier",
+                    result.payload
+                )
+            }
+        }
         val accessTokenHash = CryptoOperations.digest(
             accessToken.toByteArray(StandardCharsets.US_ASCII),
             DigestAlgorithm.Sha256
@@ -58,7 +68,7 @@ internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfigurati
             OpenID4VCIJWTProofClaims.serializer(),
             contents
         )
-        return libraryConfiguration.signer.signWithIdentifier(
+        return libraryConfiguration.tokenSigner.signWithIdentifier(
             serializedResponseContent,
             responder,
             com.microsoft.walletlibrary.util.Constants.OPENID4VCI_TYPE_HEADER

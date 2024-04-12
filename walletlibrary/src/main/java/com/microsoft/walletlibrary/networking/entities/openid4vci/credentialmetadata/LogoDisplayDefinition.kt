@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
  * The display information for the logo of the credential.
  */
 @Serializable
-data class LogoDisplayDefinition(
+internal data class LogoDisplayDefinition(
     // The URI of the logo.
     val uri: String? = null,
 

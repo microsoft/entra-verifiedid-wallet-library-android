@@ -10,9 +10,7 @@ internal suspend fun LinkedDomainsService.fetchAndVerifyLinkedDomains(
     identifierDocument: IdentifierDocument,
     rootOfTrustResolver: RootOfTrustResolver? = null
 ): Result<LinkedDomainResult> {
-    val linkedDomainsResult = fetchAndVerifyLinkedDomains(identifierDocument.id, rootOfTrustResolver)
-/*    val linkedDomains = getLinkedDomainsFromDidDocument(identifierDocument)
-    verifyLinkedDomains(linkedDomains, identifierDocument.id)*/
+    fetchAndVerifyLinkedDomains(identifierDocument.id, rootOfTrustResolver)
         .onSuccess { return Result.success(it) }
         .onFailure { return Result.failure(it) }
     return Result.failure(SdkException("Failed while verifying linked domains"))

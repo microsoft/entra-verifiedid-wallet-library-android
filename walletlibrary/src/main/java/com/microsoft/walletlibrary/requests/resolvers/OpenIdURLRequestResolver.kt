@@ -5,10 +5,10 @@
 
 package com.microsoft.walletlibrary.requests.resolvers
 
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import android.net.Uri
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestNetworkOperation
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
@@ -20,13 +20,14 @@ import com.microsoft.walletlibrary.util.RequestURIMissingException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
+import com.nimbusds.jose.JWSObject
 import org.json.JSONObject
 
 /**
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
-internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration) :
+internal class OpenIdURLRequestResolver(private val libraryConfiguration: LibraryConfiguration, private val preferHeader: List<String>) :
     RequestResolver {
 
     // Indicates whether this resolver can resolve the provided input.
@@ -44,14 +45,18 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) throw UnSupportedVerifiedIdRequestInputException(
             "Provided VerifiedIdRequestInput is not supported."
         )
-        if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN)
+        return if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN)
             || libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_PRE_AUTH)
         )
-            return resolveOpenId4VCIRequest(verifiedIdRequestInput, rootOfTrustResolver)
-        return OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString())
+            resolveOpenId4VCIRequest(verifiedIdRequestInput, rootOfTrustResolver)
+        else
+            OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString(), rootOfTrustResolver, preferHeader)
     }
 
-    private suspend fun resolveOpenId4VCIRequest(verifiedIdRequestInput: VerifiedIdRequestURL, rootOfTrustResolver: RootOfTrustResolver?): Any {
+    private suspend fun resolveOpenId4VCIRequest(
+        verifiedIdRequestInput: VerifiedIdRequestURL,
+        rootOfTrustResolver: RootOfTrustResolver?
+    ): Any {
         val requestUri = getRequestUri(verifiedIdRequestInput.url)
             ?: throw RequestURIMissingException("Request URI is not provided in ${verifiedIdRequestInput.url}.")
         fetchOpenID4VCIRequest(requestUri)
@@ -62,13 +67,13 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
                     JSONObject(requestPayloadString)
                     requestPayloadString
                 } catch (e: Exception) {
-                    val jwsToken = JwsToken.deserialize(requestPayload.decodeToString())
+                    val jwsToken = JWSObject.parse(requestPayload.decodeToString())
                     val presentationRequestContent =
                         libraryConfiguration.serializer.decodeFromString(
                             PresentationRequestContent.serializer(),
-                            jwsToken.content()
+                            JwsToken(jwsToken).content()
                         )
-                    OpenIdResolver.validateRequest(presentationRequestContent, rootOfTrustResolver)
+                    OpenIdResolver.validateRequest(presentationRequestContent, jwsToken.payload.toJSONObject(), rootOfTrustResolver)
                 }
             }
             .onFailure {
@@ -94,6 +99,7 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
     private suspend fun fetchOpenID4VCIRequest(url: String) =
         FetchOpenID4VCIRequestNetworkOperation(
             url,
+            preferHeader,
             libraryConfiguration.httpAgentApiProvider
         ).fire()
 }

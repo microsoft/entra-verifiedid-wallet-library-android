@@ -15,10 +15,19 @@ internal class FetchCredentialMetadataNetworkOperation(
         { apiProvider.openId4VciApi.getCredentialMetadata(url) }
 
     override suspend fun toResult(response: IResponse): Result<CredentialMetadata> {
+<<<<<<< HEAD
         val credentialMetadata = serializer.decodeFromString(
             CredentialMetadata.serializer(),
             response.body.decodeToString()
         )
         return Result.success(credentialMetadata)
+=======
+        return Result.success(
+            serializer.decodeFromString(
+                CredentialMetadata.serializer(),
+                response.body.decodeToString()
+            )
+        )
+>>>>>>> logirvin/facecheck-v2
     }
 }

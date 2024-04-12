@@ -5,7 +5,7 @@
 
 package com.microsoft.walletlibrary.did.sdk.util.controlflow
 
-open class SdkException(message: String? = null, cause: Throwable? = null, val retryable: Boolean = false) : Exception(message, cause)
+open class SdkException internal constructor(message: String? = null, cause: Throwable? = null, val retryable: Boolean = false) : Exception(message, cause)
 
 open class CryptoException(message: String, cause: Throwable? = null, retryable: Boolean = false) : SdkException(message, cause, retryable)
 
@@ -103,4 +103,4 @@ class InvalidPinException(message: String, retryable: Boolean) : NetworkExceptio
 
 class RepositoryException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
-class InvalidImageException(message: String, cause: Throwable? = null) : SdkException(message, cause)
+internal class InvalidImageException(message: String, cause: Throwable? = null) : SdkException(message, cause)

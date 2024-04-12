@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
+import com.microsoft.walletlibrary.requests.handlers.RequestProcessorSerializer
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
@@ -17,13 +18,14 @@ import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.Serializable
+import com.microsoft.walletlibrary.verifiedid.VerifiedIdSerializer
 import okhttp3.internal.filterList
 
 /**
  * Represents information that describes Verified IDs required in order to complete a VerifiedID request.
  */
 @Serializable
-class VerifiedIdRequirement(
+open class VerifiedIdRequirement(
     internal val id: String?,
 
     // The types of Verified ID required.
@@ -85,7 +87,7 @@ class VerifiedIdRequirement(
     }
 
     // Fulfills the requirement in the request with specified value.
-    fun fulfill(selectedVerifiedId: VerifiedId): VerifiedIdResult<Unit> {
+    open fun fulfill(selectedVerifiedId: VerifiedId): VerifiedIdResult<Unit> {
         try {
             constraint.matches(selectedVerifiedId)
         } catch (constraintException: RequirementValidationException) {
@@ -102,5 +104,13 @@ class VerifiedIdRequirement(
     // Retrieves list of Verified IDs from the provided list that matches this requirement.
     fun getMatches(verifiedIds: List<VerifiedId>): List<VerifiedId> {
         return verifiedIds.filter { constraint.doesMatch(it) }
+    }
+
+    @Throws
+    override suspend fun <T> serialize(
+        protocolSerializer: RequestProcessorSerializer<T>,
+        verifiedIdSerializer: VerifiedIdSerializer<T>
+    ): T? {
+        return verifiedIdSerializer.serialize(this.verifiedId!!)
     }
 }

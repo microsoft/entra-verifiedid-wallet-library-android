@@ -16,6 +16,8 @@ import com.microsoft.walletlibrary.requests.requirements.GroupRequirementOperato
 import com.microsoft.walletlibrary.requests.requirements.OpenId4VCIPinRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.resolvers.OpenID4VCIPreAuthAccessTokenResolver
+import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
+import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
@@ -26,11 +28,17 @@ internal class OpenId4VCIRequestHandler(
     private val signedMetadataProcessor: SignedMetadataProcessor = SignedMetadataProcessor(
         libraryConfiguration
     )
-) : RequestHandler {
+) : RequestProcessor<OpenIdRawRequest> {
+
+    /**
+     * Extensions to this RequestProcessor. All extensions should be called after initial request
+     * processing to mutate the request with additional input.
+     */
+    override var requestProcessors: MutableList<RequestProcessorExtension<OpenIdRawRequest>> = mutableListOf()
 
     // Indicates whether the provided raw request can be handled by this handler.
     // This method checks if the raw request can be cast to CredentialOffer successfully, and if it contains the required fields.
-    override fun canHandle(rawRequest: Any): Boolean {
+    override suspend fun canHandleRequest(rawRequest: Any): Boolean {
         return try {
             libraryConfiguration.serializer.decodeFromString(
                 CredentialOffer.serializer(),
@@ -180,23 +188,16 @@ internal class OpenId4VCIRequestHandler(
         credentialOffer: CredentialOffer,
         accessTokenEndpoint: String
     ): Requirement {
-        val requirements = mutableListOf<Requirement>()
         var grant = credentialOffer.grants["authorization_code"]
-        grant?.let { requirements.add(transformToAccessTokenRequirement(it, scope)) }
+        grant?.let { return transformToAccessTokenRequirement(it, scope) }
 
         grant = credentialOffer.grants["urn:ietf:params:oauth:grant-type:pre-authorized_code"]
-        grant?.let { requirements.add(transformToPreAuthRequirement(it, accessTokenEndpoint)) }
+        grant?.let { return transformToPreAuthRequirement(it, accessTokenEndpoint) }
 
-        return if (requirements.isEmpty()) {
-            throw OpenId4VciValidationException(
-                "There is no requirement in the credential offer",
-                VerifiedIdExceptions.REQUIREMENT_MISSING_EXCEPTION.value
-            )
-        } else if (requirements.size == 1) {
-            requirements.first()
-        } else {
-            GroupRequirement(true, requirements, GroupRequirementOperator.ALL)
-        }
+        throw OpenId4VciValidationException(
+            "There is no valid grant in the credential offer",
+            VerifiedIdExceptions.REQUIREMENT_MISSING_EXCEPTION.value
+        )
     }
 
     private fun transformToAccessTokenRequirement(
@@ -225,7 +226,11 @@ internal class OpenId4VCIRequestHandler(
         val pinDetails = grant.tx_code
         return if (pinDetails != null) {
             val openId4VCIPinRequirement =
-                OpenId4VCIPinRequirement(pinSet = true, length = pinDetails.length, type = pinDetails.input_mode)
+                OpenId4VCIPinRequirement(
+                    pinSet = true,
+                    length = pinDetails.length,
+                    type = pinDetails.input_mode
+                )
             openId4VCIPinRequirement.libraryConfiguration = libraryConfiguration
             openId4VCIPinRequirement.accessTokenEndpoint = accessTokenEndpoint
             openId4VCIPinRequirement.preAuthorizedCode = grant.preAuthorizedCode
