@@ -8,15 +8,12 @@ package com.microsoft.walletlibrary
 import android.content.Context
 import android.content.pm.PackageManager
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
-import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.identifier.IdentifierManager
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
-import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdExtension
