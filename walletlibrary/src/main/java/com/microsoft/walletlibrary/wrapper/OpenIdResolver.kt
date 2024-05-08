@@ -40,8 +40,8 @@ object OpenIdResolver {
         }
     }
 
-    internal suspend fun validateRequest(requestContent: PresentationRequestContent, rawRequest: Map<String, Any>): OpenIdProcessedRequest {
-        val presentationRequestResult = VerifiableCredentialSdk.presentationService.validateRequest(requestContent)
+    internal suspend fun validateRequest(requestContent: PresentationRequestContent, rawRequest: Map<String, Any>, rootOfTrustResolver: RootOfTrustResolver?): OpenIdProcessedRequest {
+        val presentationRequestResult = VerifiableCredentialSdk.presentationService.validateRequest(requestContent, rootOfTrustResolver)
         return handleRequestResult(presentationRequestResult, rawRequest)
     }
 

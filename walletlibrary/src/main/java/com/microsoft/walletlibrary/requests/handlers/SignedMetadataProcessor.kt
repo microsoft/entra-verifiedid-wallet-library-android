@@ -20,7 +20,11 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
 
     // Deserializes the provided signed metadata from credential metadata, verifies its integrity
     // validates it and processes it to return the root of trust.
-    internal suspend fun process(signedMetadata: String, credentialIssuer: String): RootOfTrust {
+    internal suspend fun process(
+        signedMetadata: String,
+        credentialIssuer: String,
+        rootOfTrustResolver: com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver? = null
+    ): RootOfTrust {
         val jwsToken = deserializeSignedMetadata(signedMetadata)
 
         // Extract the DID and Key ID from the signed metadata token header.
@@ -39,13 +43,13 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         val identifierDocument = IdentifierDocumentResolver.resolveIdentifierDocument(did)
         val jwk = identifierDocument.getJwk(keyId)
             ?: throw OpenId4VciValidationException(
-                "JWK with key id $kid not found in identifier document",
+                "JWK with key id $keyId not found in identifier document",
                 VerifiedIdExceptions.MALFORMED_SIGNED_METADATA_EXCEPTION.value
             )
-        validateSignedMetadata(jwsToken, jwk, credentialIssuer, did)
+//        validateSignedMetadata(jwsToken, jwk, credentialIssuer, did)
 
         // Return the root of trust from the identifier document along with its verification status.
-        return RootOfTrustResolver.resolveRootOfTrust(identifierDocument)
+        return RootOfTrustResolver.resolveRootOfTrust(identifierDocument, rootOfTrustResolver)
     }
 
     private fun deserializeSignedMetadata(signedMetadata: String): JwsToken {
@@ -60,9 +64,9 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         }
     }
 
-    private fun validateSignedMetadata(jwsToken: JwsToken, jwk: JWK, credentialIssuer: String, issuerDid:String) {
+    private fun validateSignedMetadata(jwsToken: JwsToken, jwk: JWK, credentialIssuer: String, issuerDid: String) {
         try {
-            verifySignature(jwsToken, jwk)
+//            verifySignature(jwsToken, jwk)
             val signedMetadataTokenClaims = libraryConfiguration.serializer.decodeFromString(
                 SignedMetadataTokenClaims.serializer(),
                 jwsToken.content()

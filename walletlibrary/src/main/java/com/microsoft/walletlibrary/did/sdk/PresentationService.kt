@@ -50,13 +50,13 @@ internal class PresentationService @Inject constructor(
             logTime("Presentation getRequest") {
                 val uri = verifyUri(stringUri)
                 val (presentationRequestContent, rawContent) = getPresentationRequestContent(uri, preferHeaders).abortOnError()
-                val request = validateRequest(presentationRequestContent).abortOnError()
+                val request = validateRequest(presentationRequestContent, rootOfTrustResolver).abortOnError()
                 return@logTime Result.Success(Pair(request, rawContent))
             }
         }
     }
 
-    internal suspend fun validateRequest(presentationRequestContent: PresentationRequestContent): Result<PresentationRequest> {
+    internal suspend fun validateRequest(presentationRequestContent: PresentationRequestContent, rootOfTrustResolver: RootOfTrustResolver?): Result<PresentationRequest> {
         return runResultTry {
             logTime("Presentation validateRequest") {
                 val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId).toSDK().abortOnError()

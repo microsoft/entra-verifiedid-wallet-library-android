@@ -44,13 +44,18 @@ internal class OpenIdURLRequestResolver(private val libraryConfiguration: Librar
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) throw UnSupportedVerifiedIdRequestInputException(
             "Provided VerifiedIdRequestInput is not supported."
         )
-        return if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN))
-            resolveOpenId4VCIRequest(verifiedIdRequestInput)
+        return if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN)
+            || libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_PRE_AUTH)
+        )
+            resolveOpenId4VCIRequest(verifiedIdRequestInput, rootOfTrustResolver)
         else
             OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString(), rootOfTrustResolver, preferHeader)
     }
 
-    private suspend fun resolveOpenId4VCIRequest(verifiedIdRequestInput: VerifiedIdRequestURL): Any {
+    private suspend fun resolveOpenId4VCIRequest(
+        verifiedIdRequestInput: VerifiedIdRequestURL,
+        rootOfTrustResolver: RootOfTrustResolver?
+    ): Any {
         val requestUri = getRequestUri(verifiedIdRequestInput.url)
             ?: throw RequestURIMissingException("Request URI is not provided in ${verifiedIdRequestInput.url}.")
         fetchOpenID4VCIRequest(requestUri)
@@ -67,7 +72,7 @@ internal class OpenIdURLRequestResolver(private val libraryConfiguration: Librar
                             PresentationRequestContent.serializer(),
                             JwsToken(jwsToken).content()
                         )
-                    OpenIdResolver.validateRequest(presentationRequestContent, jwsToken.payload.toJSONObject())
+                    OpenIdResolver.validateRequest(presentationRequestContent, jwsToken.payload.toJSONObject(), rootOfTrustResolver)
                 }
             }
             .onFailure {

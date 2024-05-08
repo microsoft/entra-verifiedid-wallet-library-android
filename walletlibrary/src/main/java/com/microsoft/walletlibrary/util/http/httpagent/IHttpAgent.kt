@@ -22,6 +22,7 @@ abstract class IHttpAgent {
             }
             return innerError
         }
+
         fun toNetworkException(): NetworkingException {
             var message = String(response.body)
             var code = response.status.toString()
@@ -52,6 +53,7 @@ abstract class IHttpAgent {
             )
         }
     }
+
     class ClientException(response: IResponse): HttpAgentException(response)
     class ServerException(response: IResponse): HttpAgentException(response)
 

@@ -15,8 +15,6 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 internal class VcTypeConstraint(internal val vcType: String): VerifiedIdConstraint {
 
     override fun doesMatch(verifiedId: VerifiedId): Boolean {
-        if (verifiedId !is VerifiableCredential)
-            return false
         return verifiedId.types.contains(vcType)
     }
 

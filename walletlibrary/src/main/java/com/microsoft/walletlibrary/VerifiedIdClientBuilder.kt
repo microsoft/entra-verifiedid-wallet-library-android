@@ -45,6 +45,7 @@ import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.WalletLibraryVCSDKLogConsumer
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
+import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.json.Json
@@ -69,6 +70,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         serializersModule = SerializersModule {
             polymorphic(VerifiedId::class) {
                 subclass(VerifiableCredential::class)
+                subclass(OpenId4VciVerifiedId::class)
             }
             polymorphic(VerifiedIdStyle::class) {
                 subclass(BasicVerifiedIdStyle::class)
@@ -182,16 +184,20 @@ class VerifiedIdClientBuilder(private val context: Context) {
 
         val identifierManager = IdentifierManager(VerifiableCredentialSdk.identifierService)
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
-        return LibraryConfiguration(previewFeatureFlags,
-                apiProvider,
-                jsonSerializer,
-                identifierManager,
-                identifierManager.getTokenSigner(),
-                logger
-            )
+        return LibraryConfiguration(
+            previewFeatureFlags,
+            apiProvider,
+            jsonSerializer,
+            identifierManager,
+            identifierManager.getTokenSigner(),
+            logger
+        )
     }
 
-    private inline fun <reified T> registerRequestHandler(requestProcessor: RequestProcessor<T>, extensions: List<RequestProcessorExtension<*>>) {
+    private inline fun <reified T> registerRequestHandler(
+        requestProcessor: RequestProcessor<T>,
+        extensions: List<RequestProcessorExtension<*>>
+    ) {
         for (extension in extensions) {
             if (extension.associatedRequestProcessor.isInstance(requestProcessor)) {
                 // associatedType has the same <T> parameter for this cast
