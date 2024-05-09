@@ -7,7 +7,10 @@ import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentia
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.util.NoMatchForVcPathRegexConstraintException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
+import com.microsoft.walletlibrary.verifiedid.VerifiableCredentialSerializer
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.regex.Pattern
 
@@ -16,9 +19,11 @@ internal class VcPathRegexConstraint(
     internal val pattern: String
 ) : VerifiedIdConstraint {
     override fun doesMatch(verifiedId: VerifiedId): Boolean {
-        if (verifiedId !is VerifiableCredential) return false
+//        if (verifiedId !is VerifiableCredential) return false
+        val encoded = Json.encodeToString(verifiedId)
+        val verifiableCredential = Json.decodeFromString(VerifiableCredentialSerializer, encoded) as VerifiableCredential
         val verifiableCredentialJsonString =
-            Json.encodeToString(VerifiableCredentialContent.serializer(), verifiedId.raw.contents)
+            Json.encodeToString(VerifiableCredentialContent.serializer(), verifiableCredential.raw.contents)
         return path.any { matchAnyPathInFields(pattern, it, verifiableCredentialJsonString) }
     }
 

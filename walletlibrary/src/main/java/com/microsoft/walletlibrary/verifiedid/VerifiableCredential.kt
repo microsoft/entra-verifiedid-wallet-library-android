@@ -11,10 +11,10 @@ import java.util.Date
  */
 @Serializable
 internal class VerifiableCredential(
-    val raw: VerifiableCredential,
+    override val raw: VerifiableCredential,
     val contract: VerifiableCredentialContract? = null,
     override val types: List<String> = raw.contents.vc.type
-) : VerifiedId {
+) : InternalVerifiedId {
     override val id = raw.jti
 
     @Serializable(with = DateSerializer::class)

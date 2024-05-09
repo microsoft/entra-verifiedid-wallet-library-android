@@ -13,14 +13,14 @@ import java.util.Date
 @Serializable
 internal class OpenId4VciVerifiedId(
     // The deserialized Verifiable Credential received during issuance.
-    val raw: VerifiableCredential,
+    override val raw: VerifiableCredential,
 
     // Name of the issuer.
     val issuerName: String,
 
     // Information about the issuer and credential issued.
     val credentialConfiguration: CredentialConfiguration
-) : VerifiedId {
+) : InternalVerifiedId {
     override val id = raw.jti
 
     @Serializable(with = DateSerializer::class)

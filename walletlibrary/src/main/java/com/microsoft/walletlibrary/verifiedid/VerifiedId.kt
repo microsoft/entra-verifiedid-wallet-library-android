@@ -6,6 +6,7 @@
 package com.microsoft.walletlibrary.verifiedid
 
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
+import kotlinx.serialization.Serializable
 import java.util.Date
 
 /**
