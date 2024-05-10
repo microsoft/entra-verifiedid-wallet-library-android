@@ -47,7 +47,7 @@ abstract class IHttpAgent {
                 correlationVector,
                 response.status.toString(),
                 innerError,
-                response.body.toString(),
+                response.body.decodeToString(),
                 retriable
             )
         }
