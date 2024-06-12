@@ -40,6 +40,9 @@ internal class HttpAgentOpenId4VciApi(
         )
     }
 
+    suspend fun getOpenIdWellKnownConfig(overrideUrl: String): Result<IResponse> =
+        agent.get(overrideUrl, httpAgentUtils.defaultHeaders())
+
     suspend fun postOpenID4VCIRequest(
         overrideUrl: String,
         rawOpenID4VCIRequest: String,
