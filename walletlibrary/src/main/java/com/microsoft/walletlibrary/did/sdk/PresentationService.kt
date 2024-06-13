@@ -56,10 +56,15 @@ internal class PresentationService @Inject constructor(
         }
     }
 
-    internal suspend fun validateRequest(presentationRequestContent: PresentationRequestContent, rootOfTrustResolver: RootOfTrustResolver? = null): Result<PresentationRequest> {
+    internal suspend fun validateRequest(
+        presentationRequestContent: PresentationRequestContent,
+        rootOfTrustResolver: RootOfTrustResolver? = null
+    ): Result<PresentationRequest> {
         return runResultTry {
             logTime("Presentation validateRequest") {
-                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId, rootOfTrustResolver).toSDK().abortOnError()
+                val linkedDomainResult =
+                    linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId, rootOfTrustResolver).toSDK()
+                        .abortOnError()
                 val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
                 isRequestValid(request).abortOnError()
                 Result.Success(request)
@@ -75,7 +80,10 @@ internal class PresentationService @Inject constructor(
         return url
     }
 
-    private suspend fun getPresentationRequestContent(uri: Uri, preferHeaders: List<String>): Result<Pair<PresentationRequestContent, OpenIdRawRequest>> {
+    private suspend fun getPresentationRequestContent(
+        uri: Uri,
+        preferHeaders: List<String>
+    ): Result<Pair<PresentationRequestContent, OpenIdRawRequest>> {
         val requestParameter = uri.getQueryParameter("request")
         if (requestParameter != null)
             return verifyAndUnwrapPresentationRequestFromQueryParam(requestParameter)
@@ -97,7 +105,12 @@ internal class PresentationService @Inject constructor(
         val jwsToken = JwsToken(jwsObject)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
-        return Result.Success(Pair(serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content()), jwsObject.payload.toJSONObject()))
+        return Result.Success(
+            Pair(
+                serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content()),
+                jwsObject.payload.toJSONObject()
+            )
+        )
     }
 
     private suspend fun fetchRequest(url: String, preferHeaders: List<String>) =
@@ -117,8 +130,10 @@ internal class PresentationService @Inject constructor(
         return runResultTry {
             logTime("Presentation sendResponse") {
                 val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
-                formAndSendResponse(presentationRequest, response, masterIdentifier,
-                    additionalHeaders = additionalHeaders).abortOnError()
+                formAndSendResponse(
+                    presentationRequest, response, masterIdentifier,
+                    additionalHeaders = additionalHeaders
+                ).abortOnError()
             }
             Result.Success(Unit)
         }
