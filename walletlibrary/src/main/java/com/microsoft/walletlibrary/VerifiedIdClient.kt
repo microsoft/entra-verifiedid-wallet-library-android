@@ -38,7 +38,7 @@ class VerifiedIdClient(
         return getResult {
             VerifiableCredentialSdk.correlationVectorService.startNewFlowAndSave()
             val requestResolver = requestResolverFactory.getResolver(verifiedIdRequestInput)
-            val rawRequest = requestResolver.resolve(verifiedIdRequestInput)
+            val rawRequest = requestResolver.resolve(verifiedIdRequestInput, rootOfTrustResolver)
             val requestHandler = requestProcessorFactory.getHandler(rawRequest)
             requestHandler.handleRequest(rawRequest, rootOfTrustResolver)
         }
