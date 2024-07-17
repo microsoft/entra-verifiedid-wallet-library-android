@@ -146,7 +146,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
             val applicationInfo = packageManager.getApplicationInfo(applicationContext.packageName, 0)
             val appName = packageManager.getApplicationLabel(applicationInfo).toString()
             val packageInfo = packageManager.getPackageInfo(applicationContext.packageName, 0)
-            "Microsoft-Authenticator" + "/" + packageInfo.versionName
+            appName + "/" + packageInfo.versionName
         } catch (e: PackageManager.NameNotFoundException) {
             WalletLibraryLogger.e("Error getting version name.", e)
             ""
