@@ -189,21 +189,21 @@ class PresentationServiceTest {
 
         runBlocking {
             // act
-            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl, null, emptyList())
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
-            val actualPresentationRequestContent = (actualRequest as Result.Success).payload.content
+            val actualPresentationRequestContent = (actualRequest as Result.Success).payload.first.content
             val actualPresentationRequestString = defaultTestSerializer.encodeToString(
                 PresentationRequestContent.serializer(),
                 actualPresentationRequestContent
             )
             // assert
             assertThat(actualPresentationRequestString).isEqualTo(expectedPresentationRequestString)
-            assertThat(actualRequest.payload.linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
-            assertThat((actualRequest.payload.linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo(
+            assertThat(actualRequest.payload.first.linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((actualRequest.payload.first.linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo(
                 mockedIdentifierDocumentServiceEndpoint
             )
-            assertThat(actualRequest.payload.entityName).isEqualTo(expectedEntityName)
-            assertThat(actualRequest.payload.entityIdentifier).isEqualTo(expectedEntityIdentifier)
+            assertThat(actualRequest.payload.first.entityName).isEqualTo(expectedEntityName)
+            assertThat(actualRequest.payload.first.entityIdentifier).isEqualTo(expectedEntityIdentifier)
         }
     }
 
@@ -225,21 +225,21 @@ class PresentationServiceTest {
 
         runBlocking {
             // act
-            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl, null, emptyList())
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
-            val actualPresentationRequestContent = (actualRequest as Result.Success).payload.content
+            val actualPresentationRequestContent = (actualRequest as Result.Success).payload.first.content
             val actualPresentationRequestString = defaultTestSerializer.encodeToString(
                 PresentationRequestContent.serializer(),
                 actualPresentationRequestContent
             )
             // assert
             assertThat(actualPresentationRequestString).isEqualTo(expectedPresentationRequestString)
-            assertThat(actualRequest.payload.linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
-            assertThat((actualRequest.payload.linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo(
+            assertThat(actualRequest.payload.first.linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((actualRequest.payload.first.linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo(
                 mockedIdentifierDocumentServiceEndpoint
             )
-            assertThat(actualRequest.payload.entityName).isEqualTo(expectedEntityName)
-            assertThat(actualRequest.payload.entityIdentifier).isEqualTo(expectedEntityIdentifier)
+            assertThat(actualRequest.payload.first.entityName).isEqualTo(expectedEntityName)
+            assertThat(actualRequest.payload.first.entityIdentifier).isEqualTo(expectedEntityIdentifier)
         }
     }
 
@@ -257,7 +257,7 @@ class PresentationServiceTest {
 
         runBlocking {
             // act
-            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl, null, emptyList())
             // assert
             assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
             assertThat((actualRequest as Result.Failure).payload).isInstanceOf(
@@ -279,7 +279,7 @@ class PresentationServiceTest {
 
         runBlocking {
             // act
-            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl, null, emptyList())
             // assert
             assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
             assertThat((actualRequest as Result.Failure).payload).isInstanceOf(PresentationException::class.java)
@@ -318,7 +318,7 @@ class PresentationServiceTest {
 
         runBlocking {
             // act
-            val presentedResponse = presentationService.sendResponse(presentationRequest, presentationResponse)
+            val presentedResponse = presentationService.sendResponse(presentationRequest, presentationResponse, null)
             // assert
             assertThat(presentedResponse).isInstanceOf(Result.Success::class.java)
         }
@@ -350,13 +350,13 @@ class PresentationServiceTest {
 
     private fun mockPresentationRequestFromNetwork() {
         val expectedPresentationRequest = unwrapPresentationContent(expectedPresentationRequestJwt)
-        coEvery { anyConstructed<FetchPresentationRequestNetworkOperation>().fire() } returns KotlinResult.success(expectedPresentationRequest)
+        coEvery { anyConstructed<FetchPresentationRequestNetworkOperation>().fire() } returns KotlinResult.success(Pair(expectedPresentationRequest, mockk()))
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
     }
 
     private fun mockPresentationRequestWithInvalidSignatureFromNetwork() {
         val expectedPresentationRequest = unwrapPresentationContent(expectedPresentationRequestJwt)
-        coEvery { anyConstructed<FetchPresentationRequestNetworkOperation>().fire() } returns KotlinResult.success(expectedPresentationRequest)
+        coEvery { anyConstructed<FetchPresentationRequestNetworkOperation>().fire() } returns KotlinResult.success(Pair(expectedPresentationRequest, mockk()))
         coEvery { mockedJwtValidator.verifySignature(any()) } returns false
     }
 }

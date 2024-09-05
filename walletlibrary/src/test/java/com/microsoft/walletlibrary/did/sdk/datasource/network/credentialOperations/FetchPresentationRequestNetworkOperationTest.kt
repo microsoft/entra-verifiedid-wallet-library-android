@@ -136,7 +136,7 @@ class FetchPresentationRequestNetworkOperationTest {
         // Arrange
         val apiProvider: HttpAgentApiProvider = mockk {
             every { presentationApis } returns mockk {
-                coEvery { getRequest(any()) } returns Result.success(IResponse(
+                coEvery { getRequest(any(), any()) } returns Result.success(IResponse(
                     status = 200,
                     headers = emptyMap(),
                     body = ("I'm a fake token").toByteArray(Charsets.UTF_8)
@@ -153,7 +153,7 @@ class FetchPresentationRequestNetworkOperationTest {
                 every { content() } returns expectedPresentationRequestWithTwoVPTokens
             }
         }
-        val operation = FetchPresentationRequestNetworkOperation("", apiProvider, jwtValidator, defaultTestSerializer)
+        val operation = FetchPresentationRequestNetworkOperation("", apiProvider, jwtValidator, defaultTestSerializer, emptyList())
 
         runBlocking {
             // Act
@@ -162,9 +162,9 @@ class FetchPresentationRequestNetworkOperationTest {
             // Assert
             assertThat(actual.isSuccess).isTrue
             val unwrapped = actual.getOrThrow()
-            assertThat(unwrapped.nonce).isEqualTo(expectedNonce)
-            assertThat(unwrapped.clientId).isEqualTo(expectedClientId)
-            assertThat(unwrapped.claims.vpTokensInRequest.size).isEqualTo(2)
+            assertThat(unwrapped.first.nonce).isEqualTo(expectedNonce)
+            assertThat(unwrapped.first.clientId).isEqualTo(expectedClientId)
+            assertThat(unwrapped.first.claims.vpTokensInRequest.size).isEqualTo(2)
         }
     }
 }

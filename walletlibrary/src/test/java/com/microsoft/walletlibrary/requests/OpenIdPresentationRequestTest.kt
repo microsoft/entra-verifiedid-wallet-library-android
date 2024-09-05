@@ -147,8 +147,9 @@ class OpenIdPresentationRequestTest {
         mockkObject(OpenIdResponder)
         coJustRun {
             OpenIdResponder.sendPresentationResponse(
-                openIdPresentationRequest.request.rawRequest,
-                openIdPresentationRequest.requirement
+                openIdPresentationRequest.request.presentationRequest,
+                openIdPresentationRequest.requirement,
+                null
             )
         }
         runBlocking {
@@ -180,8 +181,9 @@ class OpenIdPresentationRequestTest {
         mockkObject(OpenIdResponder)
         coEvery {
             OpenIdResponder.sendPresentationResponse(
-                openIdPresentationRequest.request.rawRequest,
-                openIdPresentationRequest.requirement
+                openIdPresentationRequest.request.presentationRequest,
+                openIdPresentationRequest.requirement,
+                null
             )
         }.throws(OpenIdResponseCompletionException())
 
@@ -217,7 +219,7 @@ class OpenIdPresentationRequestTest {
         val presentationRequest: PresentationRequest = mockk()
         val presentationRequestContent: PresentationRequestContent = mockk()
         val presentationDefinition: PresentationDefinition = mockk()
-        every { rawRequest.rawRequest } returns presentationRequest
+        every { rawRequest.presentationRequest } returns presentationRequest
         every { presentationRequest.content } returns presentationRequestContent
         every { presentationRequestContent.clientId } returns ""
         every { presentationRequest.getPresentationDefinitions() } returns listOf(presentationDefinition)

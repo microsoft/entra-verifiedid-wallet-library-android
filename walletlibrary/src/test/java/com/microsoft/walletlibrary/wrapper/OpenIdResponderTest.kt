@@ -99,13 +99,13 @@ class OpenIdResponderTest {
         every { vcContractFromSdk.display } returns mockDisplayContract
         setupDisplayContract()
         coEvery {
-            mockPresentationService.sendResponse(any(), any())
+            mockPresentationService.sendResponse(any(), any(), null)
         } returns Result.Success(Unit)
         (requirement as VerifiedIdRequirement).fulfill(verifiedId)
 
         runBlocking {
             // Act
-            val actualResult = OpenIdResponder.sendPresentationResponse(mockPresentationRequest, requirement)
+            val actualResult = OpenIdResponder.sendPresentationResponse(mockPresentationRequest, requirement, null)
 
             // Assert
             assertThat(actualResult).isEqualTo(Unit)
@@ -118,14 +118,14 @@ class OpenIdResponderTest {
         every { vcContractFromSdk.display } returns mockDisplayContract
         setupDisplayContract()
         coEvery {
-            mockPresentationService.sendResponse(any(), any())
+            mockPresentationService.sendResponse(any(), any(), null)
         } returns Result.Failure(SdkException("Test failure"))
         (requirement as VerifiedIdRequirement).fulfill(verifiedId)
 
         // Act and Assert
         Assertions.assertThatThrownBy {
             runBlocking {
-                OpenIdResponder.sendPresentationResponse(mockPresentationRequest, requirement)
+                OpenIdResponder.sendPresentationResponse(mockPresentationRequest, requirement, null)
             }
         }.isInstanceOf(OpenIdResponseCompletionException::class.java)
     }
@@ -136,13 +136,13 @@ class OpenIdResponderTest {
         every { vcContractFromSdk.display } returns mockDisplayContract
         setupDisplayContract()
         coEvery {
-            mockPresentationService.sendResponse(any(), any())
+            mockPresentationService.sendResponse(any(), any(), null)
         } returns Result.Failure(SdkException("Test failure"))
 
         // Act and Assert
         Assertions.assertThatThrownBy {
             runBlocking {
-                OpenIdResponder.sendPresentationResponse(mockPresentationRequest, requirement)
+                OpenIdResponder.sendPresentationResponse(mockPresentationRequest, requirement, null)
             }
         }.isInstanceOf(RequirementNotMetException::class.java)
             .hasMessage("Verified ID has not been set.")

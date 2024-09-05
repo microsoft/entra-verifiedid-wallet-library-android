@@ -6,6 +6,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationReques
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
+import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
@@ -23,6 +24,7 @@ class OpenIdResolverTest {
     private val openIdUrl = ""
     private val mockPresentationRequest: PresentationRequest = mockk()
     private val mockPresentationRequestContent: PresentationRequestContent = mockk()
+    private val mockOpenIdRawRequest: OpenIdRawRequest = mockk()
 
     init {
         setupInput(false)
@@ -32,12 +34,12 @@ class OpenIdResolverTest {
         mockkStatic(VerifiableCredentialSdk::class)
         every { VerifiableCredentialSdk.presentationService } returns mockPresentationService
         if (!isFailure) {
-            coEvery { mockPresentationService.getRequest(openIdUrl) } returns Result.Success(mockPresentationRequest)
+            coEvery { mockPresentationService.getRequest(openIdUrl, null, emptyList()) } returns Result.Success(Pair(mockPresentationRequest, mockOpenIdRawRequest))
             coEvery { mockPresentationService.validateRequest(mockPresentationRequestContent) } returns Result.Success(mockPresentationRequest)
             every { mockPresentationRequest.content } returns mockPresentationRequestContent
             every { mockPresentationRequestContent.prompt } returns ""
         } else {
-            coEvery { mockPresentationService.getRequest(openIdUrl) } returns Result.Failure(
+            coEvery { mockPresentationService.getRequest(openIdUrl, null, emptyList()) } returns Result.Failure(
                 SdkException()
             )
             coEvery { mockPresentationService.validateRequest(mockPresentationRequestContent) } returns Result.Failure(SdkException())
@@ -48,7 +50,7 @@ class OpenIdResolverTest {
     fun resolveOpenIdRequest_SuccessfulPresentationRequestFromSdk_ReturnsRawRequestOfTypePresentation() {
         runBlocking {
             // Act
-            val actualResult = OpenIdResolver.getRequest(openIdUrl)
+            val actualResult = OpenIdResolver.getRequest(openIdUrl, null, emptyList())
 
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedIdOpenIdJwtRawRequest::class.java)
@@ -61,7 +63,7 @@ class OpenIdResolverTest {
     fun resolveOpenIdRequest_ValidateRequestSuccessful_ReturnsRawRequestOfTypePresentation() {
         runBlocking {
             // Act
-            val actualResult = OpenIdResolver.validateRequest(mockPresentationRequestContent)
+            val actualResult = OpenIdResolver.validateRequest(mockPresentationRequestContent, emptyMap())
 
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedIdOpenIdJwtRawRequest::class.java)
@@ -78,7 +80,7 @@ class OpenIdResolverTest {
         // Act and Assert
         Assertions.assertThatThrownBy {
             runBlocking {
-                OpenIdResolver.validateRequest(mockPresentationRequestContent)
+                OpenIdResolver.validateRequest(mockPresentationRequestContent, emptyMap())
             }
         }.isInstanceOf(VerifiedIdRequestFetchException::class.java)
     }
@@ -91,7 +93,7 @@ class OpenIdResolverTest {
         // Act and Assert
         Assertions.assertThatThrownBy {
             runBlocking {
-                OpenIdResolver.getRequest(openIdUrl)
+                OpenIdResolver.getRequest(openIdUrl, null, emptyList())
             }
         }.isInstanceOf(VerifiedIdRequestFetchException::class.java)
     }
