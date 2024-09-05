@@ -86,7 +86,7 @@ class VerifiedIdClientTest {
         val verifiedIdRequestURL: VerifiedIdRequestURL = mockk()
         every { requestResolverFactory.getResolver(verifiedIdRequestURL) } returns openIdURLRequestResolver
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) } returns verifiedIdOpenIdJwtRawRequest
-        coEvery { requestProcessorFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
+        coEvery { requestProcessorFactory.getHandler(verifiedIdOpenIdJwtRawRequest) } returns openIdRequestHandler
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) } returns openIdPresentationRequest
 
         runBlocking {
@@ -181,7 +181,7 @@ class VerifiedIdClientTest {
         val verifiedIdRequestURL: VerifiedIdRequestURL = mockk()
         every { requestResolverFactory.getResolver(verifiedIdRequestURL) } returns openIdURLRequestResolver
         coEvery { openIdURLRequestResolver.resolve(verifiedIdRequestURL) } returns verifiedIdOpenIdJwtRawRequest
-        coEvery { requestProcessorFactory.getHandler(openIdURLRequestResolver) } returns openIdRequestHandler
+        coEvery { requestProcessorFactory.getHandler(verifiedIdOpenIdJwtRawRequest) } returns openIdRequestHandler
         coEvery { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }.throws(
             UnSupportedProtocolException()
         )
@@ -299,65 +299,6 @@ class VerifiedIdClientTest {
         assertThat(actualEncodedVc.getOrNull()).isNotNull
         assertThat(actualEncodedVc.getOrNull()).isEqualTo(expectedEncoding)
     }
-
-/*    @Test
-    fun decode_ProvideEncodedVerifiableCredential_ReturnsVerifiableCredentialObject() {
-        // Arrange
-        requestHandlerFactory = mockk()
-        requestResolverFactory = mockk()
-        val verifiedIdClient =
-            VerifiedIdClient(
-                requestResolverFactory,
-                requestHandlerFactory,
-                WalletLibraryLogger,
-                defaultTestSerializer
-            )
-        val claimDescriptor1 = ClaimDescriptor("text", "name 1")
-        val expectedVc = VerifiableCredential(
-            com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential(
-                "123",
-                "raw",
-                VerifiableCredentialContent(
-                    "456",
-                    VerifiableCredentialDescriptor(emptyList(), listOf("TestVC"), emptyMap()),
-                    "me",
-                    "Test",
-                    1234567L,
-                    null
-                )
-            ),
-            VerifiableCredentialContract(
-                "1",
-                InputContract("", "", ""),
-                DisplayContract(
-                    card = CardDescriptor("Test VC", "Test Issuer", "#000000", "#ffffff", null, ""),
-                    consent = ConsentDescriptor("", ""),
-                    claims = mapOf("vc.credentialSubject.claim1" to claimDescriptor1)
-                )
-            )
-        )
-        val encodedVc =
-            """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC","issuedBy":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle","name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""}}"""
-
-        // Act
-        val actualDecodedVc = verifiedIdClient.decodeVerifiedId(encodedVc)
-        val actualVc = actualDecodedVc.getOrNull()
-
-        // Assert
-        assertThat(actualDecodedVc).isInstanceOf(VerifiedIdResult::class.java)
-        assertThat(actualDecodedVc.isSuccess).isTrue
-        assertThat(actualVc).isNotNull
-        assertThat(actualVc).isInstanceOf(VerifiableCredential::class.java)
-        assertThat((actualVc as VerifiableCredential).getClaims().size).isEqualTo(1)
-        assertThat(actualVc.getClaims().first().id).isEqualTo("name 1")
-        assertThat(actualVc.getClaims().first().value).isEqualTo("\"value1\"")
-        assertThat(actualVc.style).isInstanceOf(BasicVerifiedIdStyle::class.java)
-        assertThat(actualVc.style).isNotNull
-        assertThat(actualVc.style?.name).isEqualTo("Test VC")
-        assertThat((actualVc.style as BasicVerifiedIdStyle).backgroundColor).isEqualTo("#000000")
-        assertThat((actualVc.style as BasicVerifiedIdStyle).textColor).isEqualTo("#ffffff")
-        assertThat((actualVc.style as BasicVerifiedIdStyle).issuer).isEqualTo("Test Issuer")
-    }*/
 
     @Test
     fun encodeVerifiedIdRequest_ProvideManifestIssuanceRequest_ReturnsEncodedString() {
@@ -526,7 +467,7 @@ class VerifiedIdClientTest {
                 "raw",
                 VerifiableCredentialContent(
                     "456",
-                    VerifiableCredentialDescriptor(emptyList(), listOf("TestVC"), emptyMap()),
+                    VerifiableCredentialDescriptor(emptyList(), listOf("TestVC"), mapOf("claim1" to "\"value1\"")),
                     "me",
                     "Test",
                     1234567L,
@@ -556,8 +497,8 @@ class VerifiedIdClientTest {
         assertThat(actualVc).isNotNull
         assertThat(actualVc).isInstanceOf(VerifiableCredential::class.java)
         assertThat((actualVc as VerifiableCredential).getClaims().size).isEqualTo(1)
-        assertThat(actualVc.getClaims().first().id).isEqualTo("name 1")
-        assertThat(actualVc.getClaims().first().value).isEqualTo("\"value1\"")
+        assertThat(actualVc.getClaims().first().label).isEqualTo(expectedVc.getClaims().first().label)
+        assertThat(actualVc.getClaims().first().value).isEqualTo(expectedVc.getClaims().first().value)
         assertThat(actualVc.style).isInstanceOf(BasicVerifiedIdStyle::class.java)
         assertThat(actualVc.style?.name).isEqualTo("Test VC")
         assertThat((actualVc.style as BasicVerifiedIdStyle).backgroundColor).isEqualTo("#000000")
@@ -578,30 +519,6 @@ class VerifiedIdClientTest {
                 WalletLibraryLogger,
                 serializer
             )
-        val claimDescriptor1 = ClaimDescriptor("text", "name 1")
-        val expectedVc = VerifiableCredential(
-            com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential(
-                "123",
-                "raw",
-                VerifiableCredentialContent(
-                    "456",
-                    VerifiableCredentialDescriptor(emptyList(), listOf("TestVC"), emptyMap()),
-                    "me",
-                    "Test",
-                    1234567L,
-                    null
-                )
-            ),
-            VerifiableCredentialContract(
-                "1",
-                InputContract("", "", ""),
-                DisplayContract(
-                    card = CardDescriptor("Test VC", "Test Issuer", "#000000", "#ffffff", null, ""),
-                    consent = ConsentDescriptor("", ""),
-                    claims = mapOf("vc.credentialSubject.claim1" to claimDescriptor1)
-                )
-            )
-        )
         val encodedVc =
             """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC","issuedBy":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle","name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""}}"""
         every {
