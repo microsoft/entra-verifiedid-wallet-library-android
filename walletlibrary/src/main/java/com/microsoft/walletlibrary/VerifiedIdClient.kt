@@ -17,6 +17,7 @@ import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.getResult
+import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -70,6 +71,55 @@ class VerifiedIdClient(
                 exception
             ).toVerifiedIdResult()
         }
+    }
+
+/*    fun getEncodedVerifiedId(verifiedId: VerifiedId): VerifiedIdResult<EncodedVerifiedId> {
+        return try {
+            when (verifiedId) {
+                is VerifiableCredential -> {
+                    val encodedVerifiedId = EncodedVerifiedId("VCVerifiedId", serializer.encodeToString(verifiedId))
+                    VerifiedIdResult.success(encodedVerifiedId)
+                }
+                is OpenId4VciVerifiedId -> {
+                    val encodedVerifiedId = EncodedVerifiedId("OpenId4VciVerifiedId", serializer.encodeToString(verifiedId))
+                    VerifiedIdResult.success(encodedVerifiedId)
+                }
+                else -> {
+                    VerifiedIdResult.failure(MalformedInputException(
+                        "Malformed Input Exception",
+                        VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value
+                    ))
+                }
+            }
+        } catch (exception: Exception) {
+            MalformedInputException(
+                "Malformed Input Exception",
+                VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value,
+                exception
+            ).toVerifiedIdResult()
+        }
+
+    }*/
+
+    fun decode(encodedVerifiedIdString: String): VerifiedIdResult<VerifiedId> {
+        return try {
+            when(val verifiedId: VerifiedId = serializer.decodeFromString(encodedVerifiedIdString)) {
+                is VerifiableCredential -> VerifiedIdResult.success(verifiedId)
+                else -> MalformedInputException(
+                    "Malformed Input Exception",
+                    VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value,
+                    Exception("Unknown type: ${verifiedId.javaClass.name}")
+                ).toVerifiedIdResult()
+            }
+        } catch (exception: Exception) {
+            println("Exception: ${exception.javaClass.name}")
+            val verifiableCredential = serializer.decodeFromString<com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential>(encodedVerifiedIdString)
+            VerifiedIdResult.success(VerifiableCredential(toWalletLibraryVc(serializer, verifiableCredential)))
+        }
+    }
+
+    private fun toWalletLibraryVc(jsonSerializer: Json, vc: com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential): com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential {
+        return jsonSerializer.decodeFromString(jsonSerializer.encodeToString(vc))
     }
 
     fun decodeVerifiedId(encodedVerifiedId: String): VerifiedIdResult<VerifiedId> {
