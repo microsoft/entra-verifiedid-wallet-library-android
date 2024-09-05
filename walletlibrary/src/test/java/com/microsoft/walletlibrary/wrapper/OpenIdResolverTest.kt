@@ -55,7 +55,7 @@ class OpenIdResolverTest {
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedIdOpenIdJwtRawRequest::class.java)
             assertThat(actualResult.requestType).isEqualTo(RequestType.PRESENTATION)
-            assertThat(actualResult.rawRequest).isEqualTo(mockPresentationRequest)
+            assertThat(actualResult.presentationRequest).isEqualTo(mockPresentationRequest)
         }
     }
 
@@ -68,7 +68,7 @@ class OpenIdResolverTest {
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedIdOpenIdJwtRawRequest::class.java)
             assertThat(actualResult.requestType).isEqualTo(RequestType.PRESENTATION)
-            assertThat(actualResult.rawRequest).isEqualTo(mockPresentationRequest)
+            assertThat(actualResult.presentationRequest).isEqualTo(mockPresentationRequest)
         }
     }
 
