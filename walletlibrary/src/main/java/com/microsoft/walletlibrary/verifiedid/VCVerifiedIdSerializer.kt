@@ -2,6 +2,8 @@
 
 package com.microsoft.walletlibrary.verifiedid
 
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+
 object VCVerifiedIdSerializer : VerifiedIdSerializer<com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential> {
     /**
      * Serialize the given verifiedID into the SerializedFormat
@@ -11,9 +13,17 @@ object VCVerifiedIdSerializer : VerifiedIdSerializer<com.microsoft.walletlibrary
             is VerifiableCredential -> {
                 verifiedId.raw
             }
+
             else -> {
                 throw VerifiedIdSerializer.VerifiedIdSerializationNotSupported()
             }
         }
+    }
+
+    fun deserialize(
+        rawVc: com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential,
+        contract: VerifiableCredentialContract
+    ): VerifiedId {
+        return VerifiableCredential(rawVc, contract, rawVc.contents.vc.type)
     }
 }
