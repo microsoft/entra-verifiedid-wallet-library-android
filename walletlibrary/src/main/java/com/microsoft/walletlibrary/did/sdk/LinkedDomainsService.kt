@@ -66,23 +66,24 @@ internal class LinkedDomainsService @Inject constructor(
             return Result.success(LinkedDomainMissing)
         val domainUrl = domainUrls.first()
         val hostname = URL(domainUrl).host
-        return getWellKnownConfigDocument(domainUrl)
-            .map { wellKnownConfigDocument ->
+        getWellKnownConfigDocument(domainUrl)
+            .onSuccess { wellKnownConfigDocument ->
                 wellKnownConfigDocument.linkedDids.firstNotNullOf { linkedDidJwt ->
                     val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(
                         linkedDidJwt,
                         relyingPartyDid,
                         domainUrl
                     )
-                    if (isDomainLinked)
-                        LinkedDomainVerified(hostname)
+                    return if (isDomainLinked)
+                        Result.success(LinkedDomainVerified(hostname))
                     else
-                        null
+                        Result.success(LinkedDomainUnVerified(hostname))
                 }
-            }.mapCatching {
-                SdkLog.i("Unable to fetch well-known config document from $domainUrl")
-                LinkedDomainUnVerified(hostname)
+            }.onFailure {
+                SdkLog.i("Unable to fetch well-known config document from $domainUrl because of ${it.message}")
+                return Result.success(LinkedDomainUnVerified(hostname))
             }
+        return Result.success(LinkedDomainMissing)
     }
 
     private suspend fun getLinkedDomainsFromDid(relyingPartyDid: String): Result<List<String>> {
