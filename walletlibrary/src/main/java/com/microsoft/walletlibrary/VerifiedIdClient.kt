@@ -20,9 +20,11 @@ import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.getResult
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.internal.readJson
 
 /**
  * VerifiedIdClient is configured by builder and is used to create requests.
@@ -84,8 +86,8 @@ class VerifiedIdClient(
                     Exception("Unknown type: ${verifiedId.javaClass.name}")
                 ).toVerifiedIdResult()
             }
-        } catch (exception: Exception) {
-            SdkLog.d("Exception during serialization: ${exception.javaClass.name}")
+        } catch (exception: SerializationException) {
+            SdkLog.i("Decoding the encoded string to verified ID failed and decoding it to Verifiable Credential: ${exception.javaClass.name} message ${exception.message}")
             val verifiableCredential = serializer.decodeFromString<com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential>(encodedVerifiedIdString)
             VerifiedIdResult.success(VerifiableCredential(toWalletLibraryVc(serializer, verifiableCredential)))
         }
