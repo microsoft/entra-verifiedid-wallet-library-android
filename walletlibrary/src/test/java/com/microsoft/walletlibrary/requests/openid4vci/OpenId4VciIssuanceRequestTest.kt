@@ -1,18 +1,23 @@
 package com.microsoft.walletlibrary.requests.openid4vci
 
+import android.util.Base64
 import com.microsoft.walletlibrary.did.sdk.IdentifierService
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
+import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
+import com.microsoft.walletlibrary.did.sdk.crypto.DigestAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
+import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.networking.entities.openid4vci.RawOpenID4VCIResponse
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
+import com.microsoft.walletlibrary.networking.entities.openid4vci.request.OpenID4VCIJWTProof
 import com.microsoft.walletlibrary.networking.entities.openid4vci.request.RawOpenID4VCIRequest
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
@@ -33,9 +38,14 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.spyk
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import java.nio.charset.StandardCharsets
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
 
 class OpenId4VciIssuanceRequestTest {
     private val mockRequesterStyle: RequesterStyle = mockk()
@@ -48,11 +58,13 @@ class OpenId4VciIssuanceRequestTest {
     private val mockPreviewFeatureFlags: PreviewFeatureFlags = mockk()
     private val mockedKeyStore: EncryptedKeyStore = mockk()
     private val mockedTokenSigner: TokenSigner = mockk()
+    private val clock = Clock.fixed(Instant.now(), ZoneId.systemDefault())
     private val libraryConfiguration = LibraryConfiguration(
         mockPreviewFeatureFlags,
         mockHttpAgentApiProvider,
         defaultTestSerializer,
-        mockedTokenSigner
+        mockedTokenSigner,
+        clock
     )
     private val slot = slot<String>()
     private val mockedIdentifier: Identifier = mockk()
@@ -237,11 +249,29 @@ class OpenId4VciIssuanceRequestTest {
         // Arrange
         val rawOpenID4VCIResponse = RawOpenID4VCIResponse(mockCredentialId, null)
         accessTokenRequirement.fulfill(mockAccessToken)
+        val accessTokenHash = CryptoOperations.digest(
+            mockAccessToken.toByteArray(StandardCharsets.US_ASCII),
+            DigestAlgorithm.Sha256
+        )
+        val accessTokenPrefix = accessTokenHash.copyOfRange(0, 16)
+        val encodedAccessToken = Base64.encodeToString(accessTokenPrefix, Constants.BASE64_URL_SAFE)
+        val rawOpenID4VCIRequest = RawOpenID4VCIRequest(
+            mockCredentialId,
+            mockIssuerSession,
+            OpenID4VCIJWTProof(
+                "{\"aud\":\"$mockCredentialEndpoint\",\"iat\":\"${clock.millis() / 1000}\",\"sub\":\"$expectedDid\",\"at_hash\":\"$encodedAccessToken\"}",
+            ),
+        )
+        runBlocking {
+            delay(1000)
+        }
+
+        println("Expectation: $rawOpenID4VCIRequest")
         coEvery {
             openId4VciIssuanceRequest["sendIssuanceRequest"](
                 mockCredentialEndpoint,
-                any<RawOpenID4VCIRequest>(),
-                mockAccessToken
+                rawOpenID4VCIRequest,
+                mockAccessToken,
             )
         } returns rawOpenID4VCIResponse
 

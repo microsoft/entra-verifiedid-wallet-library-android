@@ -46,7 +46,7 @@ internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfigurati
         val encodedAccessToken = Base64.encodeToString(accessTokenPrefix, Constants.BASE64_URL_SAFE)
         val claims = OpenID4VCIJWTProofClaims(
             aud = credentialEndpoint,
-            iat = (System.currentTimeMillis() / 1000).toString(),
+            iat = ((libraryConfiguration.clock?.millis() ?: System.currentTimeMillis()) / 1000).toString(),
             sub = identifier.id,
             at_hash = encodedAccessToken
         )
