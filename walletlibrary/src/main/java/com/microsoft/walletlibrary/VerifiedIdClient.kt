@@ -86,7 +86,7 @@ class VerifiedIdClient(
                 ).toVerifiedIdResult()
             }
         } catch (exception: SerializationException) {
-            SdkLog.i("Decoding the encoded string to verified ID failed with exception ${exception.javaClass.name}, so attempting to decode it to Verifiable Credential.")
+            SdkLog.i("Decoding to verified ID failed with ${exception.javaClass.name}, so attempting to decode it to Verifiable Credential.")
             val verifiableCredential =
                 serializer.decodeFromString<com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential>(
                     encodedVerifiedIdString
