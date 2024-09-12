@@ -24,7 +24,6 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.internal.readJson
 
 /**
  * VerifiedIdClient is configured by builder and is used to create requests.
@@ -78,7 +77,7 @@ class VerifiedIdClient(
 
     fun decode(encodedVerifiedIdString: String): VerifiedIdResult<VerifiedId> {
         return try {
-            when(val verifiedId: VerifiedId = serializer.decodeFromString(encodedVerifiedIdString)) {
+            when (val verifiedId: VerifiedId = serializer.decodeFromString(encodedVerifiedIdString)) {
                 is VerifiableCredential -> VerifiedIdResult.success(verifiedId)
                 else -> MalformedInputException(
                     "Malformed Input Exception",
@@ -88,8 +87,13 @@ class VerifiedIdClient(
             }
         } catch (exception: SerializationException) {
             SdkLog.i("Decoding the encoded string to verified ID failed with exception ${exception.javaClass.name}, so attempting to decode it to Verifiable Credential.")
-            val verifiableCredential = serializer.decodeFromString<com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential>(encodedVerifiedIdString)
-            val vc = serializer.decodeFromString<com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential>(serializer.encodeToString(verifiableCredential))
+            val verifiableCredential =
+                serializer.decodeFromString<com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential>(
+                    encodedVerifiedIdString
+                )
+            val vc = serializer.decodeFromString<com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential>(
+                serializer.encodeToString(verifiableCredential)
+            )
             VerifiedIdResult.success(VerifiableCredential(vc))
         }
     }
