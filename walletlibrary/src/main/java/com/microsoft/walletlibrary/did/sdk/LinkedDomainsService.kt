@@ -36,7 +36,8 @@ internal class LinkedDomainsService @Inject constructor(
         } catch (ex: SdkException) {
             SdkLog.i(
                 "Linked Domains verification using resolver failed with exception $ex. " +
-                    "Verifying it using Well Known Document."
+                    "Verifying it using Well Known Document.",
+                ex
             )
             verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid)
         }
