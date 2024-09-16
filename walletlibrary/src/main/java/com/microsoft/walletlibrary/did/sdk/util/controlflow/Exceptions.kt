@@ -73,6 +73,8 @@ open class ResolverException(message: String, cause: Throwable? = null) : SdkExc
 
 class LinkedDomainEndpointInUnknownFormatException(message: String, cause: Throwable? = null) : ResolverException(message, cause)
 
+class WellKnownDocumentInUnknownFormatException(message: String, cause: Throwable? = null) : ResolverException(message, cause)
+
 class RegistrarException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
 open class LocalNetworkException(message: String, cause: Throwable? = null) : SdkException(message, cause, true)
