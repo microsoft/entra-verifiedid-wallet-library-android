@@ -80,7 +80,8 @@ internal class LinkedDomainsService @Inject constructor(
                     else
                         Result.success(LinkedDomainUnVerified(hostname))
                 }
-            }.onFailure {
+            }
+            .onFailure {
                 SdkLog.i("Unable to fetch well-known config document from $domainUrl because of ${it.message}")
                 return Result.success(LinkedDomainUnVerified(hostname))
             }
