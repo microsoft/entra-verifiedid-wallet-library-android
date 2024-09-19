@@ -273,6 +273,8 @@ class OpenId4VciIssuanceRequestTest {
                 rawOpenID4VCIRequest,
                 mockAccessToken,
             )
+
+            openId4VciIssuanceRequest["requestFormatter"]["format"]()
         } returns rawOpenID4VCIResponse
 
         runBlocking {
