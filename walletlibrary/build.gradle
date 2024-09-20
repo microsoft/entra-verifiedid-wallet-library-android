@@ -66,7 +66,7 @@ android {
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier 'sources'
+    archiveClassifier = 'sources'
     destinationDirectory = reporting.file("$project.buildDir/outputs/jar/")
 }
 
