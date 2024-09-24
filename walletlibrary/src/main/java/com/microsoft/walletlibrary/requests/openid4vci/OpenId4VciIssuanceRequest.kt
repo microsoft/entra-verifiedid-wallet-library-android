@@ -16,6 +16,7 @@ import com.microsoft.walletlibrary.networking.operations.PostOpenID4VCINetworkOp
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
+import com.microsoft.walletlibrary.requests.requirements.OpenId4VCIPinRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
@@ -77,12 +78,17 @@ internal class OpenId4VciIssuanceRequest(
     }
 
     private suspend fun formatAndSendIssuanceRequest(): RawOpenID4VCIResponse {
-        val accessToken =
-            (requirement as? AccessTokenRequirement)?.accessToken
-                ?: throw OpenId4VciValidationException(
-                    "Access token is missing in requirement.",
-                    VerifiedIdExceptions.REQUEST_CREATION_EXCEPTION.value
-                )
+        val accessToken = when (requirement) {
+            is AccessTokenRequirement -> requirement.accessToken
+            is OpenId4VCIPinRequirement -> requirement.accessToken
+            else -> throw OpenId4VciValidationException(
+                "Requirement is not an auth or pre-auth flow. Access token is missing.",
+                VerifiedIdExceptions.REQUEST_CREATION_EXCEPTION.value
+            )
+        } ?: throw OpenId4VciValidationException(
+            "Requirement is not an auth or pre-auth flow. Access token is missing.",
+            VerifiedIdExceptions.REQUEST_CREATION_EXCEPTION.value
+        )
 
         val credentialEndpoint = credentialMetadata.credential_endpoint
             ?: throw OpenId4VciValidationException(

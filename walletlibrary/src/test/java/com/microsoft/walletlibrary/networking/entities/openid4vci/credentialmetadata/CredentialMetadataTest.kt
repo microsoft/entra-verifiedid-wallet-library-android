@@ -5,7 +5,7 @@ import android.content.res.Resources
 import androidx.core.os.ConfigurationCompat
 import androidx.core.os.LocaleListCompat
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
-import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOfferGrants
+import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOfferGrant
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
@@ -34,7 +34,7 @@ class CredentialMetadataTest {
         issuer_session = "request_state",
         credential_configuration_ids = listOf(credentialConfigurationId1),
         grants = mapOf(
-            "authorization_code" to CredentialOfferGrants(
+            "authorization_code" to CredentialOfferGrant(
                 authorizationServer1
             )
         )
@@ -97,7 +97,7 @@ class CredentialMetadataTest {
             issuer_session = "request_state",
             credential_configuration_ids = listOf(credentialConfigurationId1),
             grants = mapOf(
-                "authorization_code" to CredentialOfferGrants(
+                "authorization_code" to CredentialOfferGrant(
                     authorizationServer1
                 )
             )

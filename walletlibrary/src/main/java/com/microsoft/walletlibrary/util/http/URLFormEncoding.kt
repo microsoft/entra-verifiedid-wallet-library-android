@@ -23,7 +23,7 @@ object URLFormEncoding {
                     if (!firstKeyPair) {
                         builder.append("&")
                     }
-                    builder.append("${encodedKey}=${URLEncoder.encode(value, Charsets.UTF_8)}")
+                    builder.append("${encodedKey}=${URLEncoder.encode(value, Charsets.UTF_8.name())}")
                     if (firstKeyPair)
                     {
                         firstKeyPair = false
@@ -36,7 +36,7 @@ object URLFormEncoding {
                                 if (!firstKeyPair) {
                                     builder.append("&")
                                 }
-                                builder.append("${encodedKey}=${URLEncoder.encode(arrayValue, Charsets.UTF_8)}")
+                                builder.append("${encodedKey}=${URLEncoder.encode(arrayValue, Charsets.UTF_8.name())}")
                                 if (firstKeyPair)
                                 {
                                     firstKeyPair = false

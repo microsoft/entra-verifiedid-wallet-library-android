@@ -14,5 +14,5 @@ internal data class CredentialOffer(
     val credential_configuration_ids: List<String>,
 
     // An object indicating to the Wallet the Grant Types the Credential Issuer's AS is prepared to process for this Credential Offer.
-    val grants: Map<String, CredentialOfferGrants>
+    val grants: Map<String, CredentialOfferGrant>
 )
