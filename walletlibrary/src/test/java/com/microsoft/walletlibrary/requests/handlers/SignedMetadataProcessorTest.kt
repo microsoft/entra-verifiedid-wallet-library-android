@@ -45,7 +45,7 @@ class SignedMetadataProcessorTest {
         mockkStatic("com.microsoft.walletlibrary.mappings.LinkedDomainsServiceExtensionKt")
         every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinedDomainsService
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
-        every { signedMetadataProcessor["deSerializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
+        every { signedMetadataProcessor["deserializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
     }
 
     @Test
@@ -131,7 +131,7 @@ class SignedMetadataProcessorTest {
             assertThat(actualResult.isFailure).isTrue
             val actualException = actualResult.exceptionOrNull()
             assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
-            assertThat(actualException?.message).isEqualTo("JWK with key id did:web:test#signingKey-1 not found in identifier document")
+            assertThat(actualException?.message).isEqualTo("JWK with key id signingKey-1 not found in identifier document")
             assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
                 VerifiedIdExceptions.MALFORMED_SIGNED_METADATA_EXCEPTION.value
             )

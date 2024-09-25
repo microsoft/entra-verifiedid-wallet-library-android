@@ -8,6 +8,8 @@ package com.microsoft.walletlibrary
 import android.content.Context
 import android.content.pm.PackageManager
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
+import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
+import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.identifier.IdentifierManager
@@ -107,7 +109,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
         val identifierManager = IdentifierManager(VerifiableCredentialSdk.identifierService)
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
         val libraryConfiguration =
-            LibraryConfiguration(previewFeatureFlags,
+            LibraryConfiguration(
+                previewFeatureFlags,
                 apiProvider,
                 jsonSerializer,
                 identifierManager,

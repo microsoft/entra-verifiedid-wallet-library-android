@@ -11,4 +11,7 @@ object Constants {
     const val CREDENTIAL_OFFER_URI = "credential_offer_uri"
     // https://www.rfc-editor.org/rfc/rfc7240
     const val PREFER_HEADER = "Prefer"
+
+    // Constants for Request completion
+    const val OPENID4VCI_TYPE_HEADER = "openid4vci-proof+jwt"
 }

@@ -103,4 +103,19 @@ internal class URLFormEncodingTest {
         }.isInstanceOf(URLFormEncoding.URLEncodingException::class.java)
     }
 
+    @Test
+    fun testEncode_withPreAuthTokenRequest_ReturnsEncodedString() {
+        // Arrange
+        val input =
+            mapOf("grant_type" to "grant type", "pre-authorized_code" to "code", "tx_code" to "pin")
+
+        // Act
+        val actual = URLFormEncoding.encode(input)
+
+        // Assert
+        assertThat(actual).isNotEmpty()
+        val actualString = actual.toString(Charsets.UTF_8)
+        assertThat(actualString).isNotEmpty()
+        assertThat(actualString).isEqualTo("grant_type=grant+type&pre-authorized_code=code&tx_code=pin")
+    }
 }
