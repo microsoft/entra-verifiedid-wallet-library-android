@@ -6,10 +6,14 @@ import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
+import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestNetworkOperation
+import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
+import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
+import com.microsoft.walletlibrary.wrapper.RootOfTrustResolver
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -22,7 +26,7 @@ import org.junit.Test
 
 class OpenIdURLRequestResolverTest {
     private val mockLibraryConfiguration = mockk<LibraryConfiguration>()
-    private val openIdURLRequestResolver = OpenIdURLRequestResolver(mockLibraryConfiguration)
+    private val openIdURLRequestResolver = OpenIdURLRequestResolver(mockLibraryConfiguration, emptyList())
     private lateinit var mockVerifiedIdRequestInput: VerifiedIdRequestInput
     private lateinit var mockVerifiedIdRequestURL: VerifiedIdRequestURL
 
@@ -36,7 +40,7 @@ class OpenIdURLRequestResolverTest {
         val mockOpenIdRequestHandler: OpenIdRequestProcessor = mockk()
 
         // Act
-        val actualResult = openIdURLRequestResolver.canResolve(mockOpenIdRequestHandler)
+        val actualResult = openIdURLRequestResolver.canResolve(mockVerifiedIdRequestInput)
 
         // Assert
         assertThat(actualResult).isEqualTo(true)
@@ -45,17 +49,22 @@ class OpenIdURLRequestResolverTest {
     @Test
     fun resolver_CanResolveHandler_ReturnsFalse() {
         // Arrange
-        class MockRequestProcessor : RequestProcessor {
-            override suspend fun handleRequest(rawRequest: RawRequest): VerifiedIdRequest<Unit> {
+        class MockRequestProcessor(override var requestProcessors: List<RequestProcessorExtension<OpenIdRawRequest>>) : RequestProcessor<OpenIdRawRequest> {
+
+            override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
+                return mockk()
+            }
+
+            override suspend fun canHandleRequest(rawRequest: Any): Boolean {
                 return mockk()
             }
 
         }
 
-        val mockRequestHandler = MockRequestProcessor()
+        val mockRequestHandler = MockRequestProcessor(mockk())
 
         // Act
-        val actualResult = openIdURLRequestResolver.canResolve(mockRequestHandler)
+        val actualResult = openIdURLRequestResolver.canResolve(mockVerifiedIdRequestInput)
 
         // Assert
         assertThat(actualResult).isEqualTo(false)

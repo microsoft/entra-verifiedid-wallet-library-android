@@ -5,7 +5,6 @@
 
 package com.microsoft.walletlibrary.requests.resolvers
 
-import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 
 /**
@@ -13,9 +12,6 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
  * It can resolve a VerifiedIdRequestInput and return a raw request.
  */
 internal interface RequestResolver {
-
-    // Indicates whether the raw request returned by this resolver can be handled by provided handler.
-    fun canResolve(requestProcessor: RequestProcessor): Boolean
 
     // Indicates whether this resolver can resolve the provided input.
     fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean

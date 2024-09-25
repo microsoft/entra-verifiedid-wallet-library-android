@@ -30,12 +30,6 @@ import org.json.JSONObject
  */
 internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration, private val preferHeader: List<String>): RequestResolver {
 
-    // Indicates whether the raw request returned by this resolver can be handled by provided handler.
-    override fun canResolve(requestProcessor: RequestProcessor): Boolean {
-        if (requestProcessor is OpenIdRequestProcessor) return true
-        return false
-    }
-
     // Indicates whether this resolver can resolve the provided input.
     override fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean {
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) return false
