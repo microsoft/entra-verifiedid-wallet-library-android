@@ -26,8 +26,8 @@ import org.junit.Test
 class OpenIdURLRequestResolverTest {
     private val mockLibraryConfiguration = mockk<LibraryConfiguration>()
     private val openIdURLRequestResolver = OpenIdURLRequestResolver(mockLibraryConfiguration, emptyList())
-    private lateinit var mockVerifiedIdRequestInput: VerifiedIdRequestInput
-    private lateinit var mockVerifiedIdRequestURL: VerifiedIdRequestURL
+    private var mockVerifiedIdRequestInput: VerifiedIdRequestInput = mockk()
+    private var mockVerifiedIdRequestURL: VerifiedIdRequestURL = mockk()
 
     init {
         mockkConstructor(FetchOpenID4VCIRequestNetworkOperation::class)
@@ -36,10 +36,10 @@ class OpenIdURLRequestResolverTest {
     @Test
     fun resolver_CanResolveHandler_ReturnsTrue() {
         // Arrange
-        val mockOpenIdRequestHandler: OpenIdRequestProcessor = mockk()
+        every { mockVerifiedIdRequestURL.url.scheme } returns "openid-vc"
 
         // Act
-        val actualResult = openIdURLRequestResolver.canResolve(mockVerifiedIdRequestInput)
+        val actualResult = openIdURLRequestResolver.canResolve(mockVerifiedIdRequestURL)
 
         // Assert
         assertThat(actualResult).isEqualTo(true)
@@ -59,8 +59,6 @@ class OpenIdURLRequestResolverTest {
             }
 
         }
-
-        val mockRequestHandler = MockRequestProcessor(mockk())
 
         // Act
         val actualResult = openIdURLRequestResolver.canResolve(mockVerifiedIdRequestInput)
