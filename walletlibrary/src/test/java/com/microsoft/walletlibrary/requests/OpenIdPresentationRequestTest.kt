@@ -12,6 +12,7 @@ import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConst
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.UnspecifiedVerifiedIdException
 import com.microsoft.walletlibrary.util.UserCanceledException
@@ -134,6 +135,7 @@ class OpenIdPresentationRequestTest {
     @Test
     fun completeRequest_ValidRequest_ReturnsSuccess() {
         // Arrange
+        every { mockLibraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT) } returns false
         val expectedVcType = "TestVc"
         requirement = VerifiedIdRequirement(
             "id",
@@ -206,6 +208,7 @@ class OpenIdPresentationRequestTest {
     @Test
     fun completeRequest_FailureWhileAddingRequirements_ThrowsException() {
         // Arrange
+        every { mockLibraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT) } returns false
         val expectedVcType = "TestVc"
         requirement = VerifiedIdRequirement(
             "id",

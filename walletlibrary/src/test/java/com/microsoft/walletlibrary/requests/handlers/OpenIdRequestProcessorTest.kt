@@ -34,6 +34,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.d
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequirementCastingException
 import com.microsoft.walletlibrary.util.UnSupportedProtocolException
 import io.mockk.*
@@ -119,7 +120,8 @@ class OpenIdRequestProcessorTest {
         coEvery { mockIssuanceService.getRequest(expectedContractUrl) } returns Result.Success(
             mockIssuanceRequest
         )
-        openIdRequestProcessor = spyk(OpenIdRequestProcessor(mockLibraryConfiguration), recordPrivateCalls = true)
+        openIdRequestProcessor =
+            spyk(OpenIdRequestProcessor(mockLibraryConfiguration), recordPrivateCalls = true)
 
         verifiedIdOpenIdJwtRawRequest = mockk()
         if (requestType == RequestType.PRESENTATION) {
@@ -165,7 +167,13 @@ class OpenIdRequestProcessorTest {
         every { contractUri.toString() } returns expectedContractUrl
         every { verifiedIdRequirement.issuanceOptions } returns issuanceOptions
         every { verifiedIdRequestURL.url } returns contractUri
-        every { openIdRequestProcessor["getIssuanceRequest"](expectedContractUrl, "", "") } returns rawManifest
+        every {
+            openIdRequestProcessor["getIssuanceRequest"](
+                expectedContractUrl,
+                "",
+                ""
+            )
+        } returns rawManifest
     }
 
     private fun mockManifestIssuanceRequest(logoPresent: Boolean, emptyClaims: Boolean) {
@@ -245,6 +253,9 @@ class OpenIdRequestProcessorTest {
 
     @Test
     fun handleRequest_PassOpenIdRawRequestWithTypePresentation_ReturnsOpenIdPresentationRequest() {
+        // Arrange
+        every { mockLibraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PROCESSOR_EXTENSION_SUPPORT) } returns true
+
         // Act
         val request =
             runBlocking { openIdRequestProcessor.handleRequest(verifiedIdOpenIdJwtRawRequest) }

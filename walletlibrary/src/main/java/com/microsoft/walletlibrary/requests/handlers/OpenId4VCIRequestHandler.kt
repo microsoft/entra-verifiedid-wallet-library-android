@@ -119,12 +119,11 @@ internal class OpenId4VCIRequestHandler(
             credentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle()
         val verifiedIdStyle =
             credentialConfiguration.getVerifiedIdStyleInPreferredLocale(requesterStyle.name)
-        val accessTokenEndpoint = fetchAccessTokenEndpointFromOpenIdWellKnownConfig(
-            credentialMetadata.credential_issuer ?: throw OpenId4VciValidationException(
-                "Credential metadata does not contain credential_issuer.",
-                VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
-            )
+        val credentialIssuer = credentialMetadata.credential_issuer ?: throw OpenId4VciValidationException(
+            "Credential metadata does not contain credential_issuer.",
+            VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
         )
+        val accessTokenEndpoint = fetchAccessTokenEndpointFromOpenIdWellKnownConfig(credentialIssuer)
         val requirement = transformToRequirement(
             credentialConfiguration.scope,
             credentialOffer,

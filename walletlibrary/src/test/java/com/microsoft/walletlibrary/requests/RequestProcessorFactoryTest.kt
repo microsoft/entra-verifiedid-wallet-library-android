@@ -6,6 +6,7 @@ import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.resolvers.RequestResolver
 import com.microsoft.walletlibrary.util.HandlerMissingException
 import com.microsoft.walletlibrary.util.UnSupportedRawRequestException
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -32,6 +33,7 @@ class RequestProcessorFactoryTest {
         // Arrange
         requestProcessorFactory.requestProcessors.add(firstMockRequestProcessor)
         hasCompatibleResolver()
+        coEvery { firstMockRequestProcessor.canHandleRequest(any()) } returns true
 
         runBlocking {
             // Act
@@ -55,10 +57,11 @@ class RequestProcessorFactoryTest {
     }
 
     @Test
-    fun handler_NoCompatibleResolver_Throws() {
+    fun handler_NoCompatibleResolver_ThrowsException() {
         // Arrange
         requestProcessorFactory.requestProcessors.add(firstMockRequestProcessor)
         doesNotHaveCompatibleResolver()
+        coEvery { firstMockRequestProcessor.canHandleRequest(any()) } returns false
 
         // Act and Assert
         assertThatThrownBy {
@@ -78,6 +81,8 @@ class RequestProcessorFactoryTest {
         requestProcessorFactory.requestProcessors.add(secondMockRequestProcessor)
         hasCompatibleResolver()
         doesNotHaveCompatibleResolver()
+        coEvery { firstMockRequestProcessor.canHandleRequest(any()) } returns true
+        coEvery { secondMockRequestProcessor.canHandleRequest(any()) } returns false
 
         runBlocking {
             // Act
