@@ -90,7 +90,7 @@ internal class OpenId4VciIssuanceRequest(
             VerifiedIdExceptions.REQUEST_CREATION_EXCEPTION.value
         )
 
-        val credentialEndpoint = credentialMetadata.credential_endpoint
+        val credentialEndpoint = credentialMetadata.credentialEndpoint
             ?: throw OpenId4VciValidationException(
                 "Credential endpoint is missing in credential metadata.",
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value

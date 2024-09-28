@@ -18,13 +18,14 @@ internal class HttpAgentOpenId4VciApi(
 ) {
     companion object {
         const val OPENID4VCI_INTER_OP_PROFILE = "oid4vci-interop-profile-version=0.0.1"
+        private val openId4VciInteropHeadersMap = mapOf(Constants.PREFER to OPENID4VCI_INTER_OP_PROFILE)
     }
 
     suspend fun getOpenID4VCIRequest(overrideUrl: String): Result<IResponse> {
         return agent.get(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
-                mapOf(Constants.PREFER to OPENID4VCI_INTER_OP_PROFILE),
+                openId4VciInteropHeadersMap,
                 httpAgentUtils.defaultHeaders()
             )
         )
@@ -34,7 +35,7 @@ internal class HttpAgentOpenId4VciApi(
         return agent.get(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
-                mapOf(Constants.PREFER to OPENID4VCI_INTER_OP_PROFILE),
+                openId4VciInteropHeadersMap,
                 httpAgentUtils.defaultHeaders()
             )
         )

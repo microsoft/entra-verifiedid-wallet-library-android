@@ -355,8 +355,8 @@ class OpenId4VCIRequestHandlerTest {
         justRun { mockCredentialMetadata.verifyIfCredentialIssuerExist() }
         justRun { mockCredentialMetadata.verifyIfSignedMetadataExist() }
         justRun { mockCredentialMetadata.validateAuthorizationServers(mockCredentialOffer) }
-        every { mockCredentialMetadata.signed_metadata } returns "signed_metadata"
-        every { mockCredentialMetadata.credential_issuer } returns "metadata_url"
+        every { mockCredentialMetadata.signedMetadata } returns "signed_metadata"
+        every { mockCredentialMetadata.credentialIssuer } returns "metadata_url"
         every { mockCredentialMetadata.getSupportedCredentialConfigurations(listOf("credential_id")) } returns listOf(
             mockCredentialConfiguration
         )

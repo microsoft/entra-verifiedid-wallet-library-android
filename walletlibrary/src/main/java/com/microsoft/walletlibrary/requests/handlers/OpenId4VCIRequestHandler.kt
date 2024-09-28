@@ -56,7 +56,7 @@ internal class OpenId4VCIRequestHandler(
                 )
 
                 // Get the root of trust from the signed metadata.
-                val rootOfTrust = credentialMetadata.signed_metadata?.let {
+                val rootOfTrust = credentialMetadata.signedMetadata?.let {
                     signedMetadataProcessor.process(it, credentialOffer.credential_issuer, rootOfTrustResolver)
                 } ?: RootOfTrust("", false)
 
@@ -123,7 +123,7 @@ internal class OpenId4VCIRequestHandler(
         val verifiedIdStyle =
             credentialConfiguration.getVerifiedIdStyleInPreferredLocale(requesterStyle.name)
         val accessTokenEndpoint = fetchAccessTokenEndpointFromOpenIdWellKnownConfig(
-            credentialMetadata.credential_issuer ?: ""
+            credentialMetadata.credentialIssuer ?: ""
         )
         val requirement = transformToRequirement(
             credentialConfiguration.scope,
