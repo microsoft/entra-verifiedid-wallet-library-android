@@ -30,6 +30,7 @@ import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import com.microsoft.walletlibrary.wrapper.LinkedDomainsResolver
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic

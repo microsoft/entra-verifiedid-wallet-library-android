@@ -14,10 +14,12 @@ import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.mappings.toLinkedDomainResult
 import java.net.URL
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
@@ -25,7 +27,7 @@ internal class LinkedDomainsService @Inject constructor(
     private val apiProvider: HttpAgentApiProvider,
     private val resolver: Resolver,
     private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator,
-    private val rootOfTrustResolver: RootOfTrustResolver? = null
+    @Named("rootOfTrustResolver") private val rootOfTrustResolver: RootOfTrustResolver? = null
 ) {
     suspend fun fetchAndVerifyLinkedDomains(relyingPartyDid: String): Result<LinkedDomainResult> {
         return try {
@@ -37,7 +39,8 @@ internal class LinkedDomainsService @Inject constructor(
                     "Verifying it using Well Known Document.",
                 ex
             )
-            verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid)
+            val linkedDomains = verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid)
+            Result.success(linkedDomains)
         }
 /*        getLinkedDomainsFromDid(relyingPartyDid)
             .onSuccess { domainUrls ->
@@ -56,10 +59,13 @@ internal class LinkedDomainsService @Inject constructor(
         else throw SdkException("Root of trust resolver did not return a verified domain")
     }
 
-    private suspend fun verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid: String): Result<LinkedDomainResult> {
-        return getLinkedDomainsFromDid(relyingPartyDid).map {
+    internal suspend fun verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid: String): LinkedDomainResult {
+        getLinkedDomainsFromDid(relyingPartyDid).map { it ->
             verifyLinkedDomains(it, relyingPartyDid)
-        }.getOrThrow()
+                .onSuccess { linkedDomainResult -> return linkedDomainResult }
+                .onFailure { throw it }
+        }
+        return LinkedDomainMissing
     }
 
     internal suspend fun verifyLinkedDomains(
@@ -70,24 +76,25 @@ internal class LinkedDomainsService @Inject constructor(
             return Result.success(LinkedDomainMissing)
         val domainUrl = domainUrls.first()
         val hostname = URL(domainUrl).host
-        return getWellKnownConfigDocument(domainUrl)
-            .map { wellKnownConfigDocument ->
+        getWellKnownConfigDocument(domainUrl)
+            .onSuccess { wellKnownConfigDocument ->
                 wellKnownConfigDocument.linkedDids.firstNotNullOf { linkedDidJwt ->
                     val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(
                         linkedDidJwt,
                         relyingPartyDid,
                         domainUrl
                     )
-                    if (isDomainLinked)
-                        LinkedDomainVerified(hostname)
+                    return if (isDomainLinked)
+                        Result.success(LinkedDomainVerified(hostname))
                     else
-                        null
+                        Result.success(LinkedDomainUnVerified(hostname))
                 }
-            }.onFailure {
-                SdkLog.d("Unable to fetch well-known config document from $domainUrl")
-            }.recover {
-                LinkedDomainUnVerified(hostname)
             }
+            .onFailure {
+                SdkLog.i("Unable to fetch well-known config document from $domainUrl because of ${it.message}")
+                return Result.success(LinkedDomainUnVerified(hostname))
+            }
+        return Result.success(LinkedDomainMissing)
     }
 
     private suspend fun getLinkedDomainsFromDid(relyingPartyDid: String): Result<List<String>> {

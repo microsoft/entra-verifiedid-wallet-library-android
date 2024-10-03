@@ -10,7 +10,7 @@ import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.TokenValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.wrapper.IdentifierDocumentResolver
-import com.microsoft.walletlibrary.wrapper.RootOfTrustResolver
+import com.microsoft.walletlibrary.wrapper.LinkedDomainsResolver
 import com.nimbusds.jose.jwk.JWK
 
 /**
@@ -45,7 +45,7 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         validateSignedMetadata(jwsToken, jwk, credentialIssuer, did)
 
         // Return the root of trust from the identifier document along with its verification status.
-        return RootOfTrustResolver.resolveRootOfTrust(identifierDocument)
+        return LinkedDomainsResolver.resolveRootOfTrust(identifierDocument)
     }
 
     private fun deserializeSignedMetadata(signedMetadata: String): JwsToken {

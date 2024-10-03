@@ -14,6 +14,7 @@ import com.microsoft.walletlibrary.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
+import com.microsoft.walletlibrary.wrapper.LinkedDomainsResolver
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 

@@ -16,7 +16,7 @@ import org.assertj.core.api.Assertions
 import org.junit.Test
 import kotlin.Result as KotlinResult
 
-class RootOfTrustResolverTest {
+class LinkedDomainsResolverTest {
     private val mockLinedDomainsService: LinkedDomainsService = mockk()
     private val mockIdentifierDocument: IdentifierDocument = mockk()
     private val expectedDomain = "testdomain"
@@ -34,7 +34,7 @@ class RootOfTrustResolverTest {
 
         runBlocking {
             // Act
-            val actualResult = RootOfTrustResolver.resolveRootOfTrust(mockIdentifierDocument)
+            val actualResult = LinkedDomainsResolver.resolveRootOfTrust(mockIdentifierDocument)
 
             // Assert
             Assertions.assertThat(actualResult).isInstanceOf(RootOfTrust::class.java)
@@ -50,7 +50,7 @@ class RootOfTrustResolverTest {
 
         runBlocking {
             // Act
-            val actualResult = RootOfTrustResolver.resolveRootOfTrust(mockIdentifierDocument)
+            val actualResult = LinkedDomainsResolver.resolveRootOfTrust(mockIdentifierDocument)
 
             // Assert
             Assertions.assertThat(actualResult).isInstanceOf(RootOfTrust::class.java)
