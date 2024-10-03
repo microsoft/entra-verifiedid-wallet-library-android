@@ -11,9 +11,11 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiP
 import com.microsoft.walletlibrary.did.sdk.datasource.network.linkedDomainsOperations.FetchWellKnownConfigDocumentNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
+import com.microsoft.walletlibrary.mappings.toLinkedDomainResult
 import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,17 +24,42 @@ import javax.inject.Singleton
 internal class LinkedDomainsService @Inject constructor(
     private val apiProvider: HttpAgentApiProvider,
     private val resolver: Resolver,
-    private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator
+    private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator,
+    private val rootOfTrustResolver: RootOfTrustResolver? = null
 ) {
     suspend fun fetchAndVerifyLinkedDomains(relyingPartyDid: String): Result<LinkedDomainResult> {
-        getLinkedDomainsFromDid(relyingPartyDid)
+        return try {
+            val verifiedDomains = verifyLinkedDomainsUsingResolver(relyingPartyDid)
+            Result.success(verifiedDomains)
+        } catch (ex: SdkException) {
+            SdkLog.i(
+                "Linked Domains verification using resolver failed with exception $ex. " +
+                    "Verifying it using Well Known Document.",
+                ex
+            )
+            verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid)
+        }
+/*        getLinkedDomainsFromDid(relyingPartyDid)
             .onSuccess { domainUrls ->
                 return verifyLinkedDomains(domainUrls, relyingPartyDid)
             }
             .onFailure {
                 return Result.failure(it)
             }
-        return Result.failure(SdkException("Failed while verifying linked domains"))
+        return Result.failure(SdkException("Failed while verifying linked domains"))*/
+    }
+
+    private suspend fun verifyLinkedDomainsUsingResolver(relyingPartyDid: String): LinkedDomainResult {
+        rootOfTrustResolver ?: throw SdkException("Root of trust resolver is not configured")
+        val linkedDomainResult = rootOfTrustResolver.resolve(relyingPartyDid).toLinkedDomainResult()
+        if (linkedDomainResult is LinkedDomainVerified) return linkedDomainResult
+        else throw SdkException("Root of trust resolver did not return a verified domain")
+    }
+
+    private suspend fun verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid: String): Result<LinkedDomainResult> {
+        return getLinkedDomainsFromDid(relyingPartyDid).map {
+            verifyLinkedDomains(it, relyingPartyDid)
+        }.getOrThrow()
     }
 
     internal suspend fun verifyLinkedDomains(
