@@ -8,8 +8,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("document")
 internal data class IdentifierResponse(
-    @SerialName("identifierDocument")
-    val identifierDocument: IdentifierDocument,
+    @SerialName("didDocument")
+    val didDocument: IdentifierDocument,
     @SerialName("@context")
     val context: String = "https://www.w3.org/ns/did-resolution/v1"
 ) {
