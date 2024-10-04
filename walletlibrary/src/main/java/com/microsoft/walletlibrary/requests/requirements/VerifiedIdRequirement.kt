@@ -109,6 +109,8 @@ open class VerifiedIdRequirement(
         protocolSerializer: RequestProcessorSerializer<T>,
         verifiedIdSerializer: VerifiedIdSerializer<T>
     ): T? {
-        return verifiedIdSerializer.serialize(this.verifiedId!!)
+        return this.verifiedId?.let {
+            return verifiedIdSerializer.serialize(it)
+        }
     }
 }
