@@ -6,6 +6,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationReques
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
+import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
@@ -53,7 +54,7 @@ class OpenIdResolverTest {
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedIdOpenIdJwtRawRequest::class.java)
             assertThat(actualResult.requestType).isEqualTo(RequestType.PRESENTATION)
-            assertThat(actualResult.rawRequest).isEqualTo(mockPresentationRequest)
+            assertThat(actualResult.presentationRequest).isEqualTo(mockPresentationRequest)
         }
     }
 
@@ -61,12 +62,12 @@ class OpenIdResolverTest {
     fun resolveOpenIdRequest_ValidateRequestSuccessful_ReturnsRawRequestOfTypePresentation() {
         runBlocking {
             // Act
-            val actualResult = OpenIdResolver.validateRequest(mockPresentationRequestContent)
+            val actualResult = OpenIdResolver.validateRequest(mockPresentationRequestContent, emptyMap())
 
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedIdOpenIdJwtRawRequest::class.java)
             assertThat(actualResult.requestType).isEqualTo(RequestType.PRESENTATION)
-            assertThat(actualResult.rawRequest).isEqualTo(mockPresentationRequest)
+            assertThat(actualResult.presentationRequest).isEqualTo(mockPresentationRequest)
         }
     }
 
@@ -78,7 +79,7 @@ class OpenIdResolverTest {
         // Act and Assert
         Assertions.assertThatThrownBy {
             runBlocking {
-                OpenIdResolver.validateRequest(mockPresentationRequestContent)
+                OpenIdResolver.validateRequest(mockPresentationRequestContent, emptyMap())
             }
         }.isInstanceOf(VerifiedIdRequestFetchException::class.java)
     }

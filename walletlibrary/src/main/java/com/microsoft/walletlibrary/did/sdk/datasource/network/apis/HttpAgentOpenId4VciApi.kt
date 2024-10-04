@@ -16,26 +16,32 @@ internal class HttpAgentOpenId4VciApi(
     private val httpAgentUtils: HttpAgentUtils,
     private val json: Json
 ) {
-    companion object {
-        const val OPENID4VCI_INTER_OP_PROFILE = "oid4vci-interop-profile-version=0.0.1"
-    }
-
-    suspend fun getOpenID4VCIRequest(overrideUrl: String): Result<IResponse> {
+    suspend fun getOpenID4VCIRequest(
+        overrideUrl: String,
+        preferHeaders: List<String>
+    ): Result<IResponse> {
+        val headers =
+            mutableListOf(com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE)
+        headers.addAll(preferHeaders)
         return agent.get(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
-                mapOf(Constants.PREFER to OPENID4VCI_INTER_OP_PROFILE),
-                httpAgentUtils.defaultHeaders()
+                mapOf(
+                    Constants.PREFER to httpAgentUtils.formatPreferValues(headers)
+                )
             )
         )
     }
 
     suspend fun getCredentialMetadata(overrideUrl: String): Result<IResponse> {
+        val headers =
+            mutableListOf(com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE)
         return agent.get(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
-                mapOf(Constants.PREFER to OPENID4VCI_INTER_OP_PROFILE),
-                httpAgentUtils.defaultHeaders()
+                mapOf(
+                    Constants.PREFER to httpAgentUtils.formatPreferValues(headers)
+                )
             )
         )
     }
@@ -54,7 +60,7 @@ internal class HttpAgentOpenId4VciApi(
             combineAdditionalHeadersWithDefaultHeaders(
                 mapOf(
                     Constants.AUTHORIZATION to "Bearer $accessToken",
-                    Constants.PREFER to OPENID4VCI_INTER_OP_PROFILE
+                    Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
                 ),
                 httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.Json, bodyBytes)
             ),
@@ -78,10 +84,17 @@ internal class HttpAgentOpenId4VciApi(
         return agent.post(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
-                mapOf(Constants.PREFER to OPENID4VCI_INTER_OP_PROFILE),
+                mapOf(Constants.PREFER to com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE),
                 httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.UrlFormEncoded, body)
             ),
             body
+        )
+    }
+
+    private fun combineAdditionalHeadersWithDefaultHeaders(additionalHeaders: Map<String, String>): Map<String, String> {
+        return httpAgentUtils.combineMaps(
+            httpAgentUtils.defaultHeaders(),
+            additionalHeaders
         )
     }
 

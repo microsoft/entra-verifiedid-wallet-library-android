@@ -32,6 +32,9 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.d
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.Logo
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
+import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequirementCastingException
 import com.microsoft.walletlibrary.util.UnSupportedProtocolException
 import io.mockk.*
@@ -40,10 +43,11 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-class OpenIdRequestHandlerTest {
-    private lateinit var openIdRequestHandler: RequestHandler
+class OpenIdRequestProcessorTest {
+    private lateinit var openIdRequestProcessor: RequestProcessor<OpenIdRawRequest>
     private lateinit var mockRawRequest: RawRequest
     private lateinit var verifiedIdOpenIdJwtRawRequest: VerifiedIdOpenIdJwtRawRequest
+    private val mockLibraryConfiguration: LibraryConfiguration = mockk()
     private val expectedRootOfTrustSource = "test.com"
     private val expectedRequesterName = "Test"
     private val expectedRequirementClaimName = "name"
@@ -116,7 +120,8 @@ class OpenIdRequestHandlerTest {
         coEvery { mockIssuanceService.getRequest(expectedContractUrl) } returns Result.Success(
             mockIssuanceRequest
         )
-        openIdRequestHandler = spyk(OpenIdRequestHandler(), recordPrivateCalls = true)
+        openIdRequestProcessor =
+            spyk(OpenIdRequestProcessor(mockLibraryConfiguration), recordPrivateCalls = true)
 
         verifiedIdOpenIdJwtRawRequest = mockk()
         if (requestType == RequestType.PRESENTATION) {
@@ -129,9 +134,9 @@ class OpenIdRequestHandlerTest {
     }
 
     private fun createMockRawRequest() {
-        class MockRawRequest(override val requestType: RequestType, override val rawRequest: Any) :
+        class MockRawRequest(override val requestType: RequestType, val rawRequest: Any) :
             RawRequest
-        mockRawRequest = MockRawRequest(RequestType.ISSUANCE, openIdRequestHandler)
+        mockRawRequest = MockRawRequest(RequestType.ISSUANCE, openIdRequestProcessor)
     }
 
     private fun mockForIssuanceType(
@@ -162,7 +167,13 @@ class OpenIdRequestHandlerTest {
         every { contractUri.toString() } returns expectedContractUrl
         every { verifiedIdRequirement.issuanceOptions } returns issuanceOptions
         every { verifiedIdRequestURL.url } returns contractUri
-        every { openIdRequestHandler["getIssuanceRequest"](expectedContractUrl, "", "") } returns rawManifest
+        every {
+            openIdRequestProcessor["getIssuanceRequest"](
+                expectedContractUrl,
+                "",
+                ""
+            )
+        } returns rawManifest
     }
 
     private fun mockManifestIssuanceRequest(logoPresent: Boolean, emptyClaims: Boolean) {
@@ -235,16 +246,19 @@ class OpenIdRequestHandlerTest {
         // Act and Assert
         Assertions.assertThatThrownBy {
             runBlocking {
-                openIdRequestHandler.handleRequest(mockRawRequest)
+                openIdRequestProcessor.handleRequest(mockRawRequest)
             }
         }.isInstanceOf(UnSupportedProtocolException::class.java)
     }
 
     @Test
     fun handleRequest_PassOpenIdRawRequestWithTypePresentation_ReturnsOpenIdPresentationRequest() {
+        // Arrange
+        every { mockLibraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PROCESSOR_EXTENSION_SUPPORT) } returns true
+
         // Act
         val request =
-            runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
+            runBlocking { openIdRequestProcessor.handleRequest(verifiedIdOpenIdJwtRawRequest) }
 
         // Assert
         assertThat(request).isInstanceOf(OpenIdPresentationRequest::class.java)
@@ -269,7 +283,7 @@ class OpenIdRequestHandlerTest {
 
         // Act
         val request =
-            runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
+            runBlocking { openIdRequestProcessor.handleRequest(verifiedIdOpenIdJwtRawRequest) }
 
         // Assert
         assertThat(request).isInstanceOf(ManifestIssuanceRequest::class.java)
@@ -294,7 +308,7 @@ class OpenIdRequestHandlerTest {
 
         // Act and assert
         Assertions.assertThatThrownBy {
-            runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
+            runBlocking { openIdRequestProcessor.handleRequest(verifiedIdOpenIdJwtRawRequest) }
         }.isInstanceOf(RequirementCastingException::class.java)
     }
 
@@ -310,7 +324,7 @@ class OpenIdRequestHandlerTest {
 
         // Act
         val actualOpenIdRequest =
-            runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
+            runBlocking { openIdRequestProcessor.handleRequest(verifiedIdOpenIdJwtRawRequest) }
 
         // Assert
         assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle).isInstanceOf(
@@ -335,7 +349,7 @@ class OpenIdRequestHandlerTest {
 
         // Act
         val actualOpenIdRequest =
-            runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
+            runBlocking { openIdRequestProcessor.handleRequest(verifiedIdOpenIdJwtRawRequest) }
 
         // Assert
         assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle).isInstanceOf(
@@ -356,7 +370,7 @@ class OpenIdRequestHandlerTest {
 
         // Act
         val actualOpenIdRequest =
-            runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
+            runBlocking { openIdRequestProcessor.handleRequest(verifiedIdOpenIdJwtRawRequest) }
 
         // Assert
         assertThat((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle).isInstanceOf(
@@ -386,7 +400,7 @@ class OpenIdRequestHandlerTest {
 
         // Act
         val actualOpenIdRequest =
-            runBlocking { openIdRequestHandler.handleRequest(verifiedIdOpenIdJwtRawRequest) }
+            runBlocking { openIdRequestProcessor.handleRequest(verifiedIdOpenIdJwtRawRequest) }
 
         // Assert
         assertThat(((actualOpenIdRequest as ManifestIssuanceRequest).verifiedIdStyle as BasicVerifiedIdStyle).backgroundColor).isEqualTo(

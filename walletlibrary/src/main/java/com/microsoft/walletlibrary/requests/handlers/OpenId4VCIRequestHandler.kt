@@ -8,6 +8,8 @@ import com.microsoft.walletlibrary.networking.operations.FetchOpenIdWellKnownCon
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.openid4vci.OpenId4VciIssuanceRequest
+import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
+import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.LibraryConfiguration
@@ -15,16 +17,22 @@ import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
+
 internal class OpenId4VCIRequestHandler(
     private val libraryConfiguration: LibraryConfiguration,
     private val signedMetadataProcessor: SignedMetadataProcessor = SignedMetadataProcessor(
         libraryConfiguration
     )
-) : RequestHandler {
+) : RequestProcessor<OpenIdRawRequest> {
+
+    /**
+     * Extensions to the OpenId4vci Request Processor
+     */
+    public override var requestProcessors: List<RequestProcessorExtension<OpenIdRawRequest>> = emptyList()
 
     // Indicates whether the provided raw request can be handled by this handler.
     // This method checks if the raw request can be cast to CredentialOffer successfully, and if it contains the required fields.
-    override fun canHandle(rawRequest: Any): Boolean {
+    override suspend fun canHandleRequest(rawRequest: Any): Boolean {
         return try {
             libraryConfiguration.serializer.decodeFromString(
                 CredentialOffer.serializer(),
@@ -116,12 +124,11 @@ internal class OpenId4VCIRequestHandler(
             credentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle()
         val verifiedIdStyle =
             credentialConfiguration.getVerifiedIdStyleInPreferredLocale(requesterStyle.name)
-        val accessTokenEndpoint = fetchAccessTokenEndpointFromOpenIdWellKnownConfig(
-            credentialMetadata.credential_issuer ?: throw OpenId4VciValidationException(
-                "Credential metadata does not contain credential_issuer.",
-                VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
-            )
+        val credentialIssuer = credentialMetadata.credential_issuer ?: throw OpenId4VciValidationException(
+            "Credential metadata does not contain credential_issuer.",
+            VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
         )
+        val accessTokenEndpoint = fetchAccessTokenEndpointFromOpenIdWellKnownConfig(credentialIssuer)
         val requirement = transformToRequirement(
             credentialConfiguration.scope,
             credentialOffer,

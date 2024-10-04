@@ -9,7 +9,7 @@ import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
-import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
+import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
@@ -20,22 +20,22 @@ import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 object OpenIdResolver {
 
     // Fetches the presentation request from VC SDK using the url and converts it to raw request.
-    internal suspend fun getRequest(uri: String): OpenIdRawRequest {
+    internal suspend fun getRequest(uri: String): OpenIdProcessedRequest {
         val presentationRequestResult = VerifiableCredentialSdk.presentationService.getRequest(uri)
-        return handleRequestResult(presentationRequestResult)
+        return handleRequestResult(presentationRequestResult, emptyMap())
     }
 
-    internal suspend fun validateRequest(requestContent: PresentationRequestContent): OpenIdRawRequest {
+    internal suspend fun validateRequest(requestContent: PresentationRequestContent, rawRequest: Map<String, Any>): OpenIdProcessedRequest {
         val presentationRequestResult = VerifiableCredentialSdk.presentationService.validateRequest(requestContent)
-        return handleRequestResult(presentationRequestResult)
+        return handleRequestResult(presentationRequestResult, rawRequest)
     }
 
-    private fun handleRequestResult(presentationRequestResult: Result<PresentationRequest>): OpenIdRawRequest {
+    private fun handleRequestResult(presentationRequestResult: Result<PresentationRequest>, rawRequest: Map<String, Any>): OpenIdProcessedRequest {
         when (presentationRequestResult) {
             is Result.Success -> {
                 val request = presentationRequestResult.payload
                 val requestType = getRequestType(request)
-                return VerifiedIdOpenIdJwtRawRequest(request, requestType)
+                return VerifiedIdOpenIdJwtRawRequest(request, requestType, rawRequest)
             }
             is Result.Failure -> {
                 throw VerifiedIdRequestFetchException(
