@@ -24,7 +24,6 @@ import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
-import kotlin.Result as KotlinResult
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.every
@@ -34,8 +33,8 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
 import org.junit.Test
+import kotlin.Result as KotlinResult
 
 class PresentationServiceTest {
 
@@ -46,9 +45,16 @@ class PresentationServiceTest {
     private val mockedJwtValidator: JwtValidator = mockk()
     private val presentationRequestValidator: PresentationRequestValidator = mockk()
     private val presentationResponseFormatter: PresentationResponseFormatter = mockk()
-    private val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
+    private val mockedJwtDomainLinkageCredentialValidator =
+        JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
     private val linkedDomainsService =
-        spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
+        spyk(
+            LinkedDomainsService(
+                mockk(relaxed = true),
+                mockedResolver,
+                mockedJwtDomainLinkageCredentialValidator
+            )
+        )
 
     private val presentationService =
         spyk(
@@ -66,26 +72,27 @@ class PresentationServiceTest {
     private val formattedResponses = Pair("FORMATTED_RESPONSE", listOf("FORMATTED_RESPONSE"))
     private val expectedPresentationRequestString =
         """{
-  "jti": "3941ff88-69d5-465b-be13-2fe9805efe21",
-  "iat": 1643853738,
+  "iat": 1644007434,
   "response_type": "id_token",
   "response_mode": "post",
   "scope": "openid",
-  "nonce": "MqTyOoBtiLhoHAVmnkXLiw==",
+  "nonce": "wbecIKWI/SsdpjRUy0pXHQ==",
   "client_id": "did:ion:EiBP2wtU-Hcp2vDioFLjS0KKTeGFbeKhuQbWpHnczKsVIQ:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJzaWdfZGVjOTNjZTgiLCJwdWJsaWNLZXlKd2siOnsiY3J2Ijoic2VjcDI1NmsxIiwia3R5IjoiRUMiLCJ4IjoiS3dZcFNHWFFmdVctTlluM1RzMExQMVB4cC1uNjNuczlDNnBaWGkyMFp2ZyIsInkiOiJ0QnV3R3dOZjVkaG5jZjFXVXhiM0lwQTVyaml6ZmRYOUtjekl1b3VLVkNZIn0sInB1cnBvc2VzIjpbImF1dGhlbnRpY2F0aW9uIiwiYXNzZXJ0aW9uTWV0aG9kIl0sInR5cGUiOiJFY2RzYVNlY3AyNTZrMVZlcmlmaWNhdGlvbktleTIwMTkifV0sInNlcnZpY2VzIjpbeyJpZCI6ImxpbmtlZGRvbWFpbnMiLCJzZXJ2aWNlRW5kcG9pbnQiOnsib3JpZ2lucyI6WyJodHRwczovL2RvbWFpbi5jb20vIl19LCJ0eXBlIjoiTGlua2VkRG9tYWlucyJ9LHsiaWQiOiJodWIiLCJzZXJ2aWNlRW5kcG9pbnQiOnsiaW5zdGFuY2VzIjpbImh0dHBzOi8vZGV2Lmh1Yi5tc2lkZW50aXR5LmNvbS92MS4wL2UxZjY2ZjJlLWMwNTAtNDMwOC04MWIzLTNkN2VhN2VmM2IxYiJdfSwidHlwZSI6IklkZW50aXR5SHViIn1dfX1dLCJ1cGRhdGVDb21taXRtZW50IjoiRWlEeGpZMzBTZkVDLWZkYkczWVZRNllHS3VOSldsNEJXX0JwRHFadDA4LXFtdyJ9LCJzdWZmaXhEYXRhIjp7ImRlbHRhSGFzaCI6IkVpRFpGSDd6SzF5LS02MTc2X3lTS2dzeVJPT3BpaXZnUHZmSXl1S2k4bHNZV2ciLCJyZWNvdmVyeUNvbW1pdG1lbnQiOiJFaUJGX1Z2SFZ0eWkyeDNTdGtnRUVrV0g4dGNfRURZd1JhQlpxNl9pMllCS3NBIn19",
-  "redirect_uri": "https://4ab6-192-182-155-160.ngrok.io/v1.0/e1f66f2e-c050-4308-81b3-3d7ea7ef3b1b/verifiablecredentials/present",
-  "state": "djEeIymxLSfB",
-  "exp": 1643854038,
+  "redirect_uri": "https://4820-192-182-155-160.ngrok.io/v1.0/e1f66f2e-c050-4308-81b3-3d7ea7ef3b1b/verifiablecredentials/present",
+  "state": "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",
+  "exp": 1644007734,
   "registration": {
     "client_name": "December Demo",
     "subject_syntax_types_supported": [
-      "did"
-    ],
-    "did_methods_supported": [
-      "ion"
+      "did:ion"
     ],
     "vp_formats": {
       "jwt_vp": {
+        "alg": [
+          "ES256K"
+        ]
+      },
+      "jwt_vc": {
         "alg": [
           "ES256K"
         ]
@@ -97,7 +104,7 @@ class PresentationServiceTest {
   "claims": {
     "vp_token": {
       "presentation_definition": {
-        "id": "217b2662-23eb-4eec-a0f2-7706550943a9",
+        "id": "ceb93534-b4ac-4fcf-8166-11a8c593e4e6",
         "input_descriptors": [
           {
             "id": "NameTagCredential",
@@ -161,10 +168,11 @@ class PresentationServiceTest {
     private val mockedIdentifierDocumentServiceEndpoint = "testserviceendpoint.com"
     private val mockedIdentifierDocumentServiceType = "LinkedDomains"
 
-    private val suppliedOpenIdUrl = "openid://vc/?request_uri=https://test-relyingparty.azurewebsites.net/request/OmTlKvp8_qxFbg"
-    private val expectedEntityName = "Decentralized Identity Team"
+    private val suppliedOpenIdUrl =
+        "openid://vc/?request_uri=https://test-relyingparty.azurewebsites.net/request/OmTlKvp8_qxFbg"
+    private val expectedEntityName = "December Demo"
     private val expectedEntityIdentifier =
-        "did:ion:EiCXp3lIdFclfl0vvu4qAY8iTumjxiZoKrEmfokRpGcEbg?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlCWHB4b2VwU2NVdnNmc01UOEpRN0ZqWXpsMHZqZlhjc2RMam9Ga2Y0T3FJUSIsInJlY292ZXJ5X2NvbW1pdG1lbnQiOiJFaUEtU0lSeXNzOTEwMmEzUlpVMVktTFFjVU1JbUdVTE9BVk5rOWFzZ0tkX2hRIn0.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpQW5QbGJ2djBmQ1RKVnNpNjB4VU9qYUJ1cnBDNWtJVjdsSHhkOFQxZmFtRFEiLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljX2tleXMiOlt7ImlkIjoic2lnbiIsInR5cGUiOiJFY2RzYVNlY3AyNTZrMVZlcmlmaWNhdGlvbktleTIwMTkiLCJqd2siOnsia3R5IjoiRUMiLCJ1c2UiOiJzaWciLCJhbGciOiJFUzI1NksiLCJjcnYiOiJzZWNwMjU2azEiLCJ4IjoiQ0djSmNmWlVHelc1Qnh5MC1aV1VkQ05WT2tTbDFVRnhIekNycW1LM3RfZyIsInkiOiJNdEZkcnlDVE5BRTRjdmU3Q1RqSkJjQlFlMVQ1YnZVM3MzWmlSdG9zNHVZIn0sInB1cnBvc2UiOlsiYXV0aCIsImdlbmVyYWwiXX1dfX1dfQ"
+        "did:ion:EiBP2wtU-Hcp2vDioFLjS0KKTeGFbeKhuQbWpHnczKsVIQ:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJzaWdfZGVjOTNjZTgiLCJwdWJsaWNLZXlKd2siOnsiY3J2Ijoic2VjcDI1NmsxIiwia3R5IjoiRUMiLCJ4IjoiS3dZcFNHWFFmdVctTlluM1RzMExQMVB4cC1uNjNuczlDNnBaWGkyMFp2ZyIsInkiOiJ0QnV3R3dOZjVkaG5jZjFXVXhiM0lwQTVyaml6ZmRYOUtjekl1b3VLVkNZIn0sInB1cnBvc2VzIjpbImF1dGhlbnRpY2F0aW9uIiwiYXNzZXJ0aW9uTWV0aG9kIl0sInR5cGUiOiJFY2RzYVNlY3AyNTZrMVZlcmlmaWNhdGlvbktleTIwMTkifV0sInNlcnZpY2VzIjpbeyJpZCI6ImxpbmtlZGRvbWFpbnMiLCJzZXJ2aWNlRW5kcG9pbnQiOnsib3JpZ2lucyI6WyJodHRwczovL2RvbWFpbi5jb20vIl19LCJ0eXBlIjoiTGlua2VkRG9tYWlucyJ9LHsiaWQiOiJodWIiLCJzZXJ2aWNlRW5kcG9pbnQiOnsiaW5zdGFuY2VzIjpbImh0dHBzOi8vZGV2Lmh1Yi5tc2lkZW50aXR5LmNvbS92MS4wL2UxZjY2ZjJlLWMwNTAtNDMwOC04MWIzLTNkN2VhN2VmM2IxYiJdfSwidHlwZSI6IklkZW50aXR5SHViIn1dfX1dLCJ1cGRhdGVDb21taXRtZW50IjoiRWlEeGpZMzBTZkVDLWZkYkczWVZRNllHS3VOSldsNEJXX0JwRHFadDA4LXFtdyJ9LCJzdWZmaXhEYXRhIjp7ImRlbHRhSGFzaCI6IkVpRFpGSDd6SzF5LS02MTc2X3lTS2dzeVJPT3BpaXZnUHZmSXl1S2k4bHNZV2ciLCJyZWNvdmVyeUNvbW1pdG1lbnQiOiJFaUJGX1Z2SFZ0eWkyeDNTdGtnRUVrV0g4dGNfRURZd1JhQlpxNl9pMllCS3NBIn19"
 
     private val invalidSignaturePresentationRequestJwt =
         "eyJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6aW9uOkVpQlAyd3RVLUhjcDJ2RGlvRkxqUzBLS1RlR0ZiZUtodVFiV3BIbmN6S3NWSVE6ZXlKa1pXeDBZU0k2ZXlKd1lYUmphR1Z6SWpwYmV5SmhZM1JwYjI0aU9pSnlaWEJzWVdObElpd2laRzlqZFcxbGJuUWlPbnNpY0hWaWJHbGpTMlY1Y3lJNlczc2lhV1FpT2lKemFXZGZaR1ZqT1ROalpUZ2lMQ0p3ZFdKc2FXTkxaWGxLZDJzaU9uc2lZM0oySWpvaWMyVmpjREkxTm1zeElpd2lhM1I1SWpvaVJVTWlMQ0o0SWpvaVMzZFpjRk5IV0ZGbWRWY3RUbGx1TTFSek1FeFFNVkI0Y0MxdU5qTnVjemxETm5CYVdHa3lNRnAyWnlJc0lua2lPaUowUW5WM1IzZE9aalZrYUc1alpqRlhWWGhpTTBsd1FUVnlhbWw2Wm1SWU9VdGpla2wxYjNWTFZrTlpJbjBzSW5CMWNuQnZjMlZ6SWpwYkltRjFkR2hsYm5ScFkyRjBhVzl1SWl3aVlYTnpaWEowYVc5dVRXVjBhRzlrSWwwc0luUjVjR1VpT2lKRlkyUnpZVk5sWTNBeU5UWnJNVlpsY21sbWFXTmhkR2x2Ymt0bGVUSXdNVGtpZlYwc0luTmxjblpwWTJWeklqcGJleUpwWkNJNklteHBibXRsWkdSdmJXRnBibk1pTENKelpYSjJhV05sUlc1a2NHOXBiblFpT25zaWIzSnBaMmx1Y3lJNld5Sm9kSFJ3Y3pvdkwyUnZiV0ZwYmk1amIyMHZJbDE5TENKMGVYQmxJam9pVEdsdWEyVmtSRzl0WVdsdWN5SjlMSHNpYVdRaU9pSm9kV0lpTENKelpYSjJhV05sUlc1a2NHOXBiblFpT25zaWFXNXpkR0Z1WTJWeklqcGJJbWgwZEhCek9pOHZaR1YyTG1oMVlpNXRjMmxrWlc1MGFYUjVMbU52YlM5Mk1TNHdMMlV4WmpZMlpqSmxMV013TlRBdE5ETXdPQzA0TVdJekxUTmtOMlZoTjJWbU0ySXhZaUpkZlN3aWRIbHdaU0k2SWtsa1pXNTBhWFI1U0hWaUluMWRmWDFkTENKMWNHUmhkR1ZEYjIxdGFYUnRaVzUwSWpvaVJXbEVlR3BaTXpCVFprVkRMV1prWWtjeldWWlJObGxIUzNWT1NsZHNORUpYWDBKd1JIRmFkREE0TFhGdGR5SjlMQ0p6ZFdabWFYaEVZWFJoSWpwN0ltUmxiSFJoU0dGemFDSTZJa1ZwUkZwR1NEZDZTekY1TFMwMk1UYzJYM2xUUzJkemVWSlBUM0JwYVhablVIWm1TWGwxUzJrNGJITlpWMmNpTENKeVpXTnZkbVZ5ZVVOdmJXMXBkRzFsYm5RaU9pSkZhVUpHWDFaMlNGWjBlV2t5ZUROVGRHdG5SVVZyVjBnNGRHTmZSVVJaZDFKaFFscHhObDlwTWxsQ1MzTkJJbjE5I3NpZ19kZWM5M2NlOCIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2N2ZlYzUxOS1mMWJmLTQ1ZDEtYmU0MS0xNjk4ZTM2ZTY1ZWMiLCJpYXQiOjE2NDQwMDc0MzQsInJlc3BvbnNlX3R5cGUiOiJpZF90b2tlbiIsInJlc3BvbnNlX21vZGUiOiJwb3N0Iiwic2NvcGUiOiJvcGVuaWQiLCJub25jZSI6IndiZWNJS1dJL1NzZHBqUlV5MHBYSFE9PSIsImNsaWVudF9pZCI6ImRpZDppb246RWlCUDJ3dFUtSGNwMnZEaW9GTGpTMEtLVGVHRmJlS2h1UWJXcEhuY3pLc1ZJUTpleUprWld4MFlTSTZleUp3WVhSamFHVnpJanBiZXlKaFkzUnBiMjRpT2lKeVpYQnNZV05sSWl3aVpHOWpkVzFsYm5RaU9uc2ljSFZpYkdsalMyVjVjeUk2VzNzaWFXUWlPaUp6YVdkZlpHVmpPVE5qWlRnaUxDSndkV0pzYVdOTFpYbEtkMnNpT25zaVkzSjJJam9pYzJWamNESTFObXN4SWl3aWEzUjVJam9pUlVNaUxDSjRJam9pUzNkWmNGTkhXRkZtZFZjdFRsbHVNMVJ6TUV4UU1WQjRjQzF1TmpOdWN6bERObkJhV0dreU1GcDJaeUlzSW5raU9pSjBRblYzUjNkT1pqVmthRzVqWmpGWFZYaGlNMGx3UVRWeWFtbDZabVJZT1V0amVrbDFiM1ZMVmtOWkluMHNJbkIxY25CdmMyVnpJanBiSW1GMWRHaGxiblJwWTJGMGFXOXVJaXdpWVhOelpYSjBhVzl1VFdWMGFHOWtJbDBzSW5SNWNHVWlPaUpGWTJSellWTmxZM0F5TlRack1WWmxjbWxtYVdOaGRHbHZia3RsZVRJd01Ua2lmVjBzSW5ObGNuWnBZMlZ6SWpwYmV5SnBaQ0k2SW14cGJtdGxaR1J2YldGcGJuTWlMQ0p6WlhKMmFXTmxSVzVrY0c5cGJuUWlPbnNpYjNKcFoybHVjeUk2V3lKb2RIUndjem92TDJSdmJXRnBiaTVqYjIwdklsMTlMQ0owZVhCbElqb2lUR2x1YTJWa1JHOXRZV2x1Y3lKOUxIc2lhV1FpT2lKb2RXSWlMQ0p6WlhKMmFXTmxSVzVrY0c5cGJuUWlPbnNpYVc1emRHRnVZMlZ6SWpwYkltaDBkSEJ6T2k4dlpHVjJMbWgxWWk1dGMybGtaVzUwYVhSNUxtTnZiUzkyTVM0d0wyVXhaalkyWmpKbExXTXdOVEF0TkRNd09DMDRNV0l6TFROa04yVmhOMlZtTTJJeFlpSmRmU3dpZEhsd1pTSTZJa2xrWlc1MGFYUjVTSFZpSW4xZGZYMWRMQ0oxY0dSaGRHVkRiMjF0YVhSdFpXNTBJam9pUldsRWVHcFpNekJUWmtWRExXWmtZa2N6V1ZaUk5sbEhTM1ZPU2xkc05FSlhYMEp3UkhGYWREQTRMWEZ0ZHlKOUxDSnpkV1ptYVhoRVlYUmhJanA3SW1SbGJIUmhTR0Z6YUNJNklrVnBSRnBHU0RkNlN6RjVMUzAyTVRjMlgzbFRTMmR6ZVZKUFQzQnBhWFpuVUhabVNYbDFTMms0YkhOWlYyY2lMQ0p5WldOdmRtVnllVU52YlcxcGRHMWxiblFpT2lKRmFVSkdYMVoyU0ZaMGVXa3llRE5UZEd0blJVVnJWMGc0ZEdOZlJVUlpkMUpoUWxweE5sOXBNbGxDUzNOQkluMTkiLCJyZWRpcmVjdF91cmkiOiJodHRwczovLzQ4MjAtMTkyLTE4Mi0xNTUtMTYwLm5ncm9rLmlvL3YxLjAvZTFmNjZmMmUtYzA1MC00MzA4LTgxYjMtM2Q3ZWE3ZWYzYjFiL3ZlcmlmaWFibGVjcmVkZW50aWFscy9wcmVzZW50Iiwic3RhdGUiOiJkakYzRXRFV2YvVUZWd1BadThuaW8yVlBnMzRqZ0RuTVZIM3BWc1A5TW1rV0xSOGtmKy9pV0pFK2tMZGFpdjA4dW1nb2Rhc3N0MUNRN0FEL2dQcjhpcjBOcW9YTVRQR2dhY0dZV0dXMmJCeTljRUNQbXNqaWhQK1htZWY1Z3g5b09UeFZRYktKemdGcWU4RVlZSXF4NzRqYzRDdHFTOHhvT1BxQXF6WlFkb0laTHMxdjFrWm1ycXF2T05sMWZCSElVZkRxemR1WDBVNjBRdU5nekVjdkRlVHJXY2MwVThjUmdLZEVPQm90R3ZHZDhJc3prR2RsWElwZGJuZG44bml0YlRiV2QrU3N6clJJclB5a01pRzF2OVRnV3Yzd05tMGQxd0lYa1piSndpVVZ2NnlLeTZDMEtLZEpWcEhsQTBoZkZtbnJQZitOYzBYelhjVVVac2RpOXczeVBSQU02UnlCNGk0U0VPenlPOVYrQzYvQjZrRHc0VEprM0MwTW9aNUxVdUMrOGdHdVRWUEJoRlJxNlJMSmp4WDEwS1grc1FCcUZRL2tXOW9haHpjcUtGMVRZdmU1eFloRFV3RHN0QmRuTGNFNXhvWHFtSkJVdzhvS0JPOVo1b1Q4dUpCS1pqbWhLNWE1TG1YUWY5Q0VWTzZrSkdoS2lrbGw3R2Z0U2Z4TlFVc3hwSXl4TXlJZW9LaFgxbEpYdlFMRzRMZEw3RU1ka05jMHcxZXkvZmFBOUtaRHJXM05nd2dRZ1A2SGxHcnNVYTFRUmZqdmRic1dsUGNSQVhQNTd5QTB3OC94ZCtJSys2bzJQNUtrK0RSNmlRNkh0a1hHOEUvTGFLS0lIcjI2N3E0TVd0YWk2SFdpWCtjQUJSUnFlZ1FhSm9MU3Y2UDR5ZVpEWjNReEdKWUNLdTRLb0pYNklhalNUR0dwazAyNWY5bVlyNlpiT1BkVnlUTUl1Znp3SFJZUmxxRnNNTGYrSjVGL00rZEpPQzltUUJuK3JaOWdld3FrM0RKb1ZBRUVxODdvZTZMekZxems5NjFuckYyZTd4ekYySWZHVWdER2FyY2ZXM09NODB0VVVuUjAveGRjdVM2RUd4YWpPMzRZMU1OUGNxL29CVzJQTDFEa21CTjVxS0N0ajdRYmxNYWNPSjBad2JZYlZ0NDV6M1VoOXJCbGNkM25LVTBkWFViYUxaUWZiSHgxdGtmZDZXQVBUQ29Pb0p6QThjRCsxak9sNXFuQ3VRWjA2NmxIOGR1RzhYTGx0UVJmQ3NPOG5Lcm9JR3pYQ3pWcFM1K1pmOExmUkhod2xHY0VsNkg4dm8rRDdZRFhpNTVvM2hqb2hIOG9qbkZhOGZBbU5NaEo3K2Z1b0FmeE5Qd1AvTjNFNlE1Q0tmUXdBZStRUDNxVUpuNGFDdk5aRWF1NmZvQW00NUJnV0ZKRkxIUTMyREkwcFh2MjN4Z2RIOFVCOEhSTVNmQkp6VW5FU21mTGs5TW1INk5OWStHVUgwVS9VMFZEaHMvWEE0cTQ1TE5TQXNOcllHemZHSEtodjc4MjludUFNZnN0emltS2dVUHJ3OVErT05WQ0FhTHp6c1YwdTJrRmRMNUpmZjVpaG9jTFVXcnVJR0VXMFZLbUk3YWM0RVpUTGFUVERaUVNPeFpwMkI2ekd1TGJPcnh1bDJuNE52aGFiQ2JLdlVJMStoVXlGbkZSdnJFTnRMUTR6RUFOTVRpTld1V1B3KzY4bEpIb1RGYzVYci9wdHlHQW1lS2JTSnlsbEdmc0Y2NDBNdURPcjNFY3pmNCtLVXZkSVc4cThyZVd4UHZTV1dpNjMranVTKy9KSFZKVndNTUdCUnlYTTVra1VubUNSVHhhcDlDSHcrTUVwT3V1VHZodmJyZUlJWDM4SkJsSjVhV0V3Q1FqVm9sTkRQWHZlNDUrMFRMTHRVZ25XLzd5dUY5L1lSd21KRU5oUkpkQzEvcEpjbWJtWWwwNkQrVVZUaE5KV0xoWnpHYTQwUGJNeFk4TFR6c3luTWF4ZUNQTldHTisySW1CNnQzZnhJaUhrM1NBM0tLdUtVVXltWHl4aUI3aVdrVkZOaExMSzZWeG5yYnFhTHlnMWRjVzE3cnV3NUxVdlJjTThER2c3TmV3QWRTMGh4dnJhKytMSEMxaXFmWWlNTzFxODh2bVpDZ2FrV3pKVmJQcC9FZUduWmpCeG4yVHZNOGoyM0tjTXdCNkFsYjRVM3d4TGFhWHcvN1dodXRHR3RlN05ZbVJlRlJCUFNYTTloSE5jS25zbUFuSEphQ2djdlo2V1ZyOEdiTHk5cnB4T1NBTWNEbnhkSjdyalFBSUJIaUxLN1FqWFMxOWtuWEhpWHYwNEV5WHVuQW90MUlhZlc5MG5MV29CZWZuVU5XeERYNFJ3UTluTm5sTERmRTVpM1Z3MFBJTFY1Q2xUSmlFSVlWbXF3cDU2VG4xQU54Qk1GQW9qaVdLTlpxSndrLzhPcHltRFpreS9Qa2VHcGY5Q204UmtqNHFWcTkxQWpDSTJyWjdrUndtREhVM2dGckVzcldvNmpucWowSTJiMC9LcGpKM3pibm1aV1Z1Wlkzd1NnMVcxWmtFNksxZy9XZ3E3OW9ONWRTTjA1RGE2cXJocll4QUYrd3ROcVhHaEFtSHY1bm5RMjZWR0QwQlM1V0ZiLzc2RjNGeE1SamFMb20vTk5mdDV6TFloaUxFQVlKZEExMGR1S25vVU5oYU1GMm1jaS9UeHlmWE9pS2VDQ0ZuN1I3djJtWWtZcVYrQ2pFZnB5QzF4OGZxRjBFQ0UwcGthbGNBUkZQQ0FPbjZMdWtseWZrbmVhaWt0Z2pQZ0ZSekpUN2IyTzV0ekhNNzBKMEJQTllaMVY0dUtwZTNFWFlRY2MwUkdXcmlneHFWcUxTSmVwSENqeWU3S2JHRlRTL3AybDVpWHpxRjc1dXlpRGpmWGdrUHo3V1l2eGpMRnZzVGJTalprQ2pObW01T09BaG51dXQrOVJSNHBoeHAyK2c0OTJVMzBPY2hJaW5FODlXeGJTWmJabWo5S0lvYWY2NXl2YmdRUm02bTlYQzZMajNMbGdtZXVCdFFTcXBUMm53cmtxQUgzOGlPSElMZ1k3N2U3UEdBdDltc05oQUlNQTZDQ3dINkdiTjNCRDJyYjZ1SFpBRWNkNTBsODZuUDFxU1IrU3c5dWJpUU0zUmhBc2YveTFzK0lhZ2twSG05WDBmaDRLR0gvYVl0M3NZR3I1ZjM2N1p3b1g1V2RHWGgralAxVTAyclR5dCtVUS9ubSttakYxTmcvbjIxblJQR2FXZmlSckEzMXNieWxxWmVvdnZCQnRSdWRqcEtMbTFiMFJlKzRFaHdtRW0yb1ZPVnoxL01aWVNFRmpqZjI3OHFCRldySlFrM1FtV2pxcno1UklwVGxIMVA1WllvdkdSbWpOemI2ZEQrT0tVeTA3ZThaMVYxZEZaOTNJWlY2dDEyalo3bjhXTFlmZ05QMWF2N3ZmU3BRRXdpMW81TFVaUkZhQ0lDNnBFdHV6dTdtRG1zUWRNdUgrcFJrMkZ1dld6QVZxaURHQnhscUV1TFRLL3Vrb1l0bzVrYU0xUDZWK1hQSmZJdFJUbkpDM1htMVd0ZWxrTm1RZDc5eEN0QWl4eWxHd0hibStJTjNocjlZS05lT1g5dlpGY2VWTHZDZEVmUzJIV3YzRmRJZEYrNkVFQmFFUk9HZjFUcytNNHkzVkZBWmk3U25aTW1wUzBZODE4ZzdLaUVJd3h5cEZ2bXdzbmlqem1RWHcyYXFNUERrOXRTU3NsWmFsWUgxTjBZSStoSmRuZmZSZ1hTUW9URUE3TXAvUTR2QkVIeEptY0cvQW9uWC9rYWh2R3hZc1F6Sms0T3E3VGNmMndQdHBzbGN0blhTWHRwb3ZqT3RjU1FiQWZicmtZWGVjWlZOa2xKZXhCS3BXOWpaa3U4aDA5K2syZzEzMzFUWmdXb1JOMi9VbFdrMUY2elhjbGtPUTBSTGVXTWhiY0krN1Zsc2Zicm5rVERlSWF3S0U2YjFkNGZoc2xYWFZwQlZBM24ydDEzWHZuUHlYZVJZU0t0YXVXOHRPUVV3TDBzM0x0bzJVcTVGaGErM2dtYUJwa3JVWlRGenE4QzV4eHNKOEg2SjNDc2RicEVJM3JCMGQweXlDTlBpbEoxdk8wUWxiWXc5TVVud2pwQ2gxVi92dlpHRkRScDlDQmgrOFdnYWl6Z1dMUzVvSlBBWVJWb0x3Yk9COVZtL0tSNzh2VjAwMjNwNTJ2OUljNjVkVjRvd1lUeUNBSEhLSWJXSDJoOFRmK2czL3B5akdkcjNFd1l6RndmdDk2ZktKWTdYNlN4em5DSm8rdjRFV1ZtRlNzNTJlbU5HdDB0RHBmZE9tYm1aS1N6Y1o2OUYrQ2syaGdpVSt0dkxQWi9zcnI1NW5NRm9FV2IyMmpBTS9pUGtSZVNsQ0k4UDZkeDZETmU5c1hnR2twU2czb1BGU0xFbVE5Q0JzOHhpSHJaT3FnQUQ0N1J3SUJUMTJVVURWd0VWZHVIL2JsRmlhd0Y5NDVVeW9qeDRKNmdsRENQTTdBOVdBQzJkaWRobGpFbC8zWkdZMmFZRlN2bWRSVGdVa1dGc2k1VzUzT2MvaEtMdHhOa3ZFRjB2VEZUR2xMTGJPT3R6alBVSWs4bE5IRTVVbXNaVDhYbGovSjBFY1hsV0pYbFVIc2pDdlFRZTNYRFE5NTY3U2JnWERpaGZkUzhEeWZEVTNiTHRBWmFsaDRpMEZEWjkrb2xDbkxFRFNNbUN3YVR0eEhlL0JCTHp1Z0pmbTMwS3VHMEYybVIxWWJkTVBWMlgxeTY0RUxRdDVXb2dteEVEUkNPTzVvNWIxKzBkek40bHpxZ20ySmZJUWphai9UUklISndmU2Rjay93SitiTndFdHpGejVGQk1CMmxBOWs5S0JwS0RWcHBmU1prbnRzb3JuTGQ3RTZKZWNGaW9vYXh3VG5VamhXK3hMcVhOZnVhV1B3dUZGTkZBV1ZRYmZpK0tCTTFpQ1REZ1daOWZpZHp2VG9ISldlWGJsYUN5T3V5UVhhSTQ3THFtL1E5V253cGlYNUdMaTJSd2V0aHZuVVVSV2tTRVZYZEI3cFFwY1JYQ0NZMU5qRm0wQlBabHdZVk9mT09sMW51VG5GcGFscW9IeURSYnV6QlJPa0ovbENoeGJycVJHYkRJVFlXay80L3UwdCtiTFZjUTd5NkEzWDkvMVI3WE1USDZ3dHlOODNzSGVFZUJrVU9FdVZ6OXEzR0puQmo5Q29YaDZNL0tOUG14S1NrYUphdDhuNDZURFkwRndOS1FpcnpDclhKcklYYy9BNmpURjMxMUxqa1ZSc0lwWGVxYXRvMTJmM2YxMnBnYXMzYThJZEVTMDJSckwzYnRUb3BGY0tSOE4wSlF3WWlJdHFEVitJYW15RkdZVmJMZnlQOW5oZ0JhbVpGS3FVeHdnbFMrdlF2VDIySjkwbnNzS0xpU1BCQTJPMTBLMkdxaEc4VTJneWNtNWowMVRqK0RYZVFQQUhVNnNXczZJTnJlTHhGTTZJdWphRFJOancrRzFsVDRWOXArYjl4Nnl1dlVuR3JEci93OSsrdHF3UkljWG5yT1E3VHFiNlp5L29rdlUrR21tVXNFVGR5T1hsZkNpaDR4NGU3VjJTOXFVQnQwaS8zOUNEWGwrSldCN0NZV3ZTNy9SYmd3ZEgwbEwxQzhHbXVGQ0lpZzRHN1phZHQ4bkVJenFtb2ZFTThkbnFCTEdyM3JPcDZ6dDJ5NlYxRnFWeGJmQllaUEY4cEJUbElDejhhSk9JdTh6UHZyZDYvVFJleEdONGgraXdlM3pwUW5zc1FmZVlwNjROcHk1YzlPMDJFV3pOMmx1elBVVnhScGZWRGtBK3EwRktXcGJUemZPQXpCMWd2bFdWQkE3c3g2MnJYeHYzZ2R4WmxmSnpoaHRGMW4rQW1PVzd6R0MzTlk4bmF1eTQ2TzBQMnE3ZFpIK3hEUTVyaEE0aFlnMDN6dXc4N1Y4b1dOTjIzenBPdml6ZnlzdFU2UzltcGF5SUdUN2E1cGhJUS9zNlpmdWNuTWNLVWE3RG80b2dQbDEwVkc5M3JWcWxTK0loUmJsZlhqT1Z1akFNb2VZdEZaMDdBOHNGV3hSbWsyNHlDWER4VUhNeXdOSGVCRjgyMEN2a1FxVnpyK1o5RGtuSzBVUUhodU9ua3lQenh0ZFN2a2RTelFXYlJFamN0UjA3TmRzS204Sng3bGw3ZXB0SG10M3czNkJBMzhjTHM2cjZkUEFHMWhRVWtPeVo4Tit1c3dQaElzZXZiK21VZUxTMm5QakVSVFZsZE5GcmRCbjBwcGEzdGkzV01zQzNqNXZxN3dXSkprbFljcE55blIyNmsybkkxSlVaSk91aGtSNkl3Q2lMblYvU2p6dmlraG5MaVZLM0FrUkEveVV3ZVdBS055SjRDc1R0L2Q5bDZJdjM3NldYeGlOaG5GM1VrKzVjRWZ6d3FzNHVWVEJIOGxaRVJkSUQ5UU83N0pRWVhwUXhSQUNlRmF5U01ld0F2Y2gwRTNyL0tnSVJ6T1Q1UmpkWjJsalhBU3VaUTd3dmViaE9aeEZacW1nZ3RQVzA4aEJjOGlLR1pENHIwWGg3L1lXSkUrbXdwUUxEQTVmZVVTam84bGd6M1NtWE5rVUVuSDVxbFFCRmZWMk82eXN0RDVRQXVuV3JtY0d5NFhQZVZhUkVEOUpoL0ZVTVk0VXNtZWlVK2o1SHh0MTE2aklRSktwYmdyR3FHZFdRT3Fwc0hUYmJubUo3WkhhU2NSV2Q1YU5HYXI5MXMyVkhqRGt0K291UGEyY3JkQWsvaXNIWVk0dzFKeU5DdmlBb0QxOVhyekVDWCtTTzZNWEU1SlF3Qk9lckZqZ090UEV1OEZBK0pKeVZrK2JtdVR5Sm9OUGxDTlhJcVgxWDg1cjlkYmZpcitEVGR0a1NRMWxQNUJFR1FrM0RvVmF5dWtRVVpNbzZGWFhTWXdhU0tUYTRnOFdjelB6eXhrek9kUjZVTG9TWFBIRzRrc3lXd2NaK0ZJQUErWlk2YkpMaUo3VlgwNk5INVJXYVN3TVZRdTArQ2NidndrbHhZZmNybkl0VXd5cEMvblV6SFZvbzVnZGhRVVVVUU94ak01bUdGS3FhN3hXMkd3QWdvT1ZqRWdGRUdvTURMemZHeUxNZTNNaEFRYkpsMVV5TVV3ZTFlcmdaUE5KbW5YQkxLSVNoVDlqUW5WL2hWcDN3RHlMN0pDK1NZbXl5RnlINnJvZUdwMjVGTUJ6ajF6N3R1RThZakpGWWhUZVBpVkw3UjhCRmZwNmZkenVrWXU4MWVvd0wzbjlOaUZqRjFiaEZNZWUvTGhDSDJPRFBseGVUWjVETXlNYXdZdFhtKzFvUEI3UVA1RnQwZVE2Ukg5bVNvNjcwaUx4M1ZhL1J5b0ZudXRjaVhlTU5CWFk5Zm83VWJZY1htQWdHTHNRNDJQdXVRRytaeEthSUw2OXJ2Qkl2S1pTOFhpb0ptckg0dTN2SDE0K0k2d2xzS29laTZEazZkOTV1M0NWMTJqTFRPMGZla3pGaUlaTUtwQzVnbTM5RmVDMDQzdlB3TGw4M1B3NzQ4WUdyRTJDQk04eFJsNTBxNFY3NzFWVnlJeUVvNUlBMy9kOTloYUJ3RG1pZ2RPVGhZUXJ3V2hrR01aYmZMUDdORnhPRkZTVm9yWTRYclU5VzZOdWNYR3dNaXpvM2pMZTBDZTJ4VFQzTE40czVnTm15QWtCbDZvUlpXL0U0YlRscnFsRm1ldGMyRjZteHBnbUw0NGNZL2RDRWN5ZDZ3QVRGNkpCbmU3Vkx3dUZoV1dqR3luaGIzelh4K3hHeHJ1Ly9uSjA4L3RRVFZZT0ppeXNQTE1VK3ZTbk9PNzk1QUpMT1ZDbkQ2YWpVWkJtL2xpM3I5QnNWVklteWROVFFnckxaTCtRZ2tIUzNzd0l4bVhTU2VCcS8rZEhPc2xBbVp4WmJwQlZUM0FlMGtyb296MENqWlNXQWwxbUVlSTZEbS9FQ25xZFJZSEk4YmFzdCtYd0V3NElCV1hlUTN0c0lXYzYxNlF1SXB1UkF4OXFSOEQ1TFNzTTU3RjM3R3R4NWNwNkFtSmtlK2hJZVRFOTVwNWZrVXdxY3UxVTBQd2RyTHF3NFVDVXNhSzVseEsyaE12bERhY0NMK0pGYU9RZkR1cGhhYktVWDc1SjgyZDQvVkF4NmwxUUR4OW5WNlRFS1cxMkdycWFoYUE4aWxDeEFkMzhhUUhFUU0rYVRrV0JSelUydUwwL3V0ekZETEM4Mi9LWmRvdDh6VXJPQ1dzRnFnZ3RYd1NkMytRUWtYMGoxYSIsImV4cCI6MTY0NDAwNzczNCwicmVnaXN0cmF0aW9uIjp7ImNsaWVudF9uYW1lIjoiRGVjZW1iZXIgRGVtbyIsInN1YmplY3Rfc3ludGF4X3R5cGVzX3N1cHBvcnRlZCI6WyJkaWQ6aW9uIl0sInZwX2Zvcm1hdHMiOnsiand0X3ZwIjp7ImFsZyI6WyJFUzI1NksiXX0sImp3dF92YyI6eyJhbGciOlsiRVMyNTZLIl19fSwiY2xpZW50X3B1cnBvc2UiOiJERUJVR0RFQlVHREVCVUciLCJsb2dvX3VyaSI6Imh0dHBzOi8vZm9vLmNvbS9sb2dvIn0sImNsYWltcyI6eyJ2cF90b2tlbiI6eyJwcmVzZW50YXRpb25fZGVmaW5pdGlvbiI6eyJpZCI6ImNlYjkzNTM0LWI0YWMtNGZjZi04MTY2LTExYThjNTkzZTRlNiIsImlucHV0X2Rlc2NyaXB0b3JzIjpbeyJpZCI6Ik5hbWVUYWdDcmVkZW50aWFsIiwibmFtZSI6Ik5hbWVUYWdDcmVkZW50aWFsIiwicHVycG9zZSI6IkRFQlVHREVCVUdERUJVR0RFQlVHREVCVUdERUJVRyIsInNjaGVtYSI6W3sidXJpIjoiTmFtZVRhZ0NyZWRlbnRpYWwifV0sImNvbnN0cmFpbnRzIjp7ImZpZWxkcyI6W3sicGF0aCI6WyIkLmlzc3VlciIsIiQudmMuaXNzdWVyIiwiJC5pc3MiXSwiZmlsdGVyIjp7InR5cGUiOiJzdHJpbmciLCJwYXR0ZXJuIjoiZGlkOmlvbjpFaUJQMnd0VS1IY3AydkRpb0ZMalMwS0tUZUdGYmVLaHVRYldwSG5jektzVklROmV5SmtaV3gwWVNJNmV5SndZWFJqYUdWeklqcGJleUpoWTNScGIyNGlPaUp5WlhCc1lXTmxJaXdpWkc5amRXMWxiblFpT25zaWNIVmliR2xqUzJWNWN5STZXM3NpYVdRaU9pSnphV2RmWkdWak9UTmpaVGdpTENKd2RXSnNhV05MWlhsS2Qyc2lPbnNpWTNKMklqb2ljMlZqY0RJMU5tc3hJaXdpYTNSNUlqb2lSVU1pTENKNElqb2lTM2RaY0ZOSFdGRm1kVmN0VGxsdU0xUnpNRXhRTVZCNGNDMXVOak51Y3psRE5uQmFXR2t5TUZwMlp5SXNJbmtpT2lKMFFuVjNSM2RPWmpWa2FHNWpaakZYVlhoaU0wbHdRVFZ5YW1sNlptUllPVXRqZWtsMWIzVkxWa05aSW4wc0luQjFjbkJ2YzJWeklqcGJJbUYxZEdobGJuUnBZMkYwYVc5dUlpd2lZWE56WlhKMGFXOXVUV1YwYUc5a0lsMHNJblI1Y0dVaU9pSkZZMlJ6WVZObFkzQXlOVFpyTVZabGNtbG1hV05oZEdsdmJrdGxlVEl3TVRraWZWMHNJbk5sY25acFkyVnpJanBiZXlKcFpDSTZJbXhwYm10bFpHUnZiV0ZwYm5NaUxDSnpaWEoyYVdObFJXNWtjRzlwYm5RaU9uc2liM0pwWjJsdWN5STZXeUpvZEhSd2N6b3ZMMlJ2YldGcGJpNWpiMjB2SWwxOUxDSjBlWEJsSWpvaVRHbHVhMlZrUkc5dFlXbHVjeUo5TEhzaWFXUWlPaUpvZFdJaUxDSnpaWEoyYVdObFJXNWtjRzlwYm5RaU9uc2lhVzV6ZEdGdVkyVnpJanBiSW1oMGRIQnpPaTh2WkdWMkxtaDFZaTV0YzJsa1pXNTBhWFI1TG1OdmJTOTJNUzR3TDJVeFpqWTJaakpsTFdNd05UQXRORE13T0MwNE1XSXpMVE5rTjJWaE4yVm1NMkl4WWlKZGZTd2lkSGx3WlNJNklrbGtaVzUwYVhSNVNIVmlJbjFkZlgxZExDSjFjR1JoZEdWRGIyMXRhWFJ0Wlc1MElqb2lSV2xFZUdwWk16QlRaa1ZETFdaa1lrY3pXVlpSTmxsSFMzVk9TbGRzTkVKWFgwSndSSEZhZERBNExYRnRkeUo5TENKemRXWm1hWGhFWVhSaElqcDdJbVJsYkhSaFNHRnphQ0k2SWtWcFJGcEdTRGQ2U3pGNUxTMDJNVGMyWDNsVFMyZHplVkpQVDNCcGFYWm5VSFptU1hsMVMyazRiSE5aVjJjaUxDSnlaV052ZG1WeWVVTnZiVzFwZEcxbGJuUWlPaUpGYVVKR1gxWjJTRlowZVdreWVETlRkR3RuUlVWclYwZzRkR05mUlVSWmQxSmhRbHB4Tmw5cE1sbENTM05CSW4xOXxkaWQ6aW9uOkVpQXYwZUo1Y0IwaEdXVkg1WWJZLXV3MUs3MUVwT1NUNnp0dWVFUXpWQ0VjMEE6ZXlKa1pXeDBZU0k2ZXlKd1lYUmphR1Z6SWpwYmV5SmhZM1JwYjI0aU9pSnlaWEJzWVdObElpd2laRzlqZFcxbGJuUWlPbnNpY0hWaWJHbGpTMlY1Y3lJNlczc2lhV1FpT2lKemFXZGZZMkZpTmpWaFlUQWlMQ0p3ZFdKc2FXTkxaWGxLZDJzaU9uc2lZM0oySWpvaWMyVmpjREkxTm1zeElpd2lhM1I1SWpvaVJVTWlMQ0o0SWpvaU9HMTVNSEZLVUd0Nk9WTlJSVGt5UlRsbVJGZzRaako0YlRSMlgyOVpNWGROVEVwV1dsUTFTemhSZHlJc0lua2lPaUl4YjB4c1ZHNXJOek0yUlROSE9VTk5VVGgzV2pKUVNsVkJNMHBoVm5ZNVZ6RmFWR1ZHU21KUldURkZJbjBzSW5CMWNuQnZjMlZ6SWpwYkltRjFkR2hsYm5ScFkyRjBhVzl1SWl3aVlYTnpaWEowYVc5dVRXVjBhRzlrSWwwc0luUjVjR1VpT2lKRlkyUnpZVk5sWTNBeU5UWnJNVlpsY21sbWFXTmhkR2x2Ymt0bGVUSXdNVGtpZlYwc0luTmxjblpwWTJWeklqcGJleUpwWkNJNklteHBibXRsWkdSdmJXRnBibk1pTENKelpYSjJhV05sUlc1a2NHOXBiblFpT25zaWIzSnBaMmx1Y3lJNld5Sm9kSFJ3Y3pvdkwzTjNaV1Z3YzNSaGEyVnpMbVJwWkM1dGFXTnliM052Wm5RdVkyOXRMeUpkZlN3aWRIbHdaU0k2SWt4cGJtdGxaRVJ2YldGcGJuTWlmVjE5ZlYwc0luVndaR0YwWlVOdmJXMXBkRzFsYm5RaU9pSkZhVUZ3Y21WVE55MUVjemg1TURGblV6azJjRTVpVm5wb1JtWXhVbHB2YmxaM1Vrc3diRzltWkhkT1oyRkJJbjBzSW5OMVptWnBlRVJoZEdFaU9uc2laR1ZzZEdGSVlYTm9Jam9pUldsRU1XUkZkVVZsZEVSbk1uaGlWRXMwVURaVlRUTnVXRU5LVm5GTVJFMTFNMjlJVldOTWFtdFpNV0ZUZHlJc0luSmxZMjkyWlhKNVEyOXRiV2wwYldWdWRDSTZJa1ZwUkVGa1N6RldOa3BqYTFCcFkwUkJjR0Z4VjJJeVpFOTVNRlJOY21KS1RtbGxObWxLVnprNFprNTRia0VpZlgwIn19XX19LHsiaWQiOiJCdXNpbmVzc0NhcmRDcmVkZW50aWFsIiwibmFtZSI6IkJ1c2luZXNzQ2FyZENyZWRlbnRpYWwiLCJwdXJwb3NlIjoiREVCVUdERUJVR0RFQlVHREVCVUdERUJVR0RFQlVHIiwic2NoZW1hIjpbeyJ1cmkiOiJCdXNpbmVzc0NhcmRDcmVkZW50aWFsIn1dLCJjb25zdHJhaW50cyI6eyJmaWVsZHMiOlt7InBhdGgiOlsiJC5pc3N1ZXIiLCIkLnZjLmlzc3VlciIsIiQuaXNzIl0sImZpbHRlciI6eyJ0eXBlIjoic3RyaW5nIiwicGF0dGVybiI6ImRpZDppb246RWlCUDJ3dFUtSGNwMnZEaW9GTGpTMEtLVGVHRmJlS2h1UWJXcEhuY3pLc1ZJUTpleUprWld4MFlTSTZleUp3WVhSamFHVnpJanBiZXlKaFkzUnBiMjRpT2lKeVpYQnNZV05sSWl3aVpHOWpkVzFsYm5RaU9uc2ljSFZpYkdsalMyVjVjeUk2VzNzaWFXUWlPaUp6YVdkZlpHVmpPVE5qWlRnaUxDSndkV0pzYVdOTFpYbEtkMnNpT25zaVkzSjJJam9pYzJWamNESTFObXN4SWl3aWEzUjVJam9pUlVNaUxDSjRJam9pUzNkWmNGTkhXRkZtZFZjdFRsbHVNMVJ6TUV4UU1WQjRjQzF1TmpOdWN6bERObkJhV0dreU1GcDJaeUlzSW5raU9pSjBRblYzUjNkT1pqVmthRzVqWmpGWFZYaGlNMGx3UVRWeWFtbDZabVJZT1V0amVrbDFiM1ZMVmtOWkluMHNJbkIxY25CdmMyVnpJanBiSW1GMWRHaGxiblJwWTJGMGFXOXVJaXdpWVhOelpYSjBhVzl1VFdWMGFHOWtJbDBzSW5SNWNHVWlPaUpGWTJSellWTmxZM0F5TlRack1WWmxjbWxtYVdOaGRHbHZia3RsZVRJd01Ua2lmVjBzSW5ObGNuWnBZMlZ6SWpwYmV5SnBaQ0k2SW14cGJtdGxaR1J2YldGcGJuTWlMQ0p6WlhKMmFXTmxSVzVrY0c5cGJuUWlPbnNpYjNKcFoybHVjeUk2V3lKb2RIUndjem92TDJSdmJXRnBiaTVqYjIwdklsMTlMQ0owZVhCbElqb2lUR2x1YTJWa1JHOXRZV2x1Y3lKOUxIc2lhV1FpT2lKb2RXSWlMQ0p6WlhKMmFXTmxSVzVrY0c5cGJuUWlPbnNpYVc1emRHRnVZMlZ6SWpwYkltaDBkSEJ6T2k4dlpHVjJMbWgxWWk1dGMybGtaVzUwYVhSNUxtTnZiUzkyTVM0d0wyVXhaalkyWmpKbExXTXdOVEF0TkRNd09DMDRNV0l6TFROa04yVmhOMlZtTTJJeFlpSmRmU3dpZEhsd1pTSTZJa2xrWlc1MGFYUjVTSFZpSW4xZGZYMWRMQ0oxY0dSaGRHVkRiMjF0YVhSdFpXNTBJam9pUldsRWVHcFpNekJUWmtWRExXWmtZa2N6V1ZaUk5sbEhTM1ZPU2xkc05FSlhYMEp3UkhGYWREQTRMWEZ0ZHlKOUxDSnpkV1ptYVhoRVlYUmhJanA3SW1SbGJIUmhTR0Z6YUNJNklrVnBSRnBHU0RkNlN6RjVMUzAyTVRjMlgzbFRTMmR6ZVZKUFQzQnBhWFpuVUhabVNYbDFTMms0YkhOWlYyY2lMQ0p5WldOdmRtVnllVU52YlcxcGRHMWxiblFpT2lKRmFVSkdYMVoyU0ZaMGVXa3llRE5UZEd0blJVVnJWMGc0ZEdOZlJVUlpkMUpoUWxweE5sOXBNbGxDUzNOQkluMTkifX1dfX1dfX19fQ.9gqP54j95MqW4szvbjC_HQeK2-OvZci5z8HWPAPelyymlCkesM6pY9uxl_HFRvVgrAqPi2sNDMNddNsXoKDhqg"
@@ -174,17 +182,25 @@ class PresentationServiceTest {
         mockkConstructor(FetchPresentationRequestNetworkOperation::class)
     }
 
-    @Ignore("Fix when request is generated with newer version")
     @Test
     fun `test to get Presentation Request successfully from valid request uri param`() {
         // Arrange
         val mockUri = mockk<Uri>()
-        mockPresentationRequestFromNetwork()
         mockIdentifierAndLinkedDomains()
+        val requestUriParam = "https://test-relyingparty.azurewebsites.net/request/OmTlKvp8_qxFbg"
+        val expectedPresentationRequestContent = defaultTestSerializer.decodeFromString(
+            PresentationRequestContent.serializer(),
+            expectedPresentationRequestString
+        )
 
         every { presentationService["verifyUri"](suppliedOpenIdUrl) } returns mockUri
         every { mockUri.getQueryParameter("request") } returns null
-        every { mockUri.getQueryParameter("request_uri") } returns "https://test-relyingparty.azurewebsites.net/request/OmTlKvp8_qxFbg"
+        every { mockUri.getQueryParameter("request_uri") } returns requestUriParam
+        val expectedPresentationRequest = unwrapPresentationContent(expectedPresentationRequestJwt)
+        coEvery { presentationService["fetchRequest"](requestUriParam) } returns KotlinResult.success(
+            expectedPresentationRequest
+        )
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         coJustRun { presentationRequestValidator.validate(any()) }
 
         runBlocking {
@@ -192,12 +208,9 @@ class PresentationServiceTest {
             val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
             val actualPresentationRequestContent = (actualRequest as Result.Success).payload.content
-            val actualPresentationRequestString = defaultTestSerializer.encodeToString(
-                PresentationRequestContent.serializer(),
-                actualPresentationRequestContent
-            )
+
             // assert
-            assertThat(actualPresentationRequestString).isEqualTo(expectedPresentationRequestString)
+            assertPresentationRequestContent(actualPresentationRequestContent, expectedPresentationRequestContent)
             assertThat(actualRequest.payload.linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
             assertThat((actualRequest.payload.linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo(
                 mockedIdentifierDocumentServiceEndpoint
@@ -207,7 +220,6 @@ class PresentationServiceTest {
         }
     }
 
-    @Ignore("Fix when request is generated with newer version")
     @Test
     fun `test to get Presentation Request successfully from valid request param`() {
         // arrange
@@ -218,8 +230,15 @@ class PresentationServiceTest {
         every { presentationService["verifyUri"](suppliedOpenIdUrl) } returns mockUri
         every { mockUri.getQueryParameter("request_uri") } returns null
         every { mockUri.getQueryParameter("request") } returns expectedPresentationRequestJwt
-        every { presentationService["verifyAndUnwrapPresentationRequestFromQueryParam"](expectedPresentationRequestString) } returns Result.Success(
-            defaultTestSerializer.decodeFromString(PresentationRequestContent.serializer(), expectedPresentationRequestString)
+        every {
+            presentationService["verifyAndUnwrapPresentationRequestFromQueryParam"](
+                expectedPresentationRequestString
+            )
+        } returns Result.Success(
+            defaultTestSerializer.decodeFromString(
+                PresentationRequestContent.serializer(),
+                expectedPresentationRequestString
+            )
         )
         coJustRun { presentationRequestValidator.validate(any()) }
 
@@ -228,12 +247,16 @@ class PresentationServiceTest {
             val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
             val actualPresentationRequestContent = (actualRequest as Result.Success).payload.content
-            val actualPresentationRequestString = defaultTestSerializer.encodeToString(
+            val expectedPresentationRequestContent = defaultTestSerializer.decodeFromString(
                 PresentationRequestContent.serializer(),
-                actualPresentationRequestContent
+                expectedPresentationRequestString
             )
+
             // assert
-            assertThat(actualPresentationRequestString).isEqualTo(expectedPresentationRequestString)
+            assertPresentationRequestContent(
+                actualPresentationRequestContent,
+                expectedPresentationRequestContent
+            )
             assertThat(actualRequest.payload.linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
             assertThat((actualRequest.payload.linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo(
                 mockedIdentifierDocumentServiceEndpoint
@@ -261,7 +284,8 @@ class PresentationServiceTest {
             // assert
             assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
             assertThat((actualRequest as Result.Failure).payload).isInstanceOf(
-                InvalidSignatureException::class.java)
+                InvalidSignatureException::class.java
+            )
         }
     }
 
@@ -290,8 +314,12 @@ class PresentationServiceTest {
     fun `test to send multiple VP Presentation Response`() {
         // arrange
         val expectedPresentationRequestContent =
-            defaultTestSerializer.decodeFromString(PresentationRequestContent.serializer(), expectedPresentationRequestString)
-        val presentationRequest = PresentationRequest(expectedPresentationRequestContent, LinkedDomainMissing)
+            defaultTestSerializer.decodeFromString(
+                PresentationRequestContent.serializer(),
+                expectedPresentationRequestString
+            )
+        val presentationRequest =
+            PresentationRequest(expectedPresentationRequestContent, LinkedDomainMissing)
         val presentationResponse = presentationRequest.getPresentationDefinitions().map {
             PresentationResponse(presentationRequest, it.id)
         }
@@ -318,7 +346,8 @@ class PresentationServiceTest {
 
         runBlocking {
             // act
-            val presentedResponse = presentationService.sendResponse(presentationRequest, presentationResponse)
+            val presentedResponse =
+                presentationService.sendResponse(presentationRequest, presentationResponse)
             // assert
             assertThat(presentedResponse).isInstanceOf(Result.Success::class.java)
         }
@@ -335,28 +364,87 @@ class PresentationServiceTest {
 
     private fun unwrapPresentationContent(jwsTokenString: String): PresentationRequestContent {
         val jwsToken = JwsToken.deserialize(jwsTokenString)
-        return defaultTestSerializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
+        return defaultTestSerializer.decodeFromString(
+            PresentationRequestContent.serializer(),
+            jwsToken.content()
+        )
     }
 
     private fun mockIdentifierAndLinkedDomains() {
-        coEvery { linkedDomainsService.fetchAndVerifyLinkedDomains(any()) } returns KotlinResult.success(
+        coEvery { linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any()) } returns KotlinResult.success(
             LinkedDomainVerified(mockedIdentifierDocumentServiceEndpoint)
         )
-        coEvery { mockedResolver.resolve(expectedEntityIdentifier) } returns KotlinResult.success(mockedIdentifierDocument)
+        coEvery { mockedResolver.resolve(expectedEntityIdentifier) } returns KotlinResult.success(
+            mockedIdentifierDocument
+        )
         every { mockedIdentifierDocument.service } returns listOf(mockedIdentifierDocumentService)
         every { mockedIdentifierDocumentService.type } returns mockedIdentifierDocumentServiceType
-        every { mockedIdentifierDocumentService.serviceEndpoint } returns listOf(mockedIdentifierDocumentServiceEndpoint)
+        every { mockedIdentifierDocumentService.serviceEndpoint } returns listOf(
+            mockedIdentifierDocumentServiceEndpoint
+        )
     }
 
     private fun mockPresentationRequestFromNetwork() {
         val expectedPresentationRequest = unwrapPresentationContent(expectedPresentationRequestJwt)
-        coEvery { anyConstructed<FetchPresentationRequestNetworkOperation>().fire() } returns KotlinResult.success(expectedPresentationRequest)
+        coEvery { presentationService["fetchRequest"]("suppliedOpenIdUrl") } returns KotlinResult.success(
+            expectedPresentationRequest
+        )
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
     }
 
     private fun mockPresentationRequestWithInvalidSignatureFromNetwork() {
         val expectedPresentationRequest = unwrapPresentationContent(expectedPresentationRequestJwt)
-        coEvery { anyConstructed<FetchPresentationRequestNetworkOperation>().fire() } returns KotlinResult.success(expectedPresentationRequest)
+        coEvery { presentationService["fetchRequest"]("suppliedOpenIdUrl") } returns KotlinResult.success(
+            expectedPresentationRequest
+        )
         coEvery { mockedJwtValidator.verifySignature(any()) } returns false
+    }
+
+    private fun assertPresentationRequestContent(
+        actualPresentationRequestContent: PresentationRequestContent,
+        expectedPresentationRequestContent: PresentationRequestContent
+    ) {
+        assertThat(actualPresentationRequestContent.scope).isEqualTo(
+            expectedPresentationRequestContent.scope
+        )
+        assertThat(actualPresentationRequestContent.claims).isEqualTo(
+            expectedPresentationRequestContent.claims
+        )
+        assertThat(actualPresentationRequestContent.clientId).isEqualTo(
+            expectedPresentationRequestContent.clientId
+        )
+        assertThat(actualPresentationRequestContent.audience).isEqualTo(
+            expectedPresentationRequestContent.audience
+        )
+        assertThat(actualPresentationRequestContent.nonce).isEqualTo(
+            expectedPresentationRequestContent.nonce
+        )
+        assertThat(actualPresentationRequestContent.expirationTime).isEqualTo(
+            expectedPresentationRequestContent.expirationTime
+        )
+        assertThat(actualPresentationRequestContent.idTokenCreationTime).isEqualTo(
+            expectedPresentationRequestContent.idTokenCreationTime
+        )
+        assertThat(actualPresentationRequestContent.idTokenHint).isEqualTo(
+            expectedPresentationRequestContent.idTokenHint
+        )
+        assertThat(actualPresentationRequestContent.pinDetails).isEqualTo(
+            expectedPresentationRequestContent.pinDetails
+        )
+        assertThat(actualPresentationRequestContent.prompt).isEqualTo(
+            expectedPresentationRequestContent.prompt
+        )
+        assertThat(actualPresentationRequestContent.redirectUrl).isEqualTo(
+            expectedPresentationRequestContent.redirectUrl
+        )
+        assertThat(actualPresentationRequestContent.responseType).isEqualTo(
+            expectedPresentationRequestContent.responseType
+        )
+        assertThat(actualPresentationRequestContent.responseMode).isEqualTo(
+            expectedPresentationRequestContent.responseMode
+        )
+        assertThat(actualPresentationRequestContent.state).isEqualTo(
+            expectedPresentationRequestContent.state
+        )
     }
 }

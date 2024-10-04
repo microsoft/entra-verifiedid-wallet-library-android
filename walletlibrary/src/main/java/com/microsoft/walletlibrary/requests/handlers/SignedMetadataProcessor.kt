@@ -1,8 +1,11 @@
 package com.microsoft.walletlibrary.requests.handlers
 
+import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.microsoft.walletlibrary.mappings.getJwk
+import com.microsoft.walletlibrary.mappings.toRootOfTrust
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.SignedMetadataTokenClaims
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.util.LibraryConfiguration
@@ -45,7 +48,8 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         validateSignedMetadata(jwsToken, jwk, credentialIssuer, did)
 
         // Return the root of trust from the identifier document along with its verification status.
-        return LinkedDomainsResolver.resolveRootOfTrust(identifierDocument)
+        val rootOfTrustResolver = libraryConfiguration.rootOfTrustResolver ?: LinkedDomainsResolver
+        return rootOfTrustResolver.resolve(identifierDocument)
     }
 
     private fun deserializeSignedMetadata(signedMetadata: String): JwsToken {

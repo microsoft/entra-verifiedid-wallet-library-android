@@ -54,7 +54,9 @@ internal class IssuanceService @Inject constructor(
         return runResultTry {
             logTime("Issuance getRequest") {
                 val contract = fetchContract(contractUrl).toSDK().abortOnError()
-                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).toSDK().abortOnError()
+                val linkedDomainResult =
+                    linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(contract.input.issuer)
+                        .toSDK().abortOnError()
                 val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
                 Result.Success(request)
             }
@@ -110,13 +112,17 @@ internal class IssuanceService @Inject constructor(
             logTime("Issuance sendResponse") {
                 val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
                 val requestedVcMap = response.requestedVcMap
-                val verifiableCredential = formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
+                val verifiableCredential =
+                    formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
                 Result.Success(verifiableCredential)
             }
         }
     }
 
-    suspend fun sendCompletionResponse(completionResponse: IssuanceCompletionResponse, url: String): Result<Unit> {
+    suspend fun sendCompletionResponse(
+        completionResponse: IssuanceCompletionResponse,
+        url: String
+    ): Result<Unit> {
         return runResultTry {
             logTime("Issuance sendCompletionResponse") {
                 SendIssuanceCompletionResponse(
@@ -140,12 +146,14 @@ internal class IssuanceService @Inject constructor(
             responder = responder,
             expiryInSeconds = expiryInSeconds
         )
-        return SendVerifiableCredentialIssuanceRequestNetworkOperation(
-            response.audience,
-            formattedResponse,
-            apiProvider,
-            jwtValidator,
-            serializer
-        ).fire().toSDK()
+        return sendResponse(formattedResponse, response.audience)
     }
+
+    private suspend fun sendResponse(formattedResponse: String, url: String) = SendVerifiableCredentialIssuanceRequestNetworkOperation(
+        url,
+        formattedResponse,
+        apiProvider,
+        jwtValidator,
+        serializer
+    ).fire().toSDK()
 }

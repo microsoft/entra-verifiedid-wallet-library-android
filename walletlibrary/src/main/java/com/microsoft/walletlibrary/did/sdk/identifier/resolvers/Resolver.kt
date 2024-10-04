@@ -18,7 +18,7 @@ internal class Resolver @Inject constructor(
     suspend fun resolve(identifier: String): Result<IdentifierDocument> {
         return identifierRepository.resolveIdentifier(baseUrl, identifier)
             .map {
-                it.didDocument
+                it.identifierDocument
             }
             .onFailure {
                 return Result.failure(ResolverException("Unable to resolve identifier $identifier", it.cause))

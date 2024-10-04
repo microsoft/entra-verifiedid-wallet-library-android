@@ -242,7 +242,7 @@ class SignedMetadataProcessorTest {
             """{"sub":"testCredentialIssuer","iss": "did:web:test","iat": 1707859806}""".trimIndent()
         mockJwsToken("did:web:test#signingKey-1", signedMetadataTokenClaimsString)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
-        coEvery { LinkedDomainsResolver.resolveRootOfTrust(mockIdentifierDocument) } returns RootOfTrust(
+        coEvery { LinkedDomainsResolver.resolve(mockIdentifierDocument) } returns RootOfTrust(
             "unverifiedDomain",
             false
         )
@@ -267,7 +267,7 @@ class SignedMetadataProcessorTest {
             """{"sub":"testCredentialIssuer","iss": "did:web:test","iat": 1707859806}""".trimIndent()
         mockJwsToken("did:web:test#signingKey-1", signedMetadataTokenClaimsString)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
-        coEvery { LinkedDomainsResolver.resolveRootOfTrust(mockIdentifierDocument) } returns RootOfTrust(
+        coEvery { LinkedDomainsResolver.resolve(mockIdentifierDocument) } returns RootOfTrust(
             "verifiedDomain",
             true
         )

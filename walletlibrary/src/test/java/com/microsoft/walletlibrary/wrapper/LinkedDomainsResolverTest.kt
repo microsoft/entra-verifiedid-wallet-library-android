@@ -5,7 +5,6 @@ import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
-import com.microsoft.walletlibrary.mappings.fetchAndVerifyLinkedDomains
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import io.mockk.coEvery
 import io.mockk.every
@@ -30,11 +29,11 @@ class LinkedDomainsResolverTest {
     @Test
     fun resolveRootOfTrust_VerifiedLinkedDomainExists_ReturnsRootOfTrustWithVerifiedDomain() {
         // Arrange
-        coEvery { mockLinedDomainsService.fetchAndVerifyLinkedDomains(mockIdentifierDocument) } returns KotlinResult.success(LinkedDomainVerified(expectedDomain))
+        coEvery { mockLinedDomainsService.validateLinkedDomains(mockIdentifierDocument) } returns KotlinResult.success(LinkedDomainVerified(expectedDomain))
 
         runBlocking {
             // Act
-            val actualResult = LinkedDomainsResolver.resolveRootOfTrust(mockIdentifierDocument)
+            val actualResult = LinkedDomainsResolver.resolve(mockIdentifierDocument)
 
             // Assert
             Assertions.assertThat(actualResult).isInstanceOf(RootOfTrust::class.java)
@@ -46,11 +45,11 @@ class LinkedDomainsResolverTest {
     @Test
     fun resolveRootOfTrust_FailedWhileFetchingOrVerifying_ReturnsRootOfTrustWithUnverifiedEmptyDomain() {
         // Arrange
-        coEvery { mockLinedDomainsService.fetchAndVerifyLinkedDomains(mockIdentifierDocument) } returns KotlinResult.failure(SdkException())
+        coEvery { mockLinedDomainsService.validateLinkedDomains(mockIdentifierDocument) } returns KotlinResult.failure(SdkException())
 
         runBlocking {
             // Act
-            val actualResult = LinkedDomainsResolver.resolveRootOfTrust(mockIdentifierDocument)
+            val actualResult = LinkedDomainsResolver.resolve(mockIdentifierDocument)
 
             // Assert
             Assertions.assertThat(actualResult).isInstanceOf(RootOfTrust::class.java)
