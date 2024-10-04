@@ -16,7 +16,7 @@ interface RequestProcessor <T> {
      * Extensions to this RequestProcessor. All extensions should be called after initial request
      * processing to mutate the request with additional input.
      */
-    var requestProcessors: List<RequestProcessorExtension<T>>
+    var requestProcessors: MutableList<RequestProcessorExtension<T>>
 
     /**
      * Handle and process the provided raw request and returns a VerifiedIdRequest.

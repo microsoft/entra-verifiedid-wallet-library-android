@@ -18,6 +18,7 @@ import com.microsoft.walletlibrary.requests.handlers.OpenId4VCIRequestHandler
 import com.microsoft.walletlibrary.requests.VerifiedIdExtension
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
+import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.requests.resolvers.RequestResolver
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
@@ -46,6 +47,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
     private val requestProcessors = mutableListOf<RequestProcessor<*>>()
     private val previewFeatureFlagsSupported = mutableListOf<String>()
     private var preferHeaders = mutableListOf<String>()
+    private val extensionBuilders = mutableListOf<VerifiedIdExtension>()
     private val jsonSerializer = Json {
         serializersModule = SerializersModule {
             polymorphic(VerifiedId::class) {
@@ -71,9 +73,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
     }
 
     fun with(extension: VerifiedIdExtension): VerifiedIdClientBuilder {
-        // TODO: Add prefer headers to RequestResolverFactory
         preferHeaders.addAll(extension.prefer)
-        // TODO: lookup RequestProcessors by extension associated types and inject extensions
+        extensionBuilders.add(extension)
         return this
     }
 
@@ -128,9 +129,14 @@ class VerifiedIdClientBuilder(private val context: Context) {
         registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration, preferHeaders))
         requestResolverFactory.requestResolvers.addAll(requestResolvers)
 
+        val config = ExtensionConfiguration(libraryConfiguration)
+        val extensions: List<RequestProcessorExtension<*>> = extensionBuilders.mapNotNull {
+            it.createRequestProcessorExtensions(config)
+        }.flatten()
+
         val requestProcessorFactory = RequestProcessorFactory()
-        registerRequestHandler(OpenIdRequestProcessor(libraryConfiguration))
-        registerRequestHandler(OpenId4VCIRequestHandler(libraryConfiguration))
+        registerRequestHandler(OpenIdRequestProcessor(libraryConfiguration), extensions)
+        registerRequestHandler(OpenId4VCIRequestHandler(libraryConfiguration), extensions)
         requestProcessorFactory.requestProcessors.addAll(requestProcessors)
 
         return VerifiedIdClient(
@@ -141,7 +147,14 @@ class VerifiedIdClientBuilder(private val context: Context) {
         )
     }
 
-    private fun registerRequestHandler(requestProcessor: RequestProcessor<*>) {
+    private inline fun <reified T> registerRequestHandler(requestProcessor: RequestProcessor<T>, extensions: List<RequestProcessorExtension<*>>) {
+        for (extension in extensions) {
+            if (extension.associatedRequestProcessor.isInstance(requestProcessor)) {
+                // associatedType has the same <T> parameter for this cast
+                @Suppress("UNCHECKED_CAST")
+                requestProcessor.requestProcessors.add(extension as RequestProcessorExtension<T>)
+            }
+        }
         requestProcessors.add(requestProcessor)
     }
 
