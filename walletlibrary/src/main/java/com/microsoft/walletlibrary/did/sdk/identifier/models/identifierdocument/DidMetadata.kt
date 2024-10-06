@@ -2,6 +2,6 @@
 
 package com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument
 
-sealed class DidMetadata {
-    abstract val id: String
+open class DidMetadata {
+    open var id = ""
 }
