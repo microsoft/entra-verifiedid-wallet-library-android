@@ -14,13 +14,6 @@ import com.microsoft.walletlibrary.util.VerifiedIdExceptions
  */
 internal object LinkedDomainsResolver : RootOfTrustResolver {
 
-/*    internal suspend fun resolveRootOfTrust(identifierDocument: IdentifierDocument): RootOfTrust {
-        VerifiableCredentialSdk.linkedDomainsService.fetchAndVerifyLinkedDomains(identifierDocument)
-            .onSuccess { return it.toRootOfTrust() }
-            .onFailure { return RootOfTrust("", false) }
-        return RootOfTrust("", false)
-    }*/
-
     override suspend fun resolve(didMetadata: DidMetadata): RootOfTrust {
         if (didMetadata !is IdentifierDocument) {
             throw MalformedInputException(

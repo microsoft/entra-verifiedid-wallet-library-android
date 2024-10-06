@@ -112,17 +112,13 @@ internal class IssuanceService @Inject constructor(
             logTime("Issuance sendResponse") {
                 val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
                 val requestedVcMap = response.requestedVcMap
-                val verifiableCredential =
-                    formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
+                val verifiableCredential = formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
                 Result.Success(verifiableCredential)
             }
         }
     }
 
-    suspend fun sendCompletionResponse(
-        completionResponse: IssuanceCompletionResponse,
-        url: String
-    ): Result<Unit> {
+    suspend fun sendCompletionResponse(completionResponse: IssuanceCompletionResponse, url: String): Result<Unit> {
         return runResultTry {
             logTime("Issuance sendCompletionResponse") {
                 SendIssuanceCompletionResponse(

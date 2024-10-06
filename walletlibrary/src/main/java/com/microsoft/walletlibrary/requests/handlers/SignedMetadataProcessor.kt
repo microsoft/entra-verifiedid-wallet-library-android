@@ -1,11 +1,8 @@
 package com.microsoft.walletlibrary.requests.handlers
 
-import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.microsoft.walletlibrary.mappings.getJwk
-import com.microsoft.walletlibrary.mappings.toRootOfTrust
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.SignedMetadataTokenClaims
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.util.LibraryConfiguration

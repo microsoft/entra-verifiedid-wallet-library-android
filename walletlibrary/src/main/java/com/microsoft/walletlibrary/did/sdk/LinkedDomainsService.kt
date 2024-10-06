@@ -16,7 +16,6 @@ import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.mappings.toLinkedDomainResult
-import com.microsoft.walletlibrary.util.IdentifierDocumentResolutionException
 import java.net.URL
 import javax.inject.Inject
 import javax.inject.Named
@@ -53,7 +52,7 @@ internal class LinkedDomainsService @Inject constructor(
         resolveIdentifierDocument(relyingPartyDid)
             .onSuccess { return validateLinkedDomains(it) }
             .onFailure { return Result.failure(it) }
-        return Result.failure(IdentifierDocumentResolutionException("Failed to resolve identifier document"))
+        return Result.failure(SdkException("Failed to fetch identifier document"))
     }
 
     private suspend fun verifyLinkedDomainsUsingWellKnownDocument(identifierDocument: IdentifierDocument): LinkedDomainResult {
