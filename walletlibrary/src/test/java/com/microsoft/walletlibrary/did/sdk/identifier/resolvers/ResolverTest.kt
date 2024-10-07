@@ -31,7 +31,7 @@ class ResolverTest {
         coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(expectedIdentifierResponse)
         runBlocking {
             val actualIdentifierDocument = resolver.resolve(expectedIdentifier)
-            assertThat(actualIdentifierDocument).isInstanceOf(Result.Success::class.java)
+            assertThat(actualIdentifierDocument.isSuccess).isEqualTo(true)
             assertThat(actualIdentifierDocument.getOrNull()?.id).isEqualTo(expectedIdentifier)
         }
     }
@@ -47,7 +47,7 @@ class ResolverTest {
         )
         runBlocking {
             val actualResult = resolver.resolve(invalidIdentifier)
-            assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
+            assertThat(actualResult.isFailure).isEqualTo(true)
             assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
             assertThat(actualResult.exceptionOrNull()?.cause).isInstanceOf(NotFoundException::class.java)
         }
@@ -64,7 +64,7 @@ class ResolverTest {
         } returns KotlinResult.failure(LocalNetworkException("Failed to send request."))
         runBlocking {
             val actualResult = resolver.resolve(expectedIdentifier)
-            assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
+            assertThat(actualResult.isFailure).isEqualTo(true)
             assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
             assertThat(actualResult.exceptionOrNull()?.cause).isInstanceOf(LocalNetworkException::class.java)
         }

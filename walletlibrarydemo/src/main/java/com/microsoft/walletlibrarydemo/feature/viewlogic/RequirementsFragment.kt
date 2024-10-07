@@ -144,6 +144,8 @@ class RequirementsFragment : Fragment(), ClickListener {
         verifiedId?.let {
             val claims = it.getClaims()
             claims.add(VerifiedIdClaim("Issued On", it.issuedOn))
+            claims.add(VerifiedIdClaim("Domain", viewModel.verifiedIdRequest?.rootOfTrust?.source ?: ""))
+            claims.add(VerifiedIdClaim("Verification Status", viewModel.verifiedIdRequest?.rootOfTrust?.verified ?: ""))
             it.expiresOn?.let { expiry -> claims.add(VerifiedIdClaim("Expiry", expiry)) }
             claims.add(VerifiedIdClaim("Id", it.id))
             val adapter = VerifiedIdAdapter(claims)

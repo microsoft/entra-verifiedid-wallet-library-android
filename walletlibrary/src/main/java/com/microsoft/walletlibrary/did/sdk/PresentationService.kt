@@ -51,7 +51,9 @@ internal class PresentationService @Inject constructor(
     internal suspend fun validateRequest(presentationRequestContent: PresentationRequestContent): Result<PresentationRequest> {
         return runResultTry {
             logTime("Presentation validateRequest") {
-                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId).toSDK().abortOnError()
+                val linkedDomainResult = linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                    presentationRequestContent.clientId
+                ).toSDK().abortOnError()
                 val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
                 isRequestValid(request).abortOnError()
                 Result.Success(request)

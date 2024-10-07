@@ -11,6 +11,7 @@ import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.requests.RequestHandlerFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
@@ -56,10 +57,15 @@ class VerifiedIdClientBuilder(private val context: Context) {
         ignoreUnknownKeys = true
         isLenient = true
     }
+    private var rootOfTrustResolver: RootOfTrustResolver? = null
 
     // An optional custom log consumer can be passed to be used by VerifiedIdClient.
     fun with(logConsumer: WalletLibraryLogger.Consumer) {
         logger.addConsumer(logConsumer)
+    }
+
+    fun with(rootOfTrustResolver: RootOfTrustResolver) {
+        this.rootOfTrustResolver = rootOfTrustResolver
     }
 
     fun with(httpAgent: IHttpAgent): VerifiedIdClientBuilder {
@@ -83,7 +89,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
             logConsumer = vcSdkLogConsumer,
             userAgentInfo = userAgentInfo,
             walletLibraryVersionInfo = walletLibraryVersionInfo,
-            httpAgent = httpAgent
+            httpAgent = httpAgent,
+            rootOfTrustResolver = rootOfTrustResolver
         )
 
         val apiProvider = HttpAgentApiProvider(
@@ -99,7 +106,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         val keyStore = EncryptedKeyStore(context)
         val tokenSigner = TokenSigner(keyStore)
         val libraryConfiguration =
-            LibraryConfiguration(previewFeatureFlags, apiProvider, jsonSerializer, tokenSigner)
+            LibraryConfiguration(previewFeatureFlags, apiProvider, jsonSerializer, tokenSigner, rootOfTrustResolver)
 
         val requestResolverFactory = RequestResolverFactory()
         registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration))
