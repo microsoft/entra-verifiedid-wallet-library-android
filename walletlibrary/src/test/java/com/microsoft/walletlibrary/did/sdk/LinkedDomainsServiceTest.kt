@@ -180,7 +180,7 @@ class LinkedDomainsServiceTest {
         runBlocking {
             val actualLinkedDomainsResultResponse = linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(suppliedDidWithSingleServiceEndpoint)
             assertThat(actualLinkedDomainsResultResponse).isInstanceOf(KotlinResult.success(LinkedDomainVerified)::class.java)
-            assertThat((actualLinkedDomainsResultResponse.getOrNull() as? LinkedDomainVerified)?.domainUrl).isEqualTo("testsource.com")
+            assertThat((actualLinkedDomainsResultResponse.getOrNull() as? LinkedDomainVerified)?.domainUrl).isEqualTo("discover.did.microsoft.com")
         }
 
         coVerify(exactly = 1) { mockRootOfTrustResolver.resolve(any()) }
@@ -225,7 +225,7 @@ class LinkedDomainsServiceTest {
 class MockRootOfTrustResolver : RootOfTrustResolver {
     override suspend fun resolve(didMetadata: DidMetadata): RootOfTrust {
         return RootOfTrust(
-            "testsource.com",
+            "discover.did.microsoft.com",
             true
         )
     }
