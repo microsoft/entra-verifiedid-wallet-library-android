@@ -10,7 +10,6 @@ import com.microsoft.walletlibrary.util.getResult
 class OpenId4VCIPinRequirement(
     val length: Int? = null,
     val type: String? = null,
-    val pinSet: Boolean,
     var accessToken: String? = null,
     override val required: Boolean = true,
     internal var pin: String? = null,

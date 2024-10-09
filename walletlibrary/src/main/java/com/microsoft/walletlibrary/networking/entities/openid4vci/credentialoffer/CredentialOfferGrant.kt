@@ -11,7 +11,8 @@ internal data class CredentialOfferGrant(
      * entries. MUST NOT be used otherwise. The value of this parameter MUST match with one of the
      * values in the authorization_servers array obtained from the Credential Issuer metadata.
      */
-    val authorization_server: String,
+    @SerialName("authorization_server")
+    val authorizationServer: String,
 
     /**
      * The code representing the Credential Issuer's authorization for the Wallet to obtain
@@ -23,7 +24,9 @@ internal data class CredentialOfferGrant(
     val preAuthorizedCode: String? = null,
 
     // Pin requirements for the credential.
-    val tx_code: CredentialOfferPinDetails? = null,
+    @SerialName("tx_code")
+    val txCode: CredentialOfferPinDetails? = null,
 
-    val user_pin_required: Boolean? = null
+    @SerialName("user_pin_required")
+    val userPinRequired: Boolean? = null
 )

@@ -69,9 +69,9 @@ internal data class CredentialMetadata(
         }
         val authorizationServerHosts = authorizationServers.map { getAuthorizationServerPath(it) }
         credentialOffer.grants.forEach {
-            if (!authorizationServerHosts.contains(getAuthorizationServerPath(it.value.authorization_server)))
+            if (!authorizationServerHosts.contains(getAuthorizationServerPath(it.value.authorizationServer)))
                 throw OpenId4VciValidationException(
-                    "Authorization server ${it.value.authorization_server} not found in Credential Metadata.",
+                    "Authorization server ${it.value.authorizationServer} not found in Credential Metadata.",
                     VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
                 )
         }

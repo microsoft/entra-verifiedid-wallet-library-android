@@ -134,7 +134,7 @@ class OpenId4VciIssuanceRequestFormatterTest {
             )
             assertThat(claims.aud).isEqualTo(expectedCredentialEndpoint)
             assertThat(claims.sub).isEqualTo(expectedDid)
-            assertThat(claims.at_hash).isEqualTo("3zhNfw-dNvvFu-TcG4v9wMkISAE3eRtDLs9pukDjDlk")
+            assertThat(claims.at_hash).isEqualTo("3zhNfw-dNvvFu-TcG4v9wA")
         }
     }
 }
