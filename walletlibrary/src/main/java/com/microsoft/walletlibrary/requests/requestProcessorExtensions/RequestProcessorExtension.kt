@@ -9,6 +9,11 @@ import kotlin.reflect.KClass
  */
 interface RequestProcessorExtension<T> {
     /**
+     * Type of RequestProcessor this extension should be injected into
+     */
+    abstract val associatedRequestProcessor: KClass<out RequestProcessor<T>>
+
+    /**
      * Extension to the associated RequestProcessor's parsing
      * @param rawRequest Primitive form of the original request input
      * @param request RequestProcessor's base request to be updated

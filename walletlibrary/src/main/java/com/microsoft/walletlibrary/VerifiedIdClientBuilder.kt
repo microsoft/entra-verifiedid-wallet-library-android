@@ -149,8 +149,10 @@ class VerifiedIdClientBuilder(private val context: Context) {
 
     private inline fun <reified T> registerRequestHandler(requestProcessor: RequestProcessor<T>, extensions: List<RequestProcessorExtension<*>>) {
         for (extension in extensions) {
-            (extension as? RequestProcessorExtension<T>)?.let {
-                requestProcessor.requestProcessors.add(it)
+            if (extension.associatedRequestProcessor.isInstance(requestProcessor)) {
+                // associatedType has the same <T> parameter for this cast
+                @Suppress("UNCHECKED_CAST")
+                requestProcessor.requestProcessors.add(extension as RequestProcessorExtension<T>)
             }
         }
         requestProcessors.add(requestProcessor)

@@ -17,7 +17,7 @@ import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
-internal class OpenId4VCIRequestHandler(
+class OpenId4VCIRequestHandler internal constructor(
     private val libraryConfiguration: LibraryConfiguration,
     private val signedMetadataProcessor: SignedMetadataProcessor = SignedMetadataProcessor(
         libraryConfiguration
