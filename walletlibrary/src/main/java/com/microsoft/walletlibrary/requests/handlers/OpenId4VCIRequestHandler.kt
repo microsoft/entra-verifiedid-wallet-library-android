@@ -22,7 +22,7 @@ internal class OpenId4VCIRequestHandler(
     private val signedMetadataProcessor: SignedMetadataProcessor = SignedMetadataProcessor(
         libraryConfiguration
     ),
-    override var requestProcessors: List<RequestProcessorExtension<OpenIdRawRequest>> = mutableListOf()
+    override var requestProcessors: MutableList<RequestProcessorExtension<OpenIdRawRequest>> = mutableListOf()
 ) : RequestProcessor<OpenIdRawRequest> {
 
     // Indicates whether the provided raw request can be handled by this handler.

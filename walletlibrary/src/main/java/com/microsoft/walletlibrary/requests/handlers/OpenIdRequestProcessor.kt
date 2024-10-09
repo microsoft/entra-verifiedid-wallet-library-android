@@ -34,7 +34,7 @@ internal class OpenIdRequestProcessor internal constructor(private val libraryCo
      * Extensions to this RequestProcessor. All extensions should be called after initial request
      * processing to mutate the request with additional input.
      */
-    override var requestProcessors: List<RequestProcessorExtension<OpenIdProcessedRequest>> = emptyList()
+    override var requestProcessors: MutableList<RequestProcessorExtension<OpenIdProcessedRequest>> = mutableListOf()
 
     /**
      * Checks if the input can be processed

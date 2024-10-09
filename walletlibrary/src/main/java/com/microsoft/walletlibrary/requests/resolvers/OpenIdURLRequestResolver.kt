@@ -9,8 +9,6 @@ import android.net.Uri
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestNetworkOperation
-import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
-import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.util.Constants
