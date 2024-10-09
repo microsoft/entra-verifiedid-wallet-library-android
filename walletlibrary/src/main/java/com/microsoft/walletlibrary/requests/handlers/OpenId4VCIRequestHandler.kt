@@ -229,7 +229,7 @@ internal class OpenId4VCIRequestHandler(
     ): Requirement {
         val pinDetails = grant.txCode
         return if (pinDetails == null) {
-            val openId4VCIPinRequirement = OpenId4VCIPinRequirement()
+            val openId4VCIPinRequirement = OpenId4VCIPinRequirement(pinSet = false)
             openId4VCIPinRequirement.libraryConfiguration = libraryConfiguration
             openId4VCIPinRequirement.accessTokenEndpoint = accessTokenEndpoint
             openId4VCIPinRequirement.preAuthorizedCode = grant.preAuthorizedCode
@@ -237,7 +237,7 @@ internal class OpenId4VCIRequestHandler(
             openId4VCIPinRequirement
         } else {
             val openId4VCIPinRequirement =
-                OpenId4VCIPinRequirement(length = pinDetails.length, type = pinDetails.inputMode)
+                OpenId4VCIPinRequirement(pinSet = true, length = pinDetails.length, type = pinDetails.inputMode)
             openId4VCIPinRequirement.libraryConfiguration = libraryConfiguration
             openId4VCIPinRequirement.accessTokenEndpoint = accessTokenEndpoint
             openId4VCIPinRequirement.preAuthorizedCode = grant.preAuthorizedCode

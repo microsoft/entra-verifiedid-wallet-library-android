@@ -306,6 +306,7 @@ class OpenId4VCIRequestHandlerTest {
             assertThat(requirement.preAuthorizedCode).isEqualTo(mockCredentialOfferGrant.preAuthorizedCode)
             assertThat(requirement.length).isNull()
             assertThat(requirement.type).isNull()
+            assertThat(requirement.pinSet).isFalse()
         }
     }
 
@@ -345,6 +346,7 @@ class OpenId4VCIRequestHandlerTest {
             assertThat(requirement.preAuthorizedCode).isEqualTo(mockCredentialOfferGrant.preAuthorizedCode)
             assertThat(requirement.length).isEqualTo(pinLength)
             assertThat(requirement.type).isEqualTo(pinType)
+            assertThat(requirement.pinSet).isTrue()
         }
     }
 
@@ -393,6 +395,7 @@ class OpenId4VCIRequestHandlerTest {
             assertThat(openId4VCIPinRequirement.preAuthorizedCode).isEqualTo(mockCredentialOfferGrant.preAuthorizedCode)
             assertThat(openId4VCIPinRequirement.length).isNull()
             assertThat(openId4VCIPinRequirement.type).isNull()
+            assertThat(openId4VCIPinRequirement.pinSet).isFalse()
         }
     }
 
