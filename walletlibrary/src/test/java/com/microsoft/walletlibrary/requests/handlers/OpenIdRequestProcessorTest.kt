@@ -45,7 +45,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class OpenIdRequestProcessorTest {
-    private lateinit var openIdRequestProcessor: RequestProcessor<OpenIdProcessedRequest>
+    private lateinit var openIdRequestProcessor: RequestProcessor<OpenIdRawRequest>
     private lateinit var mockRawRequest: RawRequest
     private lateinit var verifiedIdOpenIdJwtRawRequest: VerifiedIdOpenIdJwtRawRequest
     private val mockLibraryConfiguration: LibraryConfiguration = mockk()

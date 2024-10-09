@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.requests.requirements
 
-sealed interface PresentationExchangeRequirement {
+interface PresentationExchangeRequirement : Requirement {
 
     /**
      * Presentation Exchange Input Descriptor ID for this request
