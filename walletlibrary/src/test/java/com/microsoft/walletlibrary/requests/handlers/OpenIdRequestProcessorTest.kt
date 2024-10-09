@@ -32,6 +32,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.d
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.Logo
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.PreviewFeatureFlags
@@ -44,7 +45,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class OpenIdRequestProcessorTest {
-    private lateinit var openIdRequestProcessor: RequestProcessor<OpenIdRawRequest>
+    private lateinit var openIdRequestProcessor: RequestProcessor<OpenIdProcessedRequest>
     private lateinit var mockRawRequest: RawRequest
     private lateinit var verifiedIdOpenIdJwtRawRequest: VerifiedIdOpenIdJwtRawRequest
     private val mockLibraryConfiguration: LibraryConfiguration = mockk()

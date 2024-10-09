@@ -48,6 +48,7 @@ class OpenId4VciIssuanceRequestFormatterTest {
         mockPreviewFeatureFlags,
         mockHttpAgentApiProvider,
         defaultTestSerializer,
+        rootOfTrustResolver = null,
         mockedIdentifierManager,
         mockedTokenSigner,
         mockWalletLibraryLogger

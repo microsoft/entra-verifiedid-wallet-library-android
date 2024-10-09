@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary.requests
 
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
+import com.microsoft.walletlibrary.requests.rawrequests.RawRequest
 import com.microsoft.walletlibrary.util.HandlerMissingException
 import com.microsoft.walletlibrary.util.UnSupportedRawRequestException
 import io.mockk.coEvery
@@ -12,7 +13,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 
 class RequestHandlerFactoryTest {
-    private val firstMockRequestProcessor: RequestProcessor = mockk()
+    private val firstMockRequestProcessor: RequestProcessor<RawRequest> = mockk()
     private val mockRawRequest: OpenIdRawRequest = mockk()
     private val requestProcessorFactory = RequestProcessorFactory()
 
@@ -69,7 +70,7 @@ class RequestHandlerFactoryTest {
     @Test
     fun handler_RegisterMultipleHandlers_Succeeds() {
         // Arrange
-        val secondMockRequestHandler: RequestProcessor = mockk()
+        val secondMockRequestHandler: RequestProcessor<RawRequest> = mockk()
         requestProcessorFactory.requestProcessors.add(firstMockRequestProcessor)
         requestProcessorFactory.requestProcessors.add(secondMockRequestHandler)
         coEvery { secondMockRequestHandler.canHandleRequest(mockRawRequest) } returns false

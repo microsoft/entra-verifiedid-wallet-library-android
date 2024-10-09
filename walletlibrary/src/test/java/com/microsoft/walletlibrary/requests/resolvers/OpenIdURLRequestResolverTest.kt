@@ -6,14 +6,12 @@ import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
-import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestNetworkOperation
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
-import com.microsoft.walletlibrary.wrapper.RootOfTrustResolver
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -49,7 +47,7 @@ class OpenIdURLRequestResolverTest {
     @Test
     fun resolver_CanResolveHandler_ReturnsFalse() {
         // Arrange
-        class MockRequestProcessor(override var requestProcessors: List<RequestProcessorExtension<OpenIdRawRequest>>) : RequestProcessor<OpenIdRawRequest> {
+        class MockRequestProcessor(override var requestProcessors: MutableList<RequestProcessorExtension<OpenIdRawRequest>>) : RequestProcessor<OpenIdRawRequest> {
 
             override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
                 return mockk()
