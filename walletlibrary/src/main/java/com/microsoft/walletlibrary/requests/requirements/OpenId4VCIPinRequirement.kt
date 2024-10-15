@@ -2,7 +2,9 @@ package com.microsoft.walletlibrary.requests.requirements
 
 import com.microsoft.walletlibrary.requests.resolvers.OpenID4VCIPreAuthAccessTokenResolver
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.NetworkingException
 import com.microsoft.walletlibrary.util.RequirementNotMetException
+import com.microsoft.walletlibrary.util.VerifiedIdException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.getResult
@@ -28,11 +30,11 @@ class OpenId4VCIPinRequirement(
         return VerifiedIdResult.success(Unit)
     }
 
-    suspend fun fulfill(pin: String) {
+    suspend fun fulfill(pin: String): VerifiedIdResult<Unit> {
         this.pin = pin
-        libraryConfiguration?.let { libraryConfiguration ->
-            accessTokenEndpoint?.let {
-                getResult {
+        return getResult {
+            libraryConfiguration?.let { libraryConfiguration ->
+                accessTokenEndpoint?.let {
                     OpenID4VCIPreAuthAccessTokenResolver(libraryConfiguration).resolve(preAuthorizedCode, this, it)
                 }
             }
