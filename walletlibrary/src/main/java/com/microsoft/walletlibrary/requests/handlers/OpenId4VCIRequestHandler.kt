@@ -27,6 +27,9 @@ internal class OpenId4VCIRequestHandler(
         libraryConfiguration
     )
 ) : RequestHandler {
+    companion object {
+        const val WELL_KNOWN_CONFIGURATION_SUFFIX = ".well-known/openid-configuration"
+    }
 
     // Indicates whether the provided raw request can be handled by this handler.
     // This method checks if the raw request can be cast to CredentialOffer successfully, and if it contains the required fields.
@@ -56,7 +59,7 @@ internal class OpenId4VCIRequestHandler(
                 )
 
                 // Get the root of trust from the signed metadata.
-                val rootOfTrust = credentialMetadata.signed_metadata?.let {
+                val rootOfTrust = credentialMetadata.signedMetadata?.let {
                     signedMetadataProcessor.process(it, credentialOffer.credential_issuer, rootOfTrustResolver)
                 } ?: RootOfTrust("", false)
 
@@ -122,8 +125,13 @@ internal class OpenId4VCIRequestHandler(
             credentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle()
         val verifiedIdStyle =
             credentialConfiguration.getVerifiedIdStyleInPreferredLocale(requesterStyle.name)
+
+        // By this point, we know credential issuer is not null.
         val accessTokenEndpoint = fetchAccessTokenEndpointFromOpenIdWellKnownConfig(
-            credentialMetadata.credential_issuer ?: ""
+            credentialMetadata.credentialIssuer ?: throw OpenId4VciValidationException(
+                "Credential metadata does not contain credential_issuer.",
+                VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
+            )
         )
         val requirement = transformToRequirement(
             credentialConfiguration.scope,
@@ -155,7 +163,7 @@ internal class OpenId4VCIRequestHandler(
     }
 
     private suspend fun fetchAccessTokenEndpointFromOpenIdWellKnownConfig(credentialIssuer: String): String {
-        val openIdWellKnownUrl = "$credentialIssuer/.well-known/openid-configuration"
+        val openIdWellKnownUrl = "$credentialIssuer/$WELL_KNOWN_CONFIGURATION_SUFFIX"
         FetchOpenIdWellKnownConfigNetworkOperation(
             openIdWellKnownUrl,
             libraryConfiguration.httpAgentApiProvider,
@@ -189,7 +197,7 @@ internal class OpenId4VCIRequestHandler(
 
         return if (requirements.isEmpty()) {
             throw OpenId4VciValidationException(
-                "There is no requirement in the credential offer",
+                "No grants defined in credential offer.",
                 VerifiedIdExceptions.REQUIREMENT_MISSING_EXCEPTION.value
             )
         } else if (requirements.size == 1) {
@@ -211,7 +219,7 @@ internal class OpenId4VCIRequestHandler(
         }
         return AccessTokenRequirement(
             "",
-            configuration = grant.authorization_server,
+            configuration = grant.authorizationServer,
             resourceId = scope,
             scope = "$scope/.default",
             claims = emptyList()
@@ -222,25 +230,21 @@ internal class OpenId4VCIRequestHandler(
         grant: CredentialOfferGrant,
         accessTokenEndpoint: String
     ): Requirement {
-        val pinDetails = grant.tx_code
-        return if (pinDetails != null) {
-            val openId4VCIPinRequirement =
-                OpenId4VCIPinRequirement(pinSet = true, length = pinDetails.length, type = pinDetails.input_mode)
-            openId4VCIPinRequirement.libraryConfiguration = libraryConfiguration
-            openId4VCIPinRequirement.accessTokenEndpoint = accessTokenEndpoint
-            openId4VCIPinRequirement.preAuthorizedCode = grant.preAuthorizedCode
-            openId4VCIPinRequirement
-        } else {
+        val pinDetails = grant.txCode
+        return if (pinDetails == null) {
             val openId4VCIPinRequirement = OpenId4VCIPinRequirement(pinSet = false)
             openId4VCIPinRequirement.libraryConfiguration = libraryConfiguration
             openId4VCIPinRequirement.accessTokenEndpoint = accessTokenEndpoint
             openId4VCIPinRequirement.preAuthorizedCode = grant.preAuthorizedCode
-            OpenID4VCIPreAuthAccessTokenResolver(libraryConfiguration).resolve(
-                grant.preAuthorizedCode,
-                openId4VCIPinRequirement,
-                accessTokenEndpoint
-            )
-            return openId4VCIPinRequirement
+            preValidatePinRequirement(openId4VCIPinRequirement)
+            openId4VCIPinRequirement
+        } else {
+            val openId4VCIPinRequirement =
+                OpenId4VCIPinRequirement(pinSet = true, length = pinDetails.length, type = pinDetails.inputMode)
+            openId4VCIPinRequirement.libraryConfiguration = libraryConfiguration
+            openId4VCIPinRequirement.accessTokenEndpoint = accessTokenEndpoint
+            openId4VCIPinRequirement.preAuthorizedCode = grant.preAuthorizedCode
+            openId4VCIPinRequirement
         }
     }
 
@@ -259,5 +263,16 @@ internal class OpenId4VCIRequestHandler(
         if (!credentialIssuer.endsWith(suffix))
             return credentialIssuer + suffix
         return credentialIssuer
+    }
+
+    private suspend fun preValidatePinRequirement(openId4VCIPinRequirement: OpenId4VCIPinRequirement) {
+        OpenID4VCIPreAuthAccessTokenResolver(libraryConfiguration).resolve(
+            openId4VCIPinRequirement.preAuthorizedCode,
+            openId4VCIPinRequirement,
+            openId4VCIPinRequirement.accessTokenEndpoint ?: throw OpenId4VciValidationException(
+                "Access token endpoint should be defined for PIN OpenId4VcI requirement.",
+                VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value
+            )
+        )
     }
 }

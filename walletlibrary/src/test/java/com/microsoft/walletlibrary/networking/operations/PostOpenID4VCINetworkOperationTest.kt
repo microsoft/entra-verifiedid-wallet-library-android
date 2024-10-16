@@ -13,7 +13,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class PostOpenID4VCINetworkOperationTest {
-    private val expectedVerifiableCredential = """"""
+    private val expectedVerifiableCredential = "some credential"
 
     @Test
     fun postOpenID4VCINetworkOperationTest_PostIssuanceRequest_ReturnsVerifiableCredential() {
@@ -24,7 +24,11 @@ class PostOpenID4VCINetworkOperationTest {
                     IResponse(
                         status = 200,
                         headers = emptyMap(),
-                        body = expectedVerifiableCredential.toByteArray(Charsets.UTF_8)
+                        body = """
+                            {
+                              "credential": "$expectedVerifiableCredential"
+                            }
+                        """.trimIndent().toByteArray(Charsets.UTF_8)
                     )
                 )
             }

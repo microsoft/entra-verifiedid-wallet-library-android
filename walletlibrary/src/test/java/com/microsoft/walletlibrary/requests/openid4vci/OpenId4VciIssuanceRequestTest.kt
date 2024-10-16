@@ -131,7 +131,7 @@ class OpenId4VciIssuanceRequestTest {
 
     private fun mockCredentialOfferAndMetadata() {
         every { mockCredentialOffer.credential_configuration_ids } returns listOf(mockCredentialId)
-        every { mockCredentialMetadata.credential_endpoint } returns mockCredentialEndpoint
+        every { mockCredentialMetadata.credentialEndpoint } returns mockCredentialEndpoint
         every { mockCredentialOffer.issuer_session } returns mockIssuerSession
     }
 
@@ -216,7 +216,7 @@ class OpenId4VciIssuanceRequestTest {
     fun completeIssuance_NoCredentialEndpointInMetadata_ThrowsException() {
         // Arrange
         accessTokenRequirement.fulfill("testAccessToken")
-        every { mockCredentialMetadata.credential_endpoint } returns null
+        every { mockCredentialMetadata.credentialEndpoint } returns null
         runBlocking {
             // Act
             val actualResult = openId4VciIssuanceRequest.complete()

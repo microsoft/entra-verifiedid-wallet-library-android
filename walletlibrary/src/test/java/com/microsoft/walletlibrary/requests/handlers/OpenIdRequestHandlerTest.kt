@@ -31,6 +31,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.d
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.Logo
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.util.RequirementCastingException
 import com.microsoft.walletlibrary.util.UnSupportedProtocolException
@@ -162,7 +163,9 @@ class OpenIdRequestHandlerTest {
         every { contractUri.toString() } returns expectedContractUrl
         every { verifiedIdRequirement.issuanceOptions } returns issuanceOptions
         every { verifiedIdRequestURL.url } returns contractUri
-        every { openIdRequestHandler["getIssuanceRequest"](expectedContractUrl, "", "") } returns rawManifest
+        coEvery {
+            openIdRequestHandler["getIssuanceRequest"](expectedContractUrl, any<String>(), any<String>(), any<RootOfTrustResolver>())
+        } returns rawManifest
     }
 
     private fun mockManifestIssuanceRequest(logoPresent: Boolean, emptyClaims: Boolean) {

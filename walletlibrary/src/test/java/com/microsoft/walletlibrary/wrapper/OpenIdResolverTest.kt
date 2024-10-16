@@ -4,6 +4,7 @@ import com.microsoft.walletlibrary.did.sdk.PresentationService
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
@@ -23,6 +24,7 @@ class OpenIdResolverTest {
     private val openIdUrl = ""
     private val mockPresentationRequest: PresentationRequest = mockk()
     private val mockPresentationRequestContent: PresentationRequestContent = mockk()
+    private val mockRootOfTrustResolver: RootOfTrustResolver = mockk()
 
     init {
         setupInput(false)
@@ -33,14 +35,18 @@ class OpenIdResolverTest {
         every { VerifiableCredentialSdk.presentationService } returns mockPresentationService
         if (!isFailure) {
             coEvery { mockPresentationService.getRequest(openIdUrl) } returns Result.Success(mockPresentationRequest)
-            coEvery { mockPresentationService.validateRequest(mockPresentationRequestContent) } returns Result.Success(mockPresentationRequest)
+            coEvery {
+                mockPresentationService.validateRequest(mockPresentationRequestContent, mockRootOfTrustResolver)
+            } returns Result.Success(mockPresentationRequest)
             every { mockPresentationRequest.content } returns mockPresentationRequestContent
             every { mockPresentationRequestContent.prompt } returns ""
         } else {
             coEvery { mockPresentationService.getRequest(openIdUrl) } returns Result.Failure(
                 SdkException()
             )
-            coEvery { mockPresentationService.validateRequest(mockPresentationRequestContent) } returns Result.Failure(SdkException())
+            coEvery {
+                mockPresentationService.validateRequest(mockPresentationRequestContent, mockRootOfTrustResolver)
+            } returns Result.Failure(SdkException())
         }
     }
 
@@ -61,7 +67,7 @@ class OpenIdResolverTest {
     fun resolveOpenIdRequest_ValidateRequestSuccessful_ReturnsRawRequestOfTypePresentation() {
         runBlocking {
             // Act
-            val actualResult = OpenIdResolver.validateRequest(mockPresentationRequestContent)
+            val actualResult = OpenIdResolver.validateRequest(mockPresentationRequestContent, mockRootOfTrustResolver)
 
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedIdOpenIdJwtRawRequest::class.java)
@@ -78,7 +84,7 @@ class OpenIdResolverTest {
         // Act and Assert
         Assertions.assertThatThrownBy {
             runBlocking {
-                OpenIdResolver.validateRequest(mockPresentationRequestContent)
+                OpenIdResolver.validateRequest(mockPresentationRequestContent, mockRootOfTrustResolver)
             }
         }.isInstanceOf(VerifiedIdRequestFetchException::class.java)
     }

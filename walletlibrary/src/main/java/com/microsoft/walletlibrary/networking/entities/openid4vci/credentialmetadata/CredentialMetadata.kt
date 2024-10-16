@@ -7,6 +7,7 @@ import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.net.URL
 
@@ -16,22 +17,28 @@ import java.net.URL
 @Serializable
 internal data class CredentialMetadata(
     // The end point of the credential issuer.
-    val credential_issuer: String? = null,
+    @SerialName("credential_issuer")
+    val credentialIssuer: String? = null,
 
     // The authorization servers property is a list of endpoints that can be used to get access token for this issuer.
-    val authorization_servers: List<String>? = null,
+    @SerialName("authorization_servers")
+    val authorizationServers: List<String>? = null,
 
     // The endpoint used to send the proofs to in order to be issued the Verified ID.
-    val credential_endpoint: String? = null,
+    @SerialName("credential_endpoint")
+    val credentialEndpoint: String? = null,
 
     // The callback endpoint to send the result of issuance.
-    val notification_endpoint: String? = null,
+    @SerialName("notification_endpoint")
+    val notificationEndpoint: String? = null,
 
     // Token to verify the issuer owns the DID and domain that the metadata comes from.
-    val signed_metadata: String? = null,
+    @SerialName("signed_metadata")
+    val signedMetadata: String? = null,
 
     // A dictionary of Credential IDs to the corresponding contract.
-    val credential_configurations_supported: Map<String, CredentialConfiguration>? = null,
+    @SerialName("credential_configurations_supported")
+    val credentialConfigurationsSupported: Map<String, CredentialConfiguration>? = null,
 
     // Display information for the issuer.
     val display: List<LocalizedIssuerDisplayDefinition>? = null,
@@ -54,17 +61,17 @@ internal data class CredentialMetadata(
     }
 
     fun validateAuthorizationServers(credentialOffer: CredentialOffer) {
-        if (authorization_servers.isNullOrEmpty()) {
+        if (authorizationServers.isNullOrEmpty()) {
             throw OpenId4VciValidationException(
                 "Authorization servers property missing in credential metadata.",
                 VerifiedIdExceptions.INVALID_PROPERTY_EXCEPTION.value
             )
         }
-        val authorizationServerHosts = authorization_servers.map { getAuthorizationServerPath(it) }
+        val authorizationServerHosts = authorizationServers.map { getAuthorizationServerPath(it) }
         credentialOffer.grants.forEach {
-            if (!authorizationServerHosts.contains(getAuthorizationServerPath(it.value.authorization_server)))
+            if (!authorizationServerHosts.contains(getAuthorizationServerPath(it.value.authorizationServer)))
                 throw OpenId4VciValidationException(
-                    "Authorization server ${it.value.authorization_server} not found in Credential Metadata.",
+                    "Authorization server ${it.value.authorizationServer} not found in Credential Metadata.",
                     VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
                 )
         }
@@ -72,16 +79,16 @@ internal data class CredentialMetadata(
 
     fun getSupportedCredentialConfigurations(credentialConfigurationIds: List<String>): List<CredentialConfiguration> {
         val supportedConfigIds = mutableListOf<CredentialConfiguration>()
-        if (credential_configurations_supported == null)
+        if (credentialConfigurationsSupported == null)
             return supportedConfigIds
         credentialConfigurationIds.forEach { id ->
-            credential_configurations_supported[id]?.let { supportedConfigIds.add(it) }
+            credentialConfigurationsSupported[id]?.let { supportedConfigIds.add(it) }
         }
         return supportedConfigIds
     }
 
     fun verifyIfCredentialIssuerExist() {
-        if (credential_issuer == null)
+        if (credentialIssuer == null)
             throw OpenId4VciValidationException(
                 "Credential metadata does not contain credential_issuer.",
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
@@ -89,7 +96,7 @@ internal data class CredentialMetadata(
     }
 
     fun verifyIfSignedMetadataExist() {
-        if (signed_metadata == null)
+        if (signedMetadata == null)
             throw OpenId4VciValidationException(
                 "Credential metadata does not contain signed_metadata.",
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
