@@ -111,7 +111,7 @@ class OpenIdURLRequestResolverTest {
         every { mockVerifiedIdRequestURL.url.scheme } returns "openid-vc"
         every { mockLibraryConfiguration.isPreviewFeatureEnabled(any()) } returns false
         mockkObject(OpenIdResolver)
-        coEvery { OpenIdResolver.getRequest(any()) } returns mockk()
+        coEvery { OpenIdResolver.getRequest(any(), any()) } returns mockk()
 
         runBlocking {
             // Act

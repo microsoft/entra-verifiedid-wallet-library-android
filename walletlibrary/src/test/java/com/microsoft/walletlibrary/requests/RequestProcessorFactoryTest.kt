@@ -16,28 +16,27 @@ import org.junit.Test
 
 class RequestProcessorFactoryTest {
     private val firstMockRequestProcessor: RequestProcessor<OpenIdRawRequest> = mockk()
-    private val mockVerifiedIdRequestInput: VerifiedIdRequestInput = mockk()
-    private val mockRequestResolver: RequestResolver = mockk()
+    private val mockRawRequest: OpenIdRawRequest = mockk()
     private val requestProcessorFactory = RequestProcessorFactory()
 
-    private fun hasCompatibleResolver() {
-        every { mockRequestResolver.canResolve(mockVerifiedIdRequestInput) } returns true
+    private fun hasCompatibleHandler() {
+        coEvery { firstMockRequestProcessor.canHandleRequest(mockRawRequest) } returns true
     }
 
-    private fun doesNotHaveCompatibleResolver() {
-        every { mockRequestResolver.canResolve(mockVerifiedIdRequestInput) } returns false
+    private fun doesNotHaveCompatibleHandler(mockRawRequest: OpenIdRawRequest) {
+        coEvery { firstMockRequestProcessor.canHandleRequest(mockRawRequest) } returns false
     }
 
     @Test
     fun handler_RegisterOneHandler_Succeeds() {
         // Arrange
         requestProcessorFactory.requestProcessors.add(firstMockRequestProcessor)
-        hasCompatibleResolver()
+        hasCompatibleHandler()
         coEvery { firstMockRequestProcessor.canHandleRequest(any()) } returns true
 
         runBlocking {
             // Act
-            val actualResult = requestProcessorFactory.getHandler(mockRequestResolver)
+            val actualResult = requestProcessorFactory.getHandler(mockRawRequest)
 
             // Assert
             assertThat(actualResult).isEqualTo(firstMockRequestProcessor)
@@ -49,7 +48,7 @@ class RequestProcessorFactoryTest {
         // Act and Assert
         assertThatThrownBy {
             runBlocking {
-                requestProcessorFactory.getHandler(mockRequestResolver)
+                requestProcessorFactory.getHandler(mockRawRequest)
             }
         }.isInstanceOf(
             HandlerMissingException::class.java
@@ -60,13 +59,13 @@ class RequestProcessorFactoryTest {
     fun handler_NoCompatibleResolver_ThrowsException() {
         // Arrange
         requestProcessorFactory.requestProcessors.add(firstMockRequestProcessor)
-        doesNotHaveCompatibleResolver()
+        doesNotHaveCompatibleHandler(mockRawRequest)
         coEvery { firstMockRequestProcessor.canHandleRequest(any()) } returns false
 
         // Act and Assert
         assertThatThrownBy {
             runBlocking {
-                requestProcessorFactory.getHandler(mockRequestResolver)
+                requestProcessorFactory.getHandler(mockRawRequest)
             }
         }.isInstanceOf(
             UnSupportedRawRequestException::class.java
@@ -79,14 +78,13 @@ class RequestProcessorFactoryTest {
         val secondMockRequestProcessor: RequestProcessor<OpenIdRawRequest> = mockk()
         requestProcessorFactory.requestProcessors.add(firstMockRequestProcessor)
         requestProcessorFactory.requestProcessors.add(secondMockRequestProcessor)
-        hasCompatibleResolver()
-        doesNotHaveCompatibleResolver()
         coEvery { firstMockRequestProcessor.canHandleRequest(any()) } returns true
         coEvery { secondMockRequestProcessor.canHandleRequest(any()) } returns false
+        hasCompatibleHandler()
 
         runBlocking {
             // Act
-            val actualResult = requestProcessorFactory.getHandler(mockRequestResolver)
+            val actualResult = requestProcessorFactory.getHandler(mockRawRequest)
 
             // Assert
             assertThat(actualResult).isEqualTo(firstMockRequestProcessor)

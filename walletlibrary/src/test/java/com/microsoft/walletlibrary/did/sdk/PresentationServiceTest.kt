@@ -197,7 +197,7 @@ class PresentationServiceTest {
         every { mockUri.getQueryParameter("request") } returns null
         every { mockUri.getQueryParameter("request_uri") } returns requestUriParam
         val expectedPresentationRequest = unwrapPresentationContent(expectedPresentationRequestJwt)
-        coEvery { presentationService["fetchRequest"](requestUriParam) } returns KotlinResult.success(
+        coEvery { presentationService["fetchRequest"](requestUriParam, emptyList<String>()) } returns KotlinResult.success(
             expectedPresentationRequest
         )
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
@@ -205,7 +205,7 @@ class PresentationServiceTest {
 
         runBlocking {
             // act
-            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl, emptyList())
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
             val actualPresentationRequestContent = (actualRequest as Result.Success).payload.content
 
@@ -244,7 +244,7 @@ class PresentationServiceTest {
 
         runBlocking {
             // act
-            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl, emptyList())
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
             val actualPresentationRequestContent = (actualRequest as Result.Success).payload.content
             val expectedPresentationRequestContent = defaultTestSerializer.decodeFromString(
@@ -280,7 +280,7 @@ class PresentationServiceTest {
 
         runBlocking {
             // act
-            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl, emptyList())
             // assert
             assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
             assertThat((actualRequest as Result.Failure).payload).isInstanceOf(
@@ -303,7 +303,7 @@ class PresentationServiceTest {
 
         runBlocking {
             // act
-            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl, emptyList())
             // assert
             assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
             assertThat((actualRequest as Result.Failure).payload).isInstanceOf(PresentationException::class.java)
@@ -386,7 +386,7 @@ class PresentationServiceTest {
 
     private fun mockPresentationRequestFromNetwork() {
         val expectedPresentationRequest = unwrapPresentationContent(expectedPresentationRequestJwt)
-        coEvery { presentationService["fetchRequest"]("suppliedOpenIdUrl") } returns KotlinResult.success(
+        coEvery { presentationService["fetchRequest"]("suppliedOpenIdUrl", emptyList<String>()) } returns KotlinResult.success(
             expectedPresentationRequest
         )
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
@@ -394,7 +394,7 @@ class PresentationServiceTest {
 
     private fun mockPresentationRequestWithInvalidSignatureFromNetwork() {
         val expectedPresentationRequest = unwrapPresentationContent(expectedPresentationRequestJwt)
-        coEvery { presentationService["fetchRequest"]("suppliedOpenIdUrl") } returns KotlinResult.success(
+        coEvery { presentationService["fetchRequest"]("suppliedOpenIdUrl", emptyList<String>()) } returns KotlinResult.success(
             expectedPresentationRequest
         )
         coEvery { mockedJwtValidator.verifySignature(any()) } returns false

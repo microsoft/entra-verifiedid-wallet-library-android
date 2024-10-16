@@ -12,11 +12,13 @@ import com.microsoft.walletlibrary.util.http.httpagent.IResponse
  */
 internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private val httpAgentUtils: HttpAgentUtils) {
 
-    suspend fun getRequest(overrideUrl: String): Result<IResponse> {
+    suspend fun getRequest(overrideUrl: String, preferHeaders: List<String>): Result<IResponse> {
+        val mutablePreferHeaders = preferHeaders.toMutableList()
+        mutablePreferHeaders.add("JWT-interop-profile-0.0.1")
         return agent.get(overrideUrl, httpAgentUtils.combineMaps(
             httpAgentUtils.defaultHeaders(),
             mapOf(
-                Constants.PREFER to "JWT-interop-profile-0.0.1"
+                Constants.PREFER to httpAgentUtils.formatPreferValues(mutablePreferHeaders)
         )))
     }
 
