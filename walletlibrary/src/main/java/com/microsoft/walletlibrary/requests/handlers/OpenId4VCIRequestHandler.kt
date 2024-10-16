@@ -128,7 +128,10 @@ internal class OpenId4VCIRequestHandler(
 
         // By this point, we know credential issuer is not null.
         val accessTokenEndpoint = fetchAccessTokenEndpointFromOpenIdWellKnownConfig(
-            credentialMetadata.credentialIssuer!!
+            credentialMetadata.credentialIssuer ?: throw OpenId4VciValidationException(
+                "Credential metadata does not contain credential_issuer.",
+                VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
+            )
         )
         val requirement = transformToRequirement(
             credentialConfiguration.scope,
@@ -195,7 +198,7 @@ internal class OpenId4VCIRequestHandler(
         return if (requirements.isEmpty()) {
             throw OpenId4VciValidationException(
                 "No grants defined in credential offer.",
-                VerifiedIdExceptions.MALFORMED_CREDENTIAL_OFFER_EXCEPTION.value
+                VerifiedIdExceptions.REQUIREMENT_MISSING_EXCEPTION.value
             )
         } else if (requirements.size == 1) {
             requirements.first()
@@ -266,7 +269,10 @@ internal class OpenId4VCIRequestHandler(
         OpenID4VCIPreAuthAccessTokenResolver(libraryConfiguration).resolve(
             openId4VCIPinRequirement.preAuthorizedCode,
             openId4VCIPinRequirement,
-            openId4VCIPinRequirement.accessTokenEndpoint!!
+            openId4VCIPinRequirement.accessTokenEndpoint ?: throw OpenId4VciValidationException(
+                "Access token endpoint should be defined for PIN OpenId4VcI requirement.",
+                VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value
+            )
         )
     }
 }

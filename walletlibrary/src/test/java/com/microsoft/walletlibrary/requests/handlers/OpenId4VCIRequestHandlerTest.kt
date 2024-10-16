@@ -427,7 +427,7 @@ class OpenId4VCIRequestHandlerTest {
             assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
             assertThat(actualException?.message).contains("No grants defined in credential offer.")
             assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
-                VerifiedIdExceptions.MALFORMED_CREDENTIAL_OFFER_EXCEPTION.value
+                VerifiedIdExceptions.REQUIREMENT_MISSING_EXCEPTION.value
             )
         }
     }
