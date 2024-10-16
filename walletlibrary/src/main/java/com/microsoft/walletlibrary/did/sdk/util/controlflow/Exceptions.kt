@@ -99,7 +99,7 @@ class RedirectException(message: String, retryable: Boolean) : NetworkException(
 
 class ExpiredTokenException(message: String, retryable: Boolean) : NetworkException(message, retryable)
 
-class InvalidPinException(message: String, retryable: Boolean) : NetworkException(message, retryable)
+class InvalidPinException(message: String, retryable: Boolean, val attemptsLeft: Int? = null) : NetworkException(message, retryable)
 
 class RepositoryException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
