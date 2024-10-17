@@ -22,7 +22,7 @@ object VCVerifiedIdSerializer : VerifiedIdSerializer<com.microsoft.walletlibrary
 
     fun deserialize(
         rawVc: com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential,
-        contract: VerifiableCredentialContract
+        contract: VerifiableCredentialContract? = null
     ): VerifiedId {
         return VerifiableCredential(rawVc, contract, rawVc.contents.vc.type)
     }

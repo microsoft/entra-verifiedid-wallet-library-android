@@ -11,8 +11,8 @@ import java.util.Date
  */
 @Serializable
 internal class VerifiableCredential(
-    val raw: VerifiableCredential,
-    val contract: VerifiableCredentialContract? = null,
+    internal val raw: VerifiableCredential,
+    internal val contract: VerifiableCredentialContract? = null,
     override val types: List<String> = raw.contents.vc.type
 ) : VerifiedId {
     override val id = raw.jti
