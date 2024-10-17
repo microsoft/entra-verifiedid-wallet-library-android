@@ -12,7 +12,8 @@ import java.util.Date
 @Serializable
 internal class VerifiableCredential(
     internal val raw: VerifiableCredential,
-    internal val contract: VerifiableCredentialContract
+    internal val contract: VerifiableCredentialContract? = null,
+    override val types: List<String> = raw.contents.vc.type
 ): VerifiedId {
     override val id = raw.jti
 
@@ -22,20 +23,18 @@ internal class VerifiableCredential(
     @Serializable(with = DateSerializer::class)
     override val expiresOn = raw.contents.exp?.let { Date(it * 1000L) }
 
-    val types = raw.contents.vc.type
-
-    override val style = contract.display.toVerifiedIdStyle()
+    override val style = contract?.display?.toVerifiedIdStyle()
 
     override fun getClaims(): ArrayList<VerifiedIdClaim> {
-        val claimDescriptors = contract.display.claims
+        val claimDescriptors = contract?.display?.claims
         val claimValues = raw.contents.vc.credentialSubject
 
         //TODO("Add support for type and path in Claims)
         val claims = ArrayList<VerifiedIdClaim>()
         for ((claimIdentifier, claimValue) in claimValues) {
-            val claimDescriptor = claimDescriptors["vc.credentialSubject.$claimIdentifier"]
-            claimDescriptor?.let { claims.add(VerifiedIdClaim(claimDescriptor.label, claimValue, claimDescriptor.type)) }
-                ?: claims.add(VerifiedIdClaim(claimIdentifier, claimValue))
+            val claimDescriptor = claimDescriptors?.get("vc.credentialSubject.$claimIdentifier")
+            claimDescriptor?.let { claims.add(VerifiedIdClaim(claimIdentifier, claimValue, claimDescriptor.label, claimDescriptor.type)) }
+                ?: claims.add(VerifiedIdClaim(claimIdentifier, claimValue, null, null))
         }
         return claims
     }
