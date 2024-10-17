@@ -26,7 +26,8 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
         overrideUrl: String,
         token: String,
         vpToken: String,
-        state: String?
+        state: String?,
+        additionalHeaders: Map<String, String> = emptyMap()
     ): Result<IResponse> {
         val body = URLFormEncoding.encode(mapOf<String, Any?>(
             "id_token" to token,
@@ -35,7 +36,10 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
         ))
         return agent.post(
             overrideUrl,
-            httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.UrlFormEncoded, body),
+            httpAgentUtils.combineMaps(
+                additionalHeaders,
+                httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.UrlFormEncoded, body)
+            ),
             body
         )
     }
@@ -44,7 +48,8 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
         overrideUrl: String,
         token: String,
         vpToken: List<String>,
-        state: String?
+        state: String?,
+        additionalHeaders: Map<String, String> = emptyMap()
     ): Result<IResponse> {
         val body = URLFormEncoding.encode(mapOf<String, Any?>(
             "id_token" to token,
@@ -53,7 +58,10 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
         ))
         return agent.post(
             overrideUrl,
-            httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.UrlFormEncoded, body),
+            httpAgentUtils.combineMaps(
+                additionalHeaders,
+                httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.UrlFormEncoded, body)
+            ),
             body
         )
     }

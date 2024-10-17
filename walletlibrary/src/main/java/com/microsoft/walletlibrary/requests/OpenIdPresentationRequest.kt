@@ -34,12 +34,19 @@ internal class OpenIdPresentationRequest(
     val request: OpenIdProcessedRequest,
 
     private val libraryConfiguration: LibraryConfiguration
-) : VerifiedIdPresentationRequest {
+) : VerifiedIdPresentationRequest, HttpProtocolRequest {
+    private var additionalHeaders = emptyMap<String, String>()
+
     // Indicates whether presentation request is satisfied on client side.
     override fun isSatisfied(): Boolean {
         val validationResult = requirement.validate()
         //TODO("Add logging")
         return !validationResult.isFailure
+    }
+
+    // Sets additional headers to include in the response
+    override fun setAdditionalHeaders(headers: Map<String, String>) {
+        additionalHeaders = headers
     }
 
     // Completes the presentation request and returns Result with success status if successful.
@@ -62,14 +69,16 @@ internal class OpenIdPresentationRequest(
                         request.presentationRequest.content.redirectUrl,
                         idToken,
                         vpTokens,
-                        request.presentationRequest.content.state
+                        request.presentationRequest.content.state,
+                        additionalHeaders
                     )
                 } else {
                     libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponse(
                         request.presentationRequest.content.redirectUrl,
                         idToken,
                         vpTokens.first(),
-                        request.presentationRequest.content.state
+                        request.presentationRequest.content.state,
+                        additionalHeaders
                     )
                 }
                 result.exceptionOrNull()?.let {
