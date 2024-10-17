@@ -1,3 +1,4 @@
+/*
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 package com.microsoft.walletlibrary.requests
@@ -34,3 +35,4 @@ object VerifiedIdRequestSerializer : KSerializer<VerifiedIdRequest<*>> {
         }
     }
 }
+*/
