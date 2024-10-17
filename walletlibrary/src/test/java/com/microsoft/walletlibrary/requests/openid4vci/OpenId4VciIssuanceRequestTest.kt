@@ -9,6 +9,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.identifier.IdentifierManager
 import com.microsoft.walletlibrary.networking.entities.openid4vci.RawOpenID4VCIResponse
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
@@ -24,6 +25,7 @@ import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.UserCanceledException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.defaultTestSerializer
 import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
 import com.nimbusds.jose.jwk.JWK
@@ -48,11 +50,16 @@ class OpenId4VciIssuanceRequestTest {
     private val mockPreviewFeatureFlags: PreviewFeatureFlags = mockk()
     private val mockedKeyStore: EncryptedKeyStore = mockk()
     private val mockedTokenSigner: TokenSigner = mockk()
+    private val mockWalletLibraryLogger: WalletLibraryLogger = mockk()
+    private val mockIdentifierManager = mockk<IdentifierManager>()
     private val libraryConfiguration = LibraryConfiguration(
         mockPreviewFeatureFlags,
         mockHttpAgentApiProvider,
         defaultTestSerializer,
-        mockedTokenSigner
+        rootOfTrustResolver = null,
+        mockIdentifierManager,
+        mockedTokenSigner,
+        mockWalletLibraryLogger
     )
     private val slot = slot<String>()
     private val mockedIdentifier: Identifier = mockk()
