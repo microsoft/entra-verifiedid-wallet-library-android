@@ -59,7 +59,7 @@ object OpenIdResponder {
             }
         }
         val presentationResponseResult =
-            VerifiableCredentialSdk.presentationService.sendResponse(presentationRequest, presentationResponses)
+            VerifiableCredentialSdk.presentationService.sendResponse(presentationRequest, presentationResponses, additionalHeaders)
         if (presentationResponseResult is Result.Failure) {
             throw OpenIdResponseCompletionException(
                 "Unable to send presentation response",
