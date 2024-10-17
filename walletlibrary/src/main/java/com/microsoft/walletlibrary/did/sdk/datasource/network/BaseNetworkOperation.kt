@@ -44,7 +44,8 @@ internal abstract class BaseNetworkOperation<T> {
                 return onFailure(it)
             }
         } catch (exception: IOException) {
-            return Result.failure(LocalNetworkException("Failed to send request.", exception))
+            SdkLog.i("Failed to send request because of ${exception.message}", exception)
+            return Result.failure(LocalNetworkException("Failed to send request because of ${exception.message}", exception))
         }
         return Result.failure(SdkException("Failed to get a response"))
     }
@@ -62,14 +63,14 @@ internal abstract class BaseNetworkOperation<T> {
         }
         val responseBody = response.body.decodeToString()
         val errorMessage = NetworkErrorParser.extractErrorMessage(responseBody) ?: responseBody
-        val error = when (response.status) {
+        val error = when (val responseStatusCode = response.status) {
             301, 302, 308 -> RedirectException(errorMessage, false)
             401 -> UnauthorizedException(errorMessage, false)
             400, 402 -> ClientException(errorMessage, false)
             403 -> ForbiddenException(errorMessage, false)
             404 -> NotFoundException(errorMessage, false)
             500, 501, 502, 503 -> ServiceUnreachableException(errorMessage, true)
-            else -> NetworkException("Unknown Status code", true)
+            else -> NetworkException("Unknown Status code $responseStatusCode", true)
         }
         error.errorCode = response.status.toString()
         error.correlationVector = response.headers[CORRELATION_VECTOR_HEADER]

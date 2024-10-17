@@ -75,7 +75,7 @@ internal class OpenIdPresentationRequest(
                             idToken,
                             vpTokens,
                             request.presentationRequest.content.state,
-                            emptyMap()
+                            additionalHeaders ?: emptyMap()
                         )
                     } else {
                         libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponse(
@@ -83,17 +83,17 @@ internal class OpenIdPresentationRequest(
                             idToken,
                             vpTokens.first(),
                             request.presentationRequest.content.state,
-                            emptyMap()
+                            additionalHeaders ?: emptyMap()
                         )
                     }
                     result.exceptionOrNull()?.let {
                         throw it
                     }
                 } else {
-                    OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, emptyMap())
+                    OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, additionalHeaders)
                 }
             } else {
-                OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, emptyMap())
+                OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, additionalHeaders)
             }
         }
     }
