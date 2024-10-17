@@ -57,7 +57,7 @@ class VerifiedIdsAdapter(
         holder: VerifiedIdsViewHolder.VerifiedIdVc,
         verifiedIdDisplay: VerifiedIdDisplay
     ) {
-        holder.binding.name.text = "Title: ${verifiedIdDisplay.verifiedId.style.name}"
+        holder.binding.name.text = "Title: ${verifiedIdDisplay.verifiedId.style?.name}"
         holder.binding.issuedOn.text = "Issued On: ${verifiedIdDisplay.verifiedId.issuedOn}"
         holder.binding.issuer.text = "Issuer: ${(verifiedIdDisplay.verifiedId.style as BasicVerifiedIdStyle).issuer}"
         holder.binding.expiry.text = "Expiry: ${verifiedIdDisplay.verifiedId.expiresOn}"

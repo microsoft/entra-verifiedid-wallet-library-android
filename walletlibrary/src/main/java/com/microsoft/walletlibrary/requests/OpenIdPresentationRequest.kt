@@ -51,4 +51,8 @@ internal class OpenIdPresentationRequest(
             )
         }
     }
+
+    override fun getNonce(): String {
+        return request.rawRequest.content.nonce
+    }
 }
