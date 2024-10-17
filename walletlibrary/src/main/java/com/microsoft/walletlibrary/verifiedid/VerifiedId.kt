@@ -21,7 +21,7 @@ interface VerifiedId {
     val expiresOn: Date?
 
     // Information needed to style a Verified ID.
-    val style: VerifiedIdStyle?
+    val style: VerifiedIdStyle
 
     // List of types of Verified ID.
     val types: List<String>?
