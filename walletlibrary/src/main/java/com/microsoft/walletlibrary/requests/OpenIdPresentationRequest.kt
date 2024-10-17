@@ -85,7 +85,7 @@ internal class OpenIdPresentationRequest(
                     throw it
                 }
             } else {
-                OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement)
+                OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, additionalHeaders)
             }
         }
     }
