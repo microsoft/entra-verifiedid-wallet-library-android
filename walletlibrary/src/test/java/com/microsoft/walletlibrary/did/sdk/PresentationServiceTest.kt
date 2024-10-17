@@ -347,7 +347,7 @@ class PresentationServiceTest {
         runBlocking {
             // act
             val presentedResponse =
-                presentationService.sendResponse(presentationRequest, presentationResponse)
+                presentationService.sendResponse(presentationRequest, presentationResponse, additionalHeaders = emptyMap())
             // assert
             assertThat(presentedResponse).isInstanceOf(Result.Success::class.java)
         }
@@ -357,6 +357,7 @@ class PresentationServiceTest {
                 presentationRequest,
                 presentationResponse,
                 masterIdentifier,
+                emptyMap<String, String>(),
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
         }

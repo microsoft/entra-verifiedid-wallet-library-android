@@ -155,7 +155,8 @@ class OpenIdPresentationRequestTest {
         coJustRun {
             OpenIdResponder.sendPresentationResponse(
                 openIdPresentationRequest.request.presentationRequest,
-                openIdPresentationRequest.requirement
+                openIdPresentationRequest.requirement,
+                additionalHeaders = emptyMap()
             )
         }
         runBlocking {
@@ -189,7 +190,8 @@ class OpenIdPresentationRequestTest {
         coEvery {
             OpenIdResponder.sendPresentationResponse(
                 openIdPresentationRequest.request.presentationRequest,
-                openIdPresentationRequest.requirement
+                openIdPresentationRequest.requirement,
+                additionalHeaders = emptyMap()
             )
         }.throws(OpenIdResponseCompletionException())
 
