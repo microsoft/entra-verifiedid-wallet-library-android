@@ -24,7 +24,8 @@ object OpenIdResponder {
     // sends the presentation response to VC SDK and returns nothing if successful.
     internal suspend fun sendPresentationResponse(
         presentationRequest: PresentationRequest,
-        requirement: Requirement
+        requirement: Requirement,
+        additionalHeaders: Map<String, String>
     ) {
         val presentationResponses = presentationRequest.getPresentationDefinitions().map { PresentationResponse(presentationRequest, it.id) }
         if (presentationResponses.size == 1) {
