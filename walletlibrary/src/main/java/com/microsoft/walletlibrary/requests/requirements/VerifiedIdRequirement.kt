@@ -17,14 +17,12 @@ import com.microsoft.walletlibrary.util.RequirementValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
-import kotlinx.serialization.Serializable
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdSerializer
 import okhttp3.internal.filterList
 
 /**
  * Represents information that describes Verified IDs required in order to complete a VerifiedID request.
  */
-@Serializable
 open class VerifiedIdRequirement(
     internal val id: String?,
 

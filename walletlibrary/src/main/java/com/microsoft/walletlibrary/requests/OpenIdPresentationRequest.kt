@@ -17,13 +17,10 @@ import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.getResult
 import com.microsoft.walletlibrary.verifiedid.StringVerifiedIdSerializer
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 /**
  * Presentation request specific to OpenId protocol.
  */
-@Serializable
 internal class OpenIdPresentationRequest(
     // Attributes describing the requester (eg. name, logo).
     override val requesterStyle: RequesterStyle,
@@ -36,7 +33,6 @@ internal class OpenIdPresentationRequest(
 
     val request: OpenIdProcessedRequest,
 
-    @Transient
     private val libraryConfiguration: LibraryConfiguration? = null
 ) : VerifiedIdPresentationRequest {
 
