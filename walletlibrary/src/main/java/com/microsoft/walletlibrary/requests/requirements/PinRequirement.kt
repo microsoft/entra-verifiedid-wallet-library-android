@@ -19,7 +19,6 @@ class PinRequirement(
     val length: Int,
 
     // Type of the pin (eg. alphanumeric, numeric).
-//    @SerialName("pinType")
     val type: String,
 
     // Indicates if pin is required or optional.
