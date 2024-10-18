@@ -5,7 +5,6 @@
 
 package com.microsoft.walletlibrary.requests.styles
 
-import android.net.Uri
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 

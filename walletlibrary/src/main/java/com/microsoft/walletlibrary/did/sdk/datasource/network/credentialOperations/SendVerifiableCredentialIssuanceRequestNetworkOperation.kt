@@ -36,7 +36,7 @@ internal class SendVerifiableCredentialIssuanceRequestNetworkOperation(
         return super.onFailure(exception).onFailure {
             when (it) {
                 is ForbiddenException -> {
-                    val innerErrorCode = it.innerErrorCodes?.substringBefore(",")
+                    val innerErrorCode = it.innerErrorCodes?.substringAfterLast(",")
                     if (innerErrorCode == Constants.INVALID_PIN) {
                         val invalidPinException = InvalidPinException(exception.message ?: "", false)
                         invalidPinException.apply {

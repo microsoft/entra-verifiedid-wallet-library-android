@@ -73,28 +73,6 @@ class VerifiedIdClientBuilder(private val context: Context) {
             polymorphic(VerifiedIdStyle::class) {
                 subclass(BasicVerifiedIdStyle::class)
             }
-            polymorphic(VerifiedIdRequest::class) {
-                subclass(ManifestIssuanceRequest::class)
-                subclass(OpenIdPresentationRequest::class)
-            }
-            polymorphic(VerifiedIdIssuanceRequest::class) {
-                subclass(ManifestIssuanceRequest::class)
-            }
-            polymorphic(VerifiedIdPresentationRequest::class) {
-                subclass(OpenIdPresentationRequest::class)
-            }
-            polymorphic(RequesterStyle::class) {
-                subclass(VerifiedIdManifestIssuerStyle::class)
-                subclass(OpenIdVerifierStyle::class)
-            }
-            polymorphic(Requirement::class) {
-                subclass(AccessTokenRequirement::class)
-                subclass(IdTokenRequirement::class)
-                subclass(PinRequirement::class)
-                subclass(SelfAttestedClaimRequirement::class)
-                subclass(GroupRequirement::class)
-                subclass(VerifiedIdRequirement::class)
-            }
         }
         ignoreUnknownKeys = true
         isLenient = true

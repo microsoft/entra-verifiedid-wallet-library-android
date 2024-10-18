@@ -22,15 +22,14 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : V
 
     // VerifiedIdClientBuilder configures and returns a VerifiedIdClient.
     init {
-        private val verifiedIdClient = VerifiedIdClientBuilder(context)
-        private val verifiedIdDao = VerifiedIdDatabase.getInstance(context).verifiedIdDao()
-        verifiedIdClient.with(listOf(
+        val builder = VerifiedIdClientBuilder(context)
+        builder.with(listOf(
             PreviewFeatureFlags.FEATURE_FLAG_PROCESSOR_EXTENSION_SUPPORT,
             PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT,
             PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN,
             PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_PRE_AUTH
         ))
-        verifiedIdClient = verifiedIdClient.build()
+        verifiedIdClient = builder.build()
     }
 
     enum class State(var value: String? = null) {

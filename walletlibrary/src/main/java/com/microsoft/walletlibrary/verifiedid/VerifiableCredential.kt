@@ -10,9 +10,9 @@ import java.util.Date
  * Holds the information related to a VerifiedID like the claims, issued and expiry dates.
  */
 @Serializable
-class VerifiableCredential(
-    val raw: VerifiableCredential,
-    val contract: VerifiableCredentialContract? = null,
+internal class VerifiableCredential(
+    internal val raw: VerifiableCredential,
+    internal val contract: VerifiableCredentialContract? = null,
     override val types: List<String> = raw.contents.vc.type
 ) : VerifiedId {
     override val id = raw.jti
