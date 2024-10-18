@@ -10,7 +10,6 @@ import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResol
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
-//import com.microsoft.walletlibrary.requests.VerifiedIdRequestSerializer
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.util.MalformedInputException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
@@ -43,22 +42,6 @@ class VerifiedIdClient(
             requestHandler.handleRequest(rawRequest, rootOfTrustResolver)
         }
     }
-
-/*    fun encodeRequest(verifiedIdRequest: VerifiedIdRequest<*>): Result<String> {
-        return try {
-            Result.success(serializer.encodeToString(VerifiedIdRequestSerializer, verifiedIdRequest))
-        } catch (exception: Exception) {
-            Result.failure(exception)
-        }
-    }
-
-    fun decodeRequest(encodedVerifiedIdRequest: String): Result<VerifiedIdRequest<*>> {
-        return try {
-            Result.success(serializer.decodeFromString(VerifiedIdRequestSerializer, encodedVerifiedIdRequest))
-        } catch (exception: Exception) {
-            Result.failure(exception)
-        }
-    }*/
 
     fun encode(verifiedId: VerifiedId): VerifiedIdResult<String> {
         return try {
