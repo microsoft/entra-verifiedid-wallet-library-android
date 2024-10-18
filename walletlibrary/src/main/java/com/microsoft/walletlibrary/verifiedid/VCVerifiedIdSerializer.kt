@@ -13,6 +13,9 @@ object VCVerifiedIdSerializer : VerifiedIdSerializer<com.microsoft.walletlibrary
             is VerifiableCredential -> {
                 verifiedId.raw
             }
+            is OpenId4VciVerifiedId -> {
+                verifiedId.raw
+            }
 
             else -> {
                 throw VerifiedIdSerializer.VerifiedIdSerializationNotSupported()
