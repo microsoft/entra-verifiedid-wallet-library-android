@@ -18,6 +18,13 @@ internal class HttpAgentUtils @Inject constructor(@Named("userAgentInfo") privat
         UrlFormEncoded
     }
 
+    fun formatPreferValues(values: List<String>): String {
+        // https://www.rfc-editor.org/rfc/rfc7240
+        // Assumes each is a preference with included parameter (preference; parameter="";...)
+        // may comma separate.
+        return values.joinToString(", ")
+    }
+
     fun combineMaps(a: Map<String, String>, b: Map<String, String>): Map<String, String> {
         val combinedMap = a.toMutableMap()
         combinedMap.putAll(b)

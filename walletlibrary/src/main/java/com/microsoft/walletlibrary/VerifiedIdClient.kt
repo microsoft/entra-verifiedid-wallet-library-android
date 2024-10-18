@@ -6,7 +6,7 @@
 package com.microsoft.walletlibrary
 
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
-import com.microsoft.walletlibrary.requests.RequestHandlerFactory
+import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
@@ -25,7 +25,7 @@ import kotlinx.serialization.json.Json
  */
 class VerifiedIdClient(
     internal val requestResolverFactory: RequestResolverFactory,
-    internal val requestHandlerFactory: RequestHandlerFactory,
+    internal val requestProcessorFactory: RequestProcessorFactory,
     internal val logger: WalletLibraryLogger,
     private val serializer: Json
 ) {
@@ -36,7 +36,7 @@ class VerifiedIdClient(
             VerifiableCredentialSdk.correlationVectorService.startNewFlowAndSave()
             val requestResolver = requestResolverFactory.getResolver(verifiedIdRequestInput)
             val rawRequest = requestResolver.resolve(verifiedIdRequestInput)
-            val requestHandler = requestHandlerFactory.getHandler(rawRequest)
+            val requestHandler = requestProcessorFactory.getHandler(rawRequest)
             requestHandler.handleRequest(rawRequest)
         }
     }

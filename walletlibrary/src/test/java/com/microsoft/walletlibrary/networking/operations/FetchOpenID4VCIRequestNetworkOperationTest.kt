@@ -35,7 +35,7 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
         // Arrange
         val apiProvider: HttpAgentApiProvider = mockk {
             every { openId4VciApi } returns mockk {
-                coEvery { getOpenID4VCIRequest(any()) } returns Result.success(
+                coEvery { getOpenID4VCIRequest(any(), any()) } returns Result.success(
                     IResponse(
                         status = 200,
                         headers = emptyMap(),
@@ -44,7 +44,7 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
                 )
             }
         }
-        val operation = FetchOpenID4VCIRequestNetworkOperation("", apiProvider)
+        val operation = FetchOpenID4VCIRequestNetworkOperation("", emptyList(), apiProvider)
 
         runBlocking {
             // Act
@@ -62,7 +62,7 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
         // Arrange
         val apiProvider: HttpAgentApiProvider = mockk {
             every { openId4VciApi } returns mockk {
-                coEvery { getOpenID4VCIRequest(any()) } returns Result.failure(
+                coEvery { getOpenID4VCIRequest(any(), any()) } returns Result.failure(
                     IHttpAgent.ClientException(
                         IResponse(
                             status = 400,
@@ -73,7 +73,7 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
                 )
             }
         }
-        val operation = FetchOpenID4VCIRequestNetworkOperation("", apiProvider)
+        val operation = FetchOpenID4VCIRequestNetworkOperation("", emptyList(), apiProvider)
 
         runBlocking {
             // Act
@@ -92,7 +92,7 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
         // Arrange
         val apiProvider: HttpAgentApiProvider = mockk {
             every { openId4VciApi } returns mockk {
-                coEvery { getOpenID4VCIRequest(any()) } returns Result.failure(
+                coEvery { getOpenID4VCIRequest(any(), any()) } returns Result.failure(
                     IHttpAgent.ClientException(
                         IResponse(
                             status = 401,
@@ -103,7 +103,7 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
                 )
             }
         }
-        val operation = FetchOpenID4VCIRequestNetworkOperation("", apiProvider)
+        val operation = FetchOpenID4VCIRequestNetworkOperation("", emptyList(), apiProvider)
 
         runBlocking {
             // Act
@@ -122,7 +122,7 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
         // Arrange
         val apiProvider: HttpAgentApiProvider = mockk {
             every { openId4VciApi } returns mockk {
-                coEvery { getOpenID4VCIRequest(any()) } returns Result.failure(
+                coEvery { getOpenID4VCIRequest(any(), any()) } returns Result.failure(
                     IHttpAgent.ClientException(
                         IResponse(
                             status = 403,
@@ -133,7 +133,7 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
                 )
             }
         }
-        val operation = FetchOpenID4VCIRequestNetworkOperation("", apiProvider)
+        val operation = FetchOpenID4VCIRequestNetworkOperation("", emptyList(), apiProvider)
 
         runBlocking {
             // Act
@@ -151,7 +151,7 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
         // Arrange
         val apiProvider: HttpAgentApiProvider = mockk {
             every { openId4VciApi } returns mockk {
-                coEvery { getOpenID4VCIRequest(any()) } returns Result.failure(
+                coEvery { getOpenID4VCIRequest(any(), any()) } returns Result.failure(
                     IHttpAgent.ServerException(
                         IResponse(
                             status = 500,
@@ -162,7 +162,7 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
                 )
             }
         }
-        val operation = FetchOpenID4VCIRequestNetworkOperation("", apiProvider)
+        val operation = FetchOpenID4VCIRequestNetworkOperation("", emptyList(), apiProvider)
 
         runBlocking {
             // Act

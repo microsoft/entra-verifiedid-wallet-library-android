@@ -10,7 +10,7 @@ import com.microsoft.walletlibrary.util.UnSupportedRequirementException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdRequirementIdConflictException
 import com.microsoft.walletlibrary.util.VerifiedIdRequirementMissingIdException
-import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
+import com.microsoft.walletlibrary.verifiedid.VCVerifiedIdSerializer
 
 /**
  * Fills the requested verifiable credentials in PresentationResponse object with Requirements object in library.
@@ -54,8 +54,10 @@ private fun PresentationResponse.addVerifiedIdRequirement(verifiedIdRequirement:
     if (matchingInputDescriptors.size > 1)
         throw VerifiedIdRequirementIdConflictException("Multiple VerifiedId Requirements have the same Ids.")
     verifiedIdRequirement.validate().getOrThrow()
-    requestedVcPresentationSubmissionMap[matchingInputDescriptors.first()] =
-        (verifiedIdRequirement.verifiedId as VerifiableCredential).raw
+    verifiedIdRequirement.verifiedId?.let {
+            verifiedId ->
+        requestedVcPresentationSubmissionMap[matchingInputDescriptors.first()] = VCVerifiedIdSerializer.serialize(verifiedId)
+    }
 }
 
 private fun PresentationResponse.addGroupRequirement(groupRequirement: GroupRequirement) {

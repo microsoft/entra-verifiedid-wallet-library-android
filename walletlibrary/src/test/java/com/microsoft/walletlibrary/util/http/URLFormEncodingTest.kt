@@ -34,9 +34,20 @@ internal class URLFormEncodingTest {
     }
 
     @Test
-    fun testEncode_withArray_shouldEncodeValueMultipleTimes() {
+    fun testEncode_withArray_throwsException() {
         // Arrange
         val input = mapOf("Test 1" to arrayOf("A", "B", "C"), "Test 2" to "123")
+
+        //Act and Assert
+        assertThatThrownBy {
+            URLFormEncoding.encode(input)
+        }.isInstanceOf(URLFormEncoding.URLEncodingException::class.java)
+    }
+
+    @Test
+    fun testEncode_withList_shouldEncodeValueMultipleTimes() {
+        // Arrange
+        val input = mapOf("Test 1" to listOf("A", "B", "C"), "Test 2" to "123")
 
         // Act
         val actual = URLFormEncoding.encode(input)
@@ -49,9 +60,9 @@ internal class URLFormEncodingTest {
     }
 
     @Test
-    fun testEncode_withArrayWithNullAndString_shouldSkipNullAndEncodeRest() {
+    fun testEncode_withListWithNullAndString_shouldSkipNullAndEncodeRest() {
         // Arrange
-        val input = mapOf("Test 1" to arrayOf("A", "B", null), "Test 2" to "123")
+        val input = mapOf("Test 1" to listOf("A", "B", null), "Test 2" to "123")
 
         // Act
         val actual = URLFormEncoding.encode(input)
@@ -64,9 +75,9 @@ internal class URLFormEncodingTest {
     }
 
     @Test
-    fun testEncode_withArrayWithNullAndNumber_throwsException() {
+    fun testEncode_withListWithNullAndNumber_throwsException() {
         // Arrange
-        val input = mapOf("Test 1" to arrayOf("A", "B", 1), "Test 2" to "123")
+        val input = mapOf("Test 1" to listOf("A", "B", 1), "Test 2" to "123")
 
         // Act and Assert
         assertThatThrownBy {
@@ -77,8 +88,8 @@ internal class URLFormEncodingTest {
     @Test
     fun testEncode_withNumber_ThrowsException() {
         // Arrange
-        val input = mapOf<String, Any>(
-            "Test 1" to arrayOf("A", "B", "C"),
+        val input = mapOf(
+            "Test 1" to listOf("A", "B", "C"),
             "Test 2" to "123",
             "Failure" to 1
         )
@@ -90,10 +101,10 @@ internal class URLFormEncodingTest {
     }
 
     @Test
-    fun testEncode_withNumberInArray_ThrowsException() {
+    fun testEncode_withNumberInList_ThrowsException() {
         // Arrange
         val input = mapOf<String, Any>(
-            "Test 1" to arrayOf("A", "B", "C", 1),
+            "Test 1" to listOf("A", "B", "C", 1),
             "Test 2" to "123"
         )
 

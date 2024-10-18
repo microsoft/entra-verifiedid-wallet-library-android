@@ -9,6 +9,8 @@ import android.net.Uri
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Fields
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
+import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeVerifiedIdFormat
+import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeVerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstraintOperator
@@ -26,13 +28,14 @@ internal fun CredentialPresentationInputDescriptor.toVerifiedIdRequirement(): Ve
             "There is no Verified ID type in the request.",
             VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value
         )
-    val verifiedIdRequirement = VerifiedIdRequirement(
+    val verifiedIdRequirement = PresentationExchangeVerifiedIdRequirement(
         this.id,
         this.schemas.map { it.uri },
         encrypted = false,
         required = true,
         this.purpose,
-        this.issuanceMetadataList.map { VerifiedIdRequestURL(Uri.parse(it.issuerContract)) }
+        this.issuanceMetadataList.map { VerifiedIdRequestURL(Uri.parse(it.issuerContract)) },
+        inputDescriptorId = this.id
     )
     val verifiedIdConstraint = toConstraint(verifiedIdRequirement)
     verifiedIdRequirement.constraint = verifiedIdConstraint

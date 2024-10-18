@@ -10,7 +10,9 @@ import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.UnspecifiedVerifiedIdException
 import com.microsoft.walletlibrary.util.UserCanceledException
@@ -37,6 +39,7 @@ class OpenIdPresentationRequestTest {
     private val rootOfTrust: RootOfTrust = mockk()
     private val rawRequest: VerifiedIdOpenIdJwtRawRequest = mockk()
     private lateinit var openIdPresentationRequest: OpenIdPresentationRequest
+    private val mockLibraryConfiguration = mockk<LibraryConfiguration>()
 
     @Test
     fun isSatisfied_ValidRequirement_ReturnsTrue() {
@@ -54,7 +57,8 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             requirement,
             rootOfTrust,
-            rawRequest
+            rawRequest,
+            mockLibraryConfiguration
         )
         every { mockVerifiedId.types } returns listOf(expectedVcType)
         (requirement as VerifiedIdRequirement).fulfill(mockVerifiedId)
@@ -81,7 +85,8 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             requirement,
             rootOfTrust,
-            rawRequest
+            rawRequest,
+            mockLibraryConfiguration
         )
 
         // Act
@@ -130,6 +135,7 @@ class OpenIdPresentationRequestTest {
     @Test
     fun completeRequest_ValidRequest_ReturnsSuccess() {
         // Arrange
+        every { mockLibraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT) } returns false
         val expectedVcType = "TestVc"
         requirement = VerifiedIdRequirement(
             "id",
@@ -142,13 +148,15 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             requirement,
             rootOfTrust,
-            rawRequest
+            rawRequest,
+            mockLibraryConfiguration
         )
         mockkObject(OpenIdResponder)
         coJustRun {
             OpenIdResponder.sendPresentationResponse(
-                openIdPresentationRequest.request.rawRequest,
-                openIdPresentationRequest.requirement
+                openIdPresentationRequest.request.presentationRequest,
+                openIdPresentationRequest.requirement,
+                additionalHeaders = emptyMap()
             )
         }
         runBlocking {
@@ -175,13 +183,15 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             requirement,
             rootOfTrust,
-            rawRequest
+            rawRequest,
+            mockLibraryConfiguration
         )
         mockkObject(OpenIdResponder)
         coEvery {
             OpenIdResponder.sendPresentationResponse(
-                openIdPresentationRequest.request.rawRequest,
-                openIdPresentationRequest.requirement
+                openIdPresentationRequest.request.presentationRequest,
+                openIdPresentationRequest.requirement,
+                additionalHeaders = emptyMap()
             )
         }.throws(OpenIdResponseCompletionException())
 
@@ -200,6 +210,7 @@ class OpenIdPresentationRequestTest {
     @Test
     fun completeRequest_FailureWhileAddingRequirements_ThrowsException() {
         // Arrange
+        every { mockLibraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT) } returns false
         val expectedVcType = "TestVc"
         requirement = VerifiedIdRequirement(
             "id",
@@ -212,12 +223,13 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             requirement,
             rootOfTrust,
-            rawRequest
+            rawRequest,
+            mockLibraryConfiguration
         )
         val presentationRequest: PresentationRequest = mockk()
         val presentationRequestContent: PresentationRequestContent = mockk()
         val presentationDefinition: PresentationDefinition = mockk()
-        every { rawRequest.rawRequest } returns presentationRequest
+        every { rawRequest.presentationRequest } returns presentationRequest
         every { presentationRequest.content } returns presentationRequestContent
         every { presentationRequestContent.clientId } returns ""
         every { presentationRequest.getPresentationDefinitions() } returns listOf(presentationDefinition)
@@ -251,7 +263,8 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             requirement,
             rootOfTrust,
-            rawRequest
+            rawRequest,
+            mockLibraryConfiguration
         )
 
         // Act
@@ -290,7 +303,8 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             groupRequirement,
             rootOfTrust,
-            rawRequest
+            rawRequest,
+            mockLibraryConfiguration
         )
         val mockVerifiedId1: VerifiableCredential = mockk()
         every { mockVerifiedId1.types } returns listOf(expectedVcType1)
