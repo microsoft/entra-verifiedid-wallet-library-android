@@ -6,6 +6,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentatio
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.createIssuedAndExpiryTime
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.toNative
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessorSerializer
+import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.LibraryConfiguration
@@ -26,35 +27,36 @@ internal class PresentationExchangeResponseBuilder(
         requirement: Requirement,
         verifiedIdSerializer: VerifiedIdSerializer<String>
     ) {
-        requirement.serialize(this, verifiedIdSerializer)?.let {
-            when (requirement) {
-                is PresentationExchangeRequirement -> {
-                    requirement.serialize(this, verifiedIdSerializer)?.let { rawCredential ->
-                        // try adding requirement to a group
-                        vpTokens.forEach {
-                            if (it.canIncludeInGroup(requirement)) {
-                                it.include(requirement, rawCredential)
-                                return@let
-                            }
-                        }
-                        // create a new group
-                        val exception =
-                            libraryConfiguration.identifierManager.getMasterIdentifier().toNative().map { identifier ->
-                                val group = PresentationExchangeSubmissionGroup(identifier)
-                                group.include(requirement, rawCredential)
-                                vpTokens.add(group)
-                                return@let
-                            }.exceptionOrNull()
-
-                        if (exception != null) {
-                            throw exception
+        when (requirement) {
+            is PresentationExchangeRequirement -> {
+                requirement.serialize(this, verifiedIdSerializer)?.let { rawCredential ->
+                    // try adding requirement to a group
+                    vpTokens.forEach {
+                        if (it.canIncludeInGroup(requirement)) {
+                            it.include(requirement, rawCredential)
+                            return@let
                         }
                     }
+                    // create a new group
+                    val exception =
+                        libraryConfiguration.identifierManager.getMasterIdentifier().toNative().map { identifier ->
+                            val group = PresentationExchangeSubmissionGroup(identifier)
+                            group.include(requirement, rawCredential)
+                            vpTokens.add(group)
+                            return@let
+                        }.exceptionOrNull()
+
+                    if (exception != null) {
+                        throw exception
+                    }
                 }
-                else -> {
-                    libraryConfiguration.logger.w("Unknown credential type ${requirement.javaClass.name} returned" +
-                            " credential data that cannot be formatted in response")
-                }
+            }
+            is GroupRequirement -> {
+                requirement.serialize(this, verifiedIdSerializer)
+            }
+            else -> {
+                libraryConfiguration.logger.w("Unknown credential type ${requirement.javaClass.name} returned" +
+                        " credential data that cannot be formatted in response")
             }
         }
     }
