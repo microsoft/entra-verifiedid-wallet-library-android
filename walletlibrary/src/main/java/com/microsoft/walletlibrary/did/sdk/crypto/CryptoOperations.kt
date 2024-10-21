@@ -5,7 +5,12 @@
 
 package com.microsoft.walletlibrary.did.sdk.crypto
 
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.Constants.SEED_BYTES
+import com.nimbusds.jose.JOSEObjectType
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.JWSHeader
+import com.nimbusds.jose.jwk.JWK
 import java.security.Key
 import java.security.KeyFactory
 import java.security.KeyPair
@@ -23,14 +28,15 @@ import javax.crypto.SecretKey
 
 internal object CryptoOperations {
 
-    fun sign(digest: ByteArray, signingKey: PrivateKey, alg: SigningAlgorithm): ByteArray {
-        val signer = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)
-        signer.apply {
-            initSign(signingKey)
-            update(digest)
-            if (alg.spec != null) setParameter(alg.spec)
-        }
-        return signer.sign()
+    fun sign(digest: ByteArray, signingKey: JWK, alg: String, keyId: String): ByteArray {
+        val token = JwsToken(digest.toString(), JWSAlgorithm(alg))
+        // adding kid value to header.
+        val header = JWSHeader.Builder(JWSAlgorithm(alg))
+            .type(JOSEObjectType.JWT)
+            .keyID(keyId)
+            .build()
+        token.sign(signingKey, header)
+        return token.serialize().toByteArray()
     }
 
     fun verify(digest: ByteArray, signature: ByteArray, publicKey: PublicKey, alg: SigningAlgorithm): Boolean {
