@@ -78,7 +78,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         extensionBuilders.add(extension)
         return this
     }
-    
+
     fun with(httpAgent: IHttpAgent): VerifiedIdClientBuilder {
         this.httpAgent = httpAgent
         return this
