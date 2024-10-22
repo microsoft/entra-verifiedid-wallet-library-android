@@ -16,9 +16,11 @@ object StringVerifiedIdSerializer : VerifiedIdSerializer<String> {
     override fun serialize(verifiedId: VerifiedId): String {
         when (verifiedId) {
             is VerifiableCredential -> {
-                return verifiedId.raw.raw
+                return serializer.encodeToString(
+                    com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential.serializer(),
+                    verifiedId.raw
+                )
             }
-
             else -> {
                 throw VerifiedIdSerializer.VerifiedIdSerializationNotSupported()
             }
