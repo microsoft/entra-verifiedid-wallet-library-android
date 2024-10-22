@@ -5,7 +5,7 @@ package com.microsoft.walletlibrary.verifiedid
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import kotlinx.serialization.json.Json
 
-object VCVerifiedIdSerializer : VerifiedIdSerializer<String> {
+object StringVCSerializer : VerifiedIdSerializer<String> {
 
     private val serializer = Json {
         ignoreUnknownKeys = true

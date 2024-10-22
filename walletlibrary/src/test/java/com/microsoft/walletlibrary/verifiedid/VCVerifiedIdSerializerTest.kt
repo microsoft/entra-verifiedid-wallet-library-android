@@ -47,7 +47,7 @@ class StringVerifiedIdSerializerTest {
             )
         val verifiedId: VerifiableCredential = mockk()
         every { verifiedId.raw } returns expectedVerifiableCredential
-        val serializer = StringVerifiedIdSerializer
+        val serializer = StringVCSerializer
         val expectedRawVc =
             """{"jti":"testJti","raw":"testVcRaw","contents":{"jti":"testJti","vc":{"@context":["contexts"],"type":["credentialTypes"],"credentialSubject":{"credSubKey":"credSubValue"}},"sub":"subject","iss":"Issuer","iat":12345678,"exp":145678998}}"""
 
@@ -76,7 +76,7 @@ class StringVerifiedIdSerializerTest {
         // Arrange
         val suppliedRawVc =
             """{"jti":"testJti","raw":"testVcRaw","contents":{"jti":"testJti","vc":{"@context":["contexts"],"type":["credentialTypes"],"credentialSubject":{"credSubKey":"credSubValue"}},"sub":"subject","iss":"Issuer","iat":12345678,"exp":145678998}}"""
-        val serializer = StringVerifiedIdSerializer
+        val serializer = StringVCSerializer
 
         // Act
         val verifiedId = serializer.deserialize(suppliedRawVc)
@@ -103,7 +103,7 @@ class StringVerifiedIdSerializerTest {
             )
         )
         val encodedContract = defaultTestSerializer.encodeToString(VerifiableCredentialContract.serializer(), suppliedContract)
-        val serializer = StringVerifiedIdSerializer
+        val serializer = StringVCSerializer
 
         // Act
         val verifiedId = serializer.deserialize(suppliedRawVc, encodedContract)
