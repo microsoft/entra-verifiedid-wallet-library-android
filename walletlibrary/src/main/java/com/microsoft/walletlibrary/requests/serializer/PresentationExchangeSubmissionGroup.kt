@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.requests.serializer
 
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationDescriptor
@@ -10,12 +11,14 @@ import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeRequirement
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeVerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
-import com.microsoft.walletlibrary.verifiedid.VCVerifiedIdSerializer
+import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.verifiedid.StringVCSerializer
 import kotlinx.serialization.json.Json
 import java.util.UUID
 
 internal class PresentationExchangeSubmissionGroup (
-    private val subject: Identifier
+    private val subject: Identifier,
+    private val libraryConfiguration: LibraryConfiguration
 ) {
     private var requirementAndCredential: MutableList<Pair<PresentationExchangeRequirement, String>> = mutableListOf()
     private var excludeInputDescriptors: MutableSet<String> = mutableSetOf()
@@ -25,7 +28,7 @@ internal class PresentationExchangeSubmissionGroup (
             // Only those of the same subject can be presented together
             it.verifiedId?.let {
                 verifiedId ->
-                val credentialSubject = VCVerifiedIdSerializer.serialize(verifiedId).contents.sub
+                val credentialSubject = libraryConfiguration.serializer.decodeFromString(VerifiableCredential.serializer(), StringVCSerializer.serialize(verifiedId)).contents.sub
                 if (credentialSubject != subject.id) {
                     return@result false
                 }

@@ -23,6 +23,12 @@ object StringVCSerializer : VerifiedIdSerializer<String> {
                     verifiedId.raw
                 )
             }
+            is OpenId4VciVerifiedId -> {
+                serializer.encodeToString(
+                    com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential.serializer(),
+                    verifiedId.raw
+                )
+            }
 
             else -> {
                 throw VerifiedIdSerializer.VerifiedIdSerializationNotSupported()

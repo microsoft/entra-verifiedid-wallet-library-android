@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.mappings.issuance
 
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.pin.IssuancePin
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
@@ -16,19 +17,20 @@ import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequir
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.util.MultipleRequirementsWithSameIdException
 import com.microsoft.walletlibrary.util.NoMatchingRequirementInRequestException
-import com.microsoft.walletlibrary.verifiedid.VCVerifiedIdSerializer
+import com.microsoft.walletlibrary.verifiedid.StringVCSerializer
+import kotlinx.serialization.json.Json
 
 /**
  * Fills the attestation requirement in IssuanceResponse object with Requirements object in library.
  */
-internal fun IssuanceResponse.addRequirements(requirement: Requirement) {
+internal fun IssuanceResponse.addRequirements(requirement: Requirement, serializer: Json) {
     when (requirement) {
         is SelfAttestedClaimRequirement -> addSelfAttestedClaimRequirement(requirement)
         is IdTokenRequirement -> addIdTokenRequirement(requirement)
         is AccessTokenRequirement -> addAccessTokenRequirement(requirement)
         is PinRequirement -> addPinRequirement(requirement)
-        is VerifiedIdRequirement -> addVerifiedIdRequirement(requirement)
-        is GroupRequirement -> addGroupRequirement(requirement)
+        is VerifiedIdRequirement -> addVerifiedIdRequirement(requirement, serializer)
+        is GroupRequirement -> addGroupRequirement(requirement, serializer)
     }
 }
 
@@ -67,7 +69,7 @@ private fun IssuanceResponse.addPinRequirement(pinRequirement: PinRequirement) {
     }
 }
 
-private fun IssuanceResponse.addVerifiedIdRequirement(verifiedIdRequirement: VerifiedIdRequirement) {
+private fun IssuanceResponse.addVerifiedIdRequirement(verifiedIdRequirement: VerifiedIdRequirement, serializer: Json) {
     verifiedIdRequirement.validate().getOrThrow()
     val presentationAttestation =
         request.getAttestations().presentations.filter { verifiedIdRequirement.types.contains(it.credentialType) }
@@ -76,16 +78,16 @@ private fun IssuanceResponse.addVerifiedIdRequirement(verifiedIdRequirement: Ver
     if (presentationAttestation.size > 1)
         throw MultipleRequirementsWithSameIdException("Multiple VerifiedId Requirements have the same Ids.")
     verifiedIdRequirement.validate()
-    verifiedIdRequirement.verifiedId?.let {
-        verifiedId ->
-        requestedVcMap[presentationAttestation.first()] = VCVerifiedIdSerializer.serialize(verifiedId)
+    verifiedIdRequirement.verifiedId?.let { verifiedId ->
+        requestedVcMap[presentationAttestation.first()] =
+            serializer.decodeFromString(VerifiableCredential.serializer(), StringVCSerializer.serialize(verifiedId))
     }
 }
 
-private fun IssuanceResponse.addGroupRequirement(groupRequirement: GroupRequirement) {
+private fun IssuanceResponse.addGroupRequirement(groupRequirement: GroupRequirement, serializer: Json) {
     groupRequirement.validate().getOrThrow()
     val requirements = groupRequirement.requirements
     for (requirement in requirements) {
-        addRequirements(requirement)
+        addRequirements(requirement, serializer)
     }
 }

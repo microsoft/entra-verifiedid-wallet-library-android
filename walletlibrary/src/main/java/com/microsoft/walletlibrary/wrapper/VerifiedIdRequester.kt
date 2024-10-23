@@ -15,6 +15,7 @@ import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.VerifiedIdResponseCompletionException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import kotlinx.serialization.json.Json
 
 /**
  * Wrapper class to wrap the completion of Issuance Request via VC SDK, map the received VerifiableCredential to VerifiedId and return it.
@@ -23,10 +24,11 @@ object VerifiedIdRequester {
     // sends the issuance response to VC SDK and returns a VerifiedId if successful.
     internal suspend fun sendIssuanceResponse(
         issuanceRequest: IssuanceRequest,
-        requirement: Requirement
+        requirement: Requirement,
+        serializer: Json
     ): VerifiedId {
         val issuanceResponse = IssuanceResponse(issuanceRequest)
-        issuanceResponse.addRequirements(requirement)
+        issuanceResponse.addRequirements(requirement, serializer)
         when (val result = VerifiableCredentialSdk.issuanceService.sendResponse(issuanceResponse)) {
             is Result.Success -> return VerifiableCredential(result.payload, issuanceRequest.contract)
             is Result.Failure -> {
