@@ -9,10 +9,10 @@ import com.microsoft.walletlibrary.requests.requirements.CryptoRequirement
  */
 internal class IdentifierFactory {
     // List of available identifiers, arranged with FIPS compliant identifiers first.
-    internal val identifiers = mutableListOf<VerifiedIdIdentifier>()
+    internal val identifiers = mutableListOf<HolderIdentifier>()
 
     // Returns the first identifier in the list that satisfies the provided cryptographic requirement.
-    internal fun getIdentifier(cryptoRequirement: CryptoRequirement) : VerifiedIdIdentifier? {
+    internal fun getIdentifier(cryptoRequirement: CryptoRequirement) : HolderIdentifier? {
         return identifiers.firstOrNull { cryptoRequirement.isSupported(it) }
     }
 }

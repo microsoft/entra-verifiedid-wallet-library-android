@@ -2,13 +2,13 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
-import com.microsoft.walletlibrary.identifier.VerifiedIdIdentifier
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
 
 /**
  * Interface for a requirement of cryptographic operations that in Identifier must satisfy.
  */
 internal interface CryptoRequirement {
 
-    // Determines if the provided VerifiedIdIdentifier satisfies the cryptographic requirement.
-    fun isSupported(verifiedIdIdentifier: VerifiedIdIdentifier) : Boolean
+    // Determines if the provided HolderIdentifier satisfies the cryptographic requirement.
+    fun isSupported(holderIdentifier: HolderIdentifier) : Boolean
 }

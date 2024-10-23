@@ -8,7 +8,7 @@ package com.microsoft.walletlibrary.identifier
 /**
  * Data model for an identifier that describes the holder of a Verified ID.
  */
-interface VerifiedIdIdentifier {
+interface HolderIdentifier {
     // The unique identifier for the Verified ID.
     val id: String
 
