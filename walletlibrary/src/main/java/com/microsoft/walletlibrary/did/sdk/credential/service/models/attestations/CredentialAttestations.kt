@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  * Class to bucket together credential requests.
  */
 @Serializable
-data class CredentialAttestations(
+internal data class CredentialAttestations(
     // IdToken Requests.
     val idTokens: List<IdTokenAttestation> = emptyList(),
 

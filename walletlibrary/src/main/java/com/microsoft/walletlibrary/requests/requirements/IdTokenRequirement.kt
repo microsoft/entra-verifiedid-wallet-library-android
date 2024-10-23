@@ -5,18 +5,15 @@
 
 package com.microsoft.walletlibrary.requests.requirements
 
-import kotlinx.serialization.Serializable
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessorSerializer
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdSerializer
-import kotlin.reflect.safeCast
 
 /**
  * Represents information that describes Id Token required in order to complete a VerifiedID request.
  */
-@Serializable
 class IdTokenRequirement(
     internal val id: String,
 

@@ -17,13 +17,10 @@ import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.getResult
 import com.microsoft.walletlibrary.verifiedid.StringVerifiedIdSerializer
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 /**
  * Presentation request specific to OpenId protocol.
  */
-@Serializable
 internal class OpenIdPresentationRequest(
     // Attributes describing the requester (eg. name, logo).
     override val requesterStyle: RequesterStyle,
@@ -36,7 +33,6 @@ internal class OpenIdPresentationRequest(
 
     val request: OpenIdProcessedRequest,
 
-    @Transient
     private val libraryConfiguration: LibraryConfiguration? = null
 ) : VerifiedIdPresentationRequest {
 
@@ -66,7 +62,7 @@ internal class OpenIdPresentationRequest(
                     val idToken = builder.buildIdToken(
                         request.presentationRequest.getPresentationDefinitions().first().id,
                         request.presentationRequest.content.clientId,
-                        request.presentationRequest.content.nonce,
+                        request.presentationRequest.content.nonce
                     )
 
                     val result = if (vpTokens.size > 1) {
@@ -75,7 +71,7 @@ internal class OpenIdPresentationRequest(
                             idToken,
                             vpTokens,
                             request.presentationRequest.content.state,
-                            emptyMap()
+                            additionalHeaders ?: emptyMap()
                         )
                     } else {
                         libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponse(
@@ -83,17 +79,17 @@ internal class OpenIdPresentationRequest(
                             idToken,
                             vpTokens.first(),
                             request.presentationRequest.content.state,
-                            emptyMap()
+                            additionalHeaders ?: emptyMap()
                         )
                     }
                     result.exceptionOrNull()?.let {
                         throw it
                     }
                 } else {
-                    OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, emptyMap())
+                    OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, additionalHeaders)
                 }
             } else {
-                OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, emptyMap())
+                OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, additionalHeaders)
             }
         }
     }

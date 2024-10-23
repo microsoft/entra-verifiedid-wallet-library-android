@@ -12,32 +12,17 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiP
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.identifier.IdentifierManager
-import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
-import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdExtension
-import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest
-import com.microsoft.walletlibrary.requests.VerifiedIdPresentationRequest
-import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.handlers.OpenId4VCIRequestHandler
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import com.microsoft.walletlibrary.requests.handlers.SignedMetadataProcessor
 import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
-import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
-import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
-import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
-import com.microsoft.walletlibrary.requests.requirements.PinRequirement
-import com.microsoft.walletlibrary.requests.requirements.Requirement
-import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
-import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.requests.resolvers.RequestResolver
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
-import com.microsoft.walletlibrary.requests.styles.OpenIdVerifierStyle
-import com.microsoft.walletlibrary.requests.styles.RequesterStyle
-import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.PreviewFeatureFlags
@@ -73,28 +58,6 @@ class VerifiedIdClientBuilder(private val context: Context) {
             polymorphic(VerifiedIdStyle::class) {
                 subclass(BasicVerifiedIdStyle::class)
             }
-            polymorphic(VerifiedIdRequest::class) {
-                subclass(ManifestIssuanceRequest::class)
-                subclass(OpenIdPresentationRequest::class)
-            }
-            polymorphic(VerifiedIdIssuanceRequest::class) {
-                subclass(ManifestIssuanceRequest::class)
-            }
-            polymorphic(VerifiedIdPresentationRequest::class) {
-                subclass(OpenIdPresentationRequest::class)
-            }
-            polymorphic(RequesterStyle::class) {
-                subclass(VerifiedIdManifestIssuerStyle::class)
-                subclass(OpenIdVerifierStyle::class)
-            }
-            polymorphic(Requirement::class) {
-                subclass(AccessTokenRequirement::class)
-                subclass(IdTokenRequirement::class)
-                subclass(PinRequirement::class)
-                subclass(SelfAttestedClaimRequirement::class)
-                subclass(GroupRequirement::class)
-                subclass(VerifiedIdRequirement::class)
-            }
         }
         ignoreUnknownKeys = true
         isLenient = true
@@ -115,7 +78,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         extensionBuilders.add(extension)
         return this
     }
-    
+
     fun with(httpAgent: IHttpAgent): VerifiedIdClientBuilder {
         this.httpAgent = httpAgent
         return this
