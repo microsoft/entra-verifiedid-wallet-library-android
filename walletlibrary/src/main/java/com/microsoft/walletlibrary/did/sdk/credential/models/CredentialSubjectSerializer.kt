@@ -11,7 +11,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.jsonPrimitive
-import org.json.JSONException
 
 /**
  * We currently only support Strings as values of claims contained under credentialSubject:.
@@ -45,7 +44,8 @@ internal object CredentialSubjectSerializer :
         element.entries.forEach { entry ->
             try {
                 newContent[entry.key] = serializer.decodeFromString(JsonElement.serializer(), entry.value.jsonPrimitive.content)
-            } catch (_: JSONException) {
+            } catch (_: Exception) {
+                // cannot check for the more precise JsonDecodingException
                 newContent[entry.key] = entry.value.jsonPrimitive
             }
 
