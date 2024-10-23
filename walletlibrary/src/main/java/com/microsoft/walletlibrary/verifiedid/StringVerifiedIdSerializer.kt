@@ -9,7 +9,6 @@ object StringVerifiedIdSerializer : VerifiedIdSerializer<String> {
             is VerifiableCredential -> {
                 return verifiedId.raw.raw
             }
-
             else -> {
                 throw VerifiedIdSerializer.VerifiedIdSerializationNotSupported()
             }

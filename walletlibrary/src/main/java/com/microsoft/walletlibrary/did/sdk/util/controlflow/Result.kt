@@ -11,7 +11,7 @@ import kotlin.Result as KotlinResult
 
 typealias Success = Boolean
 
-sealed class Result<out S> {
+internal sealed class Result<out S> {
     class Success<out S>(val payload: S) : Result<S>()
     class Failure(val payload: SdkException) : Result<Nothing>()
 }
