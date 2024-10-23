@@ -5,7 +5,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
-import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOfferGrants
+import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOfferGrant
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.openid4vci.OpenId4VciIssuanceRequest
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
@@ -32,7 +32,7 @@ class OpenId4VCIRequestHandlerTest {
     private val mockCredentialMetadata = mockk<CredentialMetadata>()
     private val mockCredentialOffer = mockk<CredentialOffer>()
     private val mockCredentialConfiguration = mockk<CredentialConfiguration>()
-    private val mockCredentialOfferGrants = mockk<CredentialOfferGrants>()
+    private val mockCredentialOfferGrant = mockk<CredentialOfferGrant>()
     private val openId4VCIRequestHandler =
         spyk(OpenId4VCIRequestHandler(mockLibraryConfiguration, mockSignedMetadataProcessor))
     private val expectedCredentialOfferString = """
@@ -279,7 +279,7 @@ class OpenId4VCIRequestHandlerTest {
                 "scope"
             )
             assertThat((actualVerifiedIdRequest.requirement as AccessTokenRequirement).configuration).isEqualTo(
-                mockCredentialOfferGrants.authorization_server
+                mockCredentialOfferGrant.authorization_server
             )
         }
     }
@@ -381,8 +381,8 @@ class OpenId4VCIRequestHandlerTest {
     private fun mockCredentialOffer() {
         every { mockCredentialOffer.credential_issuer } returns "metadata_url"
         every { mockCredentialOffer.credential_configuration_ids } returns listOf("credential_id")
-        every { mockCredentialOffer.grants["authorization_code"] } returns mockCredentialOfferGrants
-        every { mockCredentialOfferGrants.authorization_server } returns "authorization_server"
+        every { mockCredentialOffer.grants["authorization_code"] } returns mockCredentialOfferGrant
+        every { mockCredentialOfferGrant.authorization_server } returns "authorization_server"
     }
 
     private fun mockCredentialOfferMissingGrant() {

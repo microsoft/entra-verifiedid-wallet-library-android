@@ -5,7 +5,7 @@ package com.microsoft.walletlibrary.did.sdk.util
 import com.microsoft.walletlibrary.did.sdk.util.MetricsConstants.DURATION
 import com.microsoft.walletlibrary.did.sdk.util.MetricsConstants.NAME
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
-import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
+import com.microsoft.walletlibrary.util.NetworkingException
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 
 internal object MetricsConstants {
@@ -36,17 +36,10 @@ internal inline fun logNetworkTime(name: String, block: () -> Result<IResponse>)
         requestId = it.headers[Constants.REQUEST_ID_HEADER] ?: "none"
         code = it.status
     }.onFailure {
-        when(it) {
-            is IHttpAgent.ClientException -> {
-                cvResponse = it.response.headers[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
-                requestId = it.response.headers[Constants.REQUEST_ID_HEADER] ?: "none"
-                code = it.response.status
-            }
-            is IHttpAgent.ServerException -> {
-                cvResponse = it.response.headers[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
-                requestId = it.response.headers[Constants.REQUEST_ID_HEADER] ?: "none"
-                code = it.response.status
-            }
+        (it as? NetworkingException)?.let {
+            error ->
+            cvResponse = error.correlationId ?: cvResponse
+            code = error.statusCode?.toInt() ?: code
         }
     }
     val elapsedTime = System.currentTimeMillis() - start
