@@ -1,10 +1,9 @@
 package com.microsoft.walletlibrary.networking.operations
 
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.ClientException
 import com.microsoft.walletlibrary.networking.entities.openid4vci.RawOpenID4VCIResponse
+import com.microsoft.walletlibrary.util.NetworkingException
 import com.microsoft.walletlibrary.util.defaultTestSerializer
-import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import io.mockk.coEvery
 import io.mockk.every
@@ -56,13 +55,11 @@ class PostOpenID4VCINetworkOperationTest {
         val apiProvider: HttpAgentApiProvider = mockk {
             every { openId4VciApi } returns mockk {
                 coEvery { postOpenID4VCIRequest(any(), any(), any()) } returns Result.failure(
-                    IHttpAgent.ClientException(
-                        IResponse(
-                            status = 400,
-                            headers = emptyMap(),
-                            body = "Bad request".toByteArray(Charsets.UTF_8)
-                        )
-                    )
+                    IResponse(
+                        status = 400,
+                        headers = emptyMap(),
+                        body = "Bad request".toByteArray(Charsets.UTF_8)
+                    ).toNetworkingException()
                 )
             }
         }
@@ -76,7 +73,7 @@ class PostOpenID4VCINetworkOperationTest {
             // Assert
             assertThat(actual.isFailure).isTrue
             val unwrapped = actual.exceptionOrNull()
-            assertThat(unwrapped).isInstanceOf(ClientException::class.java)
+            assertThat(unwrapped).isInstanceOf(NetworkingException::class.java)
         }
     }
 }

@@ -1,10 +1,9 @@
 package com.microsoft.walletlibrary.networking.operations
 
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.ClientException
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
+import com.microsoft.walletlibrary.util.NetworkingException
 import com.microsoft.walletlibrary.util.defaultTestSerializer
-import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import io.mockk.coEvery
 import io.mockk.every
@@ -179,13 +178,11 @@ class FetchCredentialMetadataNetworkOperationTest {
         val apiProvider: HttpAgentApiProvider = mockk {
             every { openId4VciApi } returns mockk {
                 coEvery { getCredentialMetadata(any()) } returns Result.failure(
-                    IHttpAgent.ClientException(
                         IResponse(
                             status = 400,
                             headers = emptyMap(),
                             body = "Bad request".toByteArray(Charsets.UTF_8)
-                        )
-                    )
+                        ).toNetworkingException()
                 )
             }
         }
@@ -198,8 +195,8 @@ class FetchCredentialMetadataNetworkOperationTest {
             // Assert
             Assertions.assertThat(actual.isFailure).isTrue
             val unwrapped = actual.exceptionOrNull()
-            Assertions.assertThat(unwrapped).isInstanceOf(ClientException::class.java)
-            Assertions.assertThat((unwrapped as ClientException).errorCode?.toInt()).isEqualTo(400)
+            Assertions.assertThat(unwrapped).isInstanceOf(NetworkingException::class.java)
+            Assertions.assertThat((unwrapped as NetworkingException).statusCode).isEqualTo("400")
         }
     }
 }
