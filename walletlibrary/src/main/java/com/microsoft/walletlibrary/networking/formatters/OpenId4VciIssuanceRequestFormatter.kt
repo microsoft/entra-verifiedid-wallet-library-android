@@ -58,7 +58,7 @@ internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfigurati
             OpenID4VCIJWTProofClaims.serializer(),
             contents
         )
-        return libraryConfiguration.signer.signWithIdentifier(
+        return libraryConfiguration.tokenSigner.signWithIdentifier(
             serializedResponseContent,
             responder,
             com.microsoft.walletlibrary.util.Constants.OPENID4VCI_TYPE_HEADER

@@ -55,12 +55,14 @@ class OpenId4VCIRequestHandlerTest {
         // Arrange
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
 
-        //Act
-        val actualCanHandleResult =
-            openId4VCIRequestHandler.canHandle(expectedCredentialOfferString)
+        runBlocking {
+            //Act
+            val actualCanHandleResult =
+                openId4VCIRequestHandler.canHandleRequest(expectedCredentialOfferString)
 
-        // Assert
-        assertThat(actualCanHandleResult).isEqualTo(true)
+            // Assert
+            assertThat(actualCanHandleResult).isEqualTo(true)
+        }
     }
 
     @Test
@@ -69,11 +71,14 @@ class OpenId4VCIRequestHandlerTest {
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         val invalidCredentialOfferString = "invalid_credential_offer"
 
-        //Act
-        val actualCanHandleResult = openId4VCIRequestHandler.canHandle(invalidCredentialOfferString)
+        runBlocking {
+            //Act
+            val actualCanHandleResult =
+                openId4VCIRequestHandler.canHandleRequest(invalidCredentialOfferString)
 
-        // Assert
-        assertThat(actualCanHandleResult).isEqualTo(false)
+            // Assert
+            assertThat(actualCanHandleResult).isEqualTo(false)
+        }
     }
 
     @Test
@@ -82,21 +87,26 @@ class OpenId4VCIRequestHandlerTest {
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         val invalidCredentialOfferString = ""
 
-        //Act
-        val actualCanHandleResult = openId4VCIRequestHandler.canHandle(invalidCredentialOfferString)
+        runBlocking {
+            //Act
+            val actualCanHandleResult =
+                openId4VCIRequestHandler.canHandleRequest(invalidCredentialOfferString)
 
-        // Assert
-        assertThat(actualCanHandleResult).isEqualTo(false)
+            // Assert
+            assertThat(actualCanHandleResult).isEqualTo(false)
+        }
     }
 
     @Test
     fun canHandleTest_AnyFailureWithSerializer_ReturnsFalse() {
-        //Act
-        val actualCanHandleResult =
-            openId4VCIRequestHandler.canHandle(expectedCredentialOfferString)
+        runBlocking {
+            //Act
+            val actualCanHandleResult =
+                openId4VCIRequestHandler.canHandleRequest(expectedCredentialOfferString)
 
-        // Assert
-        assertThat(actualCanHandleResult).isEqualTo(false)
+            // Assert
+            assertThat(actualCanHandleResult).isEqualTo(false)
+        }
     }
 
     @Test
@@ -230,6 +240,7 @@ class OpenId4VCIRequestHandlerTest {
     @Test
     fun handleRequestTest_ValidVerifiedIdTransformations_ReturnsVerifiedIdRequest() {
         // Arrange
+        val rootOfTrust = RootOfTrust("root_of_trust", false)
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         mockCredentialMetadata()
         mockCredentialOffer()
@@ -243,7 +254,12 @@ class OpenId4VCIRequestHandlerTest {
                 any(),
                 any()
             )
-        } returns RootOfTrust("root_of_trust", false)
+        } returns rootOfTrust
+        coEvery {
+            openId4VCIRequestHandler["fetchAccessTokenEndpointFromOpenIdWellKnownConfig"](
+                any<String>()
+            )
+        } returns "AccessTokenEndpoint"
 
         runBlocking {
             //Act
@@ -271,6 +287,7 @@ class OpenId4VCIRequestHandlerTest {
     @Test
     fun handleRequestTest_AuthorizationCodeGrantMissing_ThrowsException() {
         // Arrange
+        val rootOfTrust = RootOfTrust("root_of_trust", false)
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         mockCredentialMetadata()
         mockCredentialOfferMissingGrant()
@@ -284,14 +301,12 @@ class OpenId4VCIRequestHandlerTest {
                 any(),
                 any()
             )
-        } returns RootOfTrust("root_of_trust", false)
-        val mockAccessTokenRequirement = mockk<AccessTokenRequirement>()
-        every {
-            openId4VCIRequestHandler["transformToRequirement"](
-                mockCredentialConfiguration.scope,
-                mockCredentialOffer
+        } returns rootOfTrust
+        coEvery {
+            openId4VCIRequestHandler["fetchAccessTokenEndpointFromOpenIdWellKnownConfig"](
+                any<String>()
             )
-        } returns mockAccessTokenRequirement
+        } returns "AccessTokenEndpoint"
 
         runBlocking {
             //Act
@@ -312,6 +327,7 @@ class OpenId4VCIRequestHandlerTest {
     @Test
     fun handleRequestTest_NullScope_ThrowsException() {
         // Arrange
+        val rootOfTrust = RootOfTrust("root_of_trust", false)
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         mockCredentialMetadata()
         mockCredentialOffer()
@@ -325,14 +341,12 @@ class OpenId4VCIRequestHandlerTest {
                 any(),
                 any()
             )
-        } returns RootOfTrust("root_of_trust", false)
-        val mockAccessTokenRequirement = mockk<AccessTokenRequirement>()
-        every {
-            openId4VCIRequestHandler["transformToRequirement"](
-                mockCredentialConfiguration.scope,
-                mockCredentialOffer
+        } returns rootOfTrust
+        coEvery {
+            openId4VCIRequestHandler["fetchAccessTokenEndpointFromOpenIdWellKnownConfig"](
+                any<String>()
             )
-        } returns mockAccessTokenRequirement
+        } returns "AccessTokenEndpoint"
 
         runBlocking {
             //Act

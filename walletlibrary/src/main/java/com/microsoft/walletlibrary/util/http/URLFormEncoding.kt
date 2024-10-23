@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.util.http
 
+import android.os.Build
 import com.microsoft.walletlibrary.util.WalletLibraryException
 import java.net.URLEncoder
 
@@ -23,20 +24,20 @@ object URLFormEncoding {
                     if (!firstKeyPair) {
                         builder.append("&")
                     }
-                    builder.append("${encodedKey}=${URLEncoder.encode(value, Charsets.UTF_8)}")
+                    builder.append("${encodedKey}=${URLEncoder.encode(value, "UTF-8")}")
                     if (firstKeyPair)
                     {
                         firstKeyPair = false
                     }
                 }
-                is Array<*> -> {
+                is List<*> -> {
                     value.iterator().forEach { arrayValue ->
                         when (arrayValue) {
                             is String -> {
                                 if (!firstKeyPair) {
                                     builder.append("&")
                                 }
-                                builder.append("${encodedKey}=${URLEncoder.encode(arrayValue, Charsets.UTF_8)}")
+                                builder.append("${encodedKey}=${URLEncoder.encode(arrayValue, "UTF-8")}")
                                 if (firstKeyPair)
                                 {
                                     firstKeyPair = false
