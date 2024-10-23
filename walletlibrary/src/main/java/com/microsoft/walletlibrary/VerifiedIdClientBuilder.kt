@@ -14,17 +14,14 @@ import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.identifier.IdentifierManager
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
-import com.microsoft.walletlibrary.requests.handlers.OpenId4VCIRequestHandler
 import com.microsoft.walletlibrary.requests.VerifiedIdExtension
+import com.microsoft.walletlibrary.requests.handlers.OpenId4VCIRequestHandler
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.requests.resolvers.RequestResolver
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
-import com.microsoft.walletlibrary.requests.styles.OpenIdVerifierStyle
-import com.microsoft.walletlibrary.requests.styles.RequesterStyle
-import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.PreviewFeatureFlags
@@ -58,10 +55,6 @@ class VerifiedIdClientBuilder(private val context: Context) {
             }
             polymorphic(VerifiedIdStyle::class) {
                 subclass(BasicVerifiedIdStyle::class)
-            }
-            polymorphic(RequesterStyle::class) {
-                subclass(VerifiedIdManifestIssuerStyle::class)
-                subclass(OpenIdVerifierStyle::class)
             }
         }
         ignoreUnknownKeys = true
