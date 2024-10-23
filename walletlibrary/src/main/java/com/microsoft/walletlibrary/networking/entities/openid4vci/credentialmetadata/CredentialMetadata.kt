@@ -60,7 +60,7 @@ internal data class CredentialMetadata(
                 VerifiedIdExceptions.INVALID_PROPERTY_EXCEPTION.value
             )
         }
-        val authorizationServerHosts = authorization_servers.map {getAuthorizationServerPath(it)}
+        val authorizationServerHosts = authorization_servers.map { getAuthorizationServerPath(it) }
         credentialOffer.grants.forEach {
             if (!authorizationServerHosts.contains(getAuthorizationServerPath(it.value.authorization_server)))
                 throw OpenId4VciValidationException(
