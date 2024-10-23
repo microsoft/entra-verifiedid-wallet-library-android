@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
+import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.VerifiedIdException
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.getResult
@@ -36,14 +37,17 @@ internal class ManifestIssuanceRequest(
 
     private var issuanceCallbackUrl: String? = null,
 
-    private var requestState: String? = null
+    private var requestState: String? = null,
+
+    private val libraryConfiguration: LibraryConfiguration
 ) : VerifiedIdIssuanceRequest {
     // Completes the issuance request and returns a Result with VerifiedId if successful.
     override suspend fun complete(): VerifiedIdResult<VerifiedId> {
         val result = getResult {
             VerifiedIdRequester.sendIssuanceResponse(
                 request.rawRequest,
-                requirement
+                requirement,
+                libraryConfiguration.serializer
             )
         }
         sendIssuanceCallbackIfRequestStateAndCallbackExists(requestState, result, issuanceCallbackUrl)

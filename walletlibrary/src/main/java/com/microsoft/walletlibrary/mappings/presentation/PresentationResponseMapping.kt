@@ -1,5 +1,7 @@
 package com.microsoft.walletlibrary.mappings.presentation
 
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
@@ -10,20 +12,22 @@ import com.microsoft.walletlibrary.util.UnSupportedRequirementException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdRequirementIdConflictException
 import com.microsoft.walletlibrary.util.VerifiedIdRequirementMissingIdException
-import com.microsoft.walletlibrary.verifiedid.VCVerifiedIdSerializer
+import com.microsoft.walletlibrary.verifiedid.StringVCSerializer
+import com.microsoft.walletlibrary.verifiedid.StringVerifiedIdSerializer
+import kotlinx.serialization.json.Json
 
 /**
  * Fills the requested verifiable credentials in PresentationResponse object with Requirements object in library.
  */
-internal fun PresentationResponse.addRequirements(requirement: Requirement) {
+internal fun PresentationResponse.addRequirements(requirement: Requirement, serializer: Json) {
     when (requirement) {
-        is GroupRequirement -> addGroupRequirement(requirement)
-        is VerifiedIdRequirement -> addVerifiedIdRequirement(requirement)
+        is GroupRequirement -> addGroupRequirement(requirement, serializer)
+        is VerifiedIdRequirement -> addVerifiedIdRequirement(requirement, serializer)
         else -> throw UnSupportedRequirementException("Requirement type ${requirement::class.simpleName} is not unsupported.")
     }
 }
 
-private fun PresentationResponse.addVerifiedIdRequirement(verifiedIdRequirement: VerifiedIdRequirement) {
+private fun PresentationResponse.addVerifiedIdRequirement(verifiedIdRequirement: VerifiedIdRequirement, serializer: Json) {
     if (verifiedIdRequirement.id == null)
         throw VerifiedIdRequirementMissingIdException("Id is missing in the VerifiedId Requirement.")
     if (verifiedIdRequirement.verifiedId == null)
@@ -32,20 +36,16 @@ private fun PresentationResponse.addVerifiedIdRequirement(verifiedIdRequirement:
             VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value
         )
     val matchingInputDescriptors =
-        request.getPresentationDefinitions().filter {
-            presentationDefinition ->
+        request.getPresentationDefinitions().filter { presentationDefinition ->
             // Limit to only this response' presentationDefinition
             presentationDefinition.id == this.requestedVcPresentationDefinitionId
-        }.map {
-            presentationDefinition ->
+        }.map { presentationDefinition ->
             // Filter to only matching inputDescriptor(s)
             presentationDefinition.credentialPresentationInputDescriptors
-                .filter {
-                    inputDescriptor ->
+                .filter { inputDescriptor ->
                     inputDescriptor.id == verifiedIdRequirement.id
                 }
-        }.reduce {
-            allInputDescriptors, inputDescriptor ->
+        }.reduce { allInputDescriptors, inputDescriptor ->
             // Flatten the inputDescriptors into a single array
             allInputDescriptors + inputDescriptor
         }
@@ -54,16 +54,16 @@ private fun PresentationResponse.addVerifiedIdRequirement(verifiedIdRequirement:
     if (matchingInputDescriptors.size > 1)
         throw VerifiedIdRequirementIdConflictException("Multiple VerifiedId Requirements have the same Ids.")
     verifiedIdRequirement.validate().getOrThrow()
-    verifiedIdRequirement.verifiedId?.let {
-            verifiedId ->
-        requestedVcPresentationSubmissionMap[matchingInputDescriptors.first()] = VCVerifiedIdSerializer.serialize(verifiedId)
+    verifiedIdRequirement.verifiedId?.let { verifiedId ->
+        requestedVcPresentationSubmissionMap[matchingInputDescriptors.first()] =
+            serializer.decodeFromString(VerifiableCredential.serializer(), StringVCSerializer.serialize(verifiedId))
     }
 }
 
-private fun PresentationResponse.addGroupRequirement(groupRequirement: GroupRequirement) {
+private fun PresentationResponse.addGroupRequirement(groupRequirement: GroupRequirement, serializer: Json) {
     groupRequirement.validate().getOrThrow()
     val requirements = groupRequirement.requirements
     for (requirement in requirements) {
-        addRequirements(requirement)
+        addRequirements(requirement, serializer)
     }
 }

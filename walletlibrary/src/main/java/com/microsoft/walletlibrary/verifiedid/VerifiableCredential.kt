@@ -15,7 +15,7 @@ internal class VerifiableCredential(
     internal val raw: VerifiableCredential,
     internal val contract: VerifiableCredentialContract? = null,
     override val types: List<String> = raw.contents.vc.type
-): VerifiedId {
+) : VerifiedId {
     override val id = raw.jti
 
     @Serializable(with = DateSerializer::class)

@@ -15,6 +15,7 @@ import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.IdInVerifiedIdRequirementDoesNotMatchRequestException
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
+import kotlinx.serialization.json.Json
 
 /**
  * Wrapper class to wrap the send presentation response to VC SDK.
@@ -25,11 +26,12 @@ object OpenIdResponder {
     internal suspend fun sendPresentationResponse(
         presentationRequest: PresentationRequest,
         requirement: Requirement,
-        additionalHeaders: Map<String, String>
+        additionalHeaders: Map<String, String>,
+        serializer: Json
     ) {
         val presentationResponses = presentationRequest.getPresentationDefinitions().map { PresentationResponse(presentationRequest, it.id) }
         if (presentationResponses.size == 1) {
-            presentationResponses.first().addRequirements(requirement)
+            presentationResponses.first().addRequirements(requirement, serializer)
         } else {
             // due to multi VP format. The outer most requirement may be grouping all requirements
             (requirement as? GroupRequirement)?.let {
@@ -44,7 +46,7 @@ object OpenIdResponder {
                     val matchingPresentationResponse = unmatchedPresentationResponses.firstOrNull {
                         presentationResponse ->
                         try {
-                            presentationResponse.addRequirements(requirement)
+                            presentationResponse.addRequirements(requirement, serializer)
                             true
                         } catch (exception: IdInVerifiedIdRequirementDoesNotMatchRequestException) {
                             // Expected to throw for requirements in other responses

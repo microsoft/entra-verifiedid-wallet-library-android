@@ -40,7 +40,7 @@ internal class OpenIdPresentationRequest(
     // Indicates whether presentation request is satisfied on client side.
     override fun isSatisfied(): Boolean {
         val validationResult = requirement.validate()
-        //TODO("Add logging")
+        // TODO("Add logging")
         return !validationResult.isFailure
     }
 
@@ -57,7 +57,8 @@ internal class OpenIdPresentationRequest(
                 builder.serialize(requirement, StringVerifiedIdSerializer)
                 val vpTokens = builder.buildVpTokens(
                     request.presentationRequest.content.clientId,
-                    request.presentationRequest.content.nonce)
+                    request.presentationRequest.content.nonce
+                )
                 val idToken = builder.buildIdToken(
                     request.presentationRequest.getPresentationDefinitions().first().id,
                     request.presentationRequest.content.clientId,
@@ -85,7 +86,12 @@ internal class OpenIdPresentationRequest(
                     throw it
                 }
             } else {
-                OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, additionalHeaders)
+                OpenIdResponder.sendPresentationResponse(
+                    request.presentationRequest,
+                    requirement,
+                    additionalHeaders,
+                    libraryConfiguration.serializer
+                )
             }
         }
     }

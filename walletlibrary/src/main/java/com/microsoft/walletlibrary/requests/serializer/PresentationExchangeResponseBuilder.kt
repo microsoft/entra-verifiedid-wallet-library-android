@@ -40,7 +40,7 @@ internal class PresentationExchangeResponseBuilder(
                     // create a new group
                     val exception =
                         libraryConfiguration.identifierManager.getMasterIdentifier().toNative().map { identifier ->
-                            val group = PresentationExchangeSubmissionGroup(identifier)
+                            val group = PresentationExchangeSubmissionGroup(identifier, libraryConfiguration)
                             group.include(requirement, rawCredential)
                             vpTokens.add(group)
                             return@let
