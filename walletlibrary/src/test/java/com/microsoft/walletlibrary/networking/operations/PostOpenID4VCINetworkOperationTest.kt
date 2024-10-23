@@ -14,7 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class PostOpenID4VCINetworkOperationTest {
-    private val expectedCredential = "valid raw VC"
+    private val expectedCredential = "some credential"
     private val mockRawOpenID4VCIResponse: RawOpenID4VCIResponse = mockk {
         every { credential } returns expectedCredential
     }
@@ -28,10 +28,11 @@ class PostOpenID4VCINetworkOperationTest {
                     IResponse(
                         status = 200,
                         headers = emptyMap(),
-                        body = defaultTestSerializer.encodeToString(
-                            RawOpenID4VCIResponse.serializer(),
-                            mockRawOpenID4VCIResponse
-                        ).toByteArray(Charsets.UTF_8)
+                        body = """
+                            {
+                              "credential": "$expectedCredential"
+                            }
+                        """.trimIndent().toByteArray(Charsets.UTF_8)
                     )
                 )
             }
