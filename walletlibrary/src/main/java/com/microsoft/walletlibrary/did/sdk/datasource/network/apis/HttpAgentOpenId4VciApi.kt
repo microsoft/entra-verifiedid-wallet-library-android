@@ -2,7 +2,6 @@ package com.microsoft.walletlibrary.did.sdk.datasource.network.apis
 
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
-import com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
 import com.microsoft.walletlibrary.util.http.URLFormEncoding
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
@@ -17,6 +16,9 @@ internal class HttpAgentOpenId4VciApi(
     private val httpAgentUtils: HttpAgentUtils,
     private val json: Json
 ) {
+    companion object {
+        const val OPENID4VCI_INTER_OP_PROFILE = "oid4vci-interop-profile-version=0.0.1"
+    }
 
     suspend fun getOpenID4VCIRequest(overrideUrl: String, preferHeaders: List<String>): Result<IResponse> {
         val headers = mutableListOf(OPENID4VCI_INTER_OP_PROFILE)
@@ -68,15 +70,14 @@ internal class HttpAgentOpenId4VciApi(
         overrideUrl: String,
         grantType: String,
         preAuthorizedCode: String,
-        txCode: String
+        txCode: String?
     ): Result<IResponse> {
-        val body = URLFormEncoding.encode(
-            mapOf<String, Any?>(
-                "grant_type" to grantType,
-                "pre-authorized_code" to preAuthorizedCode,
-                "tx_code" to txCode
-            )
+        val bodyToBeEncoded = mutableMapOf<String, Any?>(
+            "grant_type" to grantType,
+            "pre-authorized_code" to preAuthorizedCode,
         )
+        txCode?.let { bodyToBeEncoded["tx_code"] = it }
+        val body = URLFormEncoding.encode(bodyToBeEncoded)
         return agent.post(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(

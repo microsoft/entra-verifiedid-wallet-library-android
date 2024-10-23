@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmet
 
 import android.content.res.Resources
 import androidx.core.os.ConfigurationCompat
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -12,7 +13,8 @@ internal data class CredentialSubjectDefinition(
     // An array of display information to display the credential in different locales.
     val display: List<LocalizedDisplayDefinition>,
 
-    val value_type: String? = null
+    @SerialName("value_type")
+    val valueType: String? = null
 ) {
     fun getPreferredLocalizedDisplayDefinition(): LocalizedDisplayDefinition? {
         val preferredLanguages = ConfigurationCompat.getLocales(Resources.getSystem().configuration)

@@ -17,13 +17,18 @@ import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
-class OpenId4VCIRequestHandler internal constructor(
+internal class OpenId4VCIRequestHandler(
     private val libraryConfiguration: LibraryConfiguration,
     private val signedMetadataProcessor: SignedMetadataProcessor = SignedMetadataProcessor(
         libraryConfiguration
-    ),
-    override var requestProcessors: MutableList<RequestProcessorExtension<OpenIdRawRequest>> = mutableListOf()
+    )
 ) : RequestProcessor<OpenIdRawRequest> {
+
+    companion object {
+        const val WELL_KNOWN_CONFIGURATION_SUFFIX = ".well-known/openid-configuration"
+    }
+
+    override var requestProcessors: MutableList<RequestProcessorExtension<OpenIdRawRequest>> = mutableListOf()
 
     // Indicates whether the provided raw request can be handled by this handler.
     // This method checks if the raw request can be cast to CredentialOffer successfully, and if it contains the required fields.
@@ -53,7 +58,7 @@ class OpenId4VCIRequestHandler internal constructor(
                 )
 
                 // Get the root of trust from the signed metadata.
-                val rootOfTrust = credentialMetadata.signed_metadata?.let {
+                val rootOfTrust = credentialMetadata.signedMetadata?.let {
                     signedMetadataProcessor.process(it, credentialOffer.credential_issuer)
                 } ?: RootOfTrust("", false)
 
@@ -119,7 +124,7 @@ class OpenId4VCIRequestHandler internal constructor(
             credentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle()
         val verifiedIdStyle =
             credentialConfiguration.getVerifiedIdStyleInPreferredLocale(requesterStyle.name)
-        val credentialIssuer = credentialMetadata.credential_issuer ?: throw OpenId4VciValidationException(
+        val credentialIssuer = credentialMetadata.credentialIssuer ?: throw OpenId4VciValidationException(
             "Credential metadata does not contain credential_issuer.",
             VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
         )
@@ -192,7 +197,7 @@ class OpenId4VCIRequestHandler internal constructor(
         }
         return AccessTokenRequirement(
             "",
-            configuration = grants.authorization_server,
+            configuration = grants.authorizationServer,
             resourceId = scope,
             scope = "$scope/.default",
             claims = emptyList()

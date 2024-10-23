@@ -53,11 +53,10 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
         if (rawRequest !is VerifiedIdOpenIdJwtRawRequest)
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
         val presentationRequestContent = rawRequest.mapToPresentationRequestContent()
-        var request: VerifiedIdRequest<*> = if (rawRequest.requestType == RequestType.ISSUANCE)
+        return if (rawRequest.requestType == RequestType.ISSUANCE)
             handleIssuanceRequest(presentationRequestContent)
         else
             handlePresentationRequest(presentationRequestContent, rawRequest)
-        return request
     }
 
     private fun handlePresentationRequest(
