@@ -17,7 +17,7 @@ internal class EncryptedSharedPreferencesIdentifier(
     private val keyStore: EncryptedKeyStore
 ) : HolderIdentifier {
 
-    override fun sign(data: ByteArray): ByteArray {
+    override fun sign(data: String): String {
         val keyId = "$id#$keyReference"
         val privateKey = keyStore.getKey(keyReference)
         return cryptoOperations.sign(data, privateKey, algorithm, keyId)

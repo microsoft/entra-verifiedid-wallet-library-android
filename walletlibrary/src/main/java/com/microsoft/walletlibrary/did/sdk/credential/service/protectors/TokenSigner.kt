@@ -17,6 +17,6 @@ internal class TokenSigner @Inject constructor(
 ) {
     fun signWithIdentifier(payload: String, identifier: Identifier): String {
         val holderIdentifier = identifier.toHolderIdentifier(keyStore)
-        return holderIdentifier.sign(payload.toByteArray()).decodeToString()
+        return holderIdentifier.sign(payload)
     }
 }

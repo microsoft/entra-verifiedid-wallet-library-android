@@ -13,7 +13,7 @@ import com.nimbusds.jose.jwk.KeyUse
 import org.assertj.core.api.Assertions
 import org.junit.Test
 
-class JwsTokenTest {
+class JwsTokenTest1 {
 
     private val keyStore = EncryptedKeyStore(InstrumentationRegistry.getInstrumentation().targetContext)
 
@@ -39,7 +39,7 @@ class JwsTokenTest {
         val serializedToken = jwsToken.sign(encryptedSharedPreferencesIdentifier)
 
         // Assert
-        val deserializedToken = JwsToken.deserialize(serializedToken.decodeToString())
+        val deserializedToken = JwsToken.deserialize(serializedToken)
         val publicKey = keyStore.getKey("keyReferenceTest1").toPublicJWK()
         Assertions.assertThat(publicKey).isNotNull
         Assertions.assertThat(deserializedToken.verify(listOf(publicKey))).isTrue

@@ -16,7 +16,6 @@ import java.security.KeyFactory
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.MessageDigest
-import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.SecureRandom
 import java.security.Signature
@@ -28,7 +27,7 @@ import javax.crypto.SecretKey
 
 internal object CryptoOperations {
 
-    fun sign(digest: ByteArray, signingKey: JWK, alg: String, keyId: String): ByteArray {
+    fun sign(digest: String, signingKey: JWK, alg: String, keyId: String): String {
         val token = JwsToken(digest.toString(), JWSAlgorithm(alg))
         // adding kid value to header.
         val header = JWSHeader.Builder(JWSAlgorithm(alg))
@@ -36,7 +35,7 @@ internal object CryptoOperations {
             .keyID(keyId)
             .build()
         token.sign(signingKey, header)
-        return token.serialize().toByteArray()
+        return token.serialize()
     }
 
     fun verify(digest: ByteArray, signature: ByteArray, publicKey: PublicKey, alg: SigningAlgorithm): Boolean {

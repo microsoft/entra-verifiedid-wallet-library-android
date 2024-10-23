@@ -44,8 +44,8 @@ internal class JwsToken constructor(
         jwsObject.sign(signer)
     }
 
-    fun sign(identifier: HolderIdentifier): ByteArray {
-        return identifier.sign(jwsObject.payload.toBytes())
+    fun sign(identifier: HolderIdentifier): String {
+        return identifier.sign(jwsObject.payload.toString())
     }
 
     fun verify(publicKeyJWKs: List<JWK> = emptyList()): Boolean {

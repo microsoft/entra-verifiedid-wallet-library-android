@@ -30,17 +30,16 @@ class EncryptedSharedPreferencesIdentifierTest {
             cryptoOperations = CryptoOperations,
             keyStore = keyStore
         )
-        val testDataString = "{\"iss\":\"joe\",\n" +
+        val testData = "{\"iss\":\"joe\",\n" +
             " \"exp\":1300819380,\n" +
             " \"http://example.com/is_root\":true}"
-        val testDataByteArray = testDataString.toByteArray()
         val publicKey = keyStore.getKey("keyReferenceTest1").toPublicJWK()
 
         // Act
-        val signedData = encryptedSharedPreferencesIdentifier.sign(testDataByteArray)
+        val signedData = encryptedSharedPreferencesIdentifier.sign(testData)
 
         // Assert
-        val jwsObject = JWSObject.parse(signedData.decodeToString())
+        val jwsObject = JWSObject.parse(signedData)
         val token = JwsToken(jwsObject)
         assertThat(publicKey).isNotNull
         assertThat(token.verify(listOf(publicKey))).isTrue
