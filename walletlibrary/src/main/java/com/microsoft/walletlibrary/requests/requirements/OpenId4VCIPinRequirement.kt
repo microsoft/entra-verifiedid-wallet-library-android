@@ -30,11 +30,6 @@ class OpenId4VCIPinRequirement(
         return VerifiedIdResult.success(Unit)
     }
 
-    /**
-     * Serializes the requirement into its raw format.
-     * If this requirement is composed or an aggregate of other requirements, MUST call the protocolSerializer's serialize function on all used requirements.
-     * returns the raw format for a given SerializedFormat type (if it has output).
-     */
     override suspend fun <T> serialize(
         protocolSerializer: RequestProcessorSerializer<T>,
         verifiedIdSerializer: VerifiedIdSerializer<T>
@@ -42,16 +37,12 @@ class OpenId4VCIPinRequirement(
         return null
     }
 
-    suspend fun fulfill(pin: String) {
+    suspend fun fulfill(pin: String): VerifiedIdResult<Unit> {
         this.pin = pin
-        libraryConfiguration?.let { libraryConfiguration ->
-            accessTokenEndpoint?.let {
-                getResult {
-                    OpenID4VCIPreAuthAccessTokenResolver(libraryConfiguration).resolve(
-                        preAuthorizedCode,
-                        this,
-                        it
-                    )
+        return getResult {
+            libraryConfiguration?.let { libraryConfiguration ->
+                accessTokenEndpoint?.let {
+                    OpenID4VCIPreAuthAccessTokenResolver(libraryConfiguration).resolve(preAuthorizedCode, this, it)
                 }
             }
         }
@@ -59,5 +50,19 @@ class OpenId4VCIPinRequirement(
 
     internal fun fulfillAccessToken(accessToken: String) {
         this.accessToken = accessToken
+    }
+
+    suspend fun fulfillAccessToken(
+        preAuthorizedCode: String,
+        openId4VCIPinRequirement: OpenId4VCIPinRequirement,
+        accessTokenEndpoint: String
+    ) {
+        libraryConfiguration?.let {
+            OpenID4VCIPreAuthAccessTokenResolver(it).resolve(
+                preAuthorizedCode,
+                openId4VCIPinRequirement,
+                accessTokenEndpoint
+            )
+        }
     }
 }

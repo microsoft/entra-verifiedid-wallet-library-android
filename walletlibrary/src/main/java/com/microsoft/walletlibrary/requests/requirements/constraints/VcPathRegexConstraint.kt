@@ -27,7 +27,7 @@ internal class VcPathRegexConstraint(
         path: String,
         verifiableCredentialJsonString: String
     ): Boolean {
-        if (pattern.isEmpty()) SdkLog.d("Empty pattern in filter.")
+        if (pattern.isEmpty()) SdkLog.i("Empty pattern in filter.")
         val configuration =
             Configuration.defaultConfiguration().addOptions(Option.SUPPRESS_EXCEPTIONS)
         val constraintValue: String? =
