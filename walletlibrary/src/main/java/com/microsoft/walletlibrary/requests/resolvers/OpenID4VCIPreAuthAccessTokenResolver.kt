@@ -8,6 +8,7 @@ import com.microsoft.walletlibrary.networking.entities.openid4vci.request.OpenID
 import com.microsoft.walletlibrary.networking.operations.PostOpenID4VCIPreAuthNetworkOperation
 import com.microsoft.walletlibrary.requests.requirements.OpenId4VCIPinRequirement
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.NetworkingException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.RequirementValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
@@ -54,7 +55,7 @@ internal class OpenID4VCIPreAuthAccessTokenResolver(val libraryConfiguration: Li
             .onFailure {
                 var innerException = it as Exception
 
-                if (it is ForbiddenException) {
+                if ((it as? NetworkingException)?.statusCode == "403") {
                     // Based on error message, determine if the error is retriable and how many more times.
                     it.errorBody?.let { errorBody ->
                         pinMismatchRegex.find(errorBody)?.let { match ->
@@ -75,6 +76,8 @@ internal class OpenID4VCIPreAuthAccessTokenResolver(val libraryConfiguration: Li
                             false
                         )
                     }
+
+                    (innerException as InvalidPinException).errorCode = "403"
                 }
 
                 throw RequirementValidationException(
