@@ -8,7 +8,6 @@ import com.microsoft.walletlibrary.networking.entities.openid4vci.request.OpenID
 import com.microsoft.walletlibrary.networking.operations.PostOpenID4VCIPreAuthNetworkOperation
 import com.microsoft.walletlibrary.requests.requirements.OpenId4VCIPinRequirement
 import com.microsoft.walletlibrary.util.LibraryConfiguration
-import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.RequirementValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions

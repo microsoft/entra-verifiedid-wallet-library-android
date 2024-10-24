@@ -82,15 +82,15 @@ internal class OpenId4VciIssuanceRequest(
             is AccessTokenRequirement -> requirement.accessToken
             is OpenId4VCIPinRequirement -> requirement.accessToken
             else -> throw OpenId4VciValidationException(
-                "Requirement is not an auth or pre-auth flow. Access token is missing.",
+                "Access token is missing in requirement.",
                 VerifiedIdExceptions.REQUEST_CREATION_EXCEPTION.value
             )
         } ?: throw OpenId4VciValidationException(
-            "Requirement is not an auth or pre-auth flow. Access token is missing.",
+            "Access token is missing in requirement.",
             VerifiedIdExceptions.REQUEST_CREATION_EXCEPTION.value
         )
 
-        val credentialEndpoint = credentialMetadata.credential_endpoint
+        val credentialEndpoint = credentialMetadata.credentialEndpoint
             ?: throw OpenId4VciValidationException(
                 "Credential endpoint is missing in credential metadata.",
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
