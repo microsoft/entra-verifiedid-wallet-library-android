@@ -77,7 +77,7 @@ internal class RegistrarException(message: String, cause: Throwable? = null) : S
 
 internal open class LocalNetworkException(message: String, cause: Throwable? = null) : SdkException(message, cause, true)
 
-internal open class NetworkException(message: String, retryable: Boolean) : SdkException(message, null, retryable) {
+open class NetworkException(message: String, retryable: Boolean) : SdkException(message, null, retryable) {
     var requestId: String? = null
     var correlationVector: String? = null
     var errorCode: String? = null
@@ -99,7 +99,7 @@ internal class RedirectException(message: String, retryable: Boolean) : NetworkE
 
 internal class ExpiredTokenException(message: String, retryable: Boolean) : NetworkException(message, retryable)
 
-internal class InvalidPinException(message: String, retryable: Boolean, val attemptsLeft: Int? = null) : NetworkException(message, retryable)
+class InvalidPinException(message: String, retryable: Boolean, val attemptsLeft: Int? = null) : NetworkException(message, retryable)
 
 internal class RepositoryException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
