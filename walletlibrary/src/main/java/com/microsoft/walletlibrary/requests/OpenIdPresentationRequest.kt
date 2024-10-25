@@ -62,7 +62,7 @@ internal class OpenIdPresentationRequest(
                     val idToken = builder.buildIdToken(
                         request.presentationRequest.getPresentationDefinitions().first().id,
                         request.presentationRequest.content.clientId,
-                        request.presentationRequest.content.nonce,
+                        request.presentationRequest.content.nonce
                     )
 
                     val result = if (vpTokens.size > 1) {

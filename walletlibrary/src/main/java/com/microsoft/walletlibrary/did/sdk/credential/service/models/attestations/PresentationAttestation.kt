@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  * Must have either issuers property or contracts property
  */
 @Serializable
-data class PresentationAttestation(
+internal data class PresentationAttestation(
     // The type of the verifiable credential that is being requested.
     val credentialType: String,
 

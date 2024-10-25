@@ -13,8 +13,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class VerifiedIdLogo(
-    @Contextual
     // If image needs to be fetched, service will use this property.
+    @Contextual
     var url: String? = null,
 
     // Description used for alt text or voice over.

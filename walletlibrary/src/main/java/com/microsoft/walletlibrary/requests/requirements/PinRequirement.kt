@@ -27,7 +27,7 @@ class PinRequirement(
     val salt: String? = null,
 
     internal var pin: String? = null
-): Requirement {
+) : Requirement {
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate(): VerifiedIdResult<Unit> {
         if (pin == null)
