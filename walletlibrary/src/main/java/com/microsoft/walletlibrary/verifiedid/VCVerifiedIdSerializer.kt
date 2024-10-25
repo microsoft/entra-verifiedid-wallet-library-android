@@ -4,7 +4,7 @@ package com.microsoft.walletlibrary.verifiedid
 
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 
-internal object VCVerifiedIdSerializer : VerifiedIdSerializer<com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential> {
+object VCVerifiedIdSerializer : VerifiedIdSerializer<com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential> {
     /**
      * Serialize the given verifiedID into the SerializedFormat
      */

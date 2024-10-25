@@ -1,6 +1,7 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.network.apis
 
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.util.Constants as WalletConstants
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.util.http.URLFormEncoding
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
@@ -14,7 +15,7 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
 
     suspend fun getRequest(overrideUrl: String, preferHeaders: List<String>): Result<IResponse> {
         val mutablePreferHeaders = preferHeaders.toMutableList()
-        mutablePreferHeaders.add("JWT-interop-profile-0.0.1")
+        mutablePreferHeaders.add(WalletConstants.SELF_ISSUED_OPENID_V2_PROFILE)
         return agent.get(overrideUrl, httpAgentUtils.combineMaps(
             httpAgentUtils.defaultHeaders(),
             mapOf(
