@@ -13,7 +13,7 @@ import com.nimbusds.jose.jwk.KeyUse
 import org.assertj.core.api.Assertions
 import org.junit.Test
 
-class JwsTokenTest1 {
+class JwsTokenTest {
 
     private val keyStore = EncryptedKeyStore(InstrumentationRegistry.getInstrumentation().targetContext)
 
