@@ -7,9 +7,6 @@ package com.microsoft.walletlibrary.did.sdk.crypto
 
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.Constants.SEED_BYTES
-import com.nimbusds.jose.JOSEObjectType
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.jwk.JWK
 import java.security.Key
 import java.security.KeyFactory
@@ -28,13 +25,8 @@ import javax.crypto.SecretKey
 internal object CryptoOperations {
 
     fun sign(digest: String, signingKey: JWK, alg: String, keyId: String): String {
-        val token = JwsToken(digest.toString(), JWSAlgorithm(alg))
-        // adding kid value to header.
-        val header = JWSHeader.Builder(JWSAlgorithm(alg))
-            .type(JOSEObjectType.JWT)
-            .keyID(keyId)
-            .build()
-        token.sign(signingKey, header)
+        val token = JwsToken(digest, alg, keyId)
+        token.sign(signingKey)
         return token.serialize()
     }
 
