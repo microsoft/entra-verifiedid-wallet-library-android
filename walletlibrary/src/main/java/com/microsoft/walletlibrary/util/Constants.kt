@@ -13,4 +13,6 @@ object Constants {
     const val PREFER_HEADER = "Prefer"
     // Constants for Request completion
     const val OPENID4VCI_TYPE_HEADER = "openid4vci-proof+jwt"
+    // Constant Prefer header for requesting SiopV2 format
+    const val SELF_ISSUED_OPENID_V2_PROFILE = "JWT-interop-profile-0.0.1"
 }
