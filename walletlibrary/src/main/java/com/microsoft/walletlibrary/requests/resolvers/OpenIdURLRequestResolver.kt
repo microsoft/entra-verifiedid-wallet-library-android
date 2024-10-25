@@ -14,18 +14,18 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.util.Constants
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenId4VciRequestException
-import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequestURIMissingException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
+import com.nimbusds.jose.JWSObject
 import org.json.JSONObject
 
 /**
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
-internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration): RequestResolver {
+internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration, private val preferHeader: List<String>): RequestResolver {
 
     // Indicates whether this resolver can resolve the provided input.
     override fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean {
@@ -39,9 +39,7 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) throw UnSupportedVerifiedIdRequestInputException(
             "Provided VerifiedIdRequestInput is not supported."
         )
-        if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN))
-            return resolveOpenId4VCIRequest(verifiedIdRequestInput)
-        return OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString())
+        return resolveOpenId4VCIRequest(verifiedIdRequestInput)
     }
 
     private suspend fun resolveOpenId4VCIRequest(verifiedIdRequestInput: VerifiedIdRequestURL): Any {
@@ -55,13 +53,13 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
                     JSONObject(requestPayloadString)
                     requestPayloadString
                 } catch (e: Exception) {
-                    val jwsToken = JwsToken.deserialize(requestPayload.decodeToString())
+                    val jwsToken = JWSObject.parse(requestPayload.decodeToString())
                     val presentationRequestContent =
                         libraryConfiguration.serializer.decodeFromString(
                             PresentationRequestContent.serializer(),
-                            jwsToken.content()
+                            JwsToken(jwsToken).content()
                         )
-                    OpenIdResolver.validateRequest(presentationRequestContent)
+                    OpenIdResolver.validateRequest(presentationRequestContent, jwsToken.payload.toJSONObject())
                 }
             }
             .onFailure {
@@ -87,6 +85,7 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
     private suspend fun fetchOpenID4VCIRequest(url: String) =
         FetchOpenID4VCIRequestNetworkOperation(
             url,
+            preferHeader,
             libraryConfiguration.httpAgentApiProvider
         ).fire()
 }

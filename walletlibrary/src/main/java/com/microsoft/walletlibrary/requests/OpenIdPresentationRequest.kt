@@ -5,13 +5,17 @@
 
 package com.microsoft.walletlibrary.requests
 
-import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
+import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
+import com.microsoft.walletlibrary.requests.serializer.PresentationExchangeResponseBuilder
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.UserCanceledException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.getResult
+import com.microsoft.walletlibrary.verifiedid.StringVerifiedIdSerializer
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
 
 /**
@@ -27,8 +31,12 @@ internal class OpenIdPresentationRequest(
     // Root of trust of the requester (eg. linked domains).
     override val rootOfTrust: RootOfTrust,
 
-    val request: OpenIdRawRequest
-) : VerifiedIdPresentationRequest {
+    val request: OpenIdProcessedRequest,
+
+    private val libraryConfiguration: LibraryConfiguration
+) : VerifiedIdPresentationRequest, HttpProtocolRequest {
+    private var additionalHeaders = emptyMap<String, String>()
+
     // Indicates whether presentation request is satisfied on client side.
     override fun isSatisfied(): Boolean {
         val validationResult = requirement.validate()
@@ -36,10 +44,49 @@ internal class OpenIdPresentationRequest(
         return !validationResult.isFailure
     }
 
+    // Sets additional headers to include in the response
+    override fun setAdditionalHeaders(headers: Map<String, String>) {
+        additionalHeaders = headers
+    }
+
     // Completes the presentation request and returns Result with success status if successful.
     override suspend fun complete(): VerifiedIdResult<Unit> {
         return getResult {
-            OpenIdResponder.sendPresentationResponse(request.rawRequest, requirement)
+            if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT)) {
+                val builder = PresentationExchangeResponseBuilder(libraryConfiguration)
+                builder.serialize(requirement, StringVerifiedIdSerializer)
+                val vpTokens = builder.buildVpTokens(
+                    request.presentationRequest.content.clientId,
+                    request.presentationRequest.content.nonce)
+                val idToken = builder.buildIdToken(
+                    request.presentationRequest.getPresentationDefinitions().first().id,
+                    request.presentationRequest.content.clientId,
+                    request.presentationRequest.content.nonce,
+                )
+
+                val result = if (vpTokens.size > 1) {
+                    libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponses(
+                        request.presentationRequest.content.redirectUrl,
+                        idToken,
+                        vpTokens,
+                        request.presentationRequest.content.state,
+                        additionalHeaders
+                    )
+                } else {
+                    libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponse(
+                        request.presentationRequest.content.redirectUrl,
+                        idToken,
+                        vpTokens.first(),
+                        request.presentationRequest.content.state,
+                        additionalHeaders
+                    )
+                }
+                result.exceptionOrNull()?.let {
+                    throw it
+                }
+            } else {
+                OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, additionalHeaders)
+            }
         }
     }
 
@@ -53,6 +100,6 @@ internal class OpenIdPresentationRequest(
     }
 
     override fun getNonce(): String {
-        return request.rawRequest.content.nonce
+        return request.presentationRequest.content.nonce
     }
 }
