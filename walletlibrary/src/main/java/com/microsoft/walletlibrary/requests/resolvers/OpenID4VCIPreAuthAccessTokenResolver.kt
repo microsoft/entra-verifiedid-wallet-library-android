@@ -3,15 +3,13 @@
 package com.microsoft.walletlibrary.requests.resolvers
 
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ForbiddenException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidPinException
 import com.microsoft.walletlibrary.networking.entities.openid4vci.request.OpenID4VCIPreAuthTokenRequest
 import com.microsoft.walletlibrary.networking.operations.PostOpenID4VCIPreAuthNetworkOperation
 import com.microsoft.walletlibrary.requests.requirements.OpenId4VCIPinRequirement
+import com.microsoft.walletlibrary.util.InvalidPinAttemptException
 import com.microsoft.walletlibrary.util.LibraryConfiguration
-import com.microsoft.walletlibrary.util.NetworkingException
-import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
-import com.microsoft.walletlibrary.util.RequirementValidationException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
 internal class OpenID4VCIPreAuthAccessTokenResolver(val libraryConfiguration: LibraryConfiguration) {
@@ -53,13 +51,15 @@ internal class OpenID4VCIPreAuthAccessTokenResolver(val libraryConfiguration: Li
             .onFailure {
                 var innerException = it as Exception
 
+                // PIN related errors are 403.
                 if (it is ForbiddenException) {
                     // Based on error message, determine if the error is retriable and how many more times.
                     it.errorBody?.let { errorBody ->
                         pinMismatchRegex.find(errorBody)?.let { match ->
                             match.groups[1]?.value?.toIntOrNull()?.let { attempts ->
-                                innerException = InvalidPinException(
+                                innerException = InvalidPinAttemptException(
                                     "Entered PIN does not match expectations.",
+                                    it,
                                     attempts > 0,
                                     attempts
                                 )
@@ -68,18 +68,18 @@ internal class OpenID4VCIPreAuthAccessTokenResolver(val libraryConfiguration: Li
                     }
 
                     // Even if no more attempts are possible, forbidden means a PIN error.
-                    if (innerException !is InvalidPinException) {
-                        innerException = InvalidPinException(
+                    if (innerException !is InvalidPinAttemptException) {
+                        innerException = InvalidPinAttemptException(
                             "Failed to validate PIN.",
-                            false
+                            it
                         )
                     }
                 }
 
-                throw RequirementValidationException(
+                throw RequirementNotMetException(
                     "Failed to fetch access token for Pre Auth flow",
-                    innerException,
-                    (innerException as? InvalidPinException)?.retryable ?: false
+                    VerifiedIdExceptions.REQUIREMENT_NOT_MET_EXCEPTION.value,
+                    listOf(innerException)
                 )
             }
     }
