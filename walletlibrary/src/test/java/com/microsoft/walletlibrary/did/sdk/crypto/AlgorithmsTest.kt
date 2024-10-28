@@ -31,6 +31,14 @@ class AlgorithmsTest {
     }
 
     @Test
+    fun `test KeyGenAlgorithm p256k1`() {
+        val actualKeys = CryptoOperations.generateKeyPair(KeyGenAlgorithm.p256)
+        assertThat(actualKeys.private).isInstanceOf(ECPrivateKey::class)
+        assertThat(actualKeys.public).isInstanceOf(ECPublicKey::class)
+        assertThat(actualKeys.private.algorithm).isEqualTo("EC")
+    }
+
+    @Test
     fun `test MacAlgorithm HmacSha512`() {
         val seed = ByteArray(16, { it.toByte() })
         val secretKey = SecretKeySpec(seed, AES_KEY)

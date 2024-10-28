@@ -64,7 +64,7 @@ internal class IdentifierCreator @Inject constructor(
      *
      * @return returns the public Key in JWK format
      */
-    private fun generateAndStoreKeyPair(use: KeyUse = KeyUse.SIGNATURE): JWK {
+    private fun generateAndStoreKeyPair(use: KeyUse = KeyUse.SIGNATURE, keyGenAlgorithm: KeyGenAlgorithm = KeyGenAlgorithm.Secp256k1): JWK {
         val keyId = generateRandomKeyId()
         val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1).toPrivateJwk(keyId, use)
         keyStore.storeKey(keyId, privateKey)
