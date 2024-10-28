@@ -8,7 +8,6 @@ package com.microsoft.walletlibrary.wrapper
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
@@ -21,23 +20,9 @@ import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
 object OpenIdResolver {
 
     // Fetches the presentation request from VC SDK using the url and converts it to raw request.
-    internal suspend fun getRequest(uri: String, rootOfTrustResolver: RootOfTrustResolver? = null, preferHeaders: List<String>): OpenIdProcessedRequest {
-        val presentationRequestResult =
-            VerifiableCredentialSdk.presentationService.getRequest(uri, rootOfTrustResolver, preferHeaders)
-
-        when (presentationRequestResult) {
-            is Result.Success -> {
-                val request = presentationRequestResult.payload.first
-                val requestType = getRequestType(request)
-                return VerifiedIdOpenIdJwtRawRequest(request, requestType, presentationRequestResult.payload.second)
-            }
-            is Result.Failure -> {
-                throw VerifiedIdRequestFetchException(
-                    "Unable to fetch presentation request",
-                    presentationRequestResult.payload
-                )
-            }
-        }
+    internal suspend fun getRequest(uri: String, preferHeaders: List<String>): OpenIdProcessedRequest {
+        val presentationRequestResult = VerifiableCredentialSdk.presentationService.getRequest(uri, preferHeaders)
+        return handleRequestResult(presentationRequestResult, emptyMap())
     }
 
     internal suspend fun validateRequest(requestContent: PresentationRequestContent, rawRequest: Map<String, Any>): OpenIdProcessedRequest {

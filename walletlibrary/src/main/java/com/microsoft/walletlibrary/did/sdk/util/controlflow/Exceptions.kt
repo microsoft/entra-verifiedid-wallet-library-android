@@ -5,7 +5,7 @@
 
 package com.microsoft.walletlibrary.did.sdk.util.controlflow
 
-internal open class SdkException(message: String? = null, cause: Throwable? = null, val retryable: Boolean = false) : Exception(message, cause)
+open class SdkException internal constructor(message: String? = null, cause: Throwable? = null, val retryable: Boolean = false) : Exception(message, cause)
 
 internal open class CryptoException(message: String, cause: Throwable? = null, retryable: Boolean = false) : SdkException(message, cause, retryable)
 
@@ -72,8 +72,6 @@ internal class VpFormatNotSupported(message: String) : ValidatorException(messag
 internal open class ResolverException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
 internal class LinkedDomainEndpointInUnknownFormatException(message: String, cause: Throwable? = null) : ResolverException(message, cause)
-
-internal class WellKnownDocumentInUnknownFormatException(message: String, cause: Throwable? = null) : ResolverException(message, cause)
 
 internal class RegistrarException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 

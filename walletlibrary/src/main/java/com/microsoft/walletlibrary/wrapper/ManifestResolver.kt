@@ -23,11 +23,10 @@ internal object ManifestResolver {
     suspend fun getIssuanceRequest(
         uri: String,
         requestState: String? = null,
-        issuanceCallbackUrl: String? = null,
-        rootOfTrustResolver: RootOfTrustResolver? = null
+        issuanceCallbackUrl: String? = null
     ): RawManifest {
         return when (val issuanceRequestResult =
-            VerifiableCredentialSdk.issuanceService.getRequest(uri, rootOfTrustResolver)) {
+            VerifiableCredentialSdk.issuanceService.getRequest(uri)) {
             is Result.Success -> {
                 val request = issuanceRequestResult.payload
                 RawManifest(request)

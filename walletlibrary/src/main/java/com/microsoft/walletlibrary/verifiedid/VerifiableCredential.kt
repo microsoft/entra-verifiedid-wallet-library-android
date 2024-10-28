@@ -3,6 +3,7 @@ package com.microsoft.walletlibrary.verifiedid
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
+import com.microsoft.walletlibrary.requests.styles.NoneVerifiedIdStyle
 import kotlinx.serialization.Serializable
 import java.util.Date
 
@@ -14,7 +15,7 @@ internal class VerifiableCredential(
     internal val raw: VerifiableCredential,
     internal val contract: VerifiableCredentialContract? = null,
     override val types: List<String> = raw.contents.vc.type
-) : VerifiedId {
+): VerifiedId {
     override val id = raw.jti
 
     @Serializable(with = DateSerializer::class)
@@ -23,7 +24,7 @@ internal class VerifiableCredential(
     @Serializable(with = DateSerializer::class)
     override val expiresOn = raw.contents.exp?.let { Date(it * 1000L) }
 
-    override val style = contract?.display?.toVerifiedIdStyle()
+    override val style = contract?.display?.toVerifiedIdStyle() ?: NoneVerifiedIdStyle()
 
     override fun getClaims(): ArrayList<VerifiedIdClaim> {
         val claimDescriptors = contract?.display?.claims
@@ -34,7 +35,7 @@ internal class VerifiableCredential(
         for ((claimIdentifier, claimValue) in claimValues) {
             val claimDescriptor = claimDescriptors?.get("vc.credentialSubject.$claimIdentifier")
             claimDescriptor?.let { claims.add(VerifiedIdClaim(claimIdentifier, claimValue, claimDescriptor.label, claimDescriptor.type)) }
-                ?: claims.add(VerifiedIdClaim(claimIdentifier, claimValue))
+                ?: claims.add(VerifiedIdClaim(claimIdentifier, claimValue, null, null))
         }
         return claims
     }

@@ -12,6 +12,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.V
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.CardDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
+import com.microsoft.walletlibrary.requests.styles.NoneVerifiedIdStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.defaultTestSerializer
 import io.mockk.every
@@ -122,7 +123,7 @@ class MockVerifiedId : VerifiedId {
 
     override val expiresOn: Date? = null
 
-    override val style: VerifiedIdStyle? = null
+    override val style: VerifiedIdStyle = NoneVerifiedIdStyle()
 
     override val types: List<String> = emptyList()
 

@@ -10,7 +10,7 @@ import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.TokenValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.wrapper.IdentifierDocumentResolver
-import com.microsoft.walletlibrary.wrapper.RootOfTrustResolver
+import com.microsoft.walletlibrary.wrapper.LinkedDomainsResolver
 import com.nimbusds.jose.jwk.JWK
 
 /**
@@ -39,13 +39,14 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         val identifierDocument = IdentifierDocumentResolver.resolveIdentifierDocument(did)
         val jwk = identifierDocument.getJwk(keyId)
             ?: throw OpenId4VciValidationException(
-                "JWK with key id $kid not found in identifier document",
+                "JWK with key id $keyId not found in identifier document",
                 VerifiedIdExceptions.MALFORMED_SIGNED_METADATA_EXCEPTION.value
             )
         validateSignedMetadata(jwsToken, jwk, credentialIssuer, did)
 
         // Return the root of trust from the identifier document along with its verification status.
-        return RootOfTrustResolver.resolveRootOfTrust(identifierDocument)
+        val rootOfTrustResolver = libraryConfiguration.rootOfTrustResolver ?: LinkedDomainsResolver
+        return rootOfTrustResolver.resolve(identifierDocument)
     }
 
     private fun deserializeSignedMetadata(signedMetadata: String): JwsToken {

@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary
 
+import com.microsoft.walletlibrary.did.sdk.identifier.IdentifierManager
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 
@@ -12,7 +13,7 @@ import com.microsoft.walletlibrary.util.WalletLibraryLogger
  * Utilities such as logger, identityManager that are configured in builder and
  * all of library will use.
  */
-class ExtensionConfiguration internal constructor(
+class ExtensionConfiguration private constructor(
     /**
      * Logs and metrics class
      */
@@ -25,6 +26,6 @@ class ExtensionConfiguration internal constructor(
 
     internal constructor(libraryConfiguration: LibraryConfiguration) : this(
         libraryConfiguration.logger,
-        ExtensionIdentifierManager(libraryConfiguration.identifierManager, libraryConfiguration.tokenSigner, libraryConfiguration.serializer)
+        ExtensionIdentifierManager(libraryConfiguration)
     )
 }

@@ -9,16 +9,30 @@ import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
+import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 
 /**
  * Represents an incomplete mutable VerifiedID Request for RequestProcessorExtensions to modify.
  */
-class VerifiedIdPartialRequest (
-    // Attributes describing the requester (eg. name, logo).
+data class VerifiedIdPartialRequest(
+    /**
+     * Display information for the requester
+     */
     var requesterStyle: RequesterStyle,
-    // Information describing the requirements needed to complete the flow.
+
+    /**
+     * Potential display information for the Verified ID being issued (if this is an issuance request)
+     */
+    var verifiedIdStyle: VerifiedIdStyle?,
+
+    /**
+     * Requirement for this request
+     */
     var requirement: Requirement,
-    // Root of trust of the requester (eg. linked domains).
+
+    /**
+     * Root of trust resolved for this request
+     */
     var rootOfTrust: RootOfTrust
 ) {
     fun replaceRequirement(id: String, transformer: (VerifiedIdRequirement) -> Requirement): Boolean {

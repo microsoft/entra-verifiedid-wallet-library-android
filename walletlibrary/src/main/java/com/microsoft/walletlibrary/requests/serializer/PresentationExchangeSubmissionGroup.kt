@@ -10,7 +10,7 @@ import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeRequirement
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeVerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
-import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
+import com.microsoft.walletlibrary.verifiedid.VCVerifiedIdSerializer
 import kotlinx.serialization.json.Json
 import java.util.UUID
 
@@ -23,9 +23,10 @@ internal class PresentationExchangeSubmissionGroup (
     fun canIncludeInGroup(requirement: Requirement): Boolean {
         (requirement as? PresentationExchangeVerifiedIdRequirement)?.let result@{
             // Only those of the same subject can be presented together
-            (it.verifiedId as? VerifiableCredential)?.let {
-                verifiableCredential ->
-                if (verifiableCredential.raw.contents.sub != subject.id) {
+            it.verifiedId?.let {
+                verifiedId ->
+                val credentialSubject = VCVerifiedIdSerializer.serialize(verifiedId).contents.sub
+                if (credentialSubject != subject.id) {
                     return@result false
                 }
             }

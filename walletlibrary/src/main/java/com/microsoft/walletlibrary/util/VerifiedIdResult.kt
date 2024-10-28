@@ -2,7 +2,6 @@ package com.microsoft.walletlibrary.util
 
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.NetworkException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
-import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import kotlinx.coroutines.CancellationException
 
 typealias VerifiedIdResult<T> = Result<T>
@@ -28,7 +27,6 @@ internal suspend fun <T> getResult(block: suspend () -> T): VerifiedIdResult<T> 
                 networkingException.cause = innerException
                 networkingException.toVerifiedIdResult()
             }
-
             is SdkException -> {
                 val malformedInputException = MalformedInputException(
                     exception.message ?: "",
@@ -38,7 +36,6 @@ internal suspend fun <T> getResult(block: suspend () -> T): VerifiedIdResult<T> 
                 malformedInputException.cause = exception.cause
                 malformedInputException.toVerifiedIdResult()
             }
-
             else -> {
                 val unspecifiedVerifiedIdException = UnspecifiedVerifiedIdException(
                     exception.message ?: "",
@@ -49,9 +46,6 @@ internal suspend fun <T> getResult(block: suspend () -> T): VerifiedIdResult<T> 
                 unspecifiedVerifiedIdException.toVerifiedIdResult()
             }
         }
-    } catch (exception: IHttpAgent.HttpAgentException) {
-        val networkException = exception.toNetworkException()
-        networkException.toVerifiedIdResult()
     } catch (exception: CancellationException) {
         throw exception
     } catch (exception: Exception) {

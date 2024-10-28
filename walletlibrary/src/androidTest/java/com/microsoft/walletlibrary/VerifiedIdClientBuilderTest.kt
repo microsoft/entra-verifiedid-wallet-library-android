@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary
 
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
+import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.FixMethodOrder
@@ -23,13 +24,14 @@ class VerifiedIdClientBuilderTest {
     }
 
     private fun mockLogConsumer(logConsumerCount: Int) {
-        class MockLogConsumer: WalletLibraryLogger.Consumer {
+        class MockLogConsumer : WalletLibraryLogger.Consumer {
             override fun log(
                 logLevel: WalletLibraryLogger.Level,
                 message: String,
                 throwable: Throwable?,
                 tag: String
-            ) {}
+            ) {
+            }
 
             override fun event(name: String, properties: Map<String, String>?) {}
         }
@@ -40,7 +42,7 @@ class VerifiedIdClientBuilderTest {
     }
 
     @Test
-    fun builder1_WithNoLogConsumers_ReturnsVerifiedIdWithNoLogConsumer() {
+    fun builder1_WithNoLogConsumers_ReturnsVerifiedIdClientWithNoLogConsumer() {
         // Arrange
         setupInput(0)
 
@@ -48,13 +50,17 @@ class VerifiedIdClientBuilderTest {
         val actualResult = verifiedIdClientBuilder.build()
 
         // Assert
+<<<<<<< HEAD
         assertThat(actualResult.requestProcessorFactory.requestProcessors.size).isEqualTo(1)
+=======
+        assertThat(actualResult.requestProcessorFactory.requestProcessors.size).isEqualTo(2)
+>>>>>>> dev
         assertThat(actualResult.requestResolverFactory.requestResolvers.size).isEqualTo(1)
         assertThat(actualResult.logger.CONSUMERS).isEmpty()
     }
 
     @Test
-    fun builder2_WithOneLogConsumer_ReturnsVerifiedIdWithOneLogConsumer() {
+    fun builder2_WithOneLogConsumer_ReturnsVerifiedIdClientWithOneLogConsumer() {
         // Arrange
         setupInput(1)
 
@@ -62,13 +68,17 @@ class VerifiedIdClientBuilderTest {
         val actualResult = verifiedIdClientBuilder.build()
 
         // Assert
+<<<<<<< HEAD
         assertThat(actualResult.requestProcessorFactory.requestProcessors.size).isEqualTo(1)
+=======
+        assertThat(actualResult.requestProcessorFactory.requestProcessors.size).isEqualTo(2)
+>>>>>>> dev
         assertThat(actualResult.requestResolverFactory.requestResolvers.size).isEqualTo(1)
         assertThat(actualResult.logger.CONSUMERS.size).isEqualTo(1)
     }
 
     @Test
-    fun builder3_WithMultipleLogConsumers_ReturnsVerifiedIdWithMultipleLogConsumers() {
+    fun builder3_WithMultipleLogConsumers_ReturnsVerifiedIdClientWithMultipleLogConsumers() {
         // Arrange
         setupInput(3)
 
@@ -76,8 +86,43 @@ class VerifiedIdClientBuilderTest {
         val actualResult = verifiedIdClientBuilder.build()
 
         // Assert
+<<<<<<< HEAD
         assertThat(actualResult.requestProcessorFactory.requestProcessors.size).isEqualTo(1)
+=======
+        assertThat(actualResult.requestProcessorFactory.requestProcessors.size).isEqualTo(2)
+>>>>>>> dev
         assertThat(actualResult.requestResolverFactory.requestResolvers.size).isEqualTo(1)
         assertThat(actualResult.logger.CONSUMERS.size).isEqualTo(4)
+    }
+
+    @Test
+    fun builder4_WithPreviewFeatureFlag_ReturnsVerifiedIdClientWithSuccessfulInjection() {
+        // Arrange
+        setupInput(1)
+        val supportedPreviewFeature = "supportedPreviewFeature"
+        val unsupportedPreviewFeature = "unsupportedPreviewFeature"
+        verifiedIdClientBuilder.with(listOf(supportedPreviewFeature))
+
+        // Act
+        val actualResult = verifiedIdClientBuilder.build()
+
+        // Assert
+        assertThat(actualResult.requestProcessorFactory.requestProcessors.size).isEqualTo(2)
+        assertThat(actualResult.requestResolverFactory.requestResolvers.size).isEqualTo(1)
+        assertThat(actualResult.logger.CONSUMERS.size).isEqualTo(1)
+        assertThat(actualResult.requestResolverFactory.requestResolvers.first()).isInstanceOf(
+            OpenIdURLRequestResolver::class.java
+        )
+        assertThat(
+            (actualResult.requestResolverFactory.requestResolvers.first() as OpenIdURLRequestResolver).libraryConfiguration.isPreviewFeatureEnabled(
+                supportedPreviewFeature
+            )
+        ).isTrue
+        assertThat(
+            (actualResult.requestResolverFactory.requestResolvers.first() as OpenIdURLRequestResolver).libraryConfiguration.isPreviewFeatureEnabled(
+                unsupportedPreviewFeature
+            )
+        ).isFalse
+
     }
 }

@@ -1,10 +1,10 @@
 package com.microsoft.walletlibrary.requests.handlers
 
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.networking.operations.FetchCredentialMetadataNetworkOperation
+import com.microsoft.walletlibrary.networking.operations.FetchOpenIdWellKnownConfigNetworkOperation
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.openid4vci.OpenId4VciIssuanceRequest
@@ -17,19 +17,17 @@ import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
-
-internal class OpenId4VCIRequestHandler(
+class OpenId4VCIRequestHandler internal constructor(
     private val libraryConfiguration: LibraryConfiguration,
     private val signedMetadataProcessor: SignedMetadataProcessor = SignedMetadataProcessor(
         libraryConfiguration
-    )
-) : RequestProcessor<OpenIdRawRequest> {
-
+    ),
     /**
      * Extensions to this RequestProcessor. All extensions should be called after initial request
      * processing to mutate the request with additional input.
      */
-    public override var requestProcessors: MutableList<RequestProcessorExtension<OpenIdRawRequest>> = mutableListOf()
+    override var requestProcessors: MutableList<RequestProcessorExtension<OpenIdRawRequest>> = mutableListOf()
+) : RequestProcessor<OpenIdRawRequest> {
 
     // Indicates whether the provided raw request can be handled by this handler.
     // This method checks if the raw request can be cast to CredentialOffer successfully, and if it contains the required fields.
@@ -46,7 +44,7 @@ internal class OpenId4VCIRequestHandler(
     }
 
     // Handle and process the provided raw request and returns a VerifiedIdRequest.
-    override suspend fun handleRequest(rawRequest: Any, rootOfTrustResolver: RootOfTrustResolver?): VerifiedIdRequest<*> {
+    override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
         val credentialOffer = decodeCredentialOffer(rawRequest)
 
         // Fetch the credential metadata from the credential issuer in credential offer object.
@@ -115,7 +113,7 @@ internal class OpenId4VCIRequestHandler(
         return supportedCredentialConfigurationIds.first()
     }
 
-    private fun transformToVerifiedIdRequest(
+    private suspend fun transformToVerifiedIdRequest(
         credentialMetadata: CredentialMetadata,
         credentialConfiguration: CredentialConfiguration,
         credentialOffer: CredentialOffer,
@@ -125,14 +123,25 @@ internal class OpenId4VCIRequestHandler(
             credentialMetadata.transformLocalizedIssuerDisplayDefinitionToRequesterStyle()
         val verifiedIdStyle =
             credentialConfiguration.getVerifiedIdStyleInPreferredLocale(requesterStyle.name)
-        val requirement = transformToRequirement(credentialConfiguration.scope, credentialOffer)
+        val credentialIssuer = credentialMetadata.credential_issuer ?: throw OpenId4VciValidationException(
+            "Credential metadata does not contain credential_issuer.",
+            VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
+        )
+        val accessTokenEndpoint = fetchAccessTokenEndpointFromOpenIdWellKnownConfig(credentialIssuer)
+        val requirement = transformToRequirement(
+            credentialConfiguration.scope,
+            credentialOffer,
+            accessTokenEndpoint
+        )
         return OpenId4VciIssuanceRequest(
             requesterStyle,
             requirement,
             rootOfTrust,
             verifiedIdStyle,
             credentialOffer,
-            credentialMetadata
+            credentialMetadata,
+            credentialConfiguration,
+            libraryConfiguration
         )
     }
 
@@ -148,9 +157,31 @@ internal class OpenId4VCIRequestHandler(
         credentialMetadata.validateAuthorizationServers(credentialOffer)
     }
 
+    private suspend fun fetchAccessTokenEndpointFromOpenIdWellKnownConfig(credentialIssuer: String): String {
+        val openIdWellKnownUrl = "$credentialIssuer/.well-known/openid-configuration"
+        FetchOpenIdWellKnownConfigNetworkOperation(
+            openIdWellKnownUrl,
+            libraryConfiguration.httpAgentApiProvider,
+            libraryConfiguration.serializer
+        ).fire()
+            .onSuccess { return it.token_endpoint }
+            .onFailure {
+                throw OpenId4VciRequestException(
+                    "Failed to fetch OpenId well-known configuration ${it.message}",
+                    VerifiedIdExceptions.OPENID_WELL_KNOWN_CONFIG_FETCH_EXCEPTION.value,
+                    it as Exception
+                )
+            }
+        throw OpenId4VciRequestException(
+            "Failed to fetch OpenId well-known configuration.",
+            VerifiedIdExceptions.OPENID_WELL_KNOWN_CONFIG_FETCH_EXCEPTION.value
+        )
+    }
+
     private fun transformToRequirement(
         scope: String?,
-        credentialOffer: CredentialOffer
+        credentialOffer: CredentialOffer,
+        accessTokenEndpoint: String
     ): Requirement {
         val grants =
             credentialOffer.grants["authorization_code"] ?: throw OpenId4VciValidationException(

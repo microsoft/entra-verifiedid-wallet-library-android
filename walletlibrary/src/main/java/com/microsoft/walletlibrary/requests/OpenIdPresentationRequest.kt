@@ -33,14 +33,9 @@ internal class OpenIdPresentationRequest(
 
     val request: OpenIdProcessedRequest,
 
-    private val libraryConfiguration: LibraryConfiguration? = null
-) : VerifiedIdPresentationRequest {
-
-    private var additionalHeaders: Map<String, String>? = null
-
-    override fun setAdditionalHeaders(headers: Map<String, String>) {
-        this.additionalHeaders = headers
-    }
+    private val libraryConfiguration: LibraryConfiguration
+) : VerifiedIdPresentationRequest, HttpProtocolRequest {
+    private var additionalHeaders = emptyMap<String, String>()
 
     // Indicates whether presentation request is satisfied on client side.
     override fun isSatisfied(): Boolean {
@@ -49,44 +44,45 @@ internal class OpenIdPresentationRequest(
         return !validationResult.isFailure
     }
 
+    // Sets additional headers to include in the response
+    override fun setAdditionalHeaders(headers: Map<String, String>) {
+        additionalHeaders = headers
+    }
+
     // Completes the presentation request and returns Result with success status if successful.
     override suspend fun complete(): VerifiedIdResult<Unit> {
         return getResult {
-            if (libraryConfiguration != null) {
-                if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT)) {
-                    val builder = PresentationExchangeResponseBuilder(libraryConfiguration)
-                    builder.serialize(requirement, StringVerifiedIdSerializer)
-                    val vpTokens = builder.buildVpTokens(
-                        request.presentationRequest.content.clientId,
-                        request.presentationRequest.content.nonce)
-                    val idToken = builder.buildIdToken(
-                        request.presentationRequest.getPresentationDefinitions().first().id,
-                        request.presentationRequest.content.clientId,
-                        request.presentationRequest.content.nonce
-                    )
+            if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT)) {
+                val builder = PresentationExchangeResponseBuilder(libraryConfiguration)
+                builder.serialize(requirement, StringVerifiedIdSerializer)
+                val vpTokens = builder.buildVpTokens(
+                    request.presentationRequest.content.clientId,
+                    request.presentationRequest.content.nonce)
+                val idToken = builder.buildIdToken(
+                    request.presentationRequest.getPresentationDefinitions().first().id,
+                    request.presentationRequest.content.clientId,
+                    request.presentationRequest.content.nonce,
+                )
 
-                    val result = if (vpTokens.size > 1) {
-                        libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponses(
-                            request.presentationRequest.content.redirectUrl,
-                            idToken,
-                            vpTokens,
-                            request.presentationRequest.content.state,
-                            additionalHeaders ?: emptyMap()
-                        )
-                    } else {
-                        libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponse(
-                            request.presentationRequest.content.redirectUrl,
-                            idToken,
-                            vpTokens.first(),
-                            request.presentationRequest.content.state,
-                            additionalHeaders ?: emptyMap()
-                        )
-                    }
-                    result.exceptionOrNull()?.let {
-                        throw it
-                    }
+                val result = if (vpTokens.size > 1) {
+                    libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponses(
+                        request.presentationRequest.content.redirectUrl,
+                        idToken,
+                        vpTokens,
+                        request.presentationRequest.content.state,
+                        additionalHeaders
+                    )
                 } else {
-                    OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, additionalHeaders)
+                    libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponse(
+                        request.presentationRequest.content.redirectUrl,
+                        idToken,
+                        vpTokens.first(),
+                        request.presentationRequest.content.state,
+                        additionalHeaders
+                    )
+                }
+                result.exceptionOrNull()?.let {
+                    throw it
                 }
             } else {
                 OpenIdResponder.sendPresentationResponse(request.presentationRequest, requirement, additionalHeaders)

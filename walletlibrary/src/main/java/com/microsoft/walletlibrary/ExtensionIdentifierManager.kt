@@ -5,24 +5,28 @@
 
 package com.microsoft.walletlibrary
 
+import com.microsoft.walletlibrary.ExtensionIdentifierManager.Constants.SELF_ISSUED_ISSUER_NAME
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.createIssuedAndExpiryTime
-import com.microsoft.walletlibrary.did.sdk.identifier.IdentifierManager
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
-import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
+import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
+import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import java.util.UUID
 
-class ExtensionIdentifierManager internal constructor(private val identifierManager: IdentifierManager, private val signer: TokenSigner, private val serializer: Json) {
+class ExtensionIdentifierManager internal constructor(libraryConfiguration: LibraryConfiguration) {
+    private val identifierManager = libraryConfiguration.identifierManager
+    private val serializer = libraryConfiguration.serializer
+    private val signer = libraryConfiguration.tokenSigner
+
     internal object Constants {
         const val VC_DATA_MODEL_CONTEXT = "https://www.w3.org/2018/credentials/v1"
         const val VC_DATA_MODEL_TYPE = "VerifiableCredential"
+        const val SELF_ISSUED_ISSUER_NAME = "Self"
     }
 
     fun createEphemeralSelfSignedVerifiedId(
@@ -56,13 +60,17 @@ class ExtensionIdentifierManager internal constructor(private val identifierMana
                 issuedTime,
                 expiryTime
             )
-            val jsonContent = serializer.encodeToString (content)
+            val jsonContent = serializer.encodeToString(VerifiableCredentialContent.serializer(), content)
             val vcToken = signer.signWithIdentifier(jsonContent, identifier)
-            return VerifiableCredential(com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential(
-                jti,
-                vcToken,
-                content
-            ))
+            return OpenId4VciVerifiedId(
+                com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential(
+                    jti,
+                    vcToken,
+                    content
+                ),
+                SELF_ISSUED_ISSUER_NAME,
+                CredentialConfiguration()
+            )
         } catch (_: Exception) {
             return null
         }

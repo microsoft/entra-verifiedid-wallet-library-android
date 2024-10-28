@@ -5,8 +5,6 @@
 
 package com.microsoft.walletlibrary.verifiedid
 
-import kotlin.reflect.KClass
-
 /**
  * Defines the behavior of serializing a Verified ID
  */
