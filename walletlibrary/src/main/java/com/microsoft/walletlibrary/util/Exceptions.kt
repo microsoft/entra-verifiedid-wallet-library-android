@@ -197,3 +197,10 @@ class IdInVerifiedIdRequirementDoesNotMatchRequestException(
     cause: Throwable? = null,
     retryable: Boolean = false
 ) : RequirementValidationException(message, cause, retryable)
+
+class InvalidPinAttemptException(
+    message: String = "",
+    cause: Throwable? = null,
+    retryable: Boolean = false,
+    val attemptsLeft: Int? = null
+) : RequirementValidationException(message, cause, retryable)
