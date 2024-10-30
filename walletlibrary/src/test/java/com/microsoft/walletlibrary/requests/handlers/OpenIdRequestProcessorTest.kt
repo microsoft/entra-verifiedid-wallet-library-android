@@ -31,7 +31,6 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.d
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.Logo
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
@@ -169,17 +168,12 @@ class OpenIdRequestProcessorTest {
         every { contractUri.toString() } returns expectedContractUrl
         every { verifiedIdRequirement.issuanceOptions } returns issuanceOptions
         every { verifiedIdRequestURL.url } returns contractUri
-<<<<<<< HEAD:walletlibrary/src/test/java/com/microsoft/walletlibrary/requests/handlers/OpenIdRequestHandlerTest.kt
-        coEvery {
-            openIdRequestHandler["getIssuanceRequest"](expectedContractUrl, any<String>(), any<String>(), any<RootOfTrustResolver>())
-=======
         every {
             openIdRequestProcessor["getIssuanceRequest"](
                 expectedContractUrl,
                 "",
                 ""
             )
->>>>>>> dev:walletlibrary/src/test/java/com/microsoft/walletlibrary/requests/handlers/OpenIdRequestProcessorTest.kt
         } returns rawManifest
     }
 

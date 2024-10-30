@@ -60,18 +60,4 @@ class OpenId4VCIPinRequirement(
     internal fun fulfillAccessToken(accessToken: String) {
         this.accessToken = accessToken
     }
-
-    suspend fun fulfillAccessToken(
-        preAuthorizedCode: String,
-        openId4VCIPinRequirement: OpenId4VCIPinRequirement,
-        accessTokenEndpoint: String
-    ) {
-        libraryConfiguration?.let {
-            OpenID4VCIPreAuthAccessTokenResolver(it).resolve(
-                preAuthorizedCode,
-                openId4VCIPinRequirement,
-                accessTokenEndpoint
-            )
-        }
-    }
 }

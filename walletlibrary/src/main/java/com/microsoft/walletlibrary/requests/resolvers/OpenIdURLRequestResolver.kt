@@ -5,7 +5,6 @@
 
 package com.microsoft.walletlibrary.requests.resolvers
 
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import android.net.Uri
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken

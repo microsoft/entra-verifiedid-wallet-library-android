@@ -6,10 +6,7 @@ import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmeta
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOfferGrant
-<<<<<<< HEAD
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOfferPinDetails
-=======
->>>>>>> dev
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.openid4vci.OpenId4VciIssuanceRequest
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
@@ -283,11 +280,7 @@ class OpenId4VCIRequestHandlerTest {
                 "scope"
             )
             assertThat((actualVerifiedIdRequest.requirement as AccessTokenRequirement).configuration).isEqualTo(
-<<<<<<< HEAD
                 mockCredentialOfferGrant.authorizationServer
-=======
-                mockCredentialOfferGrant.authorization_server
->>>>>>> dev
             )
         }
     }
@@ -438,16 +431,8 @@ class OpenId4VCIRequestHandlerTest {
                 any(),
                 credentialIssuerEndpoint
             )
-<<<<<<< HEAD
         } returns RootOfTrust("root_of_trust", false)
-=======
-        } returns rootOfTrust
-        coEvery {
-            openId4VCIRequestHandler["fetchAccessTokenEndpointFromOpenIdWellKnownConfig"](
-                any<String>()
-            )
-        } returns "AccessTokenEndpoint"
->>>>>>> dev
+
 
         runBlocking {
             //Act
@@ -481,16 +466,7 @@ class OpenId4VCIRequestHandlerTest {
                 any(),
                 credentialIssuerEndpoint
             )
-<<<<<<< HEAD
         } returns RootOfTrust("root_of_trust", false)
-=======
-        } returns rootOfTrust
-        coEvery {
-            openId4VCIRequestHandler["fetchAccessTokenEndpointFromOpenIdWellKnownConfig"](
-                any<String>()
-            )
-        } returns "AccessTokenEndpoint"
->>>>>>> dev
 
         runBlocking {
             //Act
@@ -526,7 +502,6 @@ class OpenId4VCIRequestHandlerTest {
         every { mockCredentialOffer.credential_issuer } returns credentialIssuerEndpoint
         every { mockCredentialOffer.credential_configuration_ids } returns listOf("credential_id")
         every { mockCredentialOffer.grants["authorization_code"] } returns mockCredentialOfferGrant
-<<<<<<< HEAD
         every { mockCredentialOffer.grants["urn:ietf:params:oauth:grant-type:pre-authorized_code"] } returns null
         every { mockCredentialOfferGrant.authorizationServer } returns "authorization_server"
     }
@@ -549,9 +524,7 @@ class OpenId4VCIRequestHandlerTest {
         every { mockCredentialOffer.grants["urn:ietf:params:oauth:grant-type:pre-authorized_code"] } returns mockCredentialOfferGrant
         every { mockCredentialOfferGrant.txCode } returns credentialOfferPinDetails
         every { mockCredentialOfferGrant.preAuthorizedCode } returns "preAuthCode"
-=======
-        every { mockCredentialOfferGrant.authorization_server } returns "authorization_server"
->>>>>>> dev
+        every { mockCredentialOfferGrant.authorizationServer } returns "authorization_server"
     }
 
     private fun mockCredentialOfferMissingGrant() {

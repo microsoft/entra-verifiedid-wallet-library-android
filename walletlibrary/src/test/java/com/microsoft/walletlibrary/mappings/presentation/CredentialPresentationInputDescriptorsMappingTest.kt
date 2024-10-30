@@ -312,7 +312,8 @@ class CredentialPresentationInputDescriptorsMappingTest {
             1
         )
         assertThat(
-            actualConstraint.constraints.filterIsInstance<GroupConstraint>().first().constraintOperator
+            actualConstraint.constraints.filterIsInstance<GroupConstraint>()
+                .first().constraintOperator
         ).isEqualTo(
             GroupConstraintOperator.ALL
         )
@@ -350,7 +351,8 @@ class CredentialPresentationInputDescriptorsMappingTest {
             1
         )
         assertThat(
-            actualConstraint.constraints.filterIsInstance<GroupConstraint>().first().constraintOperator
+            actualConstraint.constraints.filterIsInstance<GroupConstraint>()
+                .first().constraintOperator
         ).isEqualTo(
             GroupConstraintOperator.ANY
         )
@@ -389,12 +391,14 @@ class CredentialPresentationInputDescriptorsMappingTest {
             2
         )
         assertThat(
-            actualConstraint.constraints.filterIsInstance<GroupConstraint>().first().constraintOperator
+            actualConstraint.constraints.filterIsInstance<GroupConstraint>()
+                .first().constraintOperator
         ).isEqualTo(
             GroupConstraintOperator.ANY
         )
         assertThat(
-            actualConstraint.constraints.filterIsInstance<GroupConstraint>().last().constraintOperator
+            actualConstraint.constraints.filterIsInstance<GroupConstraint>()
+                .last().constraintOperator
         ).isEqualTo(
             GroupConstraintOperator.ALL
         )
