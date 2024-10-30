@@ -20,11 +20,12 @@ import kotlinx.serialization.json.Json
 //TODO("improve onSuccess method to create receipt when this is spec'd out")
 internal class FetchPresentationRequestNetworkOperation(
     private val url: String,
+    private val preferHeaders: List<String>,
     private val apiProvider: HttpAgentApiProvider,
     private val jwtValidator: JwtValidator,
     private val serializer: Json
 ) : GetNetworkOperation<PresentationRequestContent>() {
-    override val call: suspend () -> Result<IResponse> = { apiProvider.presentationApis.getRequest(url) }
+    override val call: suspend () -> Result<IResponse> = { apiProvider.presentationApis.getRequest(url, preferHeaders) }
 
     override suspend fun toResult(response: IResponse): Result<PresentationRequestContent> {
         val jwsTokenString = response.body.decodeToString()

@@ -7,6 +7,10 @@ import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+<<<<<<< HEAD
+=======
+import com.microsoft.walletlibrary.identifier.IdentifierManager
+>>>>>>> dev
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.networking.entities.openid4vci.request.OpenID4VCIJWTProofClaims
 import com.microsoft.walletlibrary.networking.entities.openid4vci.request.RawOpenID4VCIRequest
@@ -14,6 +18,10 @@ import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
+<<<<<<< HEAD
+=======
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
+>>>>>>> dev
 import com.microsoft.walletlibrary.util.defaultTestSerializer
 import com.nimbusds.jose.jwk.JWK
 import io.mockk.coEvery
@@ -30,7 +38,13 @@ class OpenId4VciIssuanceRequestFormatterTest {
     private val mockedKeyStore: EncryptedKeyStore = mockk()
     private val mockedTokenSigner: TokenSigner = mockk()
     private val mockedIdentifier: Identifier = mockk()
+<<<<<<< HEAD
     private val mockIdentifierService: IdentifierService = mockk()
+=======
+    private val mockedIdentifierManager: IdentifierManager = mockk()
+    private val mockIdentifierService: IdentifierService = mockk()
+    private val mockWalletLibraryLogger: WalletLibraryLogger = mockk()
+>>>>>>> dev
     private val signingKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
     private val expectedJsonWebKey: JWK = JWK.parse(
@@ -44,7 +58,14 @@ class OpenId4VciIssuanceRequestFormatterTest {
         mockPreviewFeatureFlags,
         mockHttpAgentApiProvider,
         defaultTestSerializer,
+<<<<<<< HEAD
         mockedTokenSigner
+=======
+        rootOfTrustResolver = null,
+        mockedIdentifierManager,
+        mockedTokenSigner,
+        mockWalletLibraryLogger
+>>>>>>> dev
     )
     private val openId4VciIssuanceRequestFormatter =
         OpenId4VciIssuanceRequestFormatter(libraryConfiguration)

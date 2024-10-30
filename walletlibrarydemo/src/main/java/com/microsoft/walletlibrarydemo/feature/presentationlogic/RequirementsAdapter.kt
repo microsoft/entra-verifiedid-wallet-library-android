@@ -9,7 +9,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.RecyclerView
 import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
+import com.microsoft.walletlibrary.requests.requirements.OpenId4VCIPinRequirement
 import com.microsoft.walletlibrary.requests.requirements.PinRequirement
+import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeVerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
@@ -17,10 +19,12 @@ import com.microsoft.walletlibrarydemo.R
 import com.microsoft.walletlibrarydemo.databinding.RequirementTextRowBinding
 import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedclaimRowBinding
 import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedidBinding
+import kotlinx.coroutines.runBlocking
 
 sealed class RequirementViewHolder(view: View): RecyclerView.ViewHolder(view)
 class SelfAttestedHolder(val binding: RequirementTextRowBinding): RequirementViewHolder(binding.root)
 class PinHolder(val binding: RequirementTextRowBinding): RequirementViewHolder(binding.root)
+class OpenId4VciPinHolder(val binding: RequirementTextRowBinding): RequirementViewHolder(binding.root)
 class VerifiedIdHolder(val binding: RequirementVerifiedidBinding): RequirementViewHolder(binding.root)
 class IdTokenHolder(val binding: RequirementVerifiedclaimRowBinding): RequirementViewHolder(binding.root)
 
@@ -48,6 +52,7 @@ class RequirementsAdapter(
                         false
                     )
                 )
+            PresentationExchangeVerifiedIdRequirement::class.java.name.hashCode(),
             VerifiedIdRequirement::class.java.name.hashCode() ->
                 VerifiedIdHolder(
                     RequirementVerifiedidBinding.inflate(
@@ -59,6 +64,14 @@ class RequirementsAdapter(
             IdTokenRequirement::class.java.name.hashCode() ->
                 IdTokenHolder(
                     RequirementVerifiedclaimRowBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                    )
+                )
+            OpenId4VCIPinRequirement::class.java.name.hashCode() ->
+                OpenId4VciPinHolder(
+                    RequirementTextRowBinding.inflate(
                         LayoutInflater.from(parent.context),
                         parent,
                         false
@@ -81,6 +94,10 @@ class RequirementsAdapter(
             is PinHolder -> setupPinHolder(
                 holder,
                 requirements[position] as PinRequirement
+            )
+            is OpenId4VciPinHolder -> setupOpenId4VciPinHolder(
+                holder,
+                requirements[position] as OpenId4VCIPinRequirement
             )
             is VerifiedIdHolder -> setupVerifiedIdRow(
                 holder,
@@ -148,6 +165,28 @@ class RequirementsAdapter(
         holder.binding.claimValue.apply {
             doAfterTextChanged {
                 requirement.fulfill(holder.binding.claimValue.text.toString())
+                holder.binding.title.setCompoundDrawablesWithIntrinsicBounds(
+                    0,
+                    0,
+                    R.drawable.checkmark,
+                    0
+                )
+            }
+        }
+    }
+
+    private fun setupOpenId4VciPinHolder(
+        holder: OpenId4VciPinHolder,
+        requirement: OpenId4VCIPinRequirement
+    ) {
+        holder.binding.title.text = "Pin"
+        holder.binding.root.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
+        holder.binding.claimValue.setTextColor(ContextCompat.getColor(context, R.color.gray))
+        holder.binding.claimValue.apply {
+            doAfterTextChanged {
+                runBlocking {
+                    requirement.fulfill(holder.binding.claimValue.text.toString())
+                }
                 holder.binding.title.setCompoundDrawablesWithIntrinsicBounds(
                     0,
                     0,

@@ -20,7 +20,6 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperatio
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendIssuanceCompletionResponse
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
@@ -48,17 +47,16 @@ internal class IssuanceService @Inject constructor(
      * Load a Issuance Request from a contract.
      *
      * @param contractUrl url that the contract is fetched from
-     * @param rootOfTrustResolver resolver that is used to verify the root of trust (domains) of the issuer
      */
     suspend fun getRequest(
-        contractUrl: String,
-        rootOfTrustResolver: RootOfTrustResolver? = null
+        contractUrl: String
     ): Result<IssuanceRequest> {
         return runResultTry {
             logTime("Issuance getRequest") {
                 val contract = fetchContract(contractUrl).toSDK().abortOnError()
                 val linkedDomainResult =
-                    linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer, rootOfTrustResolver).toSDK().abortOnError()
+                    linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(contract.input.issuer)
+                        .toSDK().abortOnError()
                 val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
                 Result.Success(request)
             }
@@ -144,12 +142,14 @@ internal class IssuanceService @Inject constructor(
             responder = responder,
             expiryInSeconds = expiryInSeconds
         )
-        return SendVerifiableCredentialIssuanceRequestNetworkOperation(
-            response.audience,
-            formattedResponse,
-            apiProvider,
-            jwtValidator,
-            serializer
-        ).fire().toSDK()
+        return sendResponse(formattedResponse, response.audience)
     }
+
+    private suspend fun sendResponse(formattedResponse: String, url: String) = SendVerifiableCredentialIssuanceRequestNetworkOperation(
+        url,
+        formattedResponse,
+        apiProvider,
+        jwtValidator,
+        serializer
+    ).fire().toSDK()
 }

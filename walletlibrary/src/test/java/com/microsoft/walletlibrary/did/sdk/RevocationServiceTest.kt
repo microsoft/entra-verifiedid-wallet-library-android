@@ -45,19 +45,18 @@ class RevocationServiceTest {
     fun `revoke verifiable presentation successfully with correct params`() {
         val expectedRevocationRequest = RevocationRequest(verifiableCredential, masterIdentifier, revokeRpList, revokeReason)
         val expectedRevocationReceipt: RevocationReceipt = mockk()
-        coEvery { anyConstructed<SendVerifiablePresentationRevocationRequestNetworkOperation>().fire() } returns KotlinResult.success(
+        coEvery { revocationService["sendRevocationRequest"](expectedRevocationRequest, formattedResponse) } returns Result.Success(
             expectedRevocationReceipt
         )
 
         runBlocking {
             val actualResult = revocationService.revokeVerifiablePresentation(verifiableCredential, revokeRpList, revokeReason)
             assertThat(actualResult).isInstanceOf(Result.Success::class.java)
-            assertThat((actualResult as Result.Success).payload == expectedRevocationReceipt)
+            assertThat((actualResult as Result.Success).payload).isEqualTo(expectedRevocationReceipt)
         }
 
         coVerify(exactly = 1) {
             revocationService["sendRevocationRequest"](expectedRevocationRequest, formattedResponse)
-            anyConstructed<SendVerifiablePresentationRevocationRequestNetworkOperation>().fire()
         }
     }
 

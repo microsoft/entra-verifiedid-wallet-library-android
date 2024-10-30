@@ -27,7 +27,7 @@ internal object ManifestResolver {
         rootOfTrustResolver: RootOfTrustResolver? = null
     ): RawManifest {
         return when (val issuanceRequestResult =
-            VerifiableCredentialSdk.issuanceService.getRequest(uri, rootOfTrustResolver)) {
+            VerifiableCredentialSdk.issuanceService.getRequest(uri)) {
             is Result.Success -> {
                 val request = issuanceRequestResult.payload
                 RawManifest(request)

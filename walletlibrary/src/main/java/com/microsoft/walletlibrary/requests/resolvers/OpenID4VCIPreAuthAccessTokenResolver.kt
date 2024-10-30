@@ -10,6 +10,9 @@ import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
+/**
+ * Resolves and fulfills the access token for Pre Auth flow.
+ */
 internal class OpenID4VCIPreAuthAccessTokenResolver(val libraryConfiguration: LibraryConfiguration) {
     suspend fun resolve(
         preAuthorizedCode: String?,

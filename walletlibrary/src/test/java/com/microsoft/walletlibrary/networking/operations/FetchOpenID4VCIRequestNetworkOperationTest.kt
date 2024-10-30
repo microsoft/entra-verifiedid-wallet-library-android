@@ -1,11 +1,7 @@
 package com.microsoft.walletlibrary.networking.operations
 
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.ClientException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.ForbiddenException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.ServiceUnreachableException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.UnauthorizedException
-import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
+import com.microsoft.walletlibrary.util.NetworkingException
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import io.mockk.coEvery
 import io.mockk.every
@@ -35,7 +31,7 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
         // Arrange
         val apiProvider: HttpAgentApiProvider = mockk {
             every { openId4VciApi } returns mockk {
-                coEvery { getOpenID4VCIRequest(any()) } returns Result.success(
+                coEvery { getOpenID4VCIRequest(any(), any()) } returns Result.success(
                     IResponse(
                         status = 200,
                         headers = emptyMap(),
@@ -44,7 +40,7 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
                 )
             }
         }
-        val operation = FetchOpenID4VCIRequestNetworkOperation("", apiProvider)
+        val operation = FetchOpenID4VCIRequestNetworkOperation("", emptyList(), apiProvider)
 
         runBlocking {
             // Act
@@ -62,18 +58,16 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
         // Arrange
         val apiProvider: HttpAgentApiProvider = mockk {
             every { openId4VciApi } returns mockk {
-                coEvery { getOpenID4VCIRequest(any()) } returns Result.failure(
-                    IHttpAgent.ClientException(
-                        IResponse(
-                            status = 400,
-                            headers = emptyMap(),
-                            body = "Bad request".toByteArray(Charsets.UTF_8)
-                        )
-                    )
+                coEvery { getOpenID4VCIRequest(any(), any()) } returns Result.failure(
+                    IResponse(
+                        status = 400,
+                        headers = emptyMap(),
+                        body = "Bad request".toByteArray(Charsets.UTF_8)
+                    ).toNetworkingException()
                 )
             }
         }
-        val operation = FetchOpenID4VCIRequestNetworkOperation("", apiProvider)
+        val operation = FetchOpenID4VCIRequestNetworkOperation("", emptyList(), apiProvider)
 
         runBlocking {
             // Act
@@ -82,8 +76,8 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
             // Assert
             assertThat(actual.isFailure).isTrue
             val unwrapped = actual.exceptionOrNull()
-            assertThat(unwrapped).isInstanceOf(ClientException::class.java)
-            assertThat((unwrapped as ClientException).errorCode?.toInt()).isEqualTo(400)
+            assertThat(unwrapped).isInstanceOf(NetworkingException::class.java)
+            assertThat((unwrapped as NetworkingException).statusCode).isEqualTo("400")
         }
     }
 
@@ -92,18 +86,16 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
         // Arrange
         val apiProvider: HttpAgentApiProvider = mockk {
             every { openId4VciApi } returns mockk {
-                coEvery { getOpenID4VCIRequest(any()) } returns Result.failure(
-                    IHttpAgent.ClientException(
-                        IResponse(
-                            status = 401,
-                            headers = emptyMap(),
-                            body = "Bad request".toByteArray(Charsets.UTF_8)
-                        )
-                    )
+                coEvery { getOpenID4VCIRequest(any(), any()) } returns Result.failure(
+                    IResponse(
+                        status = 401,
+                        headers = emptyMap(),
+                        body = "Bad request".toByteArray(Charsets.UTF_8)
+                    ).toNetworkingException()
                 )
             }
         }
-        val operation = FetchOpenID4VCIRequestNetworkOperation("", apiProvider)
+        val operation = FetchOpenID4VCIRequestNetworkOperation("", emptyList(), apiProvider)
 
         runBlocking {
             // Act
@@ -112,8 +104,8 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
             // Assert
             assertThat(actual.isFailure).isTrue
             val unwrapped = actual.exceptionOrNull()
-            assertThat(unwrapped).isInstanceOf(UnauthorizedException::class.java)
-            assertThat((unwrapped as UnauthorizedException).errorCode?.toInt()).isEqualTo(401)
+            assertThat(unwrapped).isInstanceOf(NetworkingException::class.java)
+            assertThat((unwrapped as NetworkingException).statusCode).isEqualTo("401")
         }
     }
 
@@ -122,18 +114,16 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
         // Arrange
         val apiProvider: HttpAgentApiProvider = mockk {
             every { openId4VciApi } returns mockk {
-                coEvery { getOpenID4VCIRequest(any()) } returns Result.failure(
-                    IHttpAgent.ClientException(
+                coEvery { getOpenID4VCIRequest(any(), any()) } returns Result.failure(
                         IResponse(
                             status = 403,
                             headers = emptyMap(),
                             body = "Bad request".toByteArray(Charsets.UTF_8)
-                        )
-                    )
+                        ).toNetworkingException()
                 )
             }
         }
-        val operation = FetchOpenID4VCIRequestNetworkOperation("", apiProvider)
+        val operation = FetchOpenID4VCIRequestNetworkOperation("", emptyList(), apiProvider)
 
         runBlocking {
             // Act
@@ -142,8 +132,8 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
             // Assert
             assertThat(actual.isFailure).isTrue
             val unwrapped = actual.exceptionOrNull()
-            assertThat(unwrapped).isInstanceOf(ForbiddenException::class.java)
-            assertThat((unwrapped as ForbiddenException).errorCode?.toInt()).isEqualTo(403)
+            assertThat(unwrapped).isInstanceOf(NetworkingException::class.java)
+            assertThat((unwrapped as NetworkingException).statusCode).isEqualTo("403")
         }
     }
     @Test
@@ -151,18 +141,16 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
         // Arrange
         val apiProvider: HttpAgentApiProvider = mockk {
             every { openId4VciApi } returns mockk {
-                coEvery { getOpenID4VCIRequest(any()) } returns Result.failure(
-                    IHttpAgent.ServerException(
-                        IResponse(
-                            status = 500,
-                            headers = emptyMap(),
-                            body = "Bad request".toByteArray(Charsets.UTF_8)
-                        )
-                    )
+                coEvery { getOpenID4VCIRequest(any(), any()) } returns Result.failure(
+                    IResponse(
+                        status = 500,
+                        headers = emptyMap(),
+                        body = "Bad request".toByteArray(Charsets.UTF_8)
+                    ).toNetworkingException()
                 )
             }
         }
-        val operation = FetchOpenID4VCIRequestNetworkOperation("", apiProvider)
+        val operation = FetchOpenID4VCIRequestNetworkOperation("", emptyList(), apiProvider)
 
         runBlocking {
             // Act
@@ -171,8 +159,8 @@ class FetchOpenID4VCIRequestNetworkOperationTest {
             // Assert
             assertThat(actual.isFailure).isTrue
             val unwrapped = actual.exceptionOrNull()
-            assertThat(unwrapped).isInstanceOf(ServiceUnreachableException::class.java)
-            assertThat((unwrapped as ServiceUnreachableException).errorCode?.toInt()).isEqualTo(500)
+            assertThat(unwrapped).isInstanceOf(NetworkingException::class.java)
+            assertThat((unwrapped as NetworkingException).statusCode).isEqualTo("500")
         }
     }
 }

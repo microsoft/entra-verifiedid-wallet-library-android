@@ -16,7 +16,7 @@ import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequir
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.util.MultipleRequirementsWithSameIdException
 import com.microsoft.walletlibrary.util.NoMatchingRequirementInRequestException
-import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
+import com.microsoft.walletlibrary.verifiedid.VCVerifiedIdSerializer
 
 /**
  * Fills the attestation requirement in IssuanceResponse object with Requirements object in library.
@@ -76,8 +76,10 @@ private fun IssuanceResponse.addVerifiedIdRequirement(verifiedIdRequirement: Ver
     if (presentationAttestation.size > 1)
         throw MultipleRequirementsWithSameIdException("Multiple VerifiedId Requirements have the same Ids.")
     verifiedIdRequirement.validate()
-    requestedVcMap[presentationAttestation.first()] =
-        (verifiedIdRequirement.verifiedId as VerifiableCredential).raw
+    verifiedIdRequirement.verifiedId?.let {
+        verifiedId ->
+        requestedVcMap[presentationAttestation.first()] = VCVerifiedIdSerializer.serialize(verifiedId)
+    }
 }
 
 private fun IssuanceResponse.addGroupRequirement(groupRequirement: GroupRequirement) {

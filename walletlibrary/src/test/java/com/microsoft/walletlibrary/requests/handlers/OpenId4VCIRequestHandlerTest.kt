@@ -6,7 +6,10 @@ import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmeta
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOfferGrant
+<<<<<<< HEAD
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOfferPinDetails
+=======
+>>>>>>> dev
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.openid4vci.OpenId4VciIssuanceRequest
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
@@ -60,12 +63,14 @@ class OpenId4VCIRequestHandlerTest {
         // Arrange
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
 
-        //Act
-        val actualCanHandleResult =
-            openId4VCIRequestHandler.canHandle(expectedCredentialOfferString)
+        runBlocking {
+            //Act
+            val actualCanHandleResult =
+                openId4VCIRequestHandler.canHandleRequest(expectedCredentialOfferString)
 
-        // Assert
-        assertThat(actualCanHandleResult).isEqualTo(true)
+            // Assert
+            assertThat(actualCanHandleResult).isEqualTo(true)
+        }
     }
 
     @Test
@@ -74,11 +79,14 @@ class OpenId4VCIRequestHandlerTest {
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         val invalidCredentialOfferString = "invalid_credential_offer"
 
-        //Act
-        val actualCanHandleResult = openId4VCIRequestHandler.canHandle(invalidCredentialOfferString)
+        runBlocking {
+            //Act
+            val actualCanHandleResult =
+                openId4VCIRequestHandler.canHandleRequest(invalidCredentialOfferString)
 
-        // Assert
-        assertThat(actualCanHandleResult).isEqualTo(false)
+            // Assert
+            assertThat(actualCanHandleResult).isEqualTo(false)
+        }
     }
 
     @Test
@@ -87,21 +95,26 @@ class OpenId4VCIRequestHandlerTest {
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         val invalidCredentialOfferString = ""
 
-        //Act
-        val actualCanHandleResult = openId4VCIRequestHandler.canHandle(invalidCredentialOfferString)
+        runBlocking {
+            //Act
+            val actualCanHandleResult =
+                openId4VCIRequestHandler.canHandleRequest(invalidCredentialOfferString)
 
-        // Assert
-        assertThat(actualCanHandleResult).isEqualTo(false)
+            // Assert
+            assertThat(actualCanHandleResult).isEqualTo(false)
+        }
     }
 
     @Test
     fun canHandleTest_AnyFailureWithSerializer_ReturnsFalse() {
-        //Act
-        val actualCanHandleResult =
-            openId4VCIRequestHandler.canHandle(expectedCredentialOfferString)
+        runBlocking {
+            //Act
+            val actualCanHandleResult =
+                openId4VCIRequestHandler.canHandleRequest(expectedCredentialOfferString)
 
-        // Assert
-        assertThat(actualCanHandleResult).isEqualTo(false)
+            // Assert
+            assertThat(actualCanHandleResult).isEqualTo(false)
+        }
     }
 
     @Test
@@ -232,6 +245,7 @@ class OpenId4VCIRequestHandlerTest {
     @Test
     fun handleRequestTest_ValidVerifiedIdTransformationsWithAuthFlowGrant_ReturnsVerifiedIdRequest() {
         // Arrange
+        val rootOfTrust = RootOfTrust("root_of_trust", false)
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         mockCredentialMetadata()
         mockCredentialOfferForAuthFlow()
@@ -244,7 +258,12 @@ class OpenId4VCIRequestHandlerTest {
                 any(),
                 credentialIssuerEndpoint
             )
-        } returns RootOfTrust("root_of_trust", false)
+        } returns rootOfTrust
+        coEvery {
+            openId4VCIRequestHandler["fetchAccessTokenEndpointFromOpenIdWellKnownConfig"](
+                any<String>()
+            )
+        } returns "AccessTokenEndpoint"
 
         runBlocking {
             //Act
@@ -264,7 +283,11 @@ class OpenId4VCIRequestHandlerTest {
                 "scope"
             )
             assertThat((actualVerifiedIdRequest.requirement as AccessTokenRequirement).configuration).isEqualTo(
+<<<<<<< HEAD
                 mockCredentialOfferGrant.authorizationServer
+=======
+                mockCredentialOfferGrant.authorization_server
+>>>>>>> dev
             )
         }
     }
@@ -402,6 +425,7 @@ class OpenId4VCIRequestHandlerTest {
     @Test
     fun handleRequestTest_NoGrantsDefined_ThrowsException() {
         // Arrange
+        val rootOfTrust = RootOfTrust("root_of_trust", false)
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         mockCredentialMetadata()
         mockCredentialOfferMissingGrant()
@@ -414,7 +438,16 @@ class OpenId4VCIRequestHandlerTest {
                 any(),
                 credentialIssuerEndpoint
             )
+<<<<<<< HEAD
         } returns RootOfTrust("root_of_trust", false)
+=======
+        } returns rootOfTrust
+        coEvery {
+            openId4VCIRequestHandler["fetchAccessTokenEndpointFromOpenIdWellKnownConfig"](
+                any<String>()
+            )
+        } returns "AccessTokenEndpoint"
+>>>>>>> dev
 
         runBlocking {
             //Act
@@ -435,6 +468,7 @@ class OpenId4VCIRequestHandlerTest {
     @Test
     fun handleRequestTest_NullScope_ThrowsException() {
         // Arrange
+        val rootOfTrust = RootOfTrust("root_of_trust", false)
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         mockCredentialMetadata()
         mockCredentialOfferForAuthFlow()
@@ -447,7 +481,16 @@ class OpenId4VCIRequestHandlerTest {
                 any(),
                 credentialIssuerEndpoint
             )
+<<<<<<< HEAD
         } returns RootOfTrust("root_of_trust", false)
+=======
+        } returns rootOfTrust
+        coEvery {
+            openId4VCIRequestHandler["fetchAccessTokenEndpointFromOpenIdWellKnownConfig"](
+                any<String>()
+            )
+        } returns "AccessTokenEndpoint"
+>>>>>>> dev
 
         runBlocking {
             //Act
@@ -483,6 +526,7 @@ class OpenId4VCIRequestHandlerTest {
         every { mockCredentialOffer.credential_issuer } returns credentialIssuerEndpoint
         every { mockCredentialOffer.credential_configuration_ids } returns listOf("credential_id")
         every { mockCredentialOffer.grants["authorization_code"] } returns mockCredentialOfferGrant
+<<<<<<< HEAD
         every { mockCredentialOffer.grants["urn:ietf:params:oauth:grant-type:pre-authorized_code"] } returns null
         every { mockCredentialOfferGrant.authorizationServer } returns "authorization_server"
     }
@@ -505,6 +549,9 @@ class OpenId4VCIRequestHandlerTest {
         every { mockCredentialOffer.grants["urn:ietf:params:oauth:grant-type:pre-authorized_code"] } returns mockCredentialOfferGrant
         every { mockCredentialOfferGrant.txCode } returns credentialOfferPinDetails
         every { mockCredentialOfferGrant.preAuthorizedCode } returns "preAuthCode"
+=======
+        every { mockCredentialOfferGrant.authorization_server } returns "authorization_server"
+>>>>>>> dev
     }
 
     private fun mockCredentialOfferMissingGrant() {
