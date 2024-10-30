@@ -13,6 +13,7 @@ import com.microsoft.walletlibrary.did.sdk.IssuanceService
 import com.microsoft.walletlibrary.did.sdk.LinkedDomainsService
 import com.microsoft.walletlibrary.did.sdk.PresentationService
 import com.microsoft.walletlibrary.did.sdk.RevocationService
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import dagger.BindsInstance
 import dagger.Component
@@ -70,5 +71,8 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun polymorphicJsonSerializer(@Named("polymorphicJsonSerializer") jsonSerializer: SerializersModule): Builder
+
+        @BindsInstance
+        fun rootOfTrustResolver(@Named("rootOfTrustResolver") rootOfTrustResolver: RootOfTrustResolver? = null): Builder
     }
 }

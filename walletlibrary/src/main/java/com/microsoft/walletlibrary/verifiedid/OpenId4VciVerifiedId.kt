@@ -19,7 +19,10 @@ internal class OpenId4VciVerifiedId(
     val issuerName: String,
 
     // Information about the issuer and credential issued.
-    val credentialConfiguration: CredentialConfiguration
+    val credentialConfiguration: CredentialConfiguration,
+
+    // List of types of Verified ID.
+    override val types: List<String> = raw.contents.vc.type
 ) : VerifiedId {
     override val id = raw.jti
 
@@ -28,8 +31,6 @@ internal class OpenId4VciVerifiedId(
 
     @Serializable(with = DateSerializer::class)
     override val expiresOn = raw.contents.exp?.let { Date(it * 1000L) }
-
-    val types = raw.contents.vc.type
 
     override val style = credentialConfiguration.getVerifiedIdStyleInPreferredLocale(issuerName)
 
@@ -47,16 +48,17 @@ internal class OpenId4VciVerifiedId(
     private fun createVerifiedIdClaim(claimReference: String, claimValue: Any): VerifiedIdClaim {
         val claimDefinitions = credentialConfiguration.credential_definition?.credentialSubject
         val claimDisplayDefinition = claimDefinitions?.get("vc.credentialSubject.$claimReference")
-            ?: return VerifiedIdClaim(claimReference, claimValue, null)
+            ?: return VerifiedIdClaim(claimReference, claimValue, null, null)
         val localizedDisplayDefinition =
             claimDisplayDefinition.getPreferredLocalizedDisplayDefinition()
         return if (localizedDisplayDefinition?.name != null)
             VerifiedIdClaim(
-                localizedDisplayDefinition.name,
+                claimReference,
                 claimValue,
+                localizedDisplayDefinition.name,
                 claimDisplayDefinition.value_type
             )
         else
-            VerifiedIdClaim(claimReference, claimValue, claimDisplayDefinition.value_type)
+            VerifiedIdClaim(claimReference, claimValue, null, claimDisplayDefinition.value_type)
     }
 }

@@ -10,6 +10,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.RecyclerView
 import com.microsoft.walletlibrary.requests.requirements.IdTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.PinRequirement
+import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeVerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
@@ -48,6 +49,7 @@ class RequirementsAdapter(
                         false
                     )
                 )
+            PresentationExchangeVerifiedIdRequirement::class.java.name.hashCode(),
             VerifiedIdRequirement::class.java.name.hashCode() ->
                 VerifiedIdHolder(
                     RequirementVerifiedidBinding.inflate(

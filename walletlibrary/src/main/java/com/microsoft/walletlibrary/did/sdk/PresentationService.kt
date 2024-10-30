@@ -38,11 +38,11 @@ internal class PresentationService @Inject constructor(
     private val presentationResponseFormatter: PresentationResponseFormatter
 ) {
 
-    suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
+    suspend fun getRequest(stringUri: String, preferHeaders: List<String>): Result<PresentationRequest> {
         return runResultTry {
             logTime("Presentation getRequest") {
                 val uri = verifyUri(stringUri)
-                val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
+                val presentationRequestContent = getPresentationRequestContent(uri, preferHeaders).abortOnError()
                 return@logTime validateRequest(presentationRequestContent)
             }
         }
@@ -51,7 +51,9 @@ internal class PresentationService @Inject constructor(
     internal suspend fun validateRequest(presentationRequestContent: PresentationRequestContent): Result<PresentationRequest> {
         return runResultTry {
             logTime("Presentation validateRequest") {
-                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId).toSDK().abortOnError()
+                val linkedDomainResult = linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                    presentationRequestContent.clientId
+                ).toSDK().abortOnError()
                 val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
                 isRequestValid(request).abortOnError()
                 Result.Success(request)
@@ -67,13 +69,13 @@ internal class PresentationService @Inject constructor(
         return url
     }
 
-    private suspend fun getPresentationRequestContent(uri: Uri): Result<PresentationRequestContent> {
+    private suspend fun getPresentationRequestContent(uri: Uri, preferHeaders: List<String>): Result<PresentationRequestContent> {
         val requestParameter = uri.getQueryParameter("request")
         if (requestParameter != null)
             return verifyAndUnwrapPresentationRequestFromQueryParam(requestParameter)
         val requestUriParameter = uri.getQueryParameter("request_uri")
         if (requestUriParameter != null)
-            return fetchRequest(requestUriParameter).toSDK()
+            return fetchRequest(requestUriParameter, preferHeaders).toSDK()
         return Result.Failure(PresentationException("No query parameter 'request' nor 'request_uri' is passed."))
     }
 
@@ -91,8 +93,8 @@ internal class PresentationService @Inject constructor(
         return Result.Success(serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content()))
     }
 
-    private suspend fun fetchRequest(url: String) =
-        FetchPresentationRequestNetworkOperation(url, apiProvider, jwtValidator, serializer).fire()
+    private suspend fun fetchRequest(url: String, preferHeaders: List<String>) =
+        FetchPresentationRequestNetworkOperation(url, preferHeaders, apiProvider, jwtValidator, serializer).fire()
 
     /**
      * Send a Presentation Response.
@@ -102,12 +104,13 @@ internal class PresentationService @Inject constructor(
      */
     suspend fun sendResponse(
         presentationRequest: PresentationRequest,
-        response: List<PresentationResponse>
+        response: List<PresentationResponse>,
+        additionalHeaders: Map<String, String>
     ): Result<Unit> {
         return runResultTry {
             logTime("Presentation sendResponse") {
                 val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
-                formAndSendResponse(presentationRequest, response, masterIdentifier).abortOnError()
+                formAndSendResponse(presentationRequest, response, masterIdentifier, additionalHeaders).abortOnError()
             }
             Result.Success(Unit)
         }
@@ -117,6 +120,7 @@ internal class PresentationService @Inject constructor(
         presentationRequest: PresentationRequest,
         response: List<PresentationResponse>,
         responder: Identifier,
+        additionalHeaders: Map<String, String>,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<Unit> {
         // split on number of responses
@@ -132,7 +136,8 @@ internal class PresentationService @Inject constructor(
                 idToken,
                 vpToken,
                 presentationRequest.content.state,
-                apiProvider
+                apiProvider,
+                additionalHeaders
             ).fire().toSDK()
         } else {
             val (idToken, vpToken) = presentationResponseFormatter.formatResponse(
@@ -146,7 +151,8 @@ internal class PresentationService @Inject constructor(
                 idToken,
                 vpToken,
                 presentationRequest.content.state,
-                apiProvider
+                apiProvider,
+                additionalHeaders
             ).fire().toSDK()
         }
     }

@@ -11,31 +11,59 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiP
 import com.microsoft.walletlibrary.did.sdk.datasource.network.linkedDomainsOperations.FetchWellKnownConfigDocumentNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
+import com.microsoft.walletlibrary.mappings.toLinkedDomainResult
 import java.net.URL
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 internal class LinkedDomainsService @Inject constructor(
     private val apiProvider: HttpAgentApiProvider,
     private val resolver: Resolver,
-    private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator
+    private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator,
+    @Named("rootOfTrustResolver") private val rootOfTrustResolver: RootOfTrustResolver? = null
 ) {
-    suspend fun fetchAndVerifyLinkedDomains(relyingPartyDid: String): Result<LinkedDomainResult> {
-        getLinkedDomainsFromDid(relyingPartyDid)
-            .onSuccess { domainUrls ->
-                return verifyLinkedDomains(domainUrls, relyingPartyDid)
-            }
-            .onFailure {
-                return Result.failure(it)
-            }
-        return Result.failure(SdkException("Failed while verifying linked domains"))
+    internal suspend fun resolveIdentifierDocument(relyingPartyDid: String): Result<IdentifierDocument> {
+        return resolver.resolve(relyingPartyDid)
     }
 
-    internal suspend fun verifyLinkedDomains(
+    suspend fun validateLinkedDomains(identifierDocument: IdentifierDocument): Result<LinkedDomainResult> {
+        return try {
+            rootOfTrustResolver?.resolve(identifierDocument)
+                ?.let { Result.success(it.toLinkedDomainResult()) }
+                ?: throw SdkException("Root of trust resolver is not configured")
+        } catch (ex: SdkException) {
+            SdkLog.i(
+                "Linked Domains verification using resolver failed with exception $ex. " +
+                        "Verifying it using Well Known Document.",
+                ex
+            )
+            val linkedDomains = verifyLinkedDomainsUsingWellKnownDocument(identifierDocument)
+            Result.success(linkedDomains)
+        }
+    }
+
+    suspend fun fetchDocumentAndVerifyLinkedDomains(relyingPartyDid: String): Result<LinkedDomainResult> {
+        resolveIdentifierDocument(relyingPartyDid)
+            .onSuccess { return validateLinkedDomains(it) }
+            .onFailure { return Result.failure(it) }
+        return Result.failure(SdkException("Failed to fetch identifier document"))
+    }
+
+    private suspend fun verifyLinkedDomainsUsingWellKnownDocument(identifierDocument: IdentifierDocument): LinkedDomainResult {
+        val linkedDomains = getLinkedDomainsFromDidDocument(identifierDocument)
+        verifyLinkedDomains(linkedDomains, identifierDocument.id)
+            .onSuccess { return it }
+            .onFailure { throw it }
+        return LinkedDomainMissing
+    }
+
+    private suspend fun verifyLinkedDomains(
         domainUrls: List<String>,
         relyingPartyDid: String
     ): Result<LinkedDomainResult> {
@@ -43,40 +71,30 @@ internal class LinkedDomainsService @Inject constructor(
             return Result.success(LinkedDomainMissing)
         val domainUrl = domainUrls.first()
         val hostname = URL(domainUrl).host
-        return getWellKnownConfigDocument(domainUrl)
-            .map { wellKnownConfigDocument ->
+        getWellKnownConfigDocument(domainUrl)
+            .onSuccess { wellKnownConfigDocument ->
                 wellKnownConfigDocument.linkedDids.firstNotNullOf { linkedDidJwt ->
                     val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(
                         linkedDidJwt,
                         relyingPartyDid,
                         domainUrl
                     )
-                    if (isDomainLinked)
-                        LinkedDomainVerified(hostname)
+                    return if (isDomainLinked)
+                        Result.success(LinkedDomainVerified(hostname))
                     else
-                        null
+                        Result.success(LinkedDomainUnVerified(hostname))
                 }
-            }.onFailure {
-                SdkLog.d("Unable to fetch well-known config document from $domainUrl")
-            }.recover {
-                LinkedDomainUnVerified(hostname)
             }
+            .onFailure {
+                SdkLog.i("Unable to fetch well-known config document from $domainUrl because of ${it.message}")
+                return Result.success(LinkedDomainUnVerified(hostname))
+            }
+        return Result.success(LinkedDomainMissing)
     }
 
-    private suspend fun getLinkedDomainsFromDid(relyingPartyDid: String): Result<List<String>> {
-        val didDocumentResult = resolveIdentifierDocument(relyingPartyDid)
-        return didDocumentResult.map { didDocument ->
-            getLinkedDomainsFromDidDocument(didDocument)
-        }
-    }
-
-    internal suspend fun resolveIdentifierDocument(relyingPartyDid: String): Result<IdentifierDocument> {
-        return resolver.resolve(relyingPartyDid)
-    }
-
-    internal fun getLinkedDomainsFromDidDocument(didDocument: IdentifierDocument): List<String> {
+    private fun getLinkedDomainsFromDidDocument(identifierDocument: IdentifierDocument): List<String> {
         val linkedDomainsServices =
-            didDocument.service.filter { service ->
+            identifierDocument.service.filter { service ->
                 service.type.equals(
                     Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE,
                     true

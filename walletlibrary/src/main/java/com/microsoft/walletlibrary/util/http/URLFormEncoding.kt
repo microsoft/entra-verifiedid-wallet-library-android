@@ -23,20 +23,20 @@ object URLFormEncoding {
                     if (!firstKeyPair) {
                         builder.append("&")
                     }
-                    builder.append("${encodedKey}=${URLEncoder.encode(value, Charsets.UTF_8.name())}")
+                    builder.append("${encodedKey}=${URLEncoder.encode(value, "UTF-8")}")
                     if (firstKeyPair)
                     {
                         firstKeyPair = false
                     }
                 }
-                is Array<*> -> {
+                is List<*> -> {
                     value.iterator().forEach { arrayValue ->
                         when (arrayValue) {
                             is String -> {
                                 if (!firstKeyPair) {
                                     builder.append("&")
                                 }
-                                builder.append("${encodedKey}=${URLEncoder.encode(arrayValue, Charsets.UTF_8.name())}")
+                                builder.append("${encodedKey}=${URLEncoder.encode(arrayValue, "UTF-8")}")
                                 if (firstKeyPair)
                                 {
                                     firstKeyPair = false
