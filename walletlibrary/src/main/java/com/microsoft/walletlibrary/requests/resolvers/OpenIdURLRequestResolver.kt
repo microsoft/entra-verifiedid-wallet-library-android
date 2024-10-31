@@ -12,6 +12,7 @@ import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestN
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.util.Constants
+import com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.PreviewFeatureFlags
@@ -26,7 +27,7 @@ import org.json.JSONObject
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
-internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration, private val preferHeader: List<String>) :
+internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration, private var preferHeader: List<String>) :
     RequestResolver {
 
     // Indicates whether this resolver can resolve the provided input.
@@ -41,11 +42,7 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         if (verifiedIdRequestInput !is VerifiedIdRequestURL) throw UnSupportedVerifiedIdRequestInputException(
             "Provided VerifiedIdRequestInput is not supported."
         )
-        if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN)
-            || libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_PRE_AUTH)
-        )
-            return resolveOpenId4VCIRequest(verifiedIdRequestInput)
-        return OpenIdResolver.getRequest(verifiedIdRequestInput.url.toString(), preferHeader)
+        return resolveOpenId4VCIRequest(verifiedIdRequestInput)
     }
 
     private suspend fun resolveOpenId4VCIRequest(verifiedIdRequestInput: VerifiedIdRequestURL): Any {
@@ -88,10 +85,18 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         return requestUriParameter
     }
 
-    private suspend fun fetchOpenID4VCIRequest(url: String) =
-        FetchOpenID4VCIRequestNetworkOperation(
+    private suspend fun fetchOpenID4VCIRequest(url: String): Result<ByteArray> {
+        if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN)
+            || libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_PRE_AUTH)
+        ) {
+            val headers = preferHeader.toMutableList()
+            headers.add(OPENID4VCI_INTER_OP_PROFILE)
+            preferHeader = headers
+        }
+        return FetchOpenID4VCIRequestNetworkOperation(
             url,
             preferHeader,
             libraryConfiguration.httpAgentApiProvider
         ).fire()
+    }
 }
