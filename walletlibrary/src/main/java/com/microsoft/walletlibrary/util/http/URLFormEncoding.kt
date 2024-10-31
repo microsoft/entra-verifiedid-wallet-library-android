@@ -1,6 +1,5 @@
 package com.microsoft.walletlibrary.util.http
 
-import android.os.Build
 import com.microsoft.walletlibrary.util.WalletLibraryException
 import java.net.URLEncoder
 

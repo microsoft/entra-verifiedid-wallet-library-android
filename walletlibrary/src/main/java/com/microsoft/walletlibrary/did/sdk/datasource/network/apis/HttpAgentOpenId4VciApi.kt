@@ -19,13 +19,11 @@ internal class HttpAgentOpenId4VciApi(
 ) {
 
     suspend fun getOpenID4VCIRequest(overrideUrl: String, preferHeaders: List<String>): Result<IResponse> {
-        val headers = mutableListOf(OPENID4VCI_INTER_OP_PROFILE)
-        headers.addAll(preferHeaders)
         return agent.get(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
                 mapOf(
-                    Constants.PREFER to httpAgentUtils.formatPreferValues(headers)
+                    Constants.PREFER to httpAgentUtils.formatPreferValues(preferHeaders)
                 ),
                 httpAgentUtils.defaultHeaders()
             )
