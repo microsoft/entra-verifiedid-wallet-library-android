@@ -6,7 +6,6 @@
 package com.microsoft.walletlibrary
 
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
@@ -28,8 +27,7 @@ class VerifiedIdClient(
     internal val requestResolverFactory: RequestResolverFactory,
     internal val requestProcessorFactory: RequestProcessorFactory,
     internal val logger: WalletLibraryLogger,
-    private val serializer: Json,
-    private val rootOfTrustResolver: RootOfTrustResolver? = null
+    private val serializer: Json
 ) {
 
     // Creates an issuance or presentation request based on the provided input.
@@ -37,9 +35,9 @@ class VerifiedIdClient(
         return getResult {
             VerifiableCredentialSdk.correlationVectorService.startNewFlowAndSave()
             val requestResolver = requestResolverFactory.getResolver(verifiedIdRequestInput)
-            val rawRequest = requestResolver.resolve(verifiedIdRequestInput, rootOfTrustResolver)
+            val rawRequest = requestResolver.resolve(verifiedIdRequestInput)
             val requestHandler = requestProcessorFactory.getHandler(rawRequest)
-            requestHandler.handleRequest(rawRequest, rootOfTrustResolver)
+            requestHandler.handleRequest(rawRequest)
         }
     }
 

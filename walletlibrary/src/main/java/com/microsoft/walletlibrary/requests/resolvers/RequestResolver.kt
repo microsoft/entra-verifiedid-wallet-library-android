@@ -5,7 +5,6 @@
 
 package com.microsoft.walletlibrary.requests.resolvers
 
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 
 /**
@@ -18,5 +17,5 @@ internal interface RequestResolver {
     fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean
 
     // Resolves the provided input and returns a raw request.
-    suspend fun resolve(verifiedIdRequestInput: VerifiedIdRequestInput, rootOfTrustResolver: RootOfTrustResolver? = null): Any
+    suspend fun resolve(verifiedIdRequestInput: VerifiedIdRequestInput): Any
 }

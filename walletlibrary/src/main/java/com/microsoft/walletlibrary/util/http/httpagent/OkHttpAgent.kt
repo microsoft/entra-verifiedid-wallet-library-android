@@ -87,14 +87,8 @@ class OkHttpAgent : IHttpAgent() {
             in 200..299 -> {
                 Result.success(abstractResponse)
             }
-            in 400..499 -> {
-                Result.failure(ClientException(abstractResponse))
-            }
-            in 500..599 -> {
-                Result.failure(ServerException(abstractResponse))
-            }
             else -> {
-                Result.failure(HttpAgentException(abstractResponse))
+                Result.failure(abstractResponse.toNetworkingException())
             }
         }
     }

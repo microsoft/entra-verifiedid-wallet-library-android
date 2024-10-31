@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class IdentifierDocument(
     val verificationMethod: List<IdentifierDocumentPublicKey>? = null,
-    val id: String
-) {
+    override var id: String
+) : DidMetadata(){
     var service: List<IdentifierDocumentService> = emptyList()
 }

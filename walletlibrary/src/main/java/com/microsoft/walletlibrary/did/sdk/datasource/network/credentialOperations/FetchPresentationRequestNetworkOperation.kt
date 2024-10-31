@@ -14,22 +14,20 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.DidInHeaderAndPayloa
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ExpiredTokenException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.NotFoundException
-import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
-import com.nimbusds.jose.JWSObject
 import kotlinx.serialization.json.Json
 
 //TODO("improve onSuccess method to create receipt when this is spec'd out")
 internal class FetchPresentationRequestNetworkOperation(
     private val url: String,
+    private val preferHeaders: List<String>,
     private val apiProvider: HttpAgentApiProvider,
     private val jwtValidator: JwtValidator,
-    private val serializer: Json,
-    private val preferHeaders: List<String>
-) : GetNetworkOperation<Pair<PresentationRequestContent, OpenIdRawRequest>>() {
+    private val serializer: Json
+) : GetNetworkOperation<PresentationRequestContent>() {
     override val call: suspend () -> Result<IResponse> = { apiProvider.presentationApis.getRequest(url, preferHeaders) }
 
-    override suspend fun toResult(response: IResponse): Result<Pair<PresentationRequestContent, OpenIdRawRequest>> {
+    override suspend fun toResult(response: IResponse): Result<PresentationRequestContent> {
         val jwsTokenString = response.body.decodeToString()
         return verifyAndUnwrapPresentationRequest(jwsTokenString)
     }
@@ -49,14 +47,13 @@ internal class FetchPresentationRequestNetworkOperation(
         }
     }
 
-    private suspend fun verifyAndUnwrapPresentationRequest(jwsTokenString: String): Result<Pair<PresentationRequestContent, OpenIdRawRequest>> {
-        val jwsObject = JWSObject.parse(jwsTokenString)
-        val jwsToken = JwsToken(jwsObject)
+    private suspend fun verifyAndUnwrapPresentationRequest(jwsTokenString: String): Result<PresentationRequestContent> {
+        val jwsToken = JwsToken.deserialize(jwsTokenString)
         val presentationRequestContent = serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
         if (!jwtValidator.validateDidInHeaderAndPayload(jwsToken, presentationRequestContent.clientId))
             throw DidInHeaderAndPayloadNotMatching("DID used to sign the presentation request doesn't match the DID in presentation request.")
-        return Result.success(Pair(presentationRequestContent, jwsObject.payload.toJSONObject()))
+        return Result.success(presentationRequestContent)
     }
 }

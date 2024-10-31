@@ -16,7 +16,7 @@ class IdentifierDocumentMappingTest {
     @Test
     fun getJwkFromIdentifierDocument_KidHasMatchingKeyId_ReturnsJwk() {
         // Arrange
-        val kid = "#signingKey-1"
+        val kid = "signingKey-1"
         every { mockIdentifierDocument.verificationMethod } returns listOf(mockIdentifierDocumentPublicKey)
         every { mockIdentifierDocumentPublicKey.id } returns "#signingKey-1"
         every { mockIdentifierDocumentPublicKey.publicKeyJwk } returns mockPublicKeyJwk

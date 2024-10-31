@@ -9,7 +9,6 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResp
 import com.microsoft.walletlibrary.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.Constants
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.WellKnownDocumentInUnknownFormatException
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import java.net.URL
 import javax.inject.Inject
@@ -18,11 +17,7 @@ internal class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(
     GetNetworkOperation<LinkedDomainsResponse>() {
 
     override suspend fun toResult(response: IResponse): Result<LinkedDomainsResponse> {
-        return try {
-            Result.success(apiProvider.linkedDomainsApis.toLinkedDomainsResponse(response))
-        } catch (ex: Exception) {
-            Result.failure(WellKnownDocumentInUnknownFormatException("Failed to parse well known config document ${ex.message}", ex))
-        }
+        return Result.success(apiProvider.linkedDomainsApis.toLinkedDomainsResponse(response))
     }
 
     override val call: suspend () -> Result<IResponse> =

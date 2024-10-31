@@ -44,9 +44,11 @@ internal object CredentialSubjectSerializer :
         element.entries.forEach { entry ->
             try {
                 newContent[entry.key] = serializer.decodeFromString(JsonElement.serializer(), entry.value.jsonPrimitive.content)
-            } catch (e: SerializationException) {
+            } catch (_: Exception) {
+                // cannot check for the more precise JsonDecodingException
                 newContent[entry.key] = entry.value.jsonPrimitive
             }
+
         }
         return JsonObject(newContent)
     }

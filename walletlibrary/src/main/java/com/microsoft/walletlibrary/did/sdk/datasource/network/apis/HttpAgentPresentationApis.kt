@@ -1,6 +1,7 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.network.apis
 
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.util.Constants as WalletConstants
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.util.http.URLFormEncoding
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
@@ -13,12 +14,12 @@ import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private val httpAgentUtils: HttpAgentUtils) {
 
     suspend fun getRequest(overrideUrl: String, preferHeaders: List<String>): Result<IResponse> {
-        val prefer = mutableListOf("JWT-interop-profile-0.0.1")
-        prefer.addAll(preferHeaders)
+        val mutablePreferHeaders = preferHeaders.toMutableList()
+        mutablePreferHeaders.add(WalletConstants.SELF_ISSUED_OPENID_V2_PROFILE)
         return agent.get(overrideUrl, httpAgentUtils.combineMaps(
             httpAgentUtils.defaultHeaders(),
             mapOf(
-                Constants.PREFER to httpAgentUtils.formatPreferValues(prefer)
+                Constants.PREFER to httpAgentUtils.formatPreferValues(mutablePreferHeaders)
         )))
     }
 
@@ -27,7 +28,7 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
         token: String,
         vpToken: String,
         state: String?,
-        additionalHeaders: Map<String, String>
+        additionalHeaders: Map<String, String> = emptyMap()
     ): Result<IResponse> {
         val body = URLFormEncoding.encode(mapOf<String, Any?>(
             "id_token" to token,
@@ -49,7 +50,7 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
         token: String,
         vpToken: List<String>,
         state: String?,
-        additionalHeaders: Map<String, String>
+        additionalHeaders: Map<String, String> = emptyMap()
     ): Result<IResponse> {
         val body = URLFormEncoding.encode(mapOf<String, Any?>(
             "id_token" to token,

@@ -15,7 +15,6 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperatio
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendPresentationResponsesNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.DidDeepLinkUtil
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
@@ -24,8 +23,6 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.microsoft.walletlibrary.did.sdk.util.logTime
-import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
-import com.nimbusds.jose.JWSObject
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -41,30 +38,22 @@ internal class PresentationService @Inject constructor(
     private val presentationResponseFormatter: PresentationResponseFormatter
 ) {
 
-    suspend fun getRequest(
-        stringUri: String,
-        rootOfTrustResolver: RootOfTrustResolver? = null,
-        preferHeaders: List<String>
-    ): Result<Pair<PresentationRequest, OpenIdRawRequest>> {
+    suspend fun getRequest(stringUri: String, preferHeaders: List<String>): Result<PresentationRequest> {
         return runResultTry {
             logTime("Presentation getRequest") {
                 val uri = verifyUri(stringUri)
-                val (presentationRequestContent, rawContent) = getPresentationRequestContent(uri, preferHeaders).abortOnError()
-                val request = validateRequest(presentationRequestContent, rootOfTrustResolver).abortOnError()
-                return@logTime Result.Success(Pair(request, rawContent))
+                val presentationRequestContent = getPresentationRequestContent(uri, preferHeaders).abortOnError()
+                return@logTime validateRequest(presentationRequestContent)
             }
         }
     }
 
-    internal suspend fun validateRequest(
-        presentationRequestContent: PresentationRequestContent,
-        rootOfTrustResolver: RootOfTrustResolver? = null
-    ): Result<PresentationRequest> {
+    internal suspend fun validateRequest(presentationRequestContent: PresentationRequestContent): Result<PresentationRequest> {
         return runResultTry {
             logTime("Presentation validateRequest") {
-                val linkedDomainResult =
-                    linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId, rootOfTrustResolver).toSDK()
-                        .abortOnError()
+                val linkedDomainResult = linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                    presentationRequestContent.clientId
+                ).toSDK().abortOnError()
                 val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
                 isRequestValid(request).abortOnError()
                 Result.Success(request)
@@ -80,10 +69,7 @@ internal class PresentationService @Inject constructor(
         return url
     }
 
-    private suspend fun getPresentationRequestContent(
-        uri: Uri,
-        preferHeaders: List<String>
-    ): Result<Pair<PresentationRequestContent, OpenIdRawRequest>> {
+    private suspend fun getPresentationRequestContent(uri: Uri, preferHeaders: List<String>): Result<PresentationRequestContent> {
         val requestParameter = uri.getQueryParameter("request")
         if (requestParameter != null)
             return verifyAndUnwrapPresentationRequestFromQueryParam(requestParameter)
@@ -100,21 +86,15 @@ internal class PresentationService @Inject constructor(
         }
     }
 
-    private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(jwsTokenString: String): Result<Pair<PresentationRequestContent, OpenIdRawRequest>> {
-        val jwsObject = JWSObject.parse(jwsTokenString)
-        val jwsToken = JwsToken(jwsObject)
+    private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(jwsTokenString: String): Result<PresentationRequestContent> {
+        val jwsToken = JwsToken.deserialize(jwsTokenString)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
-        return Result.Success(
-            Pair(
-                serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content()),
-                jwsObject.payload.toJSONObject()
-            )
-        )
+        return Result.Success(serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content()))
     }
 
     private suspend fun fetchRequest(url: String, preferHeaders: List<String>) =
-        FetchPresentationRequestNetworkOperation(url, apiProvider, jwtValidator, serializer, preferHeaders).fire()
+        FetchPresentationRequestNetworkOperation(url, preferHeaders, apiProvider, jwtValidator, serializer).fire()
 
     /**
      * Send a Presentation Response.
@@ -125,15 +105,12 @@ internal class PresentationService @Inject constructor(
     suspend fun sendResponse(
         presentationRequest: PresentationRequest,
         response: List<PresentationResponse>,
-        additionalHeaders: Map<String, String>?
+        additionalHeaders: Map<String, String>
     ): Result<Unit> {
         return runResultTry {
             logTime("Presentation sendResponse") {
                 val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
-                formAndSendResponse(
-                    presentationRequest, response, masterIdentifier,
-                    additionalHeaders = additionalHeaders
-                ).abortOnError()
+                formAndSendResponse(presentationRequest, response, masterIdentifier, additionalHeaders).abortOnError()
             }
             Result.Success(Unit)
         }
@@ -143,8 +120,8 @@ internal class PresentationService @Inject constructor(
         presentationRequest: PresentationRequest,
         response: List<PresentationResponse>,
         responder: Identifier,
-        expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS,
-        additionalHeaders: Map<String, String>?
+        additionalHeaders: Map<String, String>,
+        expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<Unit> {
         // split on number of responses
         if (response.size > 1) {
@@ -162,7 +139,6 @@ internal class PresentationService @Inject constructor(
                 apiProvider,
                 additionalHeaders
             ).fire().toSDK()
-
         } else {
             val (idToken, vpToken) = presentationResponseFormatter.formatResponse(
                 request = presentationRequest,

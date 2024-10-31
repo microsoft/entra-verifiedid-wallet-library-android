@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
-object NetworkErrorParser {
+internal object NetworkErrorParser {
 
     /**
      * Attempts to parse a json errorBody and extracts and concatenates all error codes.
@@ -32,7 +32,7 @@ object NetworkErrorParser {
                 code = (error?.get("code") as? JsonPrimitive)?.content
             }
         } catch (ex: Exception) {
-            SdkLog.i("Parsing error response canceled. Json: $errorBody", ex)
+            SdkLog.i("Parsing error response canceled.", ex)
         }
         return errorCodes.joinToString(",")
     }
@@ -59,7 +59,7 @@ object NetworkErrorParser {
                 msg = (error?.get("message") as? JsonPrimitive)?.content
             }
         } catch (ex: Exception) {
-            SdkLog.i("Parsing error response canceled. Json: $errorBody", ex)
+            SdkLog.i("Parsing error response canceled.", ex)
         }
         return errorMessages.joinToString("; ")
     }

@@ -14,12 +14,14 @@ import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
  * Maps PresentationAttestation object from VC SDK to VerifiedIdRequirement in library
  */
 internal fun PresentationAttestation.toVerifiedIdRequirement(): VerifiedIdRequirement {
-    return VerifiedIdRequirement(
+    val verifiedIdRequirement = VerifiedIdRequirement(
         null,
-        listOf(credentialType),
-        encrypted,
-        required,
+        listOf(this.credentialType),
+        this.encrypted,
+        this.required,
         "",
-        issuanceOptions = contracts.map { VerifiedIdRequestURL(Uri.parse(it)) }
+        issuanceOptions = this.contracts.map { VerifiedIdRequestURL(Uri.parse(it)) }
     )
+//    verifiedIdRequirement.constraint = VcTypeConstraint(credentialType)
+    return verifiedIdRequirement
 }

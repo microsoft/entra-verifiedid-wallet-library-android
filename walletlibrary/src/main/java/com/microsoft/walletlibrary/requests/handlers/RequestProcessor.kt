@@ -5,7 +5,6 @@
 
 package com.microsoft.walletlibrary.requests.handlers
 
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 
@@ -24,7 +23,7 @@ interface RequestProcessor <T> {
      * @param rawRequest A primitive form of the request
      * @return A parsed VerifiedIdRequest
      */
-    suspend fun handleRequest(rawRequest: Any, rootOfTrustResolver: RootOfTrustResolver? = null): VerifiedIdRequest<*>
+    suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*>
 
     /**
      * Checks if the input can be processed

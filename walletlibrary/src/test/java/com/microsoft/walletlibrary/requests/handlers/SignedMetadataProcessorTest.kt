@@ -14,7 +14,7 @@ import com.microsoft.walletlibrary.util.TokenValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.defaultTestSerializer
 import com.microsoft.walletlibrary.wrapper.IdentifierDocumentResolver
-import com.microsoft.walletlibrary.wrapper.RootOfTrustResolver
+import com.microsoft.walletlibrary.wrapper.LinkedDomainsResolver
 import com.nimbusds.jose.jwk.JWK
 import io.mockk.coEvery
 import io.mockk.every
@@ -39,13 +39,13 @@ class SignedMetadataProcessorTest {
     init {
         mockkStatic(VerifiableCredentialSdk::class)
         mockkStatic(IdentifierDocumentResolver::class)
-        mockkStatic(RootOfTrustResolver::class)
+        mockkStatic(LinkedDomainsResolver::class)
         mockkStatic("com.microsoft.walletlibrary.mappings.IdentifierDocumentMappingKt")
         mockkStatic("com.microsoft.walletlibrary.mappings.LinkedDomainMappingKt")
         mockkStatic("com.microsoft.walletlibrary.mappings.LinkedDomainsServiceExtensionKt")
         every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinedDomainsService
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
-        every { signedMetadataProcessor["deSerializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
+        every { signedMetadataProcessor["deserializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
     }
 
     @Test
@@ -131,7 +131,7 @@ class SignedMetadataProcessorTest {
             assertThat(actualResult.isFailure).isTrue
             val actualException = actualResult.exceptionOrNull()
             assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
-            assertThat(actualException?.message).isEqualTo("JWK with key id did:web:test#signingKey-1 not found in identifier document")
+            assertThat(actualException?.message).isEqualTo("JWK with key id signingKey-1 not found in identifier document")
             assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
                 VerifiedIdExceptions.MALFORMED_SIGNED_METADATA_EXCEPTION.value
             )
@@ -242,7 +242,7 @@ class SignedMetadataProcessorTest {
             """{"sub":"testCredentialIssuer","iss": "did:web:test","iat": 1707859806}""".trimIndent()
         mockJwsToken("did:web:test#signingKey-1", signedMetadataTokenClaimsString)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
-        coEvery { RootOfTrustResolver.resolveRootOfTrust(mockIdentifierDocument) } returns RootOfTrust(
+        coEvery { LinkedDomainsResolver.resolve(mockIdentifierDocument) } returns RootOfTrust(
             "unverifiedDomain",
             false
         )
@@ -267,7 +267,7 @@ class SignedMetadataProcessorTest {
             """{"sub":"testCredentialIssuer","iss": "did:web:test","iat": 1707859806}""".trimIndent()
         mockJwsToken("did:web:test#signingKey-1", signedMetadataTokenClaimsString)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
-        coEvery { RootOfTrustResolver.resolveRootOfTrust(mockIdentifierDocument) } returns RootOfTrust(
+        coEvery { LinkedDomainsResolver.resolve(mockIdentifierDocument) } returns RootOfTrust(
             "verifiedDomain",
             true
         )

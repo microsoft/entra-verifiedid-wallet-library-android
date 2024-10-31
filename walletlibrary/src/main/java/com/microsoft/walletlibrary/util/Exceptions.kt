@@ -17,11 +17,12 @@ class HandlerMissingException(
     retryable: Boolean = false
 ) : WalletLibraryException(message, cause, retryable)
 
-class UnSupportedResolverException(
+class UnSupportedRawRequestException(
     message: String = "",
     cause: Throwable? = null,
     retryable: Boolean = false
 ) : WalletLibraryException(message, cause, retryable)
+
 
 class ResolverMissingException(
     message: String = "",
@@ -60,6 +61,12 @@ class IdentifierDocumentResolutionException(
 ) : WalletLibraryException(message, cause, retryable)
 
 class VerifiedIdResponseCompletionException(
+    message: String = "",
+    cause: Throwable? = null,
+    retryable: Boolean = false
+) : WalletLibraryException(message, cause, retryable)
+
+class IdentifierFetchException(
     message: String = "",
     cause: Throwable? = null,
     retryable: Boolean = false

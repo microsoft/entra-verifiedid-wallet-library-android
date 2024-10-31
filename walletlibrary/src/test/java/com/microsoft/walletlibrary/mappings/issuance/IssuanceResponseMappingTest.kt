@@ -13,6 +13,7 @@ import com.microsoft.walletlibrary.requests.requirements.PinRequirement
 import com.microsoft.walletlibrary.requests.requirements.RequestedClaim
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
+import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.every
@@ -198,7 +199,7 @@ class IssuanceResponseMappingTest {
         val pinRequirement = PinRequirement(4, "numeric", true, expectedPinSalt)
 
         // Act and Assert
-        assertThatThrownBy {
+        assertThatThrownBy{
             issuanceResponse.addRequirements(pinRequirement)
         }.isInstanceOf(RequirementNotMetException::class.java)
     }
