@@ -44,6 +44,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
 
     private var logger: WalletLibraryLogger = WalletLibraryLogger
     private var httpAgent: IHttpAgent = OkHttpAgent()
+    private var userAgent: String? = null
     private val requestResolvers = mutableListOf<RequestResolver>()
     private val requestProcessors = mutableListOf<RequestProcessor<*>>()
     private val previewFeatureFlagsSupported = mutableListOf<String>()
@@ -82,6 +83,11 @@ class VerifiedIdClientBuilder(private val context: Context) {
 
     fun with(httpAgent: IHttpAgent): VerifiedIdClientBuilder {
         this.httpAgent = httpAgent
+        return this
+    }
+
+    fun with(userAgent: String): VerifiedIdClientBuilder {
+        this.userAgent = userAgent
         return this
     }
 
@@ -175,7 +181,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
                 packageManager.getApplicationInfo(applicationContext.packageName, 0)
             val appName = packageManager.getApplicationLabel(applicationInfo).toString()
             val packageInfo = packageManager.getPackageInfo(applicationContext.packageName, 0)
-            appName + "/" + packageInfo.versionName
+            (userAgent ?: appName) + "/" + packageInfo.versionName
         } catch (e: PackageManager.NameNotFoundException) {
             WalletLibraryLogger.e("Error getting version name.", e)
             ""
