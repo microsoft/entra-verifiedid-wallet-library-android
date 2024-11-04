@@ -4,6 +4,7 @@ import android.content.res.Resources
 import androidx.core.os.ConfigurationCompat
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -18,19 +19,23 @@ internal data class CredentialConfiguration(
     val scope: String? = null,
 
     // The crypto binding methods supported (ex. did:jwk).
-    val cryptographic_binding_methods_supported: List<String>? = null,
+    @SerialName("cryptographic_binding_methods_supported")
+    val cryptographicBindingMethodsSupported: List<String>? = null,
 
     // The crypto suites supported (ex. ES256).
-    val cryptographic_suites_supported: List<String>? = null,
+    @SerialName("credential_signing_alg_values_supported")
+    val credentialSigningAlgorithmsSupported: List<String>? = null,
 
     // Describes the metadata of the supported credential.
-    val credential_definition: CredentialDefinition? = null,
+    @SerialName("credential_definition")
+    val credentialDefinition: CredentialDefinition? = null,
 
     // Display information for the credential.
     val display: List<LocalizedDisplayDefinition>? = null,
 
     // The types of proofs supported.
-    val proof_types_supported: Map<String, ProofTypesSupported>? = null
+    @SerialName("proof_types_supported")
+    val proofTypesSupported: Map<String, ProofTypesSupported>? = null
 ) {
     fun getVerifiedIdStyleInPreferredLocale(issuerName: String): VerifiedIdStyle {
         val localizedDisplayDefinition = getPreferredLocalizedDisplayDefinition()

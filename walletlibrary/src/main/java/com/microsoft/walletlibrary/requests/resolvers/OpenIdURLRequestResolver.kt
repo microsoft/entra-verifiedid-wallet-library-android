@@ -12,8 +12,10 @@ import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestN
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.util.Constants
+import com.microsoft.walletlibrary.util.Constants.OPENID4VCI_INTER_OP_PROFILE
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenId4VciRequestException
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequestURIMissingException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
@@ -25,7 +27,8 @@ import org.json.JSONObject
  * Implementation of RequestResolver specific to OIDCRequestHandler and VerifiedIdRequestURL as RequestInput.
  * It can resolve a VerifiedIdRequestInput and return a OIDC raw request.
  */
-internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration, private val preferHeader: List<String>): RequestResolver {
+internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfiguration, private var preferHeader: List<String>) :
+    RequestResolver {
 
     // Indicates whether this resolver can resolve the provided input.
     override fun canResolve(verifiedIdRequestInput: VerifiedIdRequestInput): Boolean {
@@ -82,10 +85,18 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
         return requestUriParameter
     }
 
-    private suspend fun fetchOpenID4VCIRequest(url: String) =
-        FetchOpenID4VCIRequestNetworkOperation(
+    private suspend fun fetchOpenID4VCIRequest(url: String): Result<ByteArray> {
+        if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN)
+            || libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_PRE_AUTH)
+        ) {
+            val headers = preferHeader.toMutableList()
+            headers.add(OPENID4VCI_INTER_OP_PROFILE)
+            preferHeader = headers
+        }
+        return FetchOpenID4VCIRequestNetworkOperation(
             url,
             preferHeader,
             libraryConfiguration.httpAgentApiProvider
         ).fire()
+    }
 }

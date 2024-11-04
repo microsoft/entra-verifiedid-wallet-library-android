@@ -22,7 +22,7 @@ class CredentialConfigurationTest {
                 description = "English Description",
                 logo = LogoDisplayDefinition(
                     uri = "English Logo",
-                    alt_text = "English Alt Text"
+                    alternativeText = "English Alt Text"
                 )
             ),
             LocalizedDisplayDefinition(
@@ -31,7 +31,7 @@ class CredentialConfigurationTest {
                 description = "French Description",
                 logo = LogoDisplayDefinition(
                     uri = "French Logo",
-                    alt_text = "French Alt Text"
+                    alternativeText = "French Alt Text"
                 )
             )
         )
@@ -130,7 +130,7 @@ class CredentialConfigurationTest {
                     description = "French Description",
                     logo = LogoDisplayDefinition(
                         uri = "French Logo",
-                        alt_text = "French Alt Text"
+                        alternativeText = "French Alt Text"
                     )
                 ),
                 LocalizedDisplayDefinition(
@@ -139,7 +139,7 @@ class CredentialConfigurationTest {
                     description = "English Description",
                     logo = LogoDisplayDefinition(
                         uri = "English Logo",
-                        alt_text = "English Alt Text"
+                        alternativeText = "English Alt Text"
                     )
                 )
             )

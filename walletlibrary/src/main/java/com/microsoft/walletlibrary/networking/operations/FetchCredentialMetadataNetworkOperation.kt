@@ -15,11 +15,10 @@ internal class FetchCredentialMetadataNetworkOperation(
         { apiProvider.openId4VciApi.getCredentialMetadata(url) }
 
     override suspend fun toResult(response: IResponse): Result<CredentialMetadata> {
-        return Result.success(
-            serializer.decodeFromString(
-                CredentialMetadata.serializer(),
-                response.body.decodeToString()
-            )
+        val credentialMetadata = serializer.decodeFromString(
+            CredentialMetadata.serializer(),
+            response.body.decodeToString()
         )
+        return Result.success(credentialMetadata)
     }
 }

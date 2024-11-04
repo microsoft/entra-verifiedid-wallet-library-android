@@ -1,15 +1,17 @@
 package com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
  * The display information for the logo of the credential.
  */
 @Serializable
-internal data class LogoDisplayDefinition(
+data class LogoDisplayDefinition(
     // The URI of the logo.
     val uri: String? = null,
 
     // The alternative text to describe the logo.
-    val alt_text: String? = null
+    @SerialName("alt_text")
+    val alternativeText: String? = null
 )
