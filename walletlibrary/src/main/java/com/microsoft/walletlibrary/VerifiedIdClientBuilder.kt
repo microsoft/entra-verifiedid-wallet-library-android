@@ -11,9 +11,11 @@ import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.identifier.IdentifierFactory
 import com.microsoft.walletlibrary.identifier.IdentifierManager
+import com.microsoft.walletlibrary.mappings.identifier.toHolderIdentifier
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.handlers.OpenId4VCIRequestHandler
@@ -34,6 +36,7 @@ import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
 import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -126,6 +129,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
         val identifierManager = IdentifierManager(VerifiableCredentialSdk.identifierService)
         val identifierFactory = IdentifierFactory()
         identifierFactory.identifiers.addAll(identifiers)
+        val defaultIdentifier = getDefaultIdentifier()
+        defaultIdentifier?.let { identifierFactory.identifiers.add(it) }
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
         val libraryConfiguration =
             LibraryConfiguration(previewFeatureFlags,
@@ -191,5 +196,22 @@ class VerifiedIdClientBuilder(private val context: Context) {
             WalletLibraryLogger.e("Error getting version name.", e)
             ""
         }
+    }
+
+    private fun getDefaultIdentifier(): HolderIdentifier? {
+        runBlocking {
+            when (val defaultIdentifier =
+                VerifiableCredentialSdk.identifierService.getMasterIdentifier()) {
+                is Result.Success -> {
+                    return@runBlocking defaultIdentifier.payload.toHolderIdentifier(
+                        VerifiableCredentialSdk.identifierService.getKeyStore()
+                    )
+                }
+                is Result.Failure -> {
+                    throw IllegalStateException("Unable to fetch master identifier")
+                }
+            }
+        }
+        return null
     }
 }

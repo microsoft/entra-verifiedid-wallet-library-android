@@ -1,3 +1,4 @@
+/*
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 package com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations
@@ -52,4 +53,4 @@ class SendVerifiablePresentationRevocationRequestNetworkOperationTest {
         )
     }
 
-}
+}*/

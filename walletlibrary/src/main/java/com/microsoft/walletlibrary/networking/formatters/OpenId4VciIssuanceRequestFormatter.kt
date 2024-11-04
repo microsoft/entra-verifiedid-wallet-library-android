@@ -18,7 +18,7 @@ import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import java.nio.charset.StandardCharsets
 
 internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfiguration: LibraryConfiguration) {
-    suspend fun format(
+    fun format(
         credentialOffer: CredentialOffer,
         credentialEndpoint: String,
         accessToken: String
@@ -35,7 +35,7 @@ internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfigurati
         return RawOpenID4VCIRequest(configurationId, credentialOffer.issuer_session, proof)
     }
 
-    private suspend fun formatProofAndSign(
+    private fun formatProofAndSign(
         credentialEndpoint: String,
         accessToken: String
     ): String {
@@ -60,8 +60,12 @@ internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfigurati
             OpenID4VCIJWTProofClaims.serializer(),
             contents
         )
+        formatJwsHeaderForIdentifier(holderIdentifier)
+        return holderIdentifier.sign(serializedResponseContent)
+    }
+
+    private fun formatJwsHeaderForIdentifier(holderIdentifier: HolderIdentifier) {
         val jwsHeader = JwsHeaderFormatter.formatHeader(holderIdentifier, com.microsoft.walletlibrary.util.Constants.OPENID4VCI_TYPE_HEADER)
         (holderIdentifier as EncryptedSharedPreferencesIdentifier).jwsHeader = jwsHeader
-        return holderIdentifier.sign(serializedResponseContent)
     }
 }

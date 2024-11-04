@@ -20,6 +20,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.mappings.issuance.toRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
+import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.VerifiedIdResponseCompletionException
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import io.mockk.coEvery
@@ -77,6 +78,7 @@ class VerifiedIdRequesterTest {
     private val expectedCredentialSubjectClaimName = "name"
     private val expectedCredentialSubjectClaimValue = "test"
     private lateinit var requirement: Requirement
+    private val mockLibraryConfiguration: LibraryConfiguration = mockk()
 
     init {
         setupInput(false)
@@ -88,7 +90,7 @@ class VerifiedIdRequesterTest {
         mockkStatic(VerifiableCredentialSdk::class)
         every { VerifiableCredentialSdk.issuanceService } returns mockIssuanceService
         if (!isFailure) {
-            coEvery { mockIssuanceService.sendResponse(any()) } returns Result.Success(
+            coEvery { mockIssuanceService.sendResponse(any(), any()) } returns Result.Success(
                 mockVerifiableCredential
             )
             every { mockVerifiableCredential.jti } returns ""
@@ -101,7 +103,7 @@ class VerifiedIdRequesterTest {
             expectedCredentialSubject[expectedCredentialSubjectClaimName] = expectedCredentialSubjectClaimValue
             every { mockVerifiableCredentialDescriptor.credentialSubject } returns expectedCredentialSubject
         } else
-            coEvery { mockIssuanceService.sendResponse(any()) } returns Result.Failure(SdkException())
+            coEvery { mockIssuanceService.sendResponse(any(), any()) } returns Result.Failure(SdkException())
     }
 
     @Test
@@ -112,7 +114,7 @@ class VerifiedIdRequesterTest {
         runBlocking {
             // Act
             val actualResult =
-                VerifiedIdRequester.sendIssuanceResponse(mockIssuanceRequest, requirement)
+                VerifiedIdRequester.sendIssuanceResponse(mockIssuanceRequest, requirement, mockLibraryConfiguration)
 
             // Assert
             assertThat(actualResult).isInstanceOf(VerifiedId::class.java)
@@ -134,7 +136,8 @@ class VerifiedIdRequesterTest {
             runBlocking {
                 VerifiedIdRequester.sendIssuanceResponse(
                     mockIssuanceRequest,
-                    requirement
+                    requirement,
+                    mockLibraryConfiguration
                 )
             }
         }.isInstanceOf(

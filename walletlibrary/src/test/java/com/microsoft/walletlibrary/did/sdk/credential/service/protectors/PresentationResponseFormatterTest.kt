@@ -26,6 +26,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiableP
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.mappings.presentation.addRequirements
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import io.mockk.every
@@ -42,7 +43,7 @@ class PresentationResponseFormatterTest {
     private val formatter: PresentationResponseFormatter =
         PresentationResponseFormatter(defaultTestSerializer, vpFormatter, mockedTokenSigner)
 
-    private val mockedIdentifier: Identifier = mockk()
+    private val mockedIdentifier: HolderIdentifier = mockk()
     private val slot = slot<String>()
     private val signingKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
@@ -67,8 +68,8 @@ class PresentationResponseFormatterTest {
 
     init {
         every { mockedIdentifier.id } returns expectedDid
-        every { mockedIdentifier.signatureKeyReference } returns signingKeyRef
-        every { mockedTokenSigner.signWithIdentifier(capture(slot), eq(mockedIdentifier)) } answers { slot.captured }
+        every { mockedIdentifier.keyReference } returns signingKeyRef
+        every { mockedIdentifier.sign(capture(slot)) } answers { slot.captured }
     }
 
     @Before

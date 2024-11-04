@@ -25,19 +25,22 @@ internal class LibraryConfiguration(
     val identifierFactory: IdentifierFactory
 ) {
 
-    init {
+/*    init {
         runBlocking {
-            when (val defaultIdentifier = VerifiableCredentialSdk.identifierService.getMasterIdentifier()) {
+            when (val defaultIdentifier =
+                VerifiableCredentialSdk.identifierService.getMasterIdentifier()) {
                 is Result.Success -> {
-                    val holderIdentifier = defaultIdentifier.payload.toHolderIdentifier(VerifiableCredentialSdk.identifierService.getKeyStore())
+                    val holderIdentifier =
+                        defaultIdentifier.payload.toHolderIdentifier(VerifiableCredentialSdk.identifierService.getKeyStore())
                     identifierFactory.identifiers.add(holderIdentifier)
                 }
+
                 is Result.Failure -> {
                     throw IllegalStateException("Unable to fetch master identifier")
                 }
             }
         }
-    }
+    }*/
 
     // Determine if a preview feature is enabled.
     fun isPreviewFeatureEnabled(previewFeatureFlag: String): Boolean {

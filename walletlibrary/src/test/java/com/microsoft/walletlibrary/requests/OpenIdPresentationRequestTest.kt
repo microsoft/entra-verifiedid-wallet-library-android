@@ -156,7 +156,8 @@ class OpenIdPresentationRequestTest {
             OpenIdResponder.sendPresentationResponse(
                 openIdPresentationRequest.request.presentationRequest,
                 openIdPresentationRequest.requirement,
-                additionalHeaders = emptyMap()
+                additionalHeaders = emptyMap(),
+                mockLibraryConfiguration
             )
         }
         runBlocking {
@@ -191,7 +192,8 @@ class OpenIdPresentationRequestTest {
             OpenIdResponder.sendPresentationResponse(
                 openIdPresentationRequest.request.presentationRequest,
                 openIdPresentationRequest.requirement,
-                additionalHeaders = emptyMap()
+                additionalHeaders = emptyMap(),
+                mockLibraryConfiguration
             )
         }.throws(OpenIdResponseCompletionException())
 

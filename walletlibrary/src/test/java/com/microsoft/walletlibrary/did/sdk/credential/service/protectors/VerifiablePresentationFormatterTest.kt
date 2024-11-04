@@ -7,6 +7,7 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.VerifiablePresentationFormatter
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -19,7 +20,7 @@ class VerifiablePresentationFormatterTest {
     private val mockedTokenSigner: TokenSigner = mockk()
     private val mockedVerifiableCredential: VerifiableCredential = mockk()
     private val mockedPresentationAttestation: PresentationAttestation = mockk()
-    private val mockedIdentifier: Identifier = mockk()
+    private val mockedIdentifier: HolderIdentifier = mockk()
     private val slot = slot<String>()
     private val serializer: Json = Json
 
@@ -35,8 +36,8 @@ class VerifiablePresentationFormatterTest {
     init {
         formatter = VerifiablePresentationFormatter(serializer, mockedTokenSigner)
         every { mockedIdentifier.id } returns expectedDid
-        every { mockedIdentifier.signatureKeyReference } returns signingKeyRef
-        every { mockedTokenSigner.signWithIdentifier(capture(slot), eq(mockedIdentifier)) } answers { slot.captured }
+        every { mockedIdentifier.keyReference } returns signingKeyRef
+        every { mockedIdentifier.sign(capture(slot)) } answers { slot.captured }
         every { mockedVerifiableCredential.raw } returns expectedRawVerifiableCredential
     }
 
