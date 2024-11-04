@@ -50,7 +50,7 @@ class GroupRequirement(
                     try {
                         requirement.validate().getOrThrow()
                         protocolSerializer.serialize(requirement, verifiedIdSerializer)
-                    } finally {
+                    } catch (_: Exception) {
                         // nothing needs to be done, this requirement won't be serialized
                     }
                 }
