@@ -22,8 +22,7 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
     // validates it and processes it to return the root of trust.
     internal suspend fun process(
         signedMetadata: String,
-        credentialIssuer: String,
-        rootOfTrustResolver: com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver? = null
+        credentialIssuer: String
     ): RootOfTrust {
         val jwsToken = deserializeSignedMetadata(signedMetadata)
 
