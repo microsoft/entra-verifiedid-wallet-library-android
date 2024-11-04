@@ -1,3 +1,4 @@
+/*
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 package com.microsoft.walletlibrary.did.sdk
@@ -24,13 +25,15 @@ internal class RevocationService @Inject constructor(
     private val serializer: Json
 ) {
 
-    /**
+    */
+/**
      * Revokes a verifiable presentation which revokes access for relying parties listed to do a status check on the Verifiable Credential.
      *
      * @param verifiableCredential The VC for which access to check status is revoked
      * @param rpList DIDs of relying parties whose access is revoked.
      * @param reason Reason for revocation
-     */
+     *//*
+
     suspend fun revokeVerifiablePresentation(
         verifiableCredential: VerifiableCredential,
         rpList: List<String>,
@@ -56,4 +59,4 @@ internal class RevocationService @Inject constructor(
             serializer
         ).fire().toSDK()
     }
-}
+}*/

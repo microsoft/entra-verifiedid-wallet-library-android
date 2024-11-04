@@ -26,6 +26,8 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.did.sdk.util.logTime
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
+import com.microsoft.walletlibrary.util.LibraryConfiguration
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -106,13 +108,15 @@ internal class IssuanceService @Inject constructor(
      * @param response IssuanceResponse containing the requested attestations
      */
     suspend fun sendResponse(
-        response: IssuanceResponse
+        response: IssuanceResponse,
+        libraryConfiguration: LibraryConfiguration
     ): Result<VerifiableCredential> {
         return runResultTry {
             logTime("Issuance sendResponse") {
-                val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
+//                val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
+                val identifier = libraryConfiguration.identifierFactory.getIdentifier()
                 val requestedVcMap = response.requestedVcMap
-                val verifiableCredential = formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
+                val verifiableCredential = formAndSendResponse(response, identifier, requestedVcMap).abortOnError()
                 Result.Success(verifiableCredential)
             }
         }
@@ -132,7 +136,7 @@ internal class IssuanceService @Inject constructor(
 
     private suspend fun formAndSendResponse(
         response: IssuanceResponse,
-        responder: Identifier,
+        responder: HolderIdentifier,
         requestedVcMap: RequestedVcMap,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<VerifiableCredential> {

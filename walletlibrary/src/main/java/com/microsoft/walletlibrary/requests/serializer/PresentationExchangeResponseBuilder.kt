@@ -38,25 +38,23 @@ internal class PresentationExchangeResponseBuilder(
                         }
                     }
                     // create a new group
-                    val exception =
-                        libraryConfiguration.identifierManager.getMasterIdentifier().toNative().map { identifier ->
-                            val group = PresentationExchangeSubmissionGroup(identifier)
-                            group.include(requirement, rawCredential)
-                            vpTokens.add(group)
-                            return@let
-                        }.exceptionOrNull()
-
-                    if (exception != null) {
-                        throw exception
-                    }
+                    val identifier = libraryConfiguration.identifierFactory.getIdentifier()
+                    val group = PresentationExchangeSubmissionGroup(identifier)
+                    group.include(requirement, rawCredential)
+                    vpTokens.add(group)
+                    return@let
                 }
             }
+
             is GroupRequirement -> {
                 requirement.serialize(this, verifiedIdSerializer)
             }
+
             else -> {
-                libraryConfiguration.logger.w("Unknown credential type ${requirement.javaClass.name} returned" +
-                        " credential data that cannot be formatted in response")
+                libraryConfiguration.logger.w(
+                    "Unknown credential type ${requirement.javaClass.name} returned" +
+                        " credential data that cannot be formatted in response"
+                )
             }
         }
     }
@@ -72,44 +70,39 @@ internal class PresentationExchangeResponseBuilder(
             )
         }
     }
-    suspend fun buildIdToken(definitionId: String,
-                             clientId: String,
-                             requestNonce: String,
-                             ttlInSeconds: Int = 3600): String {
-        val exception = libraryConfiguration.identifierManager.getMasterIdentifier().toNative().map { identifier ->
-            val (issuedTime, expiryTime) = createIssuedAndExpiryTime(ttlInSeconds)
-            val vpTokens = this.vpTokens.mapIndexed {
-                index, vpToken ->
-                vpToken.getPresentationSubmissionMap(index)
-            }.flatten()
 
-            val submission = VpTokenInResponse(
-                PresentationSubmission(
-                    id = UUID.randomUUID().toString(),
-                    definitionId = definitionId,
-                    presentationSubmissionDescriptors = vpTokens
-                )
+    suspend fun buildIdToken(
+        definitionId: String,
+        clientId: String,
+        requestNonce: String,
+        ttlInSeconds: Int = 3600
+    ): String {
+        val identifier = libraryConfiguration.identifierFactory.getIdentifier()
+        val (issuedTime, expiryTime) = createIssuedAndExpiryTime(ttlInSeconds)
+        val vpTokens = this.vpTokens.mapIndexed { index, vpToken ->
+            vpToken.getPresentationSubmissionMap(index)
+        }.flatten()
+
+        val submission = VpTokenInResponse(
+            PresentationSubmission(
+                id = UUID.randomUUID().toString(),
+                definitionId = definitionId,
+                presentationSubmissionDescriptors = vpTokens
             )
+        )
 
-            val vpClaims = PresentationResponseClaims(listOf(submission))
+        val vpClaims = PresentationResponseClaims(listOf(submission))
 
-            val oidcResponseClaims = vpClaims.apply {
-                subject = identifier.id
-                audience = clientId
-                nonce = requestNonce
-                responseCreationTime = issuedTime
-                responseExpirationTime = expiryTime
-            }
-
-            val token = libraryConfiguration.serializer.encodeToString(PresentationResponseClaims.serializer(), oidcResponseClaims)
-            return libraryConfiguration.tokenSigner.signWithIdentifier(token, identifier)
-        }.exceptionOrNull()
-
-        if (exception != null) {
-            throw exception
+        val oidcResponseClaims = vpClaims.apply {
+            subject = identifier.id
+            audience = clientId
+            nonce = requestNonce
+            responseCreationTime = issuedTime
+            responseExpirationTime = expiryTime
         }
-        // unreachable
-        return ""
+
+        val token = libraryConfiguration.serializer.encodeToString(PresentationResponseClaims.serializer(), oidcResponseClaims)
+        return identifier.sign(token)
     }
 
 }

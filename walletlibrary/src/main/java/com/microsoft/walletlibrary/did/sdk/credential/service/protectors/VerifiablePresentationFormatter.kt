@@ -5,6 +5,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiableP
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationDescriptor
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
@@ -21,7 +22,7 @@ internal class VerifiablePresentationFormatter @Inject constructor(
         verifiableCredential: VerifiableCredential,
         validityInterval: Int,
         audience: String,
-        responder: Identifier
+        responder: HolderIdentifier
     ): String {
         val verifiablePresentation = VerifiablePresentationDescriptor(
             verifiableCredential = listOf(verifiableCredential.raw),
@@ -43,7 +44,7 @@ internal class VerifiablePresentationFormatter @Inject constructor(
                 audience = audience
             )
         val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
-        return signer.signWithIdentifier(serializedContents, responder)
+        return responder.sign(serializedContents)
     }
 
     // supports multiple VCs per VP
@@ -51,7 +52,7 @@ internal class VerifiablePresentationFormatter @Inject constructor(
         verifiableCredentials: List<VerifiableCredential>,
         validityInterval: Int,
         audience: String,
-        responder: Identifier,
+        responder: HolderIdentifier,
         nonce: String
     ): String {
         val rawVerifiableCredentials = mutableListOf<String>()
@@ -77,6 +78,6 @@ internal class VerifiablePresentationFormatter @Inject constructor(
                 nonce = nonce
             )
         val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
-        return signer.signWithIdentifier(serializedContents, responder)
+        return responder.sign(serializedContents)
     }
 }

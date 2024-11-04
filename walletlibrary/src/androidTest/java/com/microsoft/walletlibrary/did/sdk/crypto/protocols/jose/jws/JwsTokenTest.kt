@@ -27,7 +27,6 @@ class JwsTokenTest {
             algorithm = "ES256K",
             method = "method",
             keyReference = "keyReferenceTest1",
-            cryptoOperations = CryptoOperations,
             keyStore = keyStore
         )
         val testDataString = "{\"iss\":\"joe\",\n" +

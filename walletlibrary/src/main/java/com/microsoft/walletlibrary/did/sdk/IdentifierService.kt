@@ -43,6 +43,10 @@ internal class IdentifierService @Inject constructor(
         return TokenSigner(keyStore)
     }
 
+    internal fun getKeyStore(): EncryptedKeyStore {
+        return keyStore
+    }
+
     private suspend fun createMasterIdentifier(): Result<Identifier> {
         return runResultTry {
             val seed = CryptoOperations.generateSeed()

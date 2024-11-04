@@ -7,6 +7,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSi
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.createIssuedAndExpiryTime
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeRequirement
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeVerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
@@ -15,7 +16,7 @@ import kotlinx.serialization.json.Json
 import java.util.UUID
 
 internal class PresentationExchangeSubmissionGroup (
-    private val subject: Identifier
+    private val subject: HolderIdentifier
 ) {
     private var requirementAndCredential: MutableList<Pair<PresentationExchangeRequirement, String>> = mutableListOf()
     private var excludeInputDescriptors: MutableSet<String> = mutableSetOf()
@@ -77,7 +78,7 @@ internal class PresentationExchangeSubmissionGroup (
                 nonce = nonce
             )
         val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
-        return signer.signWithIdentifier(serializedContents, subject)
+        return subject.sign(serializedContents)
     }
 
     fun getPresentationSubmissionMap(presentationIndex: Int): List<PresentationSubmissionDescriptor> {

@@ -18,7 +18,7 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.coroutines.runBlocking
 import java.util.UUID
 
-class ExtensionIdentifierManager internal constructor(libraryConfiguration: LibraryConfiguration) {
+class ExtensionIdentifierManager internal constructor(private val libraryConfiguration: LibraryConfiguration) {
     private val identifierManager = libraryConfiguration.identifierManager
     private val serializer = libraryConfiguration.serializer
     private val signer = libraryConfiguration.tokenSigner
@@ -39,16 +39,7 @@ class ExtensionIdentifierManager internal constructor(libraryConfiguration: Libr
             val vcDescriptor = VerifiableCredentialDescriptor(
                 listOf(Constants.VC_DATA_MODEL_CONTEXT), vcTypes, claims
             )
-            val identifier = runBlocking {
-                when (val result =
-                    this@ExtensionIdentifierManager.identifierManager.getMasterIdentifier()) {
-                    is Result.Success -> result.payload
-                    is Result.Failure -> {
-                        SdkLog.e("Could not get DID", result.payload)
-                        null
-                    }
-                }
-            } ?: return null
+            val identifier = libraryConfiguration.identifierFactory.getIdentifier()
 
             val (issuedTime, expiryTime) = createIssuedAndExpiryTime(5 * 60)    // 5 minutes
             val jti = UUID.randomUUID().toString()
@@ -61,7 +52,7 @@ class ExtensionIdentifierManager internal constructor(libraryConfiguration: Libr
                 expiryTime
             )
             val jsonContent = serializer.encodeToString(VerifiableCredentialContent.serializer(), content)
-            val vcToken = signer.signWithIdentifier(jsonContent, identifier)
+            val vcToken = identifier.sign(jsonContent)
             return OpenId4VciVerifiedId(
                 com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential(
                     jti,

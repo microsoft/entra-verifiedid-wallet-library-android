@@ -14,7 +14,7 @@ internal class HttpAgentApiProvider @Inject constructor(@Named("agent") agent: I
 
     val issuanceApis = HttpAgentIssuanceApi(agent, httpAgentUtils, json)
 
-    val revocationApis = HttpAgentRevocationApi(agent, httpAgentUtils, json)
+//    val revocationApis = HttpAgentRevocationApi(agent, httpAgentUtils, json)
 
     val linkedDomainsApis = HttpAgentLinkedDomainsApi(agent, httpAgentUtils, json)
 

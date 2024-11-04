@@ -12,6 +12,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecal
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.mappings.issuance.addRequirements
 import com.microsoft.walletlibrary.requests.requirements.Requirement
+import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.VerifiedIdResponseCompletionException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
@@ -23,11 +24,12 @@ object VerifiedIdRequester {
     // sends the issuance response to VC SDK and returns a VerifiedId if successful.
     internal suspend fun sendIssuanceResponse(
         issuanceRequest: IssuanceRequest,
-        requirement: Requirement
+        requirement: Requirement,
+        libraryConfiguration: LibraryConfiguration
     ): VerifiedId {
         val issuanceResponse = IssuanceResponse(issuanceRequest)
         issuanceResponse.addRequirements(requirement)
-        when (val result = VerifiableCredentialSdk.issuanceService.sendResponse(issuanceResponse)) {
+        when (val result = VerifiableCredentialSdk.issuanceService.sendResponse(issuanceResponse, libraryConfiguration)) {
             is Result.Success -> return VerifiableCredential(result.payload, issuanceRequest.contract)
             is Result.Failure -> {
                 throw VerifiedIdResponseCompletionException(

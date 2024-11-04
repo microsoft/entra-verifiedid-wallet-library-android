@@ -1,7 +1,8 @@
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+ *--------------------------------------------------------------------------------------------*//*
+
 
 package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 
@@ -15,9 +16,11 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
+*/
 /**
  * Class that forms Response Contents Properly.
- */
+ *//*
+
 @Singleton
 internal class RevocationResponseFormatter @Inject constructor(
     private val serializer: Json,
@@ -47,4 +50,4 @@ internal class RevocationResponseFormatter @Inject constructor(
         val serializedResponseContent = serializer.encodeToString(RevocationResponseClaims.serializer(), contents)
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
-}
+}*/

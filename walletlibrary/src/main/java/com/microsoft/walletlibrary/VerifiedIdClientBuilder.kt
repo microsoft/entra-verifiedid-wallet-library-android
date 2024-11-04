@@ -11,6 +11,8 @@ import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
+import com.microsoft.walletlibrary.identifier.IdentifierFactory
 import com.microsoft.walletlibrary.identifier.IdentifierManager
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
@@ -63,6 +65,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         isLenient = true
     }
     private var rootOfTrustResolver: RootOfTrustResolver? = null
+    private val identifiers = ArrayList<HolderIdentifier>()
 
     // An optional custom log consumer can be passed to be used by VerifiedIdClient.
     fun with(logConsumer: WalletLibraryLogger.Consumer) {
@@ -91,6 +94,11 @@ class VerifiedIdClientBuilder(private val context: Context) {
         return this
     }
 
+    fun with(identifier: HolderIdentifier): VerifiedIdClientBuilder {
+        identifiers.add(identifier)
+        return this
+    }
+
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
     fun build(): VerifiedIdClient {
         val vcSdkLogConsumer = WalletLibraryVCSDKLogConsumer(logger)
@@ -116,6 +124,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
         )
 
         val identifierManager = IdentifierManager(VerifiableCredentialSdk.identifierService)
+        val identifierFactory = IdentifierFactory()
+        identifierFactory.identifiers.addAll(identifiers)
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
         val libraryConfiguration =
             LibraryConfiguration(previewFeatureFlags,
@@ -124,7 +134,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
                 rootOfTrustResolver,
                 identifierManager,
                 identifierManager.getTokenSigner(),
-                logger
+                logger,
+                identifierFactory
                 )
 
         val requestResolverFactory = RequestResolverFactory()

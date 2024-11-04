@@ -15,6 +15,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentatio
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
@@ -29,7 +30,7 @@ internal class PresentationResponseFormatter @Inject constructor(
     fun formatResponse(
         request: PresentationRequest,
         presentationResponse: PresentationResponse,
-        responder: Identifier,
+        responder: HolderIdentifier,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Pair<String, String> {
         val (id_token, vp_tokens) = this.formatResponses(
@@ -44,7 +45,7 @@ internal class PresentationResponseFormatter @Inject constructor(
     fun formatResponses(
         request: PresentationRequest,
         presentationResponses: List<PresentationResponse>,
-        responder: Identifier,
+        responder: HolderIdentifier,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Pair<String, List<String>> {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
@@ -108,12 +109,12 @@ internal class PresentationResponseFormatter @Inject constructor(
     private fun createPresentations(
         presentationResponses: List<PresentationResponse>,
         audience: String,
-        responder: Identifier,
+        responder: HolderIdentifier,
         nonce: String
     ): List<String> {
         return presentationResponses.map { response ->
             verifiablePresentationFormatter.createPresentation(
-                response.requestedVcPresentationSubmissionMap.values.toList<VerifiableCredential>(),
+                response.requestedVcPresentationSubmissionMap.values.toList(),
                 DEFAULT_VP_EXPIRATION_IN_SECONDS,
                 audience,
                 responder,
@@ -122,8 +123,8 @@ internal class PresentationResponseFormatter @Inject constructor(
         }
     }
 
-    private fun signContents(contents: PresentationResponseClaims, responder: Identifier): String {
+    private fun signContents(contents: PresentationResponseClaims, responder: HolderIdentifier): String {
         val serializedResponseContent = serializer.encodeToString(PresentationResponseClaims.serializer(), contents)
-        return signer.signWithIdentifier(serializedResponseContent, responder)
+        return responder.sign(serializedResponseContent)
     }
 }

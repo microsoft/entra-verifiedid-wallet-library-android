@@ -1,3 +1,4 @@
+/*
 package com.microsoft.walletlibrary.did.sdk.datasource.network.apis
 
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResponses.RevocationServiceResponse
@@ -6,10 +7,12 @@ import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
 
+*/
 /**
  * Api class to perform revocation related network operations using the provided HttpAgent, utils
  * and json serializer to convert the network response to Revocation related model.
- */
+ *//*
+
 internal class HttpAgentRevocationApi(private val agent: IHttpAgent,
                                       private val httpAgentUtils: HttpAgentUtils,
                                       private val json : Json
@@ -24,4 +27,4 @@ internal class HttpAgentRevocationApi(private val agent: IHttpAgent,
             httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.Json, encodedBody),
             encodedBody)
     }
-}
+}*/
