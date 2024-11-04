@@ -107,8 +107,7 @@ class OpenId4VciIssuanceRequestTest {
         every {
             mockedTokenSigner.signWithIdentifier(
                 capture(slot),
-                mockedIdentifier,
-                any()
+                mockedIdentifier
             )
         } answers { slot.captured }
         mockkStatic(VerifiableCredentialSdk::class)

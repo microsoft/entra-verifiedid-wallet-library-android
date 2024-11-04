@@ -21,25 +21,25 @@ internal class PresentationExchangeSubmissionGroup (
     private var excludeInputDescriptors: MutableSet<String> = mutableSetOf()
 
     fun canIncludeInGroup(requirement: Requirement): Boolean {
-        (requirement as? PresentationExchangeVerifiedIdRequirement)?.let result@{
+        (requirement as? PresentationExchangeVerifiedIdRequirement)?.let {
             // Only those of the same subject can be presented together
             it.verifiedId?.let {
                 verifiedId ->
                 val credentialSubject = VCVerifiedIdSerializer.serialize(verifiedId).contents.sub
                 if (credentialSubject != subject.id) {
-                    return@result false
+                    return false
                 }
             }
             // Are any credentials exclusive?
             if (excludeInputDescriptors.contains(it.inputDescriptorId)) {
-                return@result false
+                return false
             }
             requirementAndCredential.forEach { requirementAndCredential ->
                 if (it.exclusivePresentationWith?.contains(requirementAndCredential.first.inputDescriptorId) == true) {
-                    return@result  false
+                    return false
                 }
             }
-            return@result true
+            return true
         }
         return false
     }
