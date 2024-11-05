@@ -65,3 +65,10 @@ class OpenId4VciRequestException(
     val innerError: Exception? = null,
     correlationId: String? = null
 ) : VerifiedIdException(message, code, correlationId)
+
+class IdentifierException(
+    message: String,
+    code: String,
+    val innerError: Exception? = null,
+    correlationId: String? = null
+) : VerifiedIdException(message, code, correlationId)
