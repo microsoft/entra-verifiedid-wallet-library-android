@@ -5,14 +5,12 @@
 
 package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 
-import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.VpTokenInResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
-import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
@@ -24,8 +22,7 @@ import javax.inject.Singleton
 @Singleton
 internal class PresentationResponseFormatter @Inject constructor(
     private val serializer: Json,
-    private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
-    private val signer: TokenSigner
+    private val verifiablePresentationFormatter: VerifiablePresentationFormatter
     ) {
     fun formatResponse(
         request: PresentationRequest,

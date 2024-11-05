@@ -3,7 +3,6 @@ package com.microsoft.walletlibrary.networking.formatters
 import com.microsoft.walletlibrary.did.sdk.IdentifierService
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.JwsHeaderFormatter
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
@@ -38,7 +37,6 @@ import org.junit.Test
 class OpenId4VciIssuanceRequestFormatterTest {
     private val slot = slot<String>()
     private val mockedKeyStore: EncryptedKeyStore = mockk()
-    private val mockedTokenSigner: TokenSigner = mockk()
     private val mockedHolderIdentifier: EncryptedSharedPreferencesIdentifier = mockk()
     private val mockedIdentifier: Identifier = mockk()
     private val mockedIdentifierManager: IdentifierManager = mockk()
@@ -63,7 +61,6 @@ class OpenId4VciIssuanceRequestFormatterTest {
             defaultTestSerializer,
             rootOfTrustResolver = null,
             mockedIdentifierManager,
-            mockedTokenSigner,
             mockWalletLibraryLogger,
             mockIdentifierFactory
         )

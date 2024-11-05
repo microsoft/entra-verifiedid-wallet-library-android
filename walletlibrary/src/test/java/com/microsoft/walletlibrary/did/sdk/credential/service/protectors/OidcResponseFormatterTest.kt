@@ -27,7 +27,6 @@ class OidcResponseFormatterTest {
     // mocks for retrieving public key.
     private val mockedKeyStore: EncryptedKeyStore = mockk()
 
-    private val mockedTokenSigner: TokenSigner = mockk()
     private val slot = slot<String>()
     private val mockedVerifiablePresentationFormatter: VerifiablePresentationFormatter = mockk()
     private val mockedVc: VerifiableCredential = mockk()
@@ -79,13 +78,11 @@ class OidcResponseFormatterTest {
         issuanceResponseFormatter = IssuanceResponseFormatter(
             defaultTestSerializer,
             mockedVerifiablePresentationFormatter,
-            mockedTokenSigner,
             mockedKeyStore
         )
         presentationResponseFormatter = PresentationResponseFormatter(
             defaultTestSerializer,
-            mockedVerifiablePresentationFormatter,
-            mockedTokenSigner
+            mockedVerifiablePresentationFormatter
         )
         setUpGetPublicKey()
         setUpExpectedPresentations()

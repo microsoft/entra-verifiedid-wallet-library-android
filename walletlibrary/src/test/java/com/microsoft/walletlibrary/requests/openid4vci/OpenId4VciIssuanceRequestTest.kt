@@ -5,7 +5,6 @@ import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.JwsHeaderFormatter
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
@@ -53,7 +52,6 @@ class OpenId4VciIssuanceRequestTest {
     private val mockHttpAgentApiProvider: HttpAgentApiProvider = mockk()
     private val mockPreviewFeatureFlags: PreviewFeatureFlags = mockk()
     private val mockedKeyStore: EncryptedKeyStore = mockk()
-    private val mockedTokenSigner: TokenSigner = mockk()
     private val mockWalletLibraryLogger: WalletLibraryLogger = mockk()
     private val mockIdentifierFactory: IdentifierFactory = mockk()
     private val mockIdentifierManager = mockk<IdentifierManager>()
@@ -63,7 +61,6 @@ class OpenId4VciIssuanceRequestTest {
         defaultTestSerializer,
         rootOfTrustResolver = null,
         mockIdentifierManager,
-        mockedTokenSigner,
         mockWalletLibraryLogger,
         mockIdentifierFactory
     )

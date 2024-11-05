@@ -62,7 +62,6 @@ internal class PresentationExchangeResponseBuilder(
     fun buildVpTokens(audience: String, nonce: String, ttlInSeconds: Int = 3600): List<String> {
         return vpTokens.map {
             it.getVerifiablePresentation(
-                libraryConfiguration.tokenSigner,
                 libraryConfiguration.serializer,
                 ttlInSeconds,
                 audience,

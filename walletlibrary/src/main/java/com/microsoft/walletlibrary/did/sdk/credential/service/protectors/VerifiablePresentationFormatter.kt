@@ -3,7 +3,6 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationDescriptor
-import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import kotlinx.serialization.json.Json
@@ -13,8 +12,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class VerifiablePresentationFormatter @Inject constructor(
-    private val serializer: Json,
-    private val signer: TokenSigner
+    private val serializer: Json
 ) {
 
     // only support one VC per VP

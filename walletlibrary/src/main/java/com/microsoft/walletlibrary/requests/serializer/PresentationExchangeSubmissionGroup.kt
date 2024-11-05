@@ -3,9 +3,7 @@ package com.microsoft.walletlibrary.requests.serializer
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationDescriptor
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.createIssuedAndExpiryTime
-import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeRequirement
@@ -52,8 +50,7 @@ internal class PresentationExchangeSubmissionGroup (
         }
     }
 
-    fun getVerifiablePresentation(signer: TokenSigner,
-                                  serializer: Json,
+    fun getVerifiablePresentation(serializer: Json,
                                   validityInterval: Int,
                                   audience: String,
                                   nonce: String): String {

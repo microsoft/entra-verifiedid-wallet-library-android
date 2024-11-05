@@ -3,9 +3,6 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
-import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.VerifiablePresentationFormatter
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import io.mockk.every
@@ -17,7 +14,6 @@ import kotlin.test.assertEquals
 
 class VerifiablePresentationFormatterTest {
 
-    private val mockedTokenSigner: TokenSigner = mockk()
     private val mockedVerifiableCredential: VerifiableCredential = mockk()
     private val mockedPresentationAttestation: PresentationAttestation = mockk()
     private val mockedIdentifier: HolderIdentifier = mockk()
@@ -34,7 +30,7 @@ class VerifiablePresentationFormatterTest {
     private val expectedPresentationType = listOf(Constants.VERIFIABLE_PRESENTATION_TYPE)
 
     init {
-        formatter = VerifiablePresentationFormatter(serializer, mockedTokenSigner)
+        formatter = VerifiablePresentationFormatter(serializer)
         every { mockedIdentifier.id } returns expectedDid
         every { mockedIdentifier.keyReference } returns signingKeyRef
         every { mockedIdentifier.sign(capture(slot)) } answers { slot.captured }

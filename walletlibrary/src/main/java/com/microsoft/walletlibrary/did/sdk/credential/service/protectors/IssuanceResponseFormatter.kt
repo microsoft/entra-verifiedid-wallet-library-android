@@ -16,7 +16,6 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.Issuan
 import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.DigestAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import kotlinx.serialization.json.Json
 import java.util.UUID
@@ -27,7 +26,6 @@ import javax.inject.Singleton
 internal class IssuanceResponseFormatter @Inject constructor(
     private val serializer: Json,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
-    private val signer: TokenSigner,
     private val keyStore: EncryptedKeyStore
 ) {
 

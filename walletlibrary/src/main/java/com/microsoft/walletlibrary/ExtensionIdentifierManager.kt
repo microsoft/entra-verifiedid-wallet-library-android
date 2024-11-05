@@ -9,19 +9,15 @@ import com.microsoft.walletlibrary.ExtensionIdentifierManager.Constants.SELF_ISS
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.createIssuedAndExpiryTime
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
-import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
-import kotlinx.coroutines.runBlocking
 import java.util.UUID
 
 class ExtensionIdentifierManager internal constructor(private val libraryConfiguration: LibraryConfiguration) {
     private val identifierManager = libraryConfiguration.identifierManager
     private val serializer = libraryConfiguration.serializer
-    private val signer = libraryConfiguration.tokenSigner
 
     internal object Constants {
         const val VC_DATA_MODEL_CONTEXT = "https://www.w3.org/2018/credentials/v1"

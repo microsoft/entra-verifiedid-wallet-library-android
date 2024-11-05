@@ -37,11 +37,10 @@ import org.junit.Test
 import java.util.Date
 
 class PresentationResponseFormatterTest {
-    private val mockedTokenSigner: TokenSigner = mockk()
     private val vpFormatter: VerifiablePresentationFormatter =
-        VerifiablePresentationFormatter(defaultTestSerializer, mockedTokenSigner)
+        VerifiablePresentationFormatter(defaultTestSerializer)
     private val formatter: PresentationResponseFormatter =
-        PresentationResponseFormatter(defaultTestSerializer, vpFormatter, mockedTokenSigner)
+        PresentationResponseFormatter(defaultTestSerializer, vpFormatter)
 
     private val mockedIdentifier: HolderIdentifier = mockk()
     private val slot = slot<String>()

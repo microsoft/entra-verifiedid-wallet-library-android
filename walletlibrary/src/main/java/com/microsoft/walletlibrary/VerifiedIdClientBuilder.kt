@@ -138,7 +138,6 @@ class VerifiedIdClientBuilder(private val context: Context) {
                 jsonSerializer,
                 rootOfTrustResolver,
                 identifierManager,
-                identifierManager.getTokenSigner(),
                 logger,
                 identifierFactory
                 )
