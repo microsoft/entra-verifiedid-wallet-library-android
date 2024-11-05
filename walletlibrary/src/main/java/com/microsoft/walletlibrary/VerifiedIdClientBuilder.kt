@@ -12,9 +12,9 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiP
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.identifier.IdentifierFactory
-import com.microsoft.walletlibrary.identifier.IdentifierManager
 import com.microsoft.walletlibrary.mappings.identifier.toHolderIdentifier
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
@@ -126,7 +126,6 @@ class VerifiedIdClientBuilder(private val context: Context) {
             jsonSerializer
         )
 
-        val identifierManager = IdentifierManager(VerifiableCredentialSdk.identifierService)
         val identifierFactory = IdentifierFactory()
         identifierFactory.identifiers.addAll(identifiers)
         val defaultIdentifier = getDefaultIdentifier()
@@ -138,7 +137,6 @@ class VerifiedIdClientBuilder(private val context: Context) {
                 apiProvider,
                 jsonSerializer,
                 rootOfTrustResolver,
-                identifierManager,
                 logger,
                 identifierFactory
             )
@@ -202,22 +200,20 @@ class VerifiedIdClientBuilder(private val context: Context) {
     }
 
     private fun getDefaultIdentifier(): HolderIdentifier? {
-        runBlocking {
+        val identifier = runBlocking {
             when (val defaultIdentifier =
                 VerifiableCredentialSdk.identifierService.getMasterIdentifier()) {
                 is Result.Success -> {
-                    return@runBlocking defaultIdentifier.payload.toHolderIdentifier(
+                    defaultIdentifier.payload.toHolderIdentifier(
                         VerifiableCredentialSdk.identifierService.getKeyStore()
                     )
                 }
                 is Result.Failure -> {
-                    throw IllegalStateException("Unable to fetch master identifier")
-                }
-                else -> {
-                    throw IllegalStateException("Unknown error occurred while fetching master identifier")
+                    SdkLog.e("Unable to fetch master identifier")
+                    null
                 }
             }
         }
-        return null
+        return identifier
     }
 }

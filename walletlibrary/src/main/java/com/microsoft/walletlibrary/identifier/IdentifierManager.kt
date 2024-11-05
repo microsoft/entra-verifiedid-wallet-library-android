@@ -1,3 +1,4 @@
+/*
 package com.microsoft.walletlibrary.identifier
 
 import com.microsoft.walletlibrary.did.sdk.IdentifierService
@@ -11,4 +12,4 @@ internal class IdentifierManager constructor(
     override suspend fun getMasterIdentifier(): Result<Identifier> {
         return identifierService.getMasterIdentifier()
     }
-}
+}*/

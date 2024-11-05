@@ -19,7 +19,6 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiP
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendIssuanceCompletionResponse
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
-import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
@@ -113,7 +112,6 @@ internal class IssuanceService @Inject constructor(
     ): Result<VerifiableCredential> {
         return runResultTry {
             logTime("Issuance sendResponse") {
-//                val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
                 val identifier = libraryConfiguration.identifierFactory.getIdentifier()
                 val requestedVcMap = response.requestedVcMap
                 val verifiableCredential = formAndSendResponse(response, identifier, requestedVcMap).abortOnError()

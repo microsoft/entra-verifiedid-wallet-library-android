@@ -16,7 +16,6 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import java.util.UUID
 
 class ExtensionIdentifierManager internal constructor(private val libraryConfiguration: LibraryConfiguration) {
-    private val identifierManager = libraryConfiguration.identifierManager
     private val serializer = libraryConfiguration.serializer
 
     internal object Constants {

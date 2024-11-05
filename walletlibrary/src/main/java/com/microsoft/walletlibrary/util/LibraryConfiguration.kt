@@ -3,7 +3,6 @@ package com.microsoft.walletlibrary.util
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.identifier.IdentifierFactory
-import com.microsoft.walletlibrary.identifier.IdentifierManager
 import kotlinx.serialization.json.Json
 
 /**
@@ -14,7 +13,6 @@ internal class LibraryConfiguration(
     val httpAgentApiProvider: HttpAgentApiProvider,
     val serializer: Json,
     val rootOfTrustResolver: RootOfTrustResolver? = null,
-    val identifierManager: IdentifierManager,
     val logger: WalletLibraryLogger,
     val identifierFactory: IdentifierFactory
 ) {

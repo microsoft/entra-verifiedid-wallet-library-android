@@ -18,9 +18,6 @@ internal object JwsHeaderFormatter {
 
     fun formatHeader(holderIdentifier: HolderIdentifier, type: String = "JWT"): JWSHeader {
         val keyId = "${holderIdentifier.id}#${holderIdentifier.keyReference}"
-        return JWSHeader.Builder(JWSAlgorithm(holderIdentifier.algorithm))
-            .type(JOSEObjectType(type))
-            .keyID(keyId)
-            .build()
+        return formatHeader(holderIdentifier.algorithm, keyId, type)
     }
 }
