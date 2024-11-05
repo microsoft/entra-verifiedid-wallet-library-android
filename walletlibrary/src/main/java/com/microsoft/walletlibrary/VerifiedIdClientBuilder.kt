@@ -36,6 +36,7 @@ import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
 import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -102,7 +103,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
     }
 
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
-    suspend fun build(): VerifiedIdClient {
+    fun build(): VerifiedIdClient {
         val vcSdkLogConsumer = WalletLibraryVCSDKLogConsumer(logger)
         val userAgentInfo = getUserAgent(context)
         val walletLibraryVersionInfo = getWalletLibraryVersionInfo()
@@ -129,7 +130,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         val identifierFactory = IdentifierFactory()
         identifierFactory.identifiers.addAll(identifiers)
         val defaultIdentifier = getDefaultIdentifier()
-        identifierFactory.identifiers.add(defaultIdentifier)
+        defaultIdentifier?.let { identifierFactory.identifiers.add(it) }
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
         val libraryConfiguration =
             LibraryConfiguration(
@@ -200,18 +201,23 @@ class VerifiedIdClientBuilder(private val context: Context) {
         }
     }
 
-    private suspend fun getDefaultIdentifier(): HolderIdentifier {
-        when (val defaultIdentifier =
-            VerifiableCredentialSdk.identifierService.getMasterIdentifier()) {
-            is Result.Success -> {
-                return defaultIdentifier.payload.toHolderIdentifier(
-                    VerifiableCredentialSdk.identifierService.getKeyStore()
-                )
-            }
-
-            is Result.Failure -> {
-                throw IllegalStateException("Unable to fetch master identifier")
+    private fun getDefaultIdentifier(): HolderIdentifier? {
+        runBlocking {
+            when (val defaultIdentifier =
+                VerifiableCredentialSdk.identifierService.getMasterIdentifier()) {
+                is Result.Success -> {
+                    return@runBlocking defaultIdentifier.payload.toHolderIdentifier(
+                        VerifiableCredentialSdk.identifierService.getKeyStore()
+                    )
+                }
+                is Result.Failure -> {
+                    throw IllegalStateException("Unable to fetch master identifier")
+                }
+                else -> {
+                    throw IllegalStateException("Unknown error occurred while fetching master identifier")
+                }
             }
         }
+        return null
     }
 }
