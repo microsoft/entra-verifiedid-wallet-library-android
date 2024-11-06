@@ -22,9 +22,6 @@ internal class JwsToken constructor(
     val keyId: String?
         get() = jwsObject.header.keyID
 
-    val header: JWSHeader
-        get() = jwsObject.header
-
     companion object {
         fun deserialize(jws: String): JwsToken {
             return JwsToken(JWSObject.parse(jws))
