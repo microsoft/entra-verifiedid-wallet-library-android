@@ -9,7 +9,6 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.identifier.IdentifierFactory
-import com.microsoft.walletlibrary.identifier.IdentifierManager
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.networking.entities.openid4vci.request.OpenID4VCIJWTProofClaims
 import com.microsoft.walletlibrary.networking.entities.openid4vci.request.RawOpenID4VCIRequest
@@ -39,7 +38,6 @@ class OpenId4VciIssuanceRequestFormatterTest {
     private val mockedKeyStore: EncryptedKeyStore = mockk()
     private val mockedHolderIdentifier: EncryptedSharedPreferencesIdentifier = mockk()
     private val mockedIdentifier: Identifier = mockk()
-    private val mockedIdentifierManager: IdentifierManager = mockk()
     private val mockIdentifierService: IdentifierService = mockk()
     private val mockWalletLibraryLogger: WalletLibraryLogger = mockk()
     private val mockIdentifierFactory: IdentifierFactory = mockk()
@@ -60,7 +58,6 @@ class OpenId4VciIssuanceRequestFormatterTest {
             mockHttpAgentApiProvider,
             defaultTestSerializer,
             rootOfTrustResolver = null,
-            mockedIdentifierManager,
             mockWalletLibraryLogger,
             mockIdentifierFactory
         )
@@ -73,7 +70,7 @@ class OpenId4VciIssuanceRequestFormatterTest {
         every { mockedKeyStore.getKey(signingKeyRef) } returns expectedJsonWebKey
         every {
             mockedHolderIdentifier.sign(
-                capture(slot)
+                capture(slot).toByteArray()
             )
         } answers { slot.captured }
         mockkStatic(VerifiableCredentialSdk::class)

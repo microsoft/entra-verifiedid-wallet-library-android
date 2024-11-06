@@ -33,7 +33,7 @@ class VerifiablePresentationFormatterTest {
         formatter = VerifiablePresentationFormatter(serializer)
         every { mockedIdentifier.id } returns expectedDid
         every { mockedIdentifier.keyReference } returns signingKeyRef
-        every { mockedIdentifier.sign(capture(slot)) } answers { slot.captured }
+        every { mockedIdentifier.sign(capture(slot).toByteArray()) } answers { slot.captured }
         every { mockedVerifiableCredential.raw } returns expectedRawVerifiableCredential
     }
 
