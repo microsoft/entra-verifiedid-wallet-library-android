@@ -50,11 +50,7 @@ class VerifiedIdClientBuilderTest {
         val actualResult = verifiedIdClientBuilder.build()
 
         // Assert
-<<<<<<< HEAD
-        assertThat(actualResult.requestProcessorFactory.requestProcessors.size).isEqualTo(1)
-=======
         assertThat(actualResult.requestProcessorFactory.requestProcessors.size).isEqualTo(2)
->>>>>>> dev
         assertThat(actualResult.requestResolverFactory.requestResolvers.size).isEqualTo(1)
         assertThat(actualResult.logger.CONSUMERS).isEmpty()
     }
@@ -68,11 +64,7 @@ class VerifiedIdClientBuilderTest {
         val actualResult = verifiedIdClientBuilder.build()
 
         // Assert
-<<<<<<< HEAD
-        assertThat(actualResult.requestProcessorFactory.requestProcessors.size).isEqualTo(1)
-=======
         assertThat(actualResult.requestProcessorFactory.requestProcessors.size).isEqualTo(2)
->>>>>>> dev
         assertThat(actualResult.requestResolverFactory.requestResolvers.size).isEqualTo(1)
         assertThat(actualResult.logger.CONSUMERS.size).isEqualTo(1)
     }
@@ -86,11 +78,7 @@ class VerifiedIdClientBuilderTest {
         val actualResult = verifiedIdClientBuilder.build()
 
         // Assert
-<<<<<<< HEAD
-        assertThat(actualResult.requestProcessorFactory.requestProcessors.size).isEqualTo(1)
-=======
         assertThat(actualResult.requestProcessorFactory.requestProcessors.size).isEqualTo(2)
->>>>>>> dev
         assertThat(actualResult.requestResolverFactory.requestResolvers.size).isEqualTo(1)
         assertThat(actualResult.logger.CONSUMERS.size).isEqualTo(4)
     }
