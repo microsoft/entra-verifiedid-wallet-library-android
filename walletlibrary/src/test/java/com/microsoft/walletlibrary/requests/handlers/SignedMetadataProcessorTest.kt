@@ -4,8 +4,7 @@ import com.microsoft.walletlibrary.did.sdk.LinkedDomainsService
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.MockRootOfTrustResolverUnVerified
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.MockRootOfTrustResolverVerified
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.MockRootOfTrustResolver
 import com.microsoft.walletlibrary.mappings.getJwk
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.SignedMetadataTokenClaims
 import com.microsoft.walletlibrary.requests.RootOfTrust
@@ -37,8 +36,6 @@ class SignedMetadataProcessorTest {
     private val mockJwsToken: JwsToken = mockk()
     private val mockJwk = mockk<JWK>()
     private val mockLinedDomainsService: LinkedDomainsService = mockk()
-    private val mockRootOfTrustResolverVerified = MockRootOfTrustResolverVerified()
-    private val mockRootOfTrustResolverUnVerified = MockRootOfTrustResolverUnVerified()
 
     init {
         mockkStatic(VerifiableCredentialSdk::class)
@@ -240,7 +237,7 @@ class SignedMetadataProcessorTest {
     @Test
     fun process_LinkedDomainsNotVerifiedByResolver_ReturnsUnverifiedRootOfTrust() {
         // Arrange
-        every { mockLibraryConfiguration.rootOfTrustResolver } returns mockRootOfTrustResolverUnVerified
+        every { mockLibraryConfiguration.rootOfTrustResolver } returns MockRootOfTrustResolver(false)
         mockIdentifierDocument()
         val signedMetadataTokenClaimsString =
             """{"sub":"testCredentialIssuer","iss": "did:web:test","iat": 1707859806}""".trimIndent()
@@ -266,7 +263,7 @@ class SignedMetadataProcessorTest {
     @Test
     fun process_LinkedDomainsVerifiedByResolver_ReturnsVerifiedRootOfTrust() {
         // Arrange
-        every { mockLibraryConfiguration.rootOfTrustResolver } returns mockRootOfTrustResolverVerified
+        every { mockLibraryConfiguration.rootOfTrustResolver } returns MockRootOfTrustResolver(true)
         mockIdentifierDocument()
         val signedMetadataTokenClaimsString =
             """{"sub":"testCredentialIssuer","iss": "did:web:test","iat": 1707859806}""".trimIndent()

@@ -7,6 +7,7 @@ import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
 import com.nimbusds.jose.Payload
 import com.nimbusds.jose.crypto.Ed25519Verifier
+import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyConverter
@@ -38,6 +39,14 @@ internal class JwsToken constructor(
 
     fun serialize(): String {
         return jwsObject.serialize()
+    }
+
+    fun sign(privateKey: JWK, overrideHeaders: JWSHeader? = null) {
+        overrideHeaders?.let { headers ->
+            jwsObject = JWSObject(headers, jwsObject.payload)
+        }
+        val signer = DefaultJWSSignerFactory().createJWSSigner(privateKey, jwsObject.header.algorithm)
+        jwsObject.sign(signer)
     }
 
     fun sign(holderIdentifier: HolderIdentifier): String {
