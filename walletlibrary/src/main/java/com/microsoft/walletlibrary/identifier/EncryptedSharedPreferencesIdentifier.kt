@@ -5,7 +5,6 @@ package com.microsoft.walletlibrary.identifier
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.ECDSASigner
-import com.nimbusds.jose.util.Base64URL
 
 /**
  * Holder Identifier which stores the private key in EncryptedSharedPreferences.
@@ -20,9 +19,9 @@ internal class EncryptedSharedPreferencesIdentifier(
 
     var jwsHeader: JWSHeader? = null
 
-    override fun sign(data: ByteArray?): Base64URL {
+    override fun sign(data: ByteArray?): String {
         val privateKey = keyStore.getKey(keyReference).toECKey()
         val ecdsaSigner = ECDSASigner(privateKey)
-        return ecdsaSigner.sign(jwsHeader, data)
+        return ecdsaSigner.sign(jwsHeader, data).toString()
     }
 }

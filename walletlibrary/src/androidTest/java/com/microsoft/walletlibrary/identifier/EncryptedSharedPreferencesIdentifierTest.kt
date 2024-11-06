@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.toPrivateJwk
 import com.nimbusds.jose.crypto.ECDSAVerifier
 import com.nimbusds.jose.jwk.KeyUse
+import com.nimbusds.jose.util.Base64URL
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -41,7 +42,7 @@ class EncryptedSharedPreferencesIdentifierTest {
 
         // Assert
         val verifier = ECDSAVerifier(publicKey.toECKey())
-        val verificationStatus = verifier.verify(jwsHeader, testData.toByteArray(), signedData)
+        val verificationStatus = verifier.verify(jwsHeader, testData.toByteArray(), Base64URL(signedData))
         assertThat(publicKey).isNotNull
         assertThat(verificationStatus).isTrue
     }

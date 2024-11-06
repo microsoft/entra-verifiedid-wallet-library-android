@@ -21,6 +21,6 @@ internal class ECDSASignerWrapper(private val holderIdentifier: HolderIdentifier
 
     override fun sign(header: JWSHeader?, signingInput: ByteArray?): Base64URL {
         (holderIdentifier as EncryptedSharedPreferencesIdentifier).jwsHeader = header
-        return holderIdentifier.sign(signingInput)
+        return Base64URL(holderIdentifier.sign(signingInput))
     }
 }
