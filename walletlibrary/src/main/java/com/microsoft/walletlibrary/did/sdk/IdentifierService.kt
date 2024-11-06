@@ -14,7 +14,6 @@ import com.microsoft.walletlibrary.did.sdk.util.Constants.MAIN_IDENTIFIER_REFERE
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.RepositoryException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
-import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,7 +46,6 @@ internal class IdentifierService @Inject constructor(
             val seed = CryptoOperations.generateSeed()
             keyStore.storeKey(MAIN_IDENTIFIER_REFERENCE, OctetSequenceKey.Builder(seed).build())
             val identifier = identifierCreator.create(MAIN_IDENTIFIER_REFERENCE)
-            SdkLog.v("Created Identifier: $identifier")
             identifierRepository.insert(identifier)
             Result.Success(identifier)
         }
