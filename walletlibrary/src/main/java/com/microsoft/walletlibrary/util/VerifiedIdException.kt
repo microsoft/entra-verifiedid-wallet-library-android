@@ -72,3 +72,10 @@ class IdentifierException(
     val innerError: Exception? = null,
     correlationId: String? = null
 ) : VerifiedIdException(message, code, correlationId)
+
+class CryptoException(
+    message: String,
+    code: String,
+    val innerError: Exception? = null,
+    correlationId: String? = null
+) : VerifiedIdException(message, code, correlationId)

@@ -18,4 +18,5 @@ enum class VerifiedIdExceptions(val value: String) {
     REQUEST_SEND_EXCEPTION("request_send_error"),
     REQUIREMENT_MISSING_EXCEPTION("requirement_missing"),
     HOLDER_IDENTIFIER_MISSING_EXCEPTION("holder_identifier_missing"),
+    CRYPTO_EXCEPTION("crypto_exception")
 }
