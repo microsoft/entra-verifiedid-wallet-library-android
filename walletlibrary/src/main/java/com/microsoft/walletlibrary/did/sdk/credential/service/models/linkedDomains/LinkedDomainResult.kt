@@ -6,16 +6,16 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class LinkedDomainResult
+internal sealed class LinkedDomainResult
 
 @Serializable
 @SerialName("LinkedDomainVerified")
-class LinkedDomainVerified(val domainUrl: String) : LinkedDomainResult()
+internal class LinkedDomainVerified(val domainUrl: String) : LinkedDomainResult()
 
 @Serializable
 @SerialName("LinkedDomainUnVerified")
-class LinkedDomainUnVerified(val domainUrl: String) : LinkedDomainResult()
+internal class LinkedDomainUnVerified(val domainUrl: String) : LinkedDomainResult()
 
 @Serializable
 @SerialName("LinkedDomainMissing")
-object LinkedDomainMissing : LinkedDomainResult()
+internal object LinkedDomainMissing : LinkedDomainResult()

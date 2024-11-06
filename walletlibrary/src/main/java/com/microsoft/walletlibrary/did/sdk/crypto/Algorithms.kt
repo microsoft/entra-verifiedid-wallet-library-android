@@ -42,7 +42,7 @@ internal abstract class PublicKeyFactoryAlgorithm(val name: String, val provider
 internal abstract class KeyGenAlgorithm(val name: String, val provider: String?, val spec: AlgorithmParameterSpec) {
     object Secp256k1 : KeyGenAlgorithm("EC", null, Curve.SECP256K1.toECParameterSpec())
 
-    object p256 : KeyGenAlgorithm("EC", null, Curve.P_256.toECParameterSpec())
+    object P256 : KeyGenAlgorithm("EC", null, Curve.P_256.toECParameterSpec())
 }
 
 internal abstract class MacAlgorithm(val name: String, val provider: String?) {

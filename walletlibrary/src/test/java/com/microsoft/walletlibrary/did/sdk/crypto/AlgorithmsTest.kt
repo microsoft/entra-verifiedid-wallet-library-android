@@ -37,7 +37,7 @@ class AlgorithmsTest {
     @Test
     fun `test KeyGenAlgorithm p256`() {
         val keyId = UUID.randomUUID().toString().replace("-", "")
-        val privateKeyJwk = CryptoOperations.generateKeyPair(KeyGenAlgorithm.p256).toPrivateJwk(keyId, KeyUse.SIGNATURE, Curve.P_256)
+        val privateKeyJwk = CryptoOperations.generateKeyPair(KeyGenAlgorithm.P256).toPrivateJwk(keyId, KeyUse.SIGNATURE, Curve.P_256)
         assertThat(privateKeyJwk.toECKey().curve.name).isEqualTo("P-256")
         assertThat(privateKeyJwk.keyUse).isEqualTo(KeyUse.SIGNATURE)
     }
