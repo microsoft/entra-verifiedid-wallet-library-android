@@ -6,7 +6,6 @@ import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.DigestAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.Constants
-import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.networking.entities.openid4vci.request.OpenID4VCIJWTProof
@@ -60,12 +59,8 @@ internal class OpenId4VciIssuanceRequestFormatter(private val libraryConfigurati
             OpenID4VCIJWTProofClaims.serializer(),
             contents
         )
-        formatJwsHeaderForIdentifier(holderIdentifier)
-        return holderIdentifier.sign(serializedResponseContent)
-    }
-
-    private fun formatJwsHeaderForIdentifier(holderIdentifier: HolderIdentifier) {
         val jwsHeader = JwsHeaderFormatter.formatHeader(holderIdentifier, com.microsoft.walletlibrary.util.Constants.OPENID4VCI_TYPE_HEADER)
-        (holderIdentifier as EncryptedSharedPreferencesIdentifier).jwsHeader = jwsHeader
+        val jwsToken = JwsToken(serializedResponseContent, jwsHeader)
+        return jwsToken.sign(holderIdentifier)
     }
 }

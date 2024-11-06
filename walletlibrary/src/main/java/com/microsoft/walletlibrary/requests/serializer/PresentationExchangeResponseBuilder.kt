@@ -3,8 +3,11 @@ package com.microsoft.walletlibrary.requests.serializer
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.VpTokenInResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
+import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.JwsHeaderFormatter
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.createIssuedAndExpiryTime
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.toNative
+import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessorSerializer
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeRequirement
@@ -101,7 +104,9 @@ internal class PresentationExchangeResponseBuilder(
         }
 
         val token = libraryConfiguration.serializer.encodeToString(PresentationResponseClaims.serializer(), oidcResponseClaims)
-        return identifier.sign(token)
+        val jwsHeader = JwsHeaderFormatter.formatHeader(identifier)
+        val jwsToken = JwsToken(token, jwsHeader)
+        return jwsToken.sign(identifier)
     }
 
 }

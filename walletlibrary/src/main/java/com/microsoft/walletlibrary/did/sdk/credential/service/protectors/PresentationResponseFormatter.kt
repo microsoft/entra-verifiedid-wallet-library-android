@@ -11,8 +11,10 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.Presen
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.VpTokenInResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
+import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import kotlinx.serialization.json.Json
 import java.util.UUID
@@ -122,6 +124,8 @@ internal class PresentationResponseFormatter @Inject constructor(
 
     private fun signContents(contents: PresentationResponseClaims, responder: HolderIdentifier): String {
         val serializedResponseContent = serializer.encodeToString(PresentationResponseClaims.serializer(), contents)
-        return responder.sign(serializedResponseContent)
+        val jwsHeader = JwsHeaderFormatter.formatHeader(responder)
+        val jwsToken = JwsToken(serializedResponseContent, jwsHeader)
+        return jwsToken.sign(responder)
     }
 }

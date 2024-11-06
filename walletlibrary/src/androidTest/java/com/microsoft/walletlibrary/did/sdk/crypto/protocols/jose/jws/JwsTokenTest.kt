@@ -3,6 +3,7 @@
 package com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws
 
 import androidx.test.platform.app.InstrumentationRegistry
+import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.JwsHeaderFormatter
 import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
@@ -32,7 +33,8 @@ class JwsTokenTest {
         val testDataString = "{\"iss\":\"joe\",\n" +
             " \"exp\":1300819380,\n" +
             " \"http://example.com/is_root\":true}"
-        val jwsToken = JwsToken(testDataString.toByteArray(), JWSAlgorithm("ES256K"))
+        val jwsHeader = JwsHeaderFormatter.formatHeader(encryptedSharedPreferencesIdentifier)
+        val jwsToken = JwsToken(testDataString, jwsHeader)
 
         // Act
         val serializedToken = jwsToken.sign(encryptedSharedPreferencesIdentifier)

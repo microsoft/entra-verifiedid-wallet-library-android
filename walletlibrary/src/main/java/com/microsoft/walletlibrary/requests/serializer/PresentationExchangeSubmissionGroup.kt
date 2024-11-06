@@ -3,8 +3,11 @@ package com.microsoft.walletlibrary.requests.serializer
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.JwsHeaderFormatter
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.createIssuedAndExpiryTime
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeRequirement
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeVerifiedIdRequirement
@@ -75,7 +78,9 @@ internal class PresentationExchangeSubmissionGroup (
                 nonce = nonce
             )
         val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
-        return subject.sign(serializedContents)
+        val jwsHeader = JwsHeaderFormatter.formatHeader(subject)
+        val jwsToken = JwsToken(serializedContents, jwsHeader)
+        return jwsToken.sign(subject)
     }
 
     fun getPresentationSubmissionMap(presentationIndex: Int): List<PresentationSubmissionDescriptor> {

@@ -1,14 +1,17 @@
 package com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
+import com.nimbusds.jose.JWSSigner
 import com.nimbusds.jose.Payload
 import com.nimbusds.jose.crypto.Ed25519Verifier
 import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory
+import com.nimbusds.jose.jca.JCAContext
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyConverter
 import com.nimbusds.jose.jwk.OctetKeyPair
@@ -21,6 +24,9 @@ internal class JwsToken constructor(
 
     val keyId: String?
         get() = jwsObject.header.keyID
+
+    val header: JWSHeader
+        get() = jwsObject.header
 
     companion object {
         fun deserialize(jws: String): JwsToken {
@@ -43,11 +49,14 @@ internal class JwsToken constructor(
             jwsObject = JWSObject(headers, jwsObject.payload)
         }
         val signer = DefaultJWSSignerFactory().createJWSSigner(privateKey, jwsObject.header.algorithm)
+        SdkLog.i("signer is ${signer.javaClass.simpleName}")
         jwsObject.sign(signer)
     }
 
-    fun sign(identifier: HolderIdentifier): String {
-        return identifier.sign(jwsObject.payload.toString())
+    fun sign(holderIdentifier: HolderIdentifier): String {
+        val signer = ECDSASignerWrapper(holderIdentifier)
+        jwsObject.sign(signer)
+        return jwsObject.serialize()
     }
 
     fun verify(publicKeyJWKs: List<JWK> = emptyList()): Boolean {
@@ -84,5 +93,19 @@ internal class JwsToken constructor(
      */
     fun content(): String {
         return jwsObject.payload.toString()
+    }
+}
+
+class ECDSASignerWrapper(private val holderIdentifier: HolderIdentifier): JWSSigner {
+    override fun getJCAContext(): JCAContext {
+        return JCAContext()
+    }
+
+    override fun supportedJWSAlgorithms(): MutableSet<JWSAlgorithm> {
+        return mutableSetOf(JWSAlgorithm(holderIdentifier.algorithm))
+    }
+
+    override fun sign(header: JWSHeader?, signingInput: ByteArray?): Base64URL {
+        return holderIdentifier.sign(header, signingInput)
     }
 }

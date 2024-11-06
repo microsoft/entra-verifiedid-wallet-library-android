@@ -8,7 +8,9 @@ package com.microsoft.walletlibrary
 import com.microsoft.walletlibrary.ExtensionIdentifierManager.Constants.SELF_ISSUED_ISSUER_NAME
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
+import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.JwsHeaderFormatter
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.createIssuedAndExpiryTime
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
@@ -47,7 +49,9 @@ class ExtensionIdentifierManager internal constructor(private val libraryConfigu
                 expiryTime
             )
             val jsonContent = serializer.encodeToString(VerifiableCredentialContent.serializer(), content)
-            val vcToken = identifier.sign(jsonContent)
+            val jwsHeader = JwsHeaderFormatter.formatHeader(identifier)
+            val jwsToken = JwsToken(jsonContent, jwsHeader)
+            val vcToken = jwsToken.sign(identifier)
             return OpenId4VciVerifiedId(
                 com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential(
                     jti,

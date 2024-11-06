@@ -16,6 +16,8 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.Issuan
 import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.DigestAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import kotlinx.serialization.json.Json
 import java.util.UUID
@@ -72,7 +74,9 @@ internal class IssuanceResponseFormatter @Inject constructor(
 
     private fun signContents(contents: IssuanceResponseClaims, responder: HolderIdentifier): String {
         val serializedResponseContent = serializer.encodeToString(IssuanceResponseClaims.serializer(), contents)
-        return responder.sign(serializedResponseContent)
+        val jwsHeader = JwsHeaderFormatter.formatHeader(responder)
+        val jwsToken = JwsToken(serializedResponseContent, jwsHeader)
+        return jwsToken.sign(responder)
     }
 
     private fun createAttestationClaimModel(

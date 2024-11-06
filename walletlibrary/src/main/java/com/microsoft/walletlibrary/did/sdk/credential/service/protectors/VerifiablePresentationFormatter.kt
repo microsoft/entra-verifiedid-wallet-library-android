@@ -3,6 +3,7 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationDescriptor
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import kotlinx.serialization.json.Json
@@ -42,7 +43,9 @@ internal class VerifiablePresentationFormatter @Inject constructor(
                 audience = audience
             )
         val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
-        return responder.sign(serializedContents)
+        val jwsHeader = JwsHeaderFormatter.formatHeader(responder)
+        val jwsToken = JwsToken(serializedContents, jwsHeader)
+        return jwsToken.sign(responder)
     }
 
     // supports multiple VCs per VP
@@ -76,6 +79,8 @@ internal class VerifiablePresentationFormatter @Inject constructor(
                 nonce = nonce
             )
         val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
-        return responder.sign(serializedContents)
+        val jwsHeader = JwsHeaderFormatter.formatHeader(responder)
+        val jwsToken = JwsToken(serializedContents, jwsHeader)
+        return jwsToken.sign(responder)
     }
 }

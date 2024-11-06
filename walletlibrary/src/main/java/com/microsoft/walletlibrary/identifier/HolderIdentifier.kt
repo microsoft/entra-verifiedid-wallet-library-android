@@ -5,6 +5,10 @@
 
 package com.microsoft.walletlibrary.identifier
 
+import com.nimbusds.jose.JWSHeader
+import com.nimbusds.jose.JWSSigner
+import com.nimbusds.jose.util.Base64URL
+
 /**
  * Data model for an identifier that describes the holder of a Verified ID.
  */
@@ -25,5 +29,5 @@ interface HolderIdentifier {
      * @param data The data to sign.
      * @return The signed data.
      */
-    fun sign(data: String): String
+    fun sign(jwsHeader: JWSHeader?, data: ByteArray?): Base64URL
 }
