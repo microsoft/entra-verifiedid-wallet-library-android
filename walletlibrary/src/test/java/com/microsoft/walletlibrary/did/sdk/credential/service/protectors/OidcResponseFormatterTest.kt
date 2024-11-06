@@ -87,7 +87,7 @@ class OidcResponseFormatterTest {
         setUpGetPublicKey()
         setUpExpectedPresentations()
         every { mockedKeyStore.getKey(signingKeyRef) } returns expectedJsonWebKey
-        every { mockedIdentifier.sign(capture(slot)) } answers { slot.captured }
+        every { mockedIdentifier.sign(capture(slot).toByteArray()) } answers { slot.captured.toByteArray() }
         every {
             mockedVerifiablePresentationFormatter.createPresentation(
                 mockedVc,
