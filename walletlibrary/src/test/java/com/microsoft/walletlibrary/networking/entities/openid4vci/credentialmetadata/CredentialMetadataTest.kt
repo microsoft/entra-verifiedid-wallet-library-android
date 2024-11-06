@@ -5,7 +5,7 @@ import android.content.res.Resources
 import androidx.core.os.ConfigurationCompat
 import androidx.core.os.LocaleListCompat
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
-import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOfferGrants
+import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOfferGrant
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
@@ -23,8 +23,8 @@ class CredentialMetadataTest {
     private val credentialConfigurationId2 = "credential_id2"
     private val authorizationServer1 = "https://authorization_server1.com/qwerty/v2.0"
     private val credentialMetadata = CredentialMetadata(
-        authorization_servers = listOf(authorizationServer1),
-        credential_configurations_supported = mapOf(
+        authorizationServers = listOf(authorizationServer1),
+        credentialConfigurationsSupported = mapOf(
             credentialConfigurationId1 to mockCredentialConfiguration1,
             credentialConfigurationId2 to mockCredentialConfiguration2
         )
@@ -34,7 +34,7 @@ class CredentialMetadataTest {
         issuer_session = "request_state",
         credential_configuration_ids = listOf(credentialConfigurationId1),
         grants = mapOf(
-            "authorization_code" to CredentialOfferGrants(
+            "authorization_code" to CredentialOfferGrant(
                 authorizationServer1
             )
         )
@@ -86,8 +86,8 @@ class CredentialMetadataTest {
     fun validateAuthorizationServers_AuthorizationServerInConfigAndMetadata_ValidationPasses() {
         // Arrange
         val credentialMetadata = CredentialMetadata(
-            authorization_servers = listOf("http://authorization_server1.com/qwerty/oauth2/v2.0/token"),
-            credential_configurations_supported = mapOf(
+            authorizationServers = listOf("http://authorization_server1.com/qwerty/oauth2/v2.0/token"),
+            credentialConfigurationsSupported = mapOf(
                 credentialConfigurationId1 to mockCredentialConfiguration1,
                 credentialConfigurationId2 to mockCredentialConfiguration2
             )
@@ -97,7 +97,7 @@ class CredentialMetadataTest {
             issuer_session = "request_state",
             credential_configuration_ids = listOf(credentialConfigurationId1),
             grants = mapOf(
-                "authorization_code" to CredentialOfferGrants(
+                "authorization_code" to CredentialOfferGrant(
                     authorizationServer1
                 )
             )
@@ -111,8 +111,8 @@ class CredentialMetadataTest {
     fun validateAuthorizationServers_AuthorizationServerInConfigNotInMetadata_ThrowsException() {
         // Arrange
         val credentialMetadata = CredentialMetadata(
-            authorization_servers = listOf("http://authorization_server1.com/abcdefg/oauth2/v2.0/token"),
-            credential_configurations_supported = mapOf(
+            authorizationServers = listOf("http://authorization_server1.com/abcdefg/oauth2/v2.0/token"),
+            credentialConfigurationsSupported = mapOf(
                 credentialConfigurationId1 to mockCredentialConfiguration1,
                 credentialConfigurationId2 to mockCredentialConfiguration2
             )
@@ -176,7 +176,7 @@ class CredentialMetadataTest {
     @Test
     fun verifyIfSignedMetadataExist_NoSignedMetadata_ThrowsException() {
         // Arrange
-        val credentialMetadata = CredentialMetadata(credential_issuer = "credential_issuer")
+        val credentialMetadata = CredentialMetadata(credentialIssuer = "credential_issuer")
 
         // Act
         val actualResult = runCatching {
@@ -206,8 +206,8 @@ class CredentialMetadataTest {
             "en"
         )
         val credentialMetadata = CredentialMetadata(
-            authorization_servers = listOf(authorizationServer1),
-            credential_configurations_supported = mapOf(
+            authorizationServers = listOf(authorizationServer1),
+            credentialConfigurationsSupported = mapOf(
                 credentialConfigurationId1 to mockCredentialConfiguration1,
                 credentialConfigurationId2 to mockCredentialConfiguration2
             ),
@@ -239,8 +239,8 @@ class CredentialMetadataTest {
             "en"
         )
         val credentialMetadata = CredentialMetadata(
-            authorization_servers = listOf(authorizationServer1),
-            credential_configurations_supported = mapOf(
+            authorizationServers = listOf(authorizationServer1),
+            credentialConfigurationsSupported = mapOf(
                 credentialConfigurationId1 to mockCredentialConfiguration1,
                 credentialConfigurationId2 to mockCredentialConfiguration2
             ),
@@ -272,8 +272,8 @@ class CredentialMetadataTest {
             "en"
         )
         val credentialMetadata = CredentialMetadata(
-            authorization_servers = listOf(authorizationServer1),
-            credential_configurations_supported = mapOf(
+            authorizationServers = listOf(authorizationServer1),
+            credentialConfigurationsSupported = mapOf(
                 credentialConfigurationId1 to mockCredentialConfiguration1,
                 credentialConfigurationId2 to mockCredentialConfiguration2
             ),
@@ -302,8 +302,8 @@ class CredentialMetadataTest {
             "fr"
         )
         val credentialMetadata = CredentialMetadata(
-            authorization_servers = listOf(authorizationServer1),
-            credential_configurations_supported = mapOf(
+            authorizationServers = listOf(authorizationServer1),
+            credentialConfigurationsSupported = mapOf(
                 credentialConfigurationId1 to mockCredentialConfiguration1,
                 credentialConfigurationId2 to mockCredentialConfiguration2
             ),
@@ -332,8 +332,8 @@ class CredentialMetadataTest {
             "fr"
         )
         val credentialMetadata = CredentialMetadata(
-            authorization_servers = listOf(authorizationServer1),
-            credential_configurations_supported = mapOf(
+            authorizationServers = listOf(authorizationServer1),
+            credentialConfigurationsSupported = mapOf(
                 credentialConfigurationId1 to mockCredentialConfiguration1,
                 credentialConfigurationId2 to mockCredentialConfiguration2
             ),
@@ -358,8 +358,8 @@ class CredentialMetadataTest {
         }
         every { mockLocaleListCompat.size() } returns 1
         val credentialMetadata = CredentialMetadata(
-            authorization_servers = listOf(authorizationServer1),
-            credential_configurations_supported = mapOf(
+            authorizationServers = listOf(authorizationServer1),
+            credentialConfigurationsSupported = mapOf(
                 credentialConfigurationId1 to mockCredentialConfiguration1,
                 credentialConfigurationId2 to mockCredentialConfiguration2
             )

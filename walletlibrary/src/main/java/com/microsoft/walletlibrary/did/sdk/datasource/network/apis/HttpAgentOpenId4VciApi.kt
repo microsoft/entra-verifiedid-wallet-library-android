@@ -19,13 +19,11 @@ internal class HttpAgentOpenId4VciApi(
 ) {
 
     suspend fun getOpenID4VCIRequest(overrideUrl: String, preferHeaders: List<String>): Result<IResponse> {
-        val headers = mutableListOf(OPENID4VCI_INTER_OP_PROFILE)
-        headers.addAll(preferHeaders)
         return agent.get(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(
                 mapOf(
-                    Constants.PREFER to httpAgentUtils.formatPreferValues(headers)
+                    Constants.PREFER to httpAgentUtils.formatPreferValues(preferHeaders)
                 ),
                 httpAgentUtils.defaultHeaders()
             )
@@ -68,15 +66,14 @@ internal class HttpAgentOpenId4VciApi(
         overrideUrl: String,
         grantType: String,
         preAuthorizedCode: String,
-        txCode: String
+        txCode: String?
     ): Result<IResponse> {
-        val body = URLFormEncoding.encode(
-            mapOf<String, Any?>(
-                "grant_type" to grantType,
-                "pre-authorized_code" to preAuthorizedCode,
-                "tx_code" to txCode
-            )
+        val bodyToBeEncoded = mutableMapOf<String, Any?>(
+            "grant_type" to grantType,
+            "pre-authorized_code" to preAuthorizedCode,
         )
+        txCode?.let { bodyToBeEncoded["tx_code"] = it }
+        val body = URLFormEncoding.encode(bodyToBeEncoded)
         return agent.post(
             overrideUrl,
             combineAdditionalHeadersWithDefaultHeaders(

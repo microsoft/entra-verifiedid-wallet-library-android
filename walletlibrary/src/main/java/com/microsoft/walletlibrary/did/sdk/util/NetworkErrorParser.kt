@@ -1,3 +1,4 @@
+/*
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 package com.microsoft.walletlibrary.did.sdk.util
@@ -10,7 +11,8 @@ import kotlinx.serialization.json.JsonPrimitive
 
 internal object NetworkErrorParser {
 
-    /**
+    */
+/**
      * Attempts to parse a json errorBody and extracts and concatenates all error codes.
      *
      * @param errorBody A json object. The topmost error under the propertyname "error".
@@ -18,7 +20,8 @@ internal object NetworkErrorParser {
      *          a "code" property for parsing to continue.
      * @return all concatenated error codes delimited by "," null if errorBody is null,
      *          or empty if not a valid json
-     */
+     *//*
+
     fun extractInnerErrorsCodes(errorBody: String?): String? {
         if (errorBody == null) return null
         val errorCodes = ArrayList<String>()
@@ -32,12 +35,13 @@ internal object NetworkErrorParser {
                 code = (error?.get("code") as? JsonPrimitive)?.content
             }
         } catch (ex: Exception) {
-            SdkLog.i("Parsing error response canceled. Json: $errorBody", ex)
+            SdkLog.i("Parsing error response canceled.", ex)
         }
         return errorCodes.joinToString(",")
     }
 
-    /**
+    */
+/**
      * Attempts to parse a json errorBody and extracts and concatenates all error messages.
      *
      * @param errorBody A json object. The topmost error under the propertyname "error".
@@ -45,7 +49,8 @@ internal object NetworkErrorParser {
      *          a "message" property for parsing to continue.
      * @return top level of error message. null if errorBody is null
      *          or not a valid json
-     */
+     *//*
+
     fun extractErrorMessage(errorBody: String?): String? {
         if (errorBody == null) return null
         val errorMessages = ArrayList<String>()
@@ -59,8 +64,8 @@ internal object NetworkErrorParser {
                 msg = (error?.get("message") as? JsonPrimitive)?.content
             }
         } catch (ex: Exception) {
-            SdkLog.i("Parsing error response canceled. Json: $errorBody", ex)
+            SdkLog.i("Parsing error response canceled.", ex)
         }
         return errorMessages.joinToString("; ")
     }
-}
+}*/

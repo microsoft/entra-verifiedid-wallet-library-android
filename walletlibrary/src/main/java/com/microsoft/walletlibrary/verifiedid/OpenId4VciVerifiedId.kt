@@ -33,7 +33,6 @@ internal class OpenId4VciVerifiedId(
     override val expiresOn = raw.contents.exp?.let { Date(it * 1000L) }
 
     override val style = credentialConfiguration.getVerifiedIdStyleInPreferredLocale(issuerName)
-
     override fun getClaims(): ArrayList<VerifiedIdClaim> {
         val claimValues = raw.contents.vc.credentialSubject
 
@@ -46,7 +45,7 @@ internal class OpenId4VciVerifiedId(
     }
 
     private fun createVerifiedIdClaim(claimReference: String, claimValue: Any): VerifiedIdClaim {
-        val claimDefinitions = credentialConfiguration.credential_definition?.credentialSubject
+        val claimDefinitions = credentialConfiguration.credentialDefinition?.credentialSubject
         val claimDisplayDefinition = claimDefinitions?.get("vc.credentialSubject.$claimReference")
             ?: return VerifiedIdClaim(claimReference, claimValue, null, null)
         val localizedDisplayDefinition =
@@ -56,9 +55,9 @@ internal class OpenId4VciVerifiedId(
                 claimReference,
                 claimValue,
                 localizedDisplayDefinition.name,
-                claimDisplayDefinition.value_type
+                claimDisplayDefinition.valueType
             )
         else
-            VerifiedIdClaim(claimReference, claimValue, null, claimDisplayDefinition.value_type)
+            VerifiedIdClaim(claimReference, claimValue, null, claimDisplayDefinition.valueType)
     }
 }

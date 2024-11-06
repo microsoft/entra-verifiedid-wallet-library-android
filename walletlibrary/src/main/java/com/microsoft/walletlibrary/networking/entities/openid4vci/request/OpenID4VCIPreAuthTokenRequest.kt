@@ -11,5 +11,5 @@ internal data class OpenID4VCIPreAuthTokenRequest(
     val pre_authorized_code: String,
 
     // Pin provided by the user.
-    val tx_code: String
+    val tx_code: String? = null
 )

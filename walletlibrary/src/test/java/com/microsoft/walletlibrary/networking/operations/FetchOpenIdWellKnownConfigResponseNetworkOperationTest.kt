@@ -3,6 +3,7 @@ package com.microsoft.walletlibrary.networking.operations
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ClientException
+import com.microsoft.walletlibrary.util.NetworkingException
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import io.mockk.coEvery
@@ -59,14 +60,12 @@ class FetchOpenIdWellKnownConfigResponseNetworkOperationTest {
         val apiProvider: HttpAgentApiProvider = mockk {
             every { openId4VciApi } returns mockk {
                 coEvery { getOpenIdWellKnownConfig(any()) } returns Result.failure(
-                    IHttpAgent.ClientException(
                         IResponse(
                             status = 400,
                             headers = emptyMap(),
                             body = "Bad request".toByteArray(Charsets.UTF_8)
-                        )
+                        ).toNetworkingException()
                     )
-                )
             }
         }
         val operation = FetchOpenIdWellKnownConfigNetworkOperation("", apiProvider, defaultTestSerializer)
@@ -78,8 +77,8 @@ class FetchOpenIdWellKnownConfigResponseNetworkOperationTest {
             // Assert
             assertThat(actual.isFailure).isTrue
             val unwrapped = actual.exceptionOrNull()
-            assertThat(unwrapped).isInstanceOf(ClientException::class.java)
-            assertThat((unwrapped as ClientException).errorCode?.toInt()).isEqualTo(400)
+            assertThat(unwrapped).isInstanceOf(NetworkingException::class.java)
+            assertThat((unwrapped as NetworkingException).statusCode).isEqualTo("400")
         }
     }
 }
