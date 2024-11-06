@@ -11,10 +11,9 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtVali
 import com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.DidMetadata
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.MockRootOfTrustResolverVerified
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.MockRootOfTrustResolverFailure
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
-import com.microsoft.walletlibrary.requests.RootOfTrust
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -160,11 +159,11 @@ class LinkedDomainsServiceTest {
     @Test
     fun `test using injected root of trust resolver and verifying successfully`() {
         // Arrange
-        val mockRootOfTrustResolver = spyk(MockRootOfTrustResolver())
+        val mockRootOfTrustResolverVerified = spyk(MockRootOfTrustResolverVerified())
         val suppliedDidWithSingleServiceEndpoint =
             "did:ion:EiA8HR28m5KUig9elPRXkmKvvBGXcOoxpUrCscTdGJcIXQ?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlDVDV5MG5nNTJCNzVjYWFqWU9qVjBRMmpxSng0NDZSajhRTjFpaHdteUpJZyIsInJlY292ZXJ5X2NvbW1pdG1lbnQiOiJFaURsOER4eXZLa3lvRmJsUWp0OXllU2J3TXkwR083MFM1R2FUU1F0UlF0aFJRIn0.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpRGFXS2sycjJiSWJsRWFpRUhtRU5Kc2h6czhtY1hJd2hTV0Z1YmtWQlJ3WWciLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljX2tleXMiOlt7ImlkIjoic2lnX2VkMmM1ZWRmIiwidHlwZSI6IkVjZHNhU2VjcDI1NmsxVmVyaWZpY2F0aW9uS2V5MjAxOSIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJoTzhYaXhtWUxNOVVVMmFWOW9kc2VsSDNobDJtbVFPLS1GTzNKa2JrekVrIiwieSI6InBDWEpxbXpUbzVQQkdRTERibnRtdUFaSElZQnFZOG1DZVdkaWhpb0tGUmMifSwicHVycG9zZSI6WyJhdXRoIiwiZ2VuZXJhbCJdfV19fV19"
         val linkedDomainsService: LinkedDomainsService =
-            spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, mockRootOfTrustResolver))
+            spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, mockRootOfTrustResolverVerified))
         val didMetadata = DidMetadata()
         didMetadata.id = suppliedDidWithSingleServiceEndpoint
         val rpDidDoc =
@@ -183,7 +182,7 @@ class LinkedDomainsServiceTest {
             assertThat((actualLinkedDomainsResultResponse.getOrNull() as? LinkedDomainVerified)?.domainUrl).isEqualTo("discover.did.microsoft.com")
         }
 
-        coVerify(exactly = 1) { mockRootOfTrustResolver.resolve(any()) }
+        coVerify(exactly = 1) { mockRootOfTrustResolverVerified.resolve(any()) }
     }
 
     @Test
@@ -218,21 +217,5 @@ class LinkedDomainsServiceTest {
         }
 
         coVerify(exactly = 1) { mockRootOfTrustResolverFailure.resolve(any()) }
-    }
-}
-
-
-class MockRootOfTrustResolver : RootOfTrustResolver {
-    override suspend fun resolve(didMetadata: DidMetadata): RootOfTrust {
-        return RootOfTrust(
-            "discover.did.microsoft.com",
-            true
-        )
-    }
-}
-
-class MockRootOfTrustResolverFailure : RootOfTrustResolver {
-    override suspend fun resolve(didMetadata: DidMetadata): RootOfTrust {
-        throw SdkException("Root of trust resolver is not configured")
     }
 }

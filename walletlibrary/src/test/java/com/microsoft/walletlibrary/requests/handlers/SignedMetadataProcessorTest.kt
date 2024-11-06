@@ -4,6 +4,8 @@ import com.microsoft.walletlibrary.did.sdk.LinkedDomainsService
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.MockRootOfTrustResolverUnVerified
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.MockRootOfTrustResolverVerified
 import com.microsoft.walletlibrary.mappings.getJwk
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.SignedMetadataTokenClaims
 import com.microsoft.walletlibrary.requests.RootOfTrust
@@ -35,6 +37,8 @@ class SignedMetadataProcessorTest {
     private val mockJwsToken: JwsToken = mockk()
     private val mockJwk = mockk<JWK>()
     private val mockLinedDomainsService: LinkedDomainsService = mockk()
+    private val mockRootOfTrustResolverVerified = MockRootOfTrustResolverVerified()
+    private val mockRootOfTrustResolverUnVerified = MockRootOfTrustResolverUnVerified()
 
     init {
         mockkStatic(VerifiableCredentialSdk::class)
@@ -42,7 +46,6 @@ class SignedMetadataProcessorTest {
         mockkStatic(LinkedDomainsResolver::class)
         mockkStatic("com.microsoft.walletlibrary.mappings.IdentifierDocumentMappingKt")
         mockkStatic("com.microsoft.walletlibrary.mappings.LinkedDomainMappingKt")
-        mockkStatic("com.microsoft.walletlibrary.mappings.LinkedDomainsServiceExtensionKt")
         every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinedDomainsService
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         every { signedMetadataProcessor["deserializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
@@ -237,13 +240,14 @@ class SignedMetadataProcessorTest {
     @Test
     fun process_LinkedDomainsNotVerifiedByResolver_ReturnsUnverifiedRootOfTrust() {
         // Arrange
+        every { mockLibraryConfiguration.rootOfTrustResolver } returns mockRootOfTrustResolverUnVerified
         mockIdentifierDocument()
         val signedMetadataTokenClaimsString =
             """{"sub":"testCredentialIssuer","iss": "did:web:test","iat": 1707859806}""".trimIndent()
         mockJwsToken("did:web:test#signingKey-1", signedMetadataTokenClaimsString)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
         coEvery { LinkedDomainsResolver.resolve(mockIdentifierDocument) } returns RootOfTrust(
-            "unverifiedDomain",
+            "discover.did.microsoft.com",
             false
         )
 
@@ -254,7 +258,7 @@ class SignedMetadataProcessorTest {
 
             // Assert
             assertThat(actualResult).isInstanceOf(RootOfTrust::class.java)
-            assertThat(actualResult.source).isEqualTo("unverifiedDomain")
+            assertThat(actualResult.source).isEqualTo("discover.did.microsoft.com")
             assertThat(actualResult.verified).isFalse
         }
     }
@@ -262,13 +266,14 @@ class SignedMetadataProcessorTest {
     @Test
     fun process_LinkedDomainsVerifiedByResolver_ReturnsVerifiedRootOfTrust() {
         // Arrange
+        every { mockLibraryConfiguration.rootOfTrustResolver } returns mockRootOfTrustResolverVerified
         mockIdentifierDocument()
         val signedMetadataTokenClaimsString =
             """{"sub":"testCredentialIssuer","iss": "did:web:test","iat": 1707859806}""".trimIndent()
         mockJwsToken("did:web:test#signingKey-1", signedMetadataTokenClaimsString)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
         coEvery { LinkedDomainsResolver.resolve(mockIdentifierDocument) } returns RootOfTrust(
-            "verifiedDomain",
+            "discover.did.microsoft.com",
             true
         )
 
@@ -279,7 +284,7 @@ class SignedMetadataProcessorTest {
 
             // Assert
             assertThat(actualResult).isInstanceOf(RootOfTrust::class.java)
-            assertThat(actualResult.source).isEqualTo("verifiedDomain")
+            assertThat(actualResult.source).isEqualTo("discover.did.microsoft.com")
             assertThat(actualResult.verified).isTrue
         }
     }

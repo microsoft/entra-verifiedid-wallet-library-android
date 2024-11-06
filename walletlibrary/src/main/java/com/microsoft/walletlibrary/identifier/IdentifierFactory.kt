@@ -3,16 +3,25 @@
 package com.microsoft.walletlibrary.identifier
 
 import com.microsoft.walletlibrary.requests.requirements.CryptoRequirement
+import com.microsoft.walletlibrary.util.IdentifierException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
 /**
  * IdentifierFactory holds a list of identifiers and returns a identifier based on the cryptographic requirement.
  */
 internal class IdentifierFactory {
     // List of available identifiers, arranged with FIPS compliant identifiers first.
-    internal val identifiers = mutableListOf<HolderIdentifier>()
+    internal val identifiers = ArrayList<HolderIdentifier>()
 
     // Returns the first identifier in the list that satisfies the provided cryptographic requirement.
-    internal fun getIdentifier(cryptoRequirement: CryptoRequirement) : HolderIdentifier? {
-        return identifiers.firstOrNull { cryptoRequirement.isSupported(it) }
+    internal fun getIdentifier(cryptoRequirement: CryptoRequirement? = null): HolderIdentifier {
+        if (identifiers.isEmpty()) throw IdentifierException(
+            "No identifiers available.",
+            VerifiedIdExceptions.HOLDER_IDENTIFIER_MISSING_EXCEPTION.value
+        )
+        val firstIdentifier = identifiers.first()
+        cryptoRequirement?.let {
+            return identifiers.first { cryptoRequirement.isSupported(it) }
+        } ?: return firstIdentifier
     }
 }

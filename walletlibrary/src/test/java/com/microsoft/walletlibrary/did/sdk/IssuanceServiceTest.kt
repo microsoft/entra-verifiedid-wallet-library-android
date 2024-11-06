@@ -27,6 +27,8 @@ import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import kotlin.Result as KotlinResult
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
+import com.microsoft.walletlibrary.util.LibraryConfiguration
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -40,11 +42,12 @@ import org.junit.Test
 class IssuanceServiceTest {
 
     private val identifierService: IdentifierService = mockk()
-    private val masterIdentifier: Identifier = mockk()
+    private val masterIdentifier: HolderIdentifier = mockk()
 
     private val mockedResolver: Resolver = mockk()
     private val mockedJwtValidator: JwtValidator = mockk()
     private val issuanceResponseFormatter: IssuanceResponseFormatter = mockk()
+    private val mockLibraryConfiguration : LibraryConfiguration = mockk()
     private val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
     private val linkedDomainsService =
         spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
@@ -93,7 +96,7 @@ class IssuanceServiceTest {
     private val mockedIdentifierDocumentServiceType = "LinkedDomains"
 
     init {
-        coEvery { identifierService.getMasterIdentifier() } returns Result.Success(masterIdentifier)
+        coEvery { mockLibraryConfiguration.identifierFactory.getIdentifier() } returns masterIdentifier
         mockkConstructor(FetchContractNetworkOperation::class)
         expectedContract = setUpTestContract(expectedContractString)
         mockkConstructor(SendVerifiableCredentialIssuanceRequestNetworkOperation::class)
@@ -170,13 +173,12 @@ class IssuanceServiceTest {
                 masterIdentifier,
                 DEFAULT_EXPIRATION_IN_SECONDS)
         } returns formattedResponse
-        coEvery { identifierService.getIdentifierById(expectedVerifiableCredential.contents.sub) } returns Result.Success(masterIdentifier)
         every { mockedPresentationAttestation.credentialType } returns "TestCredentialType"
         every { mockedPresentationAttestation.validityInterval } returns 1000
         coEvery { issuanceService["sendResponse"](formattedResponse, issuanceResponse.audience) } returns Result.Success(expectedVerifiableCredential)
 
         runBlocking {
-            val createdVerifiableCredential = issuanceService.sendResponse(issuanceResponse)
+            val createdVerifiableCredential = issuanceService.sendResponse(issuanceResponse, mockLibraryConfiguration)
             assertThat(createdVerifiableCredential).isInstanceOf(Result.Success::class.java)
             assertThat((createdVerifiableCredential as Result.Success).payload.jti).isEqualTo(suppliedVcJti)
             assertThat(createdVerifiableCredential.payload.raw).isEqualTo(suppliedVcRaw)

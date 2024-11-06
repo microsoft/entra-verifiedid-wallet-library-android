@@ -5,9 +5,7 @@
 
 package com.microsoft.walletlibrary.did.sdk.crypto
 
-import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.Constants.SEED_BYTES
-import com.nimbusds.jose.jwk.JWK
 import java.security.Key
 import java.security.KeyFactory
 import java.security.KeyPair
@@ -23,12 +21,6 @@ import javax.crypto.Mac
 import javax.crypto.SecretKey
 
 internal object CryptoOperations {
-
-    fun sign(digest: String, signingKey: JWK, alg: String, keyId: String): String {
-        val token = JwsToken(digest, alg, keyId)
-        token.sign(signingKey)
-        return token.serialize()
-    }
 
     fun verify(digest: ByteArray, signature: ByteArray, publicKey: PublicKey, alg: SigningAlgorithm): Boolean {
         val verifier = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)

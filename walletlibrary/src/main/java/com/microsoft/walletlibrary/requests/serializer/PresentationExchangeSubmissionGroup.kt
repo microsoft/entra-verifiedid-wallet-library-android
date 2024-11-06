@@ -3,10 +3,12 @@ package com.microsoft.walletlibrary.requests.serializer
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationDescriptor
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
+import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.JwsHeaderFormatter
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.createIssuedAndExpiryTime
-import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeRequirement
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeVerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
@@ -15,7 +17,7 @@ import kotlinx.serialization.json.Json
 import java.util.UUID
 
 internal class PresentationExchangeSubmissionGroup (
-    private val subject: Identifier
+    private val subject: HolderIdentifier
 ) {
     private var requirementAndCredential: MutableList<Pair<PresentationExchangeRequirement, String>> = mutableListOf()
     private var excludeInputDescriptors: MutableSet<String> = mutableSetOf()
@@ -51,8 +53,7 @@ internal class PresentationExchangeSubmissionGroup (
         }
     }
 
-    fun getVerifiablePresentation(signer: TokenSigner,
-                                  serializer: Json,
+    fun getVerifiablePresentation(serializer: Json,
                                   validityInterval: Int,
                                   audience: String,
                                   nonce: String): String {
@@ -77,7 +78,9 @@ internal class PresentationExchangeSubmissionGroup (
                 nonce = nonce
             )
         val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
-        return signer.signWithIdentifier(serializedContents, subject)
+        val jwsHeader = JwsHeaderFormatter.formatHeader(subject)
+        val jwsToken = JwsToken(serializedContents, jwsHeader)
+        return jwsToken.sign(subject)
     }
 
     fun getPresentationSubmissionMap(presentationIndex: Int): List<PresentationSubmissionDescriptor> {

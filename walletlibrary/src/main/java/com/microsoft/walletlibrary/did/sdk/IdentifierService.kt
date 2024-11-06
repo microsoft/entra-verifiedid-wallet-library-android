@@ -5,7 +5,6 @@
 
 package com.microsoft.walletlibrary.did.sdk
 
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
 import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
@@ -39,8 +38,8 @@ internal class IdentifierService @Inject constructor(
         }
     }
 
-    internal fun getTokenSigner(): TokenSigner {
-        return TokenSigner(keyStore)
+    internal fun getKeyStore(): EncryptedKeyStore {
+        return keyStore
     }
 
     private suspend fun createMasterIdentifier(): Result<Identifier> {

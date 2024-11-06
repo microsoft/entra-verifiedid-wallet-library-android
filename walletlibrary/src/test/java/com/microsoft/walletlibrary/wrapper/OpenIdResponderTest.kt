@@ -16,6 +16,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
+import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
@@ -41,6 +42,7 @@ class OpenIdResponderTest {
     private val vcFromSdk: com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential = mockk()
     private val mockDisplayContract: DisplayContract = mockk()
     private val mockCardDescriptor: CardDescriptor = mockk()
+    private val mockLibraryConfiguration: LibraryConfiguration = mockk()
     private val expectedCardTitle = "Test VC"
     private val expectedCardIssuer = "Test Issuer"
     private val expectedCardBackgroundColor = "#000000"
@@ -99,13 +101,13 @@ class OpenIdResponderTest {
         every { vcContractFromSdk.display } returns mockDisplayContract
         setupDisplayContract()
         coEvery {
-            mockPresentationService.sendResponse(any(), any(), any())
+            mockPresentationService.sendResponse(any(), any(), any(), any())
         } returns Result.Success(Unit)
         (requirement as VerifiedIdRequirement).fulfill(verifiedId)
 
         runBlocking {
             // Act
-            val actualResult = OpenIdResponder.sendPresentationResponse(mockPresentationRequest, requirement, emptyMap())
+            val actualResult = OpenIdResponder.sendPresentationResponse(mockPresentationRequest, requirement, emptyMap(), mockLibraryConfiguration)
 
             // Assert
             assertThat(actualResult).isEqualTo(Unit)
@@ -118,14 +120,14 @@ class OpenIdResponderTest {
         every { vcContractFromSdk.display } returns mockDisplayContract
         setupDisplayContract()
         coEvery {
-            mockPresentationService.sendResponse(any(), any(), any())
+            mockPresentationService.sendResponse(any(), any(), any(), any())
         } returns Result.Failure(SdkException("Test failure"))
         (requirement as VerifiedIdRequirement).fulfill(verifiedId)
 
         // Act and Assert
         Assertions.assertThatThrownBy {
             runBlocking {
-                OpenIdResponder.sendPresentationResponse(mockPresentationRequest, requirement, emptyMap())
+                OpenIdResponder.sendPresentationResponse(mockPresentationRequest, requirement, emptyMap(), mockLibraryConfiguration)
             }
         }.isInstanceOf(OpenIdResponseCompletionException::class.java)
     }
@@ -136,13 +138,13 @@ class OpenIdResponderTest {
         every { vcContractFromSdk.display } returns mockDisplayContract
         setupDisplayContract()
         coEvery {
-            mockPresentationService.sendResponse(any(), any(), any())
+            mockPresentationService.sendResponse(any(), any(), any(), any())
         } returns Result.Failure(SdkException("Test failure"))
 
         // Act and Assert
         Assertions.assertThatThrownBy {
             runBlocking {
-                OpenIdResponder.sendPresentationResponse(mockPresentationRequest, requirement, emptyMap())
+                OpenIdResponder.sendPresentationResponse(mockPresentationRequest, requirement, emptyMap(), mockLibraryConfiguration)
             }
         }.isInstanceOf(RequirementNotMetException::class.java)
             .hasMessage("Verified ID has not been set.")

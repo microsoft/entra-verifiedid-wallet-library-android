@@ -3,13 +3,14 @@
 package com.microsoft.walletlibrary.identifier
 
 import androidx.test.platform.app.InstrumentationRegistry
+import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.JwsHeaderFormatter
 import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.toPrivateJwk
-import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.nimbusds.jose.JWSObject
+import com.nimbusds.jose.crypto.ECDSAVerifier
 import com.nimbusds.jose.jwk.KeyUse
+import com.nimbusds.jose.util.Base64URL
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -27,21 +28,22 @@ class EncryptedSharedPreferencesIdentifierTest {
             algorithm = "ES256K",
             method = "method",
             keyReference = "keyReferenceTest1",
-            cryptoOperations = CryptoOperations,
             keyStore = keyStore
         )
+        val jwsHeader = JwsHeaderFormatter.formatHeader(encryptedSharedPreferencesIdentifier)
+        encryptedSharedPreferencesIdentifier.jwsHeader = jwsHeader
         val testData = "{\"iss\":\"joe\",\n" +
             " \"exp\":1300819380,\n" +
             " \"http://example.com/is_root\":true}"
         val publicKey = keyStore.getKey("keyReferenceTest1").toPublicJWK()
 
         // Act
-        val signedData = encryptedSharedPreferencesIdentifier.sign(testData)
+        val signedData = encryptedSharedPreferencesIdentifier.sign(testData.toByteArray())
 
         // Assert
-        val jwsObject = JWSObject.parse(signedData)
-        val token = JwsToken(jwsObject)
+        val verifier = ECDSAVerifier(publicKey.toECKey())
+        val verificationStatus = verifier.verify(jwsHeader, testData.toByteArray(), Base64URL(signedData))
         assertThat(publicKey).isNotNull
-        assertThat(token.verify(listOf(publicKey))).isTrue
+        assertThat(verificationStatus).isTrue
     }
 }

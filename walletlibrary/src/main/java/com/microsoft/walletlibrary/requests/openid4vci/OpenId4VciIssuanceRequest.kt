@@ -96,8 +96,16 @@ internal class OpenId4VciIssuanceRequest(
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
             )
 
-        val rawRequest = requestFormatter.format(credentialOffer, credentialEndpoint, accessToken)
+        val rawRequest = formatIssuanceRequest(credentialOffer, credentialEndpoint, accessToken)
         return sendIssuanceRequest(credentialEndpoint, rawRequest, accessToken)
+    }
+
+    private fun formatIssuanceRequest(
+        credentialOffer: CredentialOffer,
+        credentialEndpoint: String,
+        accessToken: String
+    ): RawOpenID4VCIRequest {
+        return requestFormatter.format(credentialOffer, credentialEndpoint, accessToken)
     }
 
     private suspend fun sendIssuanceRequest(
