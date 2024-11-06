@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
+import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
@@ -106,6 +107,7 @@ class ECDSASignerWrapper(private val holderIdentifier: HolderIdentifier): JWSSig
     }
 
     override fun sign(header: JWSHeader?, signingInput: ByteArray?): Base64URL {
-        return holderIdentifier.sign(header, signingInput)
+        (holderIdentifier as EncryptedSharedPreferencesIdentifier).jwsHeader = header
+        return holderIdentifier.sign(signingInput)
     }
 }

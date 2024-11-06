@@ -29,5 +29,5 @@ interface HolderIdentifier {
      * @param data The data to sign.
      * @return The signed data.
      */
-    fun sign(jwsHeader: JWSHeader?, data: ByteArray?): Base64URL
+    fun sign(data: ByteArray?): Base64URL
 }
