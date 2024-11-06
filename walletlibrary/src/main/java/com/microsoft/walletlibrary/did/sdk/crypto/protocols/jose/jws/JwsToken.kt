@@ -2,17 +2,14 @@ package com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
-import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
-import com.nimbusds.jose.JWSSigner
 import com.nimbusds.jose.Payload
 import com.nimbusds.jose.crypto.Ed25519Verifier
 import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory
-import com.nimbusds.jose.jca.JCAContext
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyConverter
 import com.nimbusds.jose.jwk.OctetKeyPair
@@ -94,20 +91,5 @@ internal class JwsToken constructor(
      */
     fun content(): String {
         return jwsObject.payload.toString()
-    }
-}
-
-class ECDSASignerWrapper(private val holderIdentifier: HolderIdentifier): JWSSigner {
-    override fun getJCAContext(): JCAContext {
-        return JCAContext()
-    }
-
-    override fun supportedJWSAlgorithms(): MutableSet<JWSAlgorithm> {
-        return mutableSetOf(JWSAlgorithm(holderIdentifier.algorithm))
-    }
-
-    override fun sign(header: JWSHeader?, signingInput: ByteArray?): Base64URL {
-        (holderIdentifier as EncryptedSharedPreferencesIdentifier).jwsHeader = header
-        return holderIdentifier.sign(signingInput)
     }
 }

@@ -13,7 +13,6 @@ import com.nimbusds.jose.jwk.KeyUse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-
 class EncryptedSharedPreferencesIdentifierTest {
 
     private val keyStore = EncryptedKeyStore(InstrumentationRegistry.getInstrumentation().targetContext)
