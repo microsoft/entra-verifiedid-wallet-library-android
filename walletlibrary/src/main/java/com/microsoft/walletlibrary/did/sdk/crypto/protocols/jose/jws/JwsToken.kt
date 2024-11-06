@@ -1,7 +1,6 @@
 package com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.walletlibrary.did.sdk.util.Constants
-import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
@@ -47,7 +46,6 @@ internal class JwsToken constructor(
             jwsObject = JWSObject(headers, jwsObject.payload)
         }
         val signer = DefaultJWSSignerFactory().createJWSSigner(privateKey, jwsObject.header.algorithm)
-        SdkLog.i("signer is ${signer.javaClass.simpleName}")
         jwsObject.sign(signer)
     }
 

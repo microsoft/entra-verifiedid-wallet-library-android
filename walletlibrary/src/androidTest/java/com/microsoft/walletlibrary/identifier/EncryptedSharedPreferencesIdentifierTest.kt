@@ -31,7 +31,6 @@ class EncryptedSharedPreferencesIdentifierTest {
             keyStore = keyStore
         )
         val jwsHeader = JwsHeaderFormatter.formatHeader(encryptedSharedPreferencesIdentifier)
-        encryptedSharedPreferencesIdentifier.jwsHeader = jwsHeader
         val testData = "{\"iss\":\"joe\",\n" +
             " \"exp\":1300819380,\n" +
             " \"http://example.com/is_root\":true}"
@@ -42,7 +41,7 @@ class EncryptedSharedPreferencesIdentifierTest {
 
         // Assert
         val verifier = ECDSAVerifier(publicKey.toECKey())
-        val verificationStatus = verifier.verify(jwsHeader, testData.toByteArray(), Base64URL(signedData))
+        val verificationStatus = verifier.verify(jwsHeader, testData.toByteArray(), Base64URL.encode(signedData))
         assertThat(publicKey).isNotNull
         assertThat(verificationStatus).isTrue
     }

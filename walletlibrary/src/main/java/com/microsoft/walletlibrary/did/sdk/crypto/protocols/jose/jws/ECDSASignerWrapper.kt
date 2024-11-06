@@ -2,8 +2,9 @@
 
 package com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws
 
-import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
+import com.microsoft.walletlibrary.util.CryptoException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSSigner
@@ -20,7 +21,7 @@ internal class ECDSASignerWrapper(private val holderIdentifier: HolderIdentifier
     }
 
     override fun sign(header: JWSHeader?, signingInput: ByteArray?): Base64URL {
-        (holderIdentifier as EncryptedSharedPreferencesIdentifier).jwsHeader = header
-        return Base64URL(holderIdentifier.sign(signingInput))
+        return signingInput?.let { Base64URL.encode(holderIdentifier.sign(signingInput)) }
+            ?: throw CryptoException("Data to sign is null", VerifiedIdExceptions.CRYPTO_EXCEPTION.value)
     }
 }

@@ -18,9 +18,6 @@ import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.defaultTestSerializer
-import com.nimbusds.jose.JOSEObjectType
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.jwk.JWK
 import io.mockk.coEvery
 import io.mockk.every
@@ -72,7 +69,7 @@ class OpenId4VciIssuanceRequestFormatterTest {
             mockedHolderIdentifier.sign(
                 capture(slot).toByteArray()
             )
-        } answers { slot.captured }
+        } answers { slot.captured.toByteArray() }
         mockkStatic(VerifiableCredentialSdk::class)
         every { VerifiableCredentialSdk.identifierService } returns mockIdentifierService
         coEvery { mockIdentifierService.getMasterIdentifier() } returns Result.Success(
@@ -88,16 +85,11 @@ class OpenId4VciIssuanceRequestFormatterTest {
         every { mockedHolderIdentifier.keyReference } returns signingKeyRef
         every { mockedHolderIdentifier.algorithm } returns "ES256K"
         mockkStatic(JwsHeaderFormatter::class)
-        val jwsHeader = JWSHeader.Builder(JWSAlgorithm("ES256K"))
-            .type(JOSEObjectType("openid4vci-proof+jwt"))
-            .keyID("$expectedDid#$signingKeyRef")
-            .build()
         justRun {
             openId4VciIssuanceRequestFormatter["formatJwsHeaderForIdentifier"](
                 mockedHolderIdentifier
             )
         }
-        every { mockedHolderIdentifier.jwsHeader } returns jwsHeader
     }
 
     @Test

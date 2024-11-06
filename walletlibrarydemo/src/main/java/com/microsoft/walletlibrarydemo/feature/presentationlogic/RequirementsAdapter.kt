@@ -16,9 +16,11 @@ import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrarydemo.R
+import com.microsoft.walletlibrarydemo.databinding.RequirementExtensionRowBinding
 import com.microsoft.walletlibrarydemo.databinding.RequirementTextRowBinding
 import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedclaimRowBinding
 import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedidBinding
+import com.microsoft.walletlibrarydemo.extension.ExtensionRequirement
 import kotlinx.coroutines.runBlocking
 
 sealed class RequirementViewHolder(view: View): RecyclerView.ViewHolder(view)
@@ -27,6 +29,7 @@ class PinHolder(val binding: RequirementTextRowBinding): RequirementViewHolder(b
 class OpenId4VciPinHolder(val binding: RequirementTextRowBinding): RequirementViewHolder(binding.root)
 class VerifiedIdHolder(val binding: RequirementVerifiedidBinding): RequirementViewHolder(binding.root)
 class IdTokenHolder(val binding: RequirementVerifiedclaimRowBinding): RequirementViewHolder(binding.root)
+class ExtensionHolder(val binding: RequirementExtensionRowBinding): RequirementViewHolder(binding.root)
 
 class RequirementsAdapter(
     private val clickListener: ClickListener,
@@ -69,6 +72,14 @@ class RequirementsAdapter(
                         false
                     )
                 )
+            ExtensionRequirement::class.java.name.hashCode() ->
+                ExtensionHolder(
+                    RequirementExtensionRowBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                    )
+                )
             OpenId4VCIPinRequirement::class.java.name.hashCode() ->
                 OpenId4VciPinHolder(
                     RequirementTextRowBinding.inflate(
@@ -106,6 +117,10 @@ class RequirementsAdapter(
             is IdTokenHolder -> setupIdTokenRow(
                 holder,
                 requirements[position] as IdTokenRequirement
+            )
+            is ExtensionHolder -> setupExtensionRow(
+                holder,
+                requirements[position] as ExtensionRequirement
             )
         }
     }
@@ -175,6 +190,13 @@ class RequirementsAdapter(
         }
     }
 
+    private fun setupExtensionRow(
+        holder: ExtensionHolder,
+        requirement: ExtensionRequirement
+    ) {
+        holder.binding.displayName.text = requirement.displayName
+    }
+    
     private fun setupOpenId4VciPinHolder(
         holder: OpenId4VciPinHolder,
         requirement: OpenId4VCIPinRequirement
