@@ -19,9 +19,9 @@ internal class EncryptedSharedPreferencesIdentifier(
 
     var jwsHeader: JWSHeader? = null
 
-    override fun sign(data: ByteArray?): String {
+    override fun sign(data: ByteArray): ByteArray {
         val privateKey = keyStore.getKey(keyReference).toECKey()
         val ecdsaSigner = ECDSASigner(privateKey)
-        return ecdsaSigner.sign(jwsHeader, data).toString()
+        return ecdsaSigner.sign(jwsHeader, data).decode()
     }
 }

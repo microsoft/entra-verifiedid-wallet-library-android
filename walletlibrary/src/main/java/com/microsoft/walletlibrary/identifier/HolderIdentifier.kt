@@ -25,5 +25,5 @@ interface HolderIdentifier {
      * @param data The data to sign.
      * @return The signed data.
      */
-    fun sign(data: ByteArray?): String
+    fun sign(data: ByteArray): ByteArray
 }
