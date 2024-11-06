@@ -27,9 +27,6 @@ import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.defaultTestSerializer
 import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
-import com.nimbusds.jose.JOSEObjectType
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.jwk.JWK
 import io.mockk.coEvery
 import io.mockk.every
