@@ -8,6 +8,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.toPrivateJwk
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.KeyStoreException
 import com.microsoft.walletlibrary.util.HolderIdentifierCreationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.nimbusds.jose.jwk.JWK
@@ -22,7 +23,7 @@ internal class HolderIdentifierCreator(private val encryptedKeyStore: EncryptedK
         didMethod: String
     ): EncryptedSharedPreferencesIdentifier {
         val keyGenAlgorithm = mapJWAToKeyGenAlgorithm(algorithm)
-        val signingPublicKeyJwk = generateAndStoreKeyPair(keyReference, keyGenAlgorithm)
+        val signingPublicKeyJwk = fetchOrGenerateKey(keyReference, keyGenAlgorithm)
         val did = createDid(signingPublicKeyJwk, didMethod)
         return EncryptedSharedPreferencesIdentifier(
             did,
@@ -54,6 +55,19 @@ internal class HolderIdentifierCreator(private val encryptedKeyStore: EncryptedK
             CryptoOperations.generateKeyPair(keyGenAlgorithm).toPrivateJwk(keyReference, use)
         encryptedKeyStore.storeKey(keyReference, privateKey)
         return privateKey.toPublicJWK()
+    }
+
+    /**
+     * Fetches the key if it exists or generates a new KeyPair and stores it in the keyStore.
+     *
+     * @return returns the public Key in JWK format
+     */
+    private fun fetchOrGenerateKey(keyReference: String, keyGenAlgorithm: KeyGenAlgorithm): JWK {
+        return try {
+            encryptedKeyStore.getKey(keyReference)
+        } catch (e: KeyStoreException) {
+            generateAndStoreKeyPair(keyReference, keyGenAlgorithm)
+        }
     }
 
     private fun createDid(jwk: JWK, didMethod: String): String {
