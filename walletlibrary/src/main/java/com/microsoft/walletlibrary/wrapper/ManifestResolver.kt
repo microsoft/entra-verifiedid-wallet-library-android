@@ -35,7 +35,7 @@ internal object ManifestResolver {
                     IssuanceCompletionResponse(
                         IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
                         it,
-                        IssuanceCompletionResponse.IssuanceCompletionErrorDetails.FETCH_CONTRACT_ERROR,
+                        IssuanceCompletionResponse.IssuanceCompletionErrorDetails.FETCH_CONTRACT_ERROR
                     )
                 }
                 try {

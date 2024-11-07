@@ -9,6 +9,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.toPrivateJwk
 import com.nimbusds.jose.crypto.ECDSAVerifier
+import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.util.Base64URL
 import org.assertj.core.api.Assertions.assertThat
@@ -19,7 +20,7 @@ class EncryptedSharedPreferencesIdentifierTest {
     private val keyStore = EncryptedKeyStore(InstrumentationRegistry.getInstrumentation().targetContext)
 
     @Test
-    fun sign() {
+    fun sign_useSecp256k1Key_signsSuccessfully() {
         // Arrange
         val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1).toPrivateJwk("keyReferenceTest1", KeyUse.SIGNATURE)
         keyStore.storeKey("keyReferenceTest1", privateKey)
@@ -34,6 +35,34 @@ class EncryptedSharedPreferencesIdentifierTest {
         val testData = "{\"iss\":\"joe\",\n" +
             " \"exp\":1300819380,\n" +
             " \"http://example.com/is_root\":true}"
+        val publicKey = keyStore.getKey("keyReferenceTest1").toPublicJWK()
+
+        // Act
+        val signedData = encryptedSharedPreferencesIdentifier.sign(testData.toByteArray())
+
+        // Assert
+        val verifier = ECDSAVerifier(publicKey.toECKey())
+        val verificationStatus = verifier.verify(jwsHeader, testData.toByteArray(), Base64URL.encode(signedData))
+        assertThat(publicKey).isNotNull
+        assertThat(verificationStatus).isTrue
+    }
+
+    @Test
+    fun sign_useP256Key_signsSuccessfully() {
+        // Arrange
+        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.P256).toPrivateJwk("keyReferenceTest1", KeyUse.SIGNATURE, Curve.P_256)
+        keyStore.storeKey("keyReferenceTest1", privateKey)
+        val encryptedSharedPreferencesIdentifier = EncryptedSharedPreferencesIdentifier(
+            id = "id",
+            algorithm = "ES256",
+            method = "method",
+            keyReference = "keyReferenceTest1",
+            keyStore = keyStore
+        )
+        val jwsHeader = JwsHeaderFormatter.formatHeader(encryptedSharedPreferencesIdentifier)
+        val testData = "{\"iss\":\"joe\",\n" +
+                " \"exp\":1300819380,\n" +
+                " \"http://example.com/is_root\":true}"
         val publicKey = keyStore.getKey("keyReferenceTest1").toPublicJWK()
 
         // Act

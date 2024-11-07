@@ -27,6 +27,10 @@ class OpenId4VCIRequestHandler internal constructor(
     private val signedMetadataProcessor: SignedMetadataProcessor = SignedMetadataProcessor(
         libraryConfiguration
     ),
+    /**
+     * Extensions to this RequestProcessor. All extensions should be called after initial request
+     * processing to mutate the request with additional input.
+     */
     override var requestProcessors: MutableList<RequestProcessorExtension<OpenIdRawRequest>> = mutableListOf()
 ) : RequestProcessor<OpenIdRawRequest> {
     companion object {

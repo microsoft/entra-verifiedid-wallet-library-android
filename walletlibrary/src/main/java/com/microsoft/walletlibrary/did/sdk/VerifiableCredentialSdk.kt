@@ -62,6 +62,8 @@ internal object VerifiableCredentialSdk {
      * @param registrationUrl url used to register DID
      * @param resolverUrl url used to resolve DID
      * @param walletLibraryVersionInfo version of the library in use
+     * @param httpAgent http agent implementation to be used for network requests
+     * @param rootOfTrustResolver root of trust resolver implementation to be used for verifying the domains.
      */
     // TODO(Change how version numbers are passed for headers when HTTP client layer is refactored)
     @JvmOverloads

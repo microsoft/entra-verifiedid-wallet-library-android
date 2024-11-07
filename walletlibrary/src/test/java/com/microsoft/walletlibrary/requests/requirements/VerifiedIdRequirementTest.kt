@@ -30,7 +30,7 @@ class VerifiedIdRequirementTest {
             listOf("TestCredential"),
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = VcTypeConstraint(expectedVcType)
     }
@@ -271,7 +271,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = VcPathRegexConstraint(listOf("$.iss"), "WrongIssuer")
 
@@ -302,7 +302,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = VcPathRegexConstraint(listOf("$.iss"), "TestIssuer")
 
@@ -345,7 +345,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = VcPathRegexConstraint(listOf("$.iss"), "TestIssuer")
 
@@ -380,7 +380,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = GroupConstraint(
             listOf(
@@ -417,7 +417,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = GroupConstraint(
             listOf(
@@ -454,7 +454,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = GroupConstraint(
             listOf(
@@ -491,7 +491,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = GroupConstraint(
             listOf(
@@ -533,7 +533,7 @@ class VerifiedIdRequirementTest {
             expectedVcTypes,
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = GroupConstraint(
             listOf(
@@ -575,7 +575,7 @@ class VerifiedIdRequirementTest {
             listOf(expectedVcType),
             encrypted = false,
             required = true,
-            "testing purposes",
+            "testing purposes"
         )
         verifiedIdRequirement.constraint = VcPathRegexConstraint(listOf("$.iss"), "WrongIssuer")
 

@@ -199,7 +199,7 @@ class IssuanceResponseMappingTest {
         val pinRequirement = PinRequirement(4, "numeric", true, expectedPinSalt)
 
         // Act and Assert
-        assertThatThrownBy{
+        assertThatThrownBy {
             issuanceResponse.addRequirements(pinRequirement)
         }.isInstanceOf(RequirementNotMetException::class.java)
     }
