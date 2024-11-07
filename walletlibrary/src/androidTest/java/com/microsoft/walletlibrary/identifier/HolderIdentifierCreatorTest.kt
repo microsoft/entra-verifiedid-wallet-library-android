@@ -21,15 +21,23 @@ class HolderIdentifierCreatorTest {
     @Test
     fun createHolderIdentifier_passES256AlgorithmAndDidJwkMethod_returnsHolderIdentifierWithValidValues() {
         // Arrange
-        val holderIdentifierCreator = spyk(HolderIdentifierCreator(keyStore), recordPrivateCalls = true)
+        val holderIdentifierCreator =
+            spyk(HolderIdentifierCreator(keyStore), recordPrivateCalls = true)
         val jwkString =
             """{"crv": "P-256","kty": "EC","x": "acbIQiuMs3i8_uszEjJ2tpTtRM4EU3yz91PH6CdH2V0","y": "_KcyLj9vWMptnmKtm46GqDz8wf74I5LKgrl2GzH3nSE"}"""
         val jwk = spyk(JWK.parse(jwkString), recordPrivateCalls = true)
-        every { holderIdentifierCreator["generateAndStoreKeyPair"](any<KeyGenAlgorithm>(), any<KeyUse>()) } returns jwk
+        every {
+            holderIdentifierCreator["generateAndStoreKeyPair"](
+                any<String>(),
+                any<KeyGenAlgorithm>(),
+                any<KeyUse>()
+            )
+        } returns jwk
         every { jwk.keyID } returns "randomKeyID"
 
         // Act
-        val actualEncryptedSharedPreferencesIdentifier = holderIdentifierCreator.createHolderIdentifier("ES256", "did:jwk")
+        val actualEncryptedSharedPreferencesIdentifier =
+            holderIdentifierCreator.createHolderIdentifier("main", "ES256", "did:jwk")
 
         // Assert
         assertThat(actualEncryptedSharedPreferencesIdentifier.algorithm).isEqualTo("ES256")
@@ -40,17 +48,24 @@ class HolderIdentifierCreatorTest {
     @Test
     fun createHolderIdentifier_useInvalidJwk_throwsException() {
         // Arrange
-        val holderIdentifierCreator = spyk(HolderIdentifierCreator(keyStore), recordPrivateCalls = true)
+        val holderIdentifierCreator =
+            spyk(HolderIdentifierCreator(keyStore), recordPrivateCalls = true)
         val jwkString =
             """{"crv": "P-256","kty": "EC","x": "acbIQiuMs3i8_uszEjJ2tpTtRM43yz91PH6CdH2V0","y": "_KcyLj9vWMptnmKtm46GqDz8wf74I5LKgrl2GzH3nSE"}"""
 
         assertThatThrownBy {
             val jwk = spyk(JWK.parse(jwkString), recordPrivateCalls = true)
-            every { holderIdentifierCreator["generateAndStoreKeyPair"](any<KeyGenAlgorithm>(), any<KeyUse>()) } returns jwk
+            every {
+                holderIdentifierCreator["generateAndStoreKeyPair"](
+                    any<String>(),
+                    any<KeyGenAlgorithm>(),
+                    any<KeyUse>()
+                )
+            } returns jwk
             every { jwk.keyID } returns "randomKeyID"
 
             // Act & Assert
-            holderIdentifierCreator.createHolderIdentifier("ES256", "did:jwk")
+            holderIdentifierCreator.createHolderIdentifier("main", "ES256", "did:jwk")
         }
             .isInstanceOf(ParseException::class.java)
             .hasMessage("Invalid EC JWK: The 'x' and 'y' public coordinates are not on the P-256 curve")

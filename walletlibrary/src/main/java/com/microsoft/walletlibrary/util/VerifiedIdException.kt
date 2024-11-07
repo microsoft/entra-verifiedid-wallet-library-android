@@ -66,7 +66,14 @@ class OpenId4VciRequestException(
     correlationId: String? = null
 ) : VerifiedIdException(message, code, correlationId)
 
-class IdentifierException(
+class HolderIdentifierMissingException(
+    message: String,
+    code: String,
+    val innerError: Exception? = null,
+    correlationId: String? = null
+) : VerifiedIdException(message, code, correlationId)
+
+class HolderIdentifierCreationException(
     message: String,
     code: String,
     val innerError: Exception? = null,
