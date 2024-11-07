@@ -5,7 +5,6 @@
 
 package com.microsoft.walletlibrary
 
-import com.microsoft.walletlibrary.did.sdk.identifier.IdentifierManager
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 

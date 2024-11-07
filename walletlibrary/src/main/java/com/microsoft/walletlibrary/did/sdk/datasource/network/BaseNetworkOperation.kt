@@ -34,7 +34,8 @@ internal abstract class BaseNetworkOperation<T> {
                 return onFailure(it)
             }
         } catch (exception: IOException) {
-            return Result.failure(LocalNetworkException("Failed to send request.", exception))
+            SdkLog.i("Failed to send request because of ${exception.message}", exception)
+            return Result.failure(LocalNetworkException("Failed to send request because of ${exception.message}", exception))
         }
         return Result.failure(SdkException("Failed to get a response"))
     }

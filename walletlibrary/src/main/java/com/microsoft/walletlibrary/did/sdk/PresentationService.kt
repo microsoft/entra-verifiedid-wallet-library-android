@@ -23,6 +23,8 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.microsoft.walletlibrary.did.sdk.util.logTime
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
+import com.microsoft.walletlibrary.util.LibraryConfiguration
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -105,12 +107,13 @@ internal class PresentationService @Inject constructor(
     suspend fun sendResponse(
         presentationRequest: PresentationRequest,
         response: List<PresentationResponse>,
-        additionalHeaders: Map<String, String>
+        additionalHeaders: Map<String, String>,
+        libraryConfiguration: LibraryConfiguration
     ): Result<Unit> {
         return runResultTry {
             logTime("Presentation sendResponse") {
-                val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
-                formAndSendResponse(presentationRequest, response, masterIdentifier, additionalHeaders).abortOnError()
+                val identifier = libraryConfiguration.identifierFactory.getIdentifier()
+                formAndSendResponse(presentationRequest, response, identifier, additionalHeaders).abortOnError()
             }
             Result.Success(Unit)
         }
@@ -119,7 +122,7 @@ internal class PresentationService @Inject constructor(
     private suspend fun formAndSendResponse(
         presentationRequest: PresentationRequest,
         response: List<PresentationResponse>,
-        responder: Identifier,
+        responder: HolderIdentifier,
         additionalHeaders: Map<String, String>,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<Unit> {

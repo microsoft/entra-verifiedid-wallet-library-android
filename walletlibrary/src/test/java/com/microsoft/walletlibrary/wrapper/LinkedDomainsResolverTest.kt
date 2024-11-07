@@ -22,7 +22,6 @@ class LinkedDomainsResolverTest {
 
     init {
         mockkStatic(VerifiableCredentialSdk::class)
-        mockkStatic("com.microsoft.walletlibrary.mappings.LinkedDomainsServiceExtensionKt")
         every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinedDomainsService
     }
 

@@ -5,11 +5,15 @@ package com.microsoft.walletlibrary.did.sdk.crypto
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
+import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.toPrivateJwk
 import com.microsoft.walletlibrary.did.sdk.util.Constants.AES_KEY
+import com.nimbusds.jose.jwk.Curve
+import com.nimbusds.jose.jwk.KeyUse
 import org.junit.Test
 import java.math.BigInteger
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
+import java.util.UUID
 import javax.crypto.spec.SecretKeySpec
 
 class AlgorithmsTest {
@@ -28,6 +32,14 @@ class AlgorithmsTest {
         val actualKeys = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1)
         assertThat(actualKeys.private).isInstanceOf(ECPrivateKey::class)
         assertThat(actualKeys.public).isInstanceOf(ECPublicKey::class)
+    }
+
+    @Test
+    fun `test KeyGenAlgorithm p256`() {
+        val keyId = UUID.randomUUID().toString().replace("-", "")
+        val privateKeyJwk = CryptoOperations.generateKeyPair(KeyGenAlgorithm.P256).toPrivateJwk(keyId, KeyUse.SIGNATURE, Curve.P_256)
+        assertThat(privateKeyJwk.toECKey().curve.name).isEqualTo("P-256")
+        assertThat(privateKeyJwk.keyUse).isEqualTo(KeyUse.SIGNATURE)
     }
 
     @Test

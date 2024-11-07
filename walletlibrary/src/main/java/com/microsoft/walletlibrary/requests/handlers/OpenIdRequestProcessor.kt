@@ -109,7 +109,8 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
             rawManifest.rawRequest.contract.display.toVerifiedIdStyle(),
             rawManifest,
             presentationRequestContent.issuanceCallbackUrl,
-            presentationRequestContent.requestState
+            presentationRequestContent.requestState,
+            libraryConfiguration
         )
     }
 

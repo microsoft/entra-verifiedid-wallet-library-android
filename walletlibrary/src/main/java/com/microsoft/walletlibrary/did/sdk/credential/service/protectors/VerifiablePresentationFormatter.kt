@@ -3,8 +3,9 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationDescriptor
-import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
@@ -12,8 +13,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class VerifiablePresentationFormatter @Inject constructor(
-    private val serializer: Json,
-    private val signer: TokenSigner
+    private val serializer: Json
 ) {
 
     // only support one VC per VP
@@ -21,7 +21,7 @@ internal class VerifiablePresentationFormatter @Inject constructor(
         verifiableCredential: VerifiableCredential,
         validityInterval: Int,
         audience: String,
-        responder: Identifier
+        responder: HolderIdentifier
     ): String {
         val verifiablePresentation = VerifiablePresentationDescriptor(
             verifiableCredential = listOf(verifiableCredential.raw),
@@ -43,7 +43,9 @@ internal class VerifiablePresentationFormatter @Inject constructor(
                 audience = audience
             )
         val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
-        return signer.signWithIdentifier(serializedContents, responder)
+        val jwsHeader = JwsHeaderFormatter.formatHeader(responder)
+        val jwsToken = JwsToken(serializedContents, jwsHeader)
+        return jwsToken.sign(responder)
     }
 
     // supports multiple VCs per VP
@@ -51,7 +53,7 @@ internal class VerifiablePresentationFormatter @Inject constructor(
         verifiableCredentials: List<VerifiableCredential>,
         validityInterval: Int,
         audience: String,
-        responder: Identifier,
+        responder: HolderIdentifier,
         nonce: String
     ): String {
         val rawVerifiableCredentials = mutableListOf<String>()
@@ -77,6 +79,8 @@ internal class VerifiablePresentationFormatter @Inject constructor(
                 nonce = nonce
             )
         val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
-        return signer.signWithIdentifier(serializedContents, responder)
+        val jwsHeader = JwsHeaderFormatter.formatHeader(responder)
+        val jwsToken = JwsToken(serializedContents, jwsHeader)
+        return jwsToken.sign(responder)
     }
 }

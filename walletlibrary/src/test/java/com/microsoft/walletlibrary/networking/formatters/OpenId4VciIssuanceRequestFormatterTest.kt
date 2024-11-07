@@ -2,12 +2,13 @@ package com.microsoft.walletlibrary.networking.formatters
 
 import com.microsoft.walletlibrary.did.sdk.IdentifierService
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
+import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.JwsHeaderFormatter
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
-import com.microsoft.walletlibrary.identifier.IdentifierManager
+import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
+import com.microsoft.walletlibrary.identifier.IdentifierFactory
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.networking.entities.openid4vci.request.OpenID4VCIJWTProofClaims
 import com.microsoft.walletlibrary.networking.entities.openid4vci.request.RawOpenID4VCIRequest
@@ -20,9 +21,11 @@ import com.microsoft.walletlibrary.util.defaultTestSerializer
 import com.nimbusds.jose.jwk.JWK
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -30,11 +33,11 @@ import org.junit.Test
 class OpenId4VciIssuanceRequestFormatterTest {
     private val slot = slot<String>()
     private val mockedKeyStore: EncryptedKeyStore = mockk()
-    private val mockedTokenSigner: TokenSigner = mockk()
+    private val mockedHolderIdentifier: EncryptedSharedPreferencesIdentifier = mockk()
     private val mockedIdentifier: Identifier = mockk()
-    private val mockedIdentifierManager: IdentifierManager = mockk()
     private val mockIdentifierService: IdentifierService = mockk()
     private val mockWalletLibraryLogger: WalletLibraryLogger = mockk()
+    private val mockIdentifierFactory: IdentifierFactory = mockk()
     private val signingKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
     private val expectedJsonWebKey: JWK = JWK.parse(
@@ -44,27 +47,29 @@ class OpenId4VciIssuanceRequestFormatterTest {
     )
     private val mockHttpAgentApiProvider: HttpAgentApiProvider = mockk()
     private val mockPreviewFeatureFlags: PreviewFeatureFlags = mockk()
-    private val libraryConfiguration = LibraryConfiguration(
-        mockPreviewFeatureFlags,
-        mockHttpAgentApiProvider,
-        defaultTestSerializer,
-        rootOfTrustResolver = null,
-        mockedIdentifierManager,
-        mockedTokenSigner,
-        mockWalletLibraryLogger
-    )
-    private val openId4VciIssuanceRequestFormatter =
-        OpenId4VciIssuanceRequestFormatter(libraryConfiguration)
+    private var openId4VciIssuanceRequestFormatter: OpenId4VciIssuanceRequestFormatter
 
     init {
+        val libraryConfiguration = LibraryConfiguration(
+            mockPreviewFeatureFlags,
+            mockHttpAgentApiProvider,
+            defaultTestSerializer,
+            rootOfTrustResolver = null,
+            mockWalletLibraryLogger,
+            mockIdentifierFactory
+        )
+        openId4VciIssuanceRequestFormatter = spyk(
+            OpenId4VciIssuanceRequestFormatter(libraryConfiguration),
+            recordPrivateCalls = true
+        )
+        every { mockIdentifierFactory.getIdentifier() } returns mockedHolderIdentifier
         setUpGetPublicKey()
         every { mockedKeyStore.getKey(signingKeyRef) } returns expectedJsonWebKey
         every {
-            mockedTokenSigner.signWithIdentifier(
-                capture(slot),
-                mockedIdentifier
+            mockedHolderIdentifier.sign(
+                capture(slot).toByteArray()
             )
-        } answers { slot.captured }
+        } answers { slot.captured.toByteArray() }
         mockkStatic(VerifiableCredentialSdk::class)
         every { VerifiableCredentialSdk.identifierService } returns mockIdentifierService
         coEvery { mockIdentifierService.getMasterIdentifier() } returns Result.Success(
@@ -73,8 +78,18 @@ class OpenId4VciIssuanceRequestFormatterTest {
     }
 
     private fun setUpGetPublicKey() {
-        every { mockedIdentifier.signatureKeyReference } returns signingKeyRef
+        every { mockIdentifierService.getKeyStore() } returns mockedKeyStore
         every { mockedIdentifier.id } returns expectedDid
+        every { mockedIdentifier.signatureKeyReference } returns signingKeyRef
+        every { mockedHolderIdentifier.id } returns expectedDid
+        every { mockedHolderIdentifier.keyReference } returns signingKeyRef
+        every { mockedHolderIdentifier.algorithm } returns "ES256K"
+        mockkStatic(JwsHeaderFormatter::class)
+        justRun {
+            openId4VciIssuanceRequestFormatter["formatJwsHeaderForIdentifier"](
+                mockedHolderIdentifier
+            )
+        }
     }
 
     @Test

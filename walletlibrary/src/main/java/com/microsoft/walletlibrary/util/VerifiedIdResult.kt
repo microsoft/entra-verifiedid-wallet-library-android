@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary.util
 
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.NetworkException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
+import kotlinx.coroutines.CancellationException
 
 typealias VerifiedIdResult<T> = Result<T>
 
@@ -45,6 +46,8 @@ internal suspend fun <T> getResult(block: suspend () -> T): VerifiedIdResult<T> 
                 unspecifiedVerifiedIdException.toVerifiedIdResult()
             }
         }
+    } catch (exception: CancellationException) {
+        throw exception
     } catch (exception: Exception) {
         val unspecifiedVerifiedIdException = UnspecifiedVerifiedIdException(
             exception.message ?: "",

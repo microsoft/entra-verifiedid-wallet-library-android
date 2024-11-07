@@ -16,7 +16,8 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.Issuan
 import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.DigestAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
@@ -26,14 +27,13 @@ import javax.inject.Singleton
 internal class IssuanceResponseFormatter @Inject constructor(
     private val serializer: Json,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
-    private val signer: TokenSigner,
     private val keyStore: EncryptedKeyStore
 ) {
 
     fun formatResponse(
         requestedVcMap: RequestedVcMap = mutableMapOf(),
         issuanceResponse: IssuanceResponse,
-        responder: Identifier,
+        responder: HolderIdentifier,
         expiryInSeconds: Int
     ): String {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
@@ -51,13 +51,13 @@ internal class IssuanceResponseFormatter @Inject constructor(
 
     private fun createAndSignOidcResponseContent(
         issuanceResponse: IssuanceResponse,
-        responder: Identifier,
+        responder: HolderIdentifier,
         issuedTime: Long,
         expiryTime: Long,
         responseId: String,
         attestationResponse: AttestationClaimModel
     ): String {
-        val key = keyStore.getKey(responder.signatureKeyReference)
+        val key = keyStore.getKey(responder.keyReference)
         val contents = IssuanceResponseClaims(issuanceResponse.request.contractUrl, attestationResponse).apply {
             subject = key.computeThumbprint().toString()
             audience = issuanceResponse.audience
@@ -71,9 +71,11 @@ internal class IssuanceResponseFormatter @Inject constructor(
         return signContents(contents, responder)
     }
 
-    private fun signContents(contents: IssuanceResponseClaims, responder: Identifier): String {
+    private fun signContents(contents: IssuanceResponseClaims, responder: HolderIdentifier): String {
         val serializedResponseContent = serializer.encodeToString(IssuanceResponseClaims.serializer(), contents)
-        return signer.signWithIdentifier(serializedResponseContent, responder)
+        val jwsHeader = JwsHeaderFormatter.formatHeader(responder)
+        val jwsToken = JwsToken(serializedResponseContent, jwsHeader)
+        return jwsToken.sign(responder)
     }
 
     private fun createAttestationClaimModel(
@@ -82,7 +84,7 @@ internal class IssuanceResponseFormatter @Inject constructor(
         requestedAccessTokenMap: RequestedAccessTokenMap,
         requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap,
         presentationsAudience: String,
-        responder: Identifier
+        responder: HolderIdentifier
     ): AttestationClaimModel {
         if (areNoCollectedClaims(requestedVcMap, requestedIdTokenMap, requestedAccessTokenMap, requestedSelfAttestedClaimMap)) {
             return AttestationClaimModel()
@@ -91,7 +93,7 @@ internal class IssuanceResponseFormatter @Inject constructor(
         return AttestationClaimModel(requestedSelfAttestedClaimMap, requestedIdTokenMap, requestedAccessTokenMap, presentationAttestations)
     }
 
-    private fun createPresentations(requestedVcMap: RequestedVcMap, audience: String, responder: Identifier): Map<String, String> {
+    private fun createPresentations(requestedVcMap: RequestedVcMap, audience: String, responder: HolderIdentifier): Map<String, String> {
         return requestedVcMap.map { (inputDescriptor, vc) ->
             inputDescriptor.credentialType to verifiablePresentationFormatter.createPresentation(
                 vc,

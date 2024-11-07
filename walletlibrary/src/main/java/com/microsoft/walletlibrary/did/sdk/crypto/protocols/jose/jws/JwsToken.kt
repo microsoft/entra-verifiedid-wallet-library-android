@@ -2,7 +2,6 @@ package com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
-import com.nimbusds.jose.JOSEObjectType
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
@@ -33,14 +32,7 @@ internal class JwsToken constructor(
 
     constructor(content: String, jwsAlgorithm: JWSAlgorithm) : this(JWSObject(JWSHeader(jwsAlgorithm), Payload(Base64URL.encode(content))))
 
-    constructor(content: String, jwsAlgorithm: String, keyId: String, type: String = "JWT") : this(
-        JWSObject(
-            JWSHeader.Builder(JWSAlgorithm(jwsAlgorithm))
-                .type(JOSEObjectType(type))
-                .keyID(keyId)
-                .build(), Payload(Base64URL.encode(content))
-        )
-    )
+    constructor(content: String, jwsHeader: JWSHeader) : this(JWSObject(jwsHeader, Payload(Base64URL.encode(content))))
 
     fun serialize(): String {
         return jwsObject.serialize()
@@ -54,8 +46,10 @@ internal class JwsToken constructor(
         jwsObject.sign(signer)
     }
 
-    fun sign(identifier: HolderIdentifier): String {
-        return identifier.sign(jwsObject.payload.toString())
+    fun sign(holderIdentifier: HolderIdentifier): String {
+        val signer = ECDSASignerWrapper(holderIdentifier)
+        jwsObject.sign(signer)
+        return jwsObject.serialize()
     }
 
     fun verify(publicKeyJWKs: List<JWK> = emptyList()): Boolean {

@@ -13,6 +13,7 @@ import com.microsoft.walletlibrary.mappings.presentation.addRequirements
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.IdInVerifiedIdRequirementDoesNotMatchRequestException
+import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenIdResponseCompletionException
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 
@@ -25,7 +26,8 @@ object OpenIdResponder {
     internal suspend fun sendPresentationResponse(
         presentationRequest: PresentationRequest,
         requirement: Requirement,
-        additionalHeaders: Map<String, String>
+        additionalHeaders: Map<String, String>,
+        libraryConfiguration: LibraryConfiguration
     ) {
         val presentationResponses = presentationRequest.getPresentationDefinitions().map { PresentationResponse(presentationRequest, it.id) }
         if (presentationResponses.size == 1) {
@@ -59,7 +61,7 @@ object OpenIdResponder {
             }
         }
         val presentationResponseResult =
-            VerifiableCredentialSdk.presentationService.sendResponse(presentationRequest, presentationResponses, additionalHeaders)
+            VerifiableCredentialSdk.presentationService.sendResponse(presentationRequest, presentationResponses, additionalHeaders, libraryConfiguration)
         if (presentationResponseResult is Result.Failure) {
             throw OpenIdResponseCompletionException(
                 "Unable to send presentation response",

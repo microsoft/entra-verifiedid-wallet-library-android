@@ -32,8 +32,8 @@ class VerifiableCredentialTest {
     private val expectedClaim2Value = "test"
     private val expectedDisplayNameForClaim1 = "vc.credentialSubject.name"
     private val expectedDisplayNameForClaim2 = "vc.credentialSubject.company"
-    private val expectedClaimLabelForClaim1 = "Test Name"
-    private val expectedClaimLabelForClaim2 = "Test Company"
+    private val expectedClaimLabelForClaim1 = "name"
+    private val expectedClaimLabelForClaim2 = "company"
 
     @Test
     fun getClaims_EmptyDisplayContract_ReturnsClaimLabelsFromVc() {
