@@ -12,6 +12,5 @@ internal data class CredentialDefinition(
     val type: List<String>? = null,
 
     // Mapping of the claims in the credential to its display information.
-    @SerialName("credential_subject")
     val credentialSubject: Map<String, CredentialSubjectDefinition>? = null
 )
