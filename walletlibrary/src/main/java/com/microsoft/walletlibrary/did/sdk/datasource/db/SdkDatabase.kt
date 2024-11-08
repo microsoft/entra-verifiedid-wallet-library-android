@@ -6,6 +6,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.microsoft.walletlibrary.datasource.db.dao.HolderIdentifierDataDao
 import com.microsoft.walletlibrary.datasource.db.entities.HolderIdentifierData
 import com.microsoft.walletlibrary.did.sdk.datasource.db.dao.IdentifierDao
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
@@ -24,14 +25,16 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 internal abstract class SdkDatabase : RoomDatabase() {
 
     abstract fun identifierDao(): IdentifierDao
+
+    abstract fun holderIdentifierDataDao(): HolderIdentifierDataDao
 }
 
-object Sdk {
+object SdkDbMigrations {
     val MIGRATIONS: Array<Migration> = arrayOf(
         object : Migration(2, 3) {
             @Suppress("MaxLineLength")
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("CREATE TABLE IF NOT EXISTS `HolderIdentifierData` (`id` TEXT NOT NULL, `encodedVerifiedId` TEXT NOT NULL, PRIMARY KEY(`cardId`))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `HolderIdentifierData` (`keyId` TEXT NOT NULL, `didMethod` TEXT NOT NULL, `algorithm` TEXT NOT NULL, `keyReference` TEXT NOT NULL, PRIMARY KEY(`keyId`))")
             }
         }
     )

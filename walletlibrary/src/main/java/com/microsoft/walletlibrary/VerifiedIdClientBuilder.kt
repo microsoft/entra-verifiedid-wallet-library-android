@@ -136,6 +136,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         identifierFactory.identifiers.addAll(identifiers)
         val defaultIdentifier = getDefaultIdentifier()
         defaultIdentifier?.let { identifierFactory.identifiers.add(it) }
+        val database = VerifiableCredentialSdk.identifierService.getDatabase()
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
         val libraryConfiguration =
             LibraryConfiguration(
@@ -144,7 +145,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
                 jsonSerializer,
                 rootOfTrustResolver,
                 logger,
-                identifierFactory
+                identifierFactory,
+                database
             )
 
         val requestResolverFactory = RequestResolverFactory()

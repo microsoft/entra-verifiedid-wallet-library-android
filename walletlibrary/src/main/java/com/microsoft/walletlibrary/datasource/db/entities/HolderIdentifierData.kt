@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class HolderIdentifierData (
     @PrimaryKey
-    val id: String,
+    val keyId: String,
     val didMethod: String,
     val algorithm: String,
     val keyReference: String
