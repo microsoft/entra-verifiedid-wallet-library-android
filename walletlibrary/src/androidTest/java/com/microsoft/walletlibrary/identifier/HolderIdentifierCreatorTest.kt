@@ -42,6 +42,7 @@ class HolderIdentifierCreatorTest {
         // Assert
         assertThat(actualEncryptedSharedPreferencesIdentifier.algorithm).isEqualTo("ES256")
         assertThat(actualEncryptedSharedPreferencesIdentifier.method).isEqualTo("did:jwk")
+        assertThat(actualEncryptedSharedPreferencesIdentifier.keyReference).isEqualTo("main")
         assertThat(actualEncryptedSharedPreferencesIdentifier.id).isEqualTo("did:jwk:eyJjcnYiOiJQLTI1NiIsImt0eSI6IkVDIiwieCI6ImFjYklRaXVNczNpOF91c3pFakoydHBUdFJNNEVVM3l6OTFQSDZDZEgyVjAiLCJ5IjoiX0tjeUxqOXZXTXB0bm1LdG00NkdxRHo4d2Y3NEk1TEtncmwyR3pIM25TRSJ9")
     }
 

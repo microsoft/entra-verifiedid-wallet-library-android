@@ -2,18 +2,13 @@
 
 package com.microsoft.walletlibrary.identifier
 
-import android.util.Base64
 import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.toPrivateJwk
-import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.KeyStoreException
-import com.microsoft.walletlibrary.util.HolderIdentifierCreationException
-import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyUse
-import org.erdtman.jcs.JsonCanonicalizer
 
 internal class HolderIdentifierCreator(private val encryptedKeyStore: EncryptedKeyStore) {
 
@@ -24,7 +19,7 @@ internal class HolderIdentifierCreator(private val encryptedKeyStore: EncryptedK
     ): EncryptedSharedPreferencesIdentifier {
         val keyGenAlgorithm = mapJWAToKeyGenAlgorithm(algorithm)
         val signingPublicKeyJwk = fetchOrGenerateKey(keyReference, keyGenAlgorithm)
-        val did = createDid(signingPublicKeyJwk, didMethod)
+        val did = DidCreator.createDid(signingPublicKeyJwk, didMethod)
         return EncryptedSharedPreferencesIdentifier(
             did,
             algorithm,
@@ -68,13 +63,5 @@ internal class HolderIdentifierCreator(private val encryptedKeyStore: EncryptedK
         } catch (e: KeyStoreException) {
             generateAndStoreKeyPair(keyReference, keyGenAlgorithm)
         }
-    }
-
-    private fun createDid(jwk: JWK, didMethod: String): String {
-        if (didMethod != "did:jwk") {
-            throw HolderIdentifierCreationException("Only did:jwk is supported", VerifiedIdExceptions.HOLDER_IDENTIFIER_EXCEPTION.value)
-        }
-        val utf8EncodedJwk = JsonCanonicalizer(jwk.toJSONString()).encodedUTF8
-        return didMethod + ":" + Base64.encodeToString(utf8EncodedJwk, Constants.BASE64_URL_SAFE)
     }
 }
