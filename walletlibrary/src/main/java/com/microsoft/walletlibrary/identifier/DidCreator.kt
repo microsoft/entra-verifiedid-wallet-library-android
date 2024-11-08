@@ -1,4 +1,7 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/**---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 package com.microsoft.walletlibrary.identifier
 
@@ -12,14 +15,14 @@ import org.erdtman.jcs.JsonCanonicalizer
 internal object DidCreator {
 
     // Creates a DID from Public Key JWK and a DID method. Currently only P-256 keys and did:jwk are supported.
-    fun createDid(jwk: JWK, didMethod: String): String {
-        if (jwk.keyType.value != "EC") {
+    fun createDid(jwk: JWK, didMethod: DidMethod): String {
+        if (jwk.keyType.value != KeyGenAlgorithms.EC.name) {
             throw HolderIdentifierCreationException("Only EC keys are supported", VerifiedIdExceptions.HOLDER_IDENTIFIER_EXCEPTION.value)
         }
-        if (didMethod != "did:jwk") {
+        if (didMethod != DidMethod.DID_JWK) {
             throw HolderIdentifierCreationException("Only did:jwk is supported", VerifiedIdExceptions.HOLDER_IDENTIFIER_EXCEPTION.value)
         }
         val utf8EncodedJwk = JsonCanonicalizer(jwk.toJSONString()).encodedUTF8
-        return didMethod + ":" + Base64.encodeToString(utf8EncodedJwk, Constants.BASE64_URL_SAFE)
+        return didMethod.value + ":" + Base64.encodeToString(utf8EncodedJwk, Constants.BASE64_URL_SAFE)
     }
 }

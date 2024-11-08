@@ -1,4 +1,7 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/**---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 package com.microsoft.walletlibrary.identifier
 
@@ -12,28 +15,28 @@ import com.nimbusds.jose.jwk.KeyUse
 
 internal class HolderIdentifierCreator(private val encryptedKeyStore: EncryptedKeyStore) {
 
+    /**
+     * Creates a Holder Identifier based on the provided parameters.
+     * @param keyReference The reference to the key in the keyStore
+     * @param algorithm The algorithm to use for cryptographic operations
+     * @param didMethod The method for creating the DID (eg. did:jwk)
+     * @return The Holder Identifier with the provided parameters.
+     */
     fun createHolderIdentifier(
         keyReference: String,
         algorithm: String,
-        didMethod: String
+        didMethod: DidMethod
     ): EncryptedSharedPreferencesIdentifier {
-        val keyGenAlgorithm = mapJWAToKeyGenAlgorithm(algorithm)
+        val keyGenAlgorithm = JsonWebAlgorithm.values().find { it.name == algorithm }?.value ?: throw IllegalArgumentException("Unsupported algorithm")
         val signingPublicKeyJwk = fetchOrGenerateKey(keyReference, keyGenAlgorithm)
         val did = DidCreator.createDid(signingPublicKeyJwk, didMethod)
         return EncryptedSharedPreferencesIdentifier(
             did,
             algorithm,
-            didMethod,
+            didMethod.value,
             signingPublicKeyJwk.keyID,
             encryptedKeyStore
         )
-    }
-
-    private fun mapJWAToKeyGenAlgorithm(jwa: String): KeyGenAlgorithm {
-        return when (jwa) {
-            "ES256" -> KeyGenAlgorithm.P256
-            else -> throw IllegalArgumentException("Unsupported algorithm")
-        }
     }
 
     /**

@@ -1,4 +1,7 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/**---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 package com.microsoft.walletlibrary.identifier
 
@@ -21,7 +24,7 @@ class DidCreatorTest {
 
         // Act
         val actualDid =
-            DidCreator.createDid(jwk, "did:jwk")
+            DidCreator.createDid(jwk, DidMethod.DID_JWK)
 
         // Assert
         Assertions.assertThat(actualDid).isEqualTo("did:jwk:eyJjcnYiOiJQLTI1NiIsImt0eSI6IkVDIiwieCI6ImFjYklRaXVNczNpOF91c3pFakoydHBUdFJNNEVVM3l6OTFQSDZDZEgyVjAiLCJ5IjoiX0tjeUxqOXZXTXB0bm1LdG00NkdxRHo4d2Y3NEk1TEtncmwyR3pIM25TRSJ9")
@@ -38,7 +41,7 @@ class DidCreatorTest {
             every { jwk.keyID } returns "randomKeyID"
 
             // Act & Assert
-            DidCreator.createDid(jwk, "did:jwk")
+            DidCreator.createDid(jwk, DidMethod.DID_JWK)
         }
             .isInstanceOf(ParseException::class.java)
             .hasMessage("Invalid EC JWK: The 'x' and 'y' public coordinates are not on the P-256 curve")
