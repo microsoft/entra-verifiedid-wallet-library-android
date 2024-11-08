@@ -42,16 +42,12 @@ class OpenId4VCIPinRequirement(
         return null
     }
 
-    suspend fun fulfill(pin: String) {
+    suspend fun fulfill(pin: String): VerifiedIdResult<Unit> {
         this.pin = pin
-        libraryConfiguration?.let { libraryConfiguration ->
-            accessTokenEndpoint?.let {
-                getResult {
-                    OpenID4VCIPreAuthAccessTokenResolver(libraryConfiguration).resolve(
-                        preAuthorizedCode,
-                        this,
-                        it
-                    )
+        return getResult {
+            libraryConfiguration?.let { libraryConfiguration ->
+                accessTokenEndpoint?.let {
+                    OpenID4VCIPreAuthAccessTokenResolver(libraryConfiguration).resolve(preAuthorizedCode, this, it)
                 }
             }
         }
