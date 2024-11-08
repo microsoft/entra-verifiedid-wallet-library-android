@@ -27,9 +27,8 @@ class HolderIdentifierCreatorTest {
             """{"crv": "P-256","kty": "EC","x": "acbIQiuMs3i8_uszEjJ2tpTtRM4EU3yz91PH6CdH2V0","y": "_KcyLj9vWMptnmKtm46GqDz8wf74I5LKgrl2GzH3nSE"}"""
         val jwk = spyk(JWK.parse(jwkString), recordPrivateCalls = true)
         every {
-            holderIdentifierCreator["generateAndStoreKeyPair"](
+            holderIdentifierCreator["generateKeyPairAndStorePrivateKey"](
                 any<String>(),
-                any<KeyGenAlgorithm>(),
                 any<KeyUse>()
             )
         } returns jwk

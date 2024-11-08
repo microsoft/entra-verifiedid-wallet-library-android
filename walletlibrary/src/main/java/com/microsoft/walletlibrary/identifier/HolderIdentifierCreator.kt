@@ -6,26 +6,27 @@ import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.toPrivateJwk
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.KeyStoreException
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyUse
+import java.util.UUID
 
 internal class HolderIdentifierCreator(private val encryptedKeyStore: EncryptedKeyStore) {
 
     fun createHolderIdentifier(
         keyReference: String,
         algorithm: String,
-        didMethod: String
+        didMethod: String,
+        keyId: String? = null
     ): EncryptedSharedPreferencesIdentifier {
-        val keyGenAlgorithm = mapJWAToKeyGenAlgorithm(algorithm)
-        val signingPublicKeyJwk = fetchOrGenerateKey(keyReference, keyGenAlgorithm)
+        val signingPublicKeyJwk = keyId?.let { fetchKey(it) } ?: generateKeyPairAndStorePrivateKey(algorithm)
         val did = DidCreator.createDid(signingPublicKeyJwk, didMethod)
         return EncryptedSharedPreferencesIdentifier(
             did,
             algorithm,
             didMethod,
-            signingPublicKeyJwk.keyID,
-            encryptedKeyStore
+            keyReference,
+            encryptedKeyStore,
+            signingPublicKeyJwk.keyID
         )
     }
 
@@ -41,27 +42,28 @@ internal class HolderIdentifierCreator(private val encryptedKeyStore: EncryptedK
      *
      * @return returns the public Key in JWK format
      */
-    private fun generateAndStoreKeyPair(
-        keyReference: String,
-        keyGenAlgorithm: KeyGenAlgorithm = KeyGenAlgorithm.P256,
+    private fun generateKeyPairAndStorePrivateKey(
+        algorithm: String,
         use: KeyUse = KeyUse.SIGNATURE
     ): JWK {
+        val keyGenAlgorithm = mapJWAToKeyGenAlgorithm(algorithm)
+        val keyId = generateRandomKeyId()
         val privateKey =
-            CryptoOperations.generateKeyPair(keyGenAlgorithm).toPrivateJwk(keyReference, use)
-        encryptedKeyStore.storeKey(keyReference, privateKey)
+            CryptoOperations.generateKeyPair(keyGenAlgorithm).toPrivateJwk(keyId, use)
+        encryptedKeyStore.storeKey(keyId, privateKey)
         return privateKey.toPublicJWK()
     }
 
+    private fun generateRandomKeyId(): String {
+        return UUID.randomUUID().toString().replace("-", "")
+    }
+
     /**
-     * Fetches the key if it exists or generates a new KeyPair and stores it in the keyStore.
+     * Fetches the key from keyStore.
      *
      * @return returns the public Key in JWK format
      */
-    private fun fetchOrGenerateKey(keyReference: String, keyGenAlgorithm: KeyGenAlgorithm): JWK {
-        return try {
-            encryptedKeyStore.getKey(keyReference)
-        } catch (e: KeyStoreException) {
-            generateAndStoreKeyPair(keyReference, keyGenAlgorithm)
-        }
+    private fun fetchKey(keyReference: String): JWK {
+        return encryptedKeyStore.getKey(keyReference)
     }
 }

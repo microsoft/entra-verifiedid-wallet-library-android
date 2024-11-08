@@ -27,8 +27,9 @@ class JwsTokenTest {
             id = "id",
             algorithm = "ES256K",
             method = "method",
-            keyReference = "keyReferenceTest1",
-            keyStore = keyStore
+            keyReference = "main",
+            keyStore = keyStore,
+            keyId = "keyReferenceTest1"
         )
         val testDataString = "{\"iss\":\"joe\",\n" +
             " \"exp\":1300819380,\n" +

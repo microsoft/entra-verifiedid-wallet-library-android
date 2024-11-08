@@ -15,11 +15,12 @@ internal class EncryptedSharedPreferencesIdentifier(
     override val algorithm: String,
     override val method: String,
     override val keyReference: String,
-    private val keyStore: EncryptedKeyStore
+    private val keyStore: EncryptedKeyStore,
+    private val keyId: String
 ) : HolderIdentifier {
 
     override fun sign(data: ByteArray): ByteArray {
-        val privateKey = keyStore.getKey(keyReference).toECKey()
+        val privateKey = keyStore.getKey(keyId).toECKey()
         val jwsHeader = JWSHeader.Builder(JWSAlgorithm(algorithm)).build()
         val ecdsaSigner = ECDSASigner(privateKey)
         return ecdsaSigner.sign(jwsHeader, data).decode()

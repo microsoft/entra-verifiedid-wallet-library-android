@@ -28,8 +28,9 @@ class EncryptedSharedPreferencesIdentifierTest {
             id = "id",
             algorithm = "ES256K",
             method = "method",
-            keyReference = "keyReferenceTest1",
-            keyStore = keyStore
+            keyReference = "main",
+            keyStore = keyStore,
+            keyId = "keyReferenceTest1"
         )
         val jwsHeader = JwsHeaderFormatter.formatHeader(encryptedSharedPreferencesIdentifier)
         val testData = "{\"iss\":\"joe\",\n" +
@@ -56,8 +57,9 @@ class EncryptedSharedPreferencesIdentifierTest {
             id = "id",
             algorithm = "ES256",
             method = "method",
-            keyReference = "keyReferenceTest1",
-            keyStore = keyStore
+            keyReference = "main",
+            keyStore = keyStore,
+            keyId = "keyReferenceTest1"
         )
         val jwsHeader = JwsHeaderFormatter.formatHeader(encryptedSharedPreferencesIdentifier)
         val testData = "{\"iss\":\"joe\",\n" +
