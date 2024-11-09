@@ -8,13 +8,15 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.d
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
-import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.TokenSigner
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
+import com.microsoft.walletlibrary.mappings.identifier.toHolderIdentifier
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeVerifiedIdRequirement
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.spyk
 import kotlinx.serialization.json.Json
 import org.junit.Test
 import java.util.Date
@@ -50,14 +52,14 @@ internal class PresentationExchangeSubmissionGroupTest {
     }
 
     // Arrange
-    val identifier: Identifier = Identifier(
+    val identifier = Identifier(
         "did:example:mockabcdefghi1234567890",
         "sig",
         "enc",
         "sig",
         "sig",
         "mock"
-    )
+    ).toHolderIdentifier(mockk())
 
     val correctVerifiedId = makeVerifiedId(identifier.id)
 
@@ -153,8 +155,14 @@ internal class PresentationExchangeSubmissionGroupTest {
     @Test
     fun getPresentationSubmissionMap_correctlyMapsRequirements() {
         // Arrange
-        val group = PresentationExchangeSubmissionGroup(identifier)
+        val group = spyk(PresentationExchangeSubmissionGroup(identifier), recordPrivateCalls = true)
         group.include(defaultRequirement, "expected")
+        every {
+            group["createAndSignToken"](
+                any<HolderIdentifier>(),
+                any<String>()
+            )
+        } returns "expected"
         // Act
         val submissionIndex = (0..20).random()
         val submissionDescriptors = group.getPresentationSubmissionMap(submissionIndex)
@@ -172,20 +180,23 @@ internal class PresentationExchangeSubmissionGroupTest {
     @Test
     fun getVerifiablePresentation_createsVP() {
         // Arrange
-        val group = PresentationExchangeSubmissionGroup(identifier)
-        val signer = mockk<TokenSigner>()
+        val group = spyk(PresentationExchangeSubmissionGroup(identifier), recordPrivateCalls = true)
         val serializer = Json
         val validityInterval = 1
         val audience = "did:example:testcase"
         val nonce = (0..256).random().toString()
         val payload = slot<String>()
-        val subject = slot<Identifier>()
-        every { signer.signWithIdentifier( capture(payload), capture(subject) )} returns "expected"
+        val subject = slot<HolderIdentifier>()
         group.include(defaultRequirement, "foobar")
+        every {
+            group["createAndSignToken"](
+                capture(subject),
+                capture(payload)
+            )
+        } returns "expected"
 
         // Act/Assert
         assertEquals(group.getVerifiablePresentation(
-            signer,
             serializer,
             validityInterval,
             audience,

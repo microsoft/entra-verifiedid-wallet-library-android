@@ -4,6 +4,7 @@ package com.microsoft.walletlibrary.did.sdk.crypto
 
 import com.microsoft.walletlibrary.did.sdk.crypto.spi.EcPairwisePrivateKeySpec
 import com.microsoft.walletlibrary.did.sdk.crypto.spi.EcPairwisePublicKeySpec
+import com.microsoft.walletlibrary.identifier.KeyGenAlgorithms
 import com.nimbusds.jose.jwk.Curve
 import java.math.BigInteger
 import java.security.spec.AlgorithmParameterSpec
@@ -28,21 +29,21 @@ internal abstract class PrivateKeyFactoryAlgorithm(val name: String, val provide
         PrivateKeyFactoryAlgorithm("ecPairwise", "DID", ecPairwisePrivateKeySpec)
 
     class Secp256k1(s: BigInteger) :
-        PrivateKeyFactoryAlgorithm("EC", null, ECPrivateKeySpec(s, Curve.SECP256K1.toECParameterSpec()))
+        PrivateKeyFactoryAlgorithm(KeyGenAlgorithms.EC.name, null, ECPrivateKeySpec(s, Curve.SECP256K1.toECParameterSpec()))
 }
 
 internal abstract class PublicKeyFactoryAlgorithm(val name: String, val provider: String?, val keySpec: KeySpec) {
     class Secp256k1(x: BigInteger, y: BigInteger) :
-        PublicKeyFactoryAlgorithm("EC", null, ECPublicKeySpec(ECPoint(x, y), Curve.SECP256K1.toECParameterSpec()))
+        PublicKeyFactoryAlgorithm(KeyGenAlgorithms.EC.name, null, ECPublicKeySpec(ECPoint(x, y), Curve.SECP256K1.toECParameterSpec()))
 
     class EcPairwise(ecPairwisePublicKeySpec: EcPairwisePublicKeySpec) :
         PublicKeyFactoryAlgorithm("ecPairwise", "DID", ecPairwisePublicKeySpec)
 }
 
 internal abstract class KeyGenAlgorithm(val name: String, val provider: String?, val spec: AlgorithmParameterSpec) {
-    object Secp256k1 : KeyGenAlgorithm("EC", null, Curve.SECP256K1.toECParameterSpec())
+    object Secp256k1 : KeyGenAlgorithm(KeyGenAlgorithms.EC.name, null, Curve.SECP256K1.toECParameterSpec())
 
-    object P256 : KeyGenAlgorithm("EC", null, Curve.P_256.toECParameterSpec())
+    object P256 : KeyGenAlgorithm(KeyGenAlgorithms.EC.name, null, Curve.P_256.toECParameterSpec())
 }
 
 internal abstract class MacAlgorithm(val name: String, val provider: String?) {

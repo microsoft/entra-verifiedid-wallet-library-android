@@ -78,9 +78,7 @@ internal class PresentationExchangeSubmissionGroup (
                 nonce = nonce
             )
         val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
-        val jwsHeader = JwsHeaderFormatter.formatHeader(subject)
-        val jwsToken = JwsToken(serializedContents, jwsHeader)
-        return jwsToken.sign(subject)
+        return createAndSignToken(subject, serializedContents)
     }
 
     fun getPresentationSubmissionMap(presentationIndex: Int): List<PresentationSubmissionDescriptor> {
@@ -97,5 +95,11 @@ internal class PresentationExchangeSubmissionGroup (
                 )
             )
         }
+    }
+
+    private fun createAndSignToken(identifier: HolderIdentifier, jsonContent: String): String {
+        val jwsHeader = JwsHeaderFormatter.formatHeader(identifier)
+        val jwsToken = JwsToken(jsonContent, jwsHeader)
+        return jwsToken.sign(identifier)
     }
 }
