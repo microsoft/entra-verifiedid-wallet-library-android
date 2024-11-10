@@ -6,6 +6,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.toPrivateJwk
+import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyUse
 import java.util.UUID
@@ -49,7 +50,7 @@ internal class HolderIdentifierCreator(private val encryptedKeyStore: EncryptedK
         val keyGenAlgorithm = mapJWAToKeyGenAlgorithm(algorithm)
         val keyId = generateRandomKeyId()
         val privateKey =
-            CryptoOperations.generateKeyPair(keyGenAlgorithm).toPrivateJwk(keyId, use)
+            CryptoOperations.generateKeyPair(keyGenAlgorithm).toPrivateJwk(keyId, use, Curve.P_256)
         encryptedKeyStore.storeKey(keyId, privateKey)
         return privateKey.toPublicJWK()
     }

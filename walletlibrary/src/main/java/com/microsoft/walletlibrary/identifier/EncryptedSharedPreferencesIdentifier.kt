@@ -2,6 +2,7 @@
 
 package com.microsoft.walletlibrary.identifier
 
+import com.microsoft.walletlibrary.datasource.db.entities.HolderIdentifierData
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
@@ -24,5 +25,9 @@ internal class EncryptedSharedPreferencesIdentifier(
         val jwsHeader = JWSHeader.Builder(JWSAlgorithm(algorithm)).build()
         val ecdsaSigner = ECDSASigner(privateKey)
         return ecdsaSigner.sign(jwsHeader, data).decode()
+    }
+
+    internal fun convertToHolderIdentifierData(): HolderIdentifierData {
+        return HolderIdentifierData(keyId, method, algorithm, keyReference)
     }
 }

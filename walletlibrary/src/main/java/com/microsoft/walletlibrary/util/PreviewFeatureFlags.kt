@@ -18,13 +18,17 @@ data class PreviewFeatureFlags(val previewFeatureFlags: List<String> = emptyList
 
         // Feature flag to enable request processor extensions in existing processors
         const val FEATURE_FLAG_PROCESSOR_EXTENSION_SUPPORT = "ProcessorExtensionSupport"
+
+        // Feature flag to enable FIPS compliant identifier
+        const val FEATURE_FLAG_FIPS_COMPLIANT_IDENTIFIER = "FIPSCompliantIdentifier"
     }
 
     private var supportedPreviewFeatureFlags =
         mutableMapOf(FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN to false,
             FEATURE_FLAG_OPENID4VCI_PRE_AUTH to false,
             FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT to false,
-            FEATURE_FLAG_PROCESSOR_EXTENSION_SUPPORT to false)
+            FEATURE_FLAG_PROCESSOR_EXTENSION_SUPPORT to false,
+            FEATURE_FLAG_FIPS_COMPLIANT_IDENTIFIER to false)
 
     init {
         previewFeatureFlags.forEach {
