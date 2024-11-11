@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.toPrivateJwk
 import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.KeyUse
 import org.assertj.core.api.Assertions
 import org.junit.Test
@@ -21,13 +22,13 @@ class JwsTokenTest {
     @Test
     fun signToken_supplyHolderIdentifier_SignsToken() {
         // Arrange
-        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1).toPrivateJwk("keyReferenceTest1", KeyUse.SIGNATURE)
+        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.P256).toPrivateJwk("keyReferenceTest1", KeyUse.SIGNATURE, Curve.P_256)
         keyStore.storeKey("keyReferenceTest1", privateKey)
         val encryptedSharedPreferencesIdentifier = EncryptedSharedPreferencesIdentifier(
             id = "id",
-            algorithm = "ES256K",
+            algorithm = "ES256",
             method = "method",
-            keyReference = "main",
+            keyReference = "keyReferenceTest1",
             keyStore = keyStore,
             keyId = "keyReferenceTest1"
         )

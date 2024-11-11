@@ -17,11 +17,11 @@ internal class ECDSASignerWrapper(private val holderIdentifier: HolderIdentifier
     }
 
     override fun supportedJWSAlgorithms(): MutableSet<JWSAlgorithm> {
-        return mutableSetOf(JWSAlgorithm(holderIdentifier.algorithm))
+        return mutableSetOf(JWSAlgorithm("ES256K"), JWSAlgorithm("ES256"))
     }
 
     override fun sign(header: JWSHeader?, signingInput: ByteArray?): Base64URL {
-        return signingInput?.let { Base64URL.encode(holderIdentifier.sign(signingInput)) }
+        return signingInput?.let { Base64URL.encode(holderIdentifier.sign(it)) }
             ?: throw CryptoException("Data to sign is null", VerifiedIdExceptions.CRYPTO_EXCEPTION.value)
     }
 }

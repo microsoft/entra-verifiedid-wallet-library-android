@@ -28,7 +28,7 @@ class EncryptedSharedPreferencesIdentifierTest {
             id = "id",
             algorithm = "ES256K",
             method = "method",
-            keyReference = "main",
+            keyReference = "keyReferenceTest1",
             keyStore = keyStore,
             keyId = "keyReferenceTest1"
         )
@@ -57,7 +57,7 @@ class EncryptedSharedPreferencesIdentifierTest {
             id = "id",
             algorithm = "ES256",
             method = "method",
-            keyReference = "main",
+            keyReference = "keyReferenceTest1",
             keyStore = keyStore,
             keyId = "keyReferenceTest1"
         )

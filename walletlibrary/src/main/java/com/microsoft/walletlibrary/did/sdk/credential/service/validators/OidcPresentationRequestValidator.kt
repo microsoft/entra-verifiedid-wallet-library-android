@@ -29,7 +29,7 @@ internal class OidcPresentationRequestValidator @Inject constructor(private val 
         checkResponseType(request.content.responseType)
         checkScope(request.content.scope)
         checkForInputInPresentationRequest(request)
-        checkRegistrationParameters(request.content.registration)
+//        checkRegistrationParameters(request.content.registration)
         validatePinDetails(request.content.pinDetails)
     }
 

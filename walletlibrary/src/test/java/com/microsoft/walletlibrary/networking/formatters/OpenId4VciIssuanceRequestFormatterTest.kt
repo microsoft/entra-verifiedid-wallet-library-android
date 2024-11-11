@@ -56,7 +56,9 @@ class OpenId4VciIssuanceRequestFormatterTest {
             defaultTestSerializer,
             rootOfTrustResolver = null,
             mockWalletLibraryLogger,
-            mockIdentifierFactory
+            mockIdentifierFactory,
+            mockk(),
+            mockk()
         )
         openId4VciIssuanceRequestFormatter = spyk(
             OpenId4VciIssuanceRequestFormatter(libraryConfiguration),

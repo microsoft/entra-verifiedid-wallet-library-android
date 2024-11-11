@@ -12,7 +12,7 @@ internal fun Identifier.toHolderIdentifier(encryptedKeyStore: EncryptedKeyStore)
         id = id,
         algorithm = "ES256K",
         method = "did:ion",
-        keyReference = name,
+        keyReference = signatureKeyReference,
         keyStore = encryptedKeyStore,
         keyId = signatureKeyReference
     )

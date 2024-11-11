@@ -56,7 +56,9 @@ class OpenId4VciIssuanceRequestTest {
         defaultTestSerializer,
         rootOfTrustResolver = null,
         mockWalletLibraryLogger,
-        mockIdentifierFactory
+        mockIdentifierFactory,
+        mockk(),
+        mockk()
     )
     private val slot = slot<String>()
     private val mockedIdentifier: EncryptedSharedPreferencesIdentifier = mockk()

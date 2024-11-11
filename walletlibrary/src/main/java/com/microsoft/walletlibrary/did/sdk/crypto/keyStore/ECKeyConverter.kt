@@ -19,6 +19,6 @@ internal fun KeyPair.toPrivateJwk(keyId: String, keyUse: KeyUse, curve: Curve = 
 /**
  * Returns a Nimbus public JWK built from Java key material. Currently hardcoded to SECP256k1.
  */
-internal fun KeyPair.toPublicJwk(keyId: String): JWK {
-    return ECKey.Builder(Curve.SECP256K1, public as ECPublicKey).keyID(keyId).build()
+internal fun KeyPair.toPublicJwk(keyId: String, curve: Curve = Curve.SECP256K1): JWK {
+    return ECKey.Builder(curve, public as ECPublicKey).keyID(keyId).build()
 }

@@ -31,7 +31,7 @@ internal class HolderIdentifierDataRepository(val libraryConfiguration: LibraryC
     private suspend fun createNewHolderIdentifierAndStore(): HolderIdentifier {
         val holderIdentifierCreator = HolderIdentifierCreator(libraryConfiguration.keyStore)
         val holderIdentifier =
-            holderIdentifierCreator.createHolderIdentifier("", "ES256", "did:jwk")
+            holderIdentifierCreator.createHolderIdentifier("ES256", "did:jwk")
         insert(holderIdentifier.convertToHolderIdentifierData())
         return holderIdentifier
     }
@@ -39,9 +39,9 @@ internal class HolderIdentifierDataRepository(val libraryConfiguration: LibraryC
     private fun convertToHolderIdentifier(holderIdentifierData: HolderIdentifierData): HolderIdentifier {
         val holderIdentifierCreator = HolderIdentifierCreator(libraryConfiguration.keyStore)
         return holderIdentifierCreator.createHolderIdentifier(
-            holderIdentifierData.keyId,
             holderIdentifierData.algorithm,
-            holderIdentifierData.didMethod
+            holderIdentifierData.didMethod,
+            holderIdentifierData.keyId
         )
     }
 
