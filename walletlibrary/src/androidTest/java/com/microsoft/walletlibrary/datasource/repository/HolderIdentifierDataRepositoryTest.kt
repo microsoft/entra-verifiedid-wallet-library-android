@@ -7,11 +7,14 @@ import com.microsoft.walletlibrary.datasource.db.dao.HolderIdentifierDataDao
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
+import com.microsoft.walletlibrary.identifier.HolderIdentifierCreator
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.nimbusds.jose.jwk.JWK
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -65,6 +68,15 @@ class HolderIdentifierDataRepositoryTest {
             "keyId"
         ).convertToHolderIdentifierData()
         coEvery { holderIdentifierDataDao.queryAllHolderIdentifiers() } returns listOf(holderIdentifierData)
+        val mockPrivateKeyJwk = mockk<JWK>()
+        val jwkString =
+            """{"kid": "keyId", "crv": "P-256","kty": "EC","x": "acbIQiuMs3i8_uszEjJ2tpTtRM4EU3yz91PH6CdH2V0","y": "_KcyLj9vWMptnmKtm46GqDz8wf74I5LKgrl2GzH3nSE"}"""
+        val mockPublicKeyJwk = JWK.parse(jwkString)
+        mockkConstructor(HolderIdentifierCreator::class)
+        every {
+            anyConstructed<HolderIdentifierCreator>()["fetchKey"](any<String>())
+        } returns mockPrivateKeyJwk
+        every { mockPrivateKeyJwk.toPublicJWK() } returns mockPublicKeyJwk
 
         // Act
         val actualHolderIdentifier = runBlocking {

@@ -6,6 +6,7 @@
 package com.microsoft.walletlibrary.identifier
 
 import androidx.test.platform.app.InstrumentationRegistry
+import com.microsoft.walletlibrary.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyUse
@@ -30,7 +31,7 @@ class HolderIdentifierCreatorTest {
         val jwk = spyk(JWK.parse(jwkString), recordPrivateCalls = true)
         every {
             holderIdentifierCreator["generateKeyPairAndStorePrivateKey"](
-                any<String>(),
+                any<KeyGenAlgorithm>(),
                 any<KeyUse>()
             )
         } returns jwk
@@ -43,7 +44,7 @@ class HolderIdentifierCreatorTest {
         // Assert
         assertThat(actualEncryptedSharedPreferencesIdentifier.algorithm).isEqualTo("ES256")
         assertThat(actualEncryptedSharedPreferencesIdentifier.method).isEqualTo("did:jwk")
-        assertThat(actualEncryptedSharedPreferencesIdentifier.keyReference).isEqualTo("main")
+        assertThat(actualEncryptedSharedPreferencesIdentifier.keyReference).isEqualTo("0")
         assertThat(actualEncryptedSharedPreferencesIdentifier.id).isEqualTo("did:jwk:eyJjcnYiOiJQLTI1NiIsImt0eSI6IkVDIiwieCI6ImFjYklRaXVNczNpOF91c3pFakoydHBUdFJNNEVVM3l6OTFQSDZDZEgyVjAiLCJ5IjoiX0tjeUxqOXZXTXB0bm1LdG00NkdxRHo4d2Y3NEk1TEtncmwyR3pIM25TRSJ9")
     }
 
@@ -59,11 +60,11 @@ class HolderIdentifierCreatorTest {
             val jwk = spyk(JWK.parse(jwkString), recordPrivateCalls = true)
             every {
                 holderIdentifierCreator["generateKeyPairAndStorePrivateKey"](
-                    any<String>(),
+                    any<KeyGenAlgorithm>(),
                     any<KeyUse>()
                 )
             } returns jwk
-            every { jwk.keyID } returns "main"
+            every { jwk.keyID } returns "randomKeyID"
 
             // Act & Assert
             holderIdentifierCreator.createHolderIdentifier("ES256", DidMethod.DID_JWK)

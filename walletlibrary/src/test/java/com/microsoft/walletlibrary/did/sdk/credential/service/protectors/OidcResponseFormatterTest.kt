@@ -78,7 +78,6 @@ class OidcResponseFormatterTest {
         issuanceResponseFormatter = IssuanceResponseFormatter(
             defaultTestSerializer,
             mockedVerifiablePresentationFormatter,
-            mockedKeyStore
         )
         presentationResponseFormatter = PresentationResponseFormatter(
             defaultTestSerializer,

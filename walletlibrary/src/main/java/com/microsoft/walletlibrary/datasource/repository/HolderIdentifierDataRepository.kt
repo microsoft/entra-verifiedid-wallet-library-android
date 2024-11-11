@@ -3,9 +3,12 @@
 package com.microsoft.walletlibrary.datasource.repository
 
 import com.microsoft.walletlibrary.datasource.db.entities.HolderIdentifierData
+import com.microsoft.walletlibrary.identifier.DidMethod
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.identifier.HolderIdentifierCreator
+import com.microsoft.walletlibrary.util.HolderIdentifierCreationException
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
 internal class HolderIdentifierDataRepository(val libraryConfiguration: LibraryConfiguration) {
 
@@ -31,7 +34,7 @@ internal class HolderIdentifierDataRepository(val libraryConfiguration: LibraryC
     private suspend fun createNewHolderIdentifierAndStore(): HolderIdentifier {
         val holderIdentifierCreator = HolderIdentifierCreator(libraryConfiguration.keyStore)
         val holderIdentifier =
-            holderIdentifierCreator.createHolderIdentifier("ES256", "did:jwk")
+            holderIdentifierCreator.createHolderIdentifier("ES256", DidMethod.DID_JWK)
         insert(holderIdentifier.convertToHolderIdentifierData())
         return holderIdentifier
     }
@@ -40,7 +43,11 @@ internal class HolderIdentifierDataRepository(val libraryConfiguration: LibraryC
         val holderIdentifierCreator = HolderIdentifierCreator(libraryConfiguration.keyStore)
         return holderIdentifierCreator.createHolderIdentifier(
             holderIdentifierData.algorithm,
-            holderIdentifierData.didMethod,
+            DidMethod.values().find { it.value == holderIdentifierData.didMethod }
+                ?: throw HolderIdentifierCreationException(
+                    "Provided DID method is not supported",
+                    VerifiedIdExceptions.HOLDER_IDENTIFIER_EXCEPTION.value
+                ),
             holderIdentifierData.keyId
         )
     }

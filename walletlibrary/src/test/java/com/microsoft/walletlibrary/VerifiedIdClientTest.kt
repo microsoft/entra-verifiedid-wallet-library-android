@@ -17,6 +17,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.d
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.Logo
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
+import com.microsoft.walletlibrary.identifier.DidMethod
 import com.microsoft.walletlibrary.requests.ManifestIssuanceRequest
 import com.microsoft.walletlibrary.requests.OpenIdPresentationRequest
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
@@ -452,5 +453,12 @@ class VerifiedIdClientTest {
         assertThat(actualDecodedVc.isSuccess).isFalse
         assertThat(actualVc).isNotNull
         assertThat(actualVc).isInstanceOf(MalformedInputException::class.java)
+    }
+
+    @Test
+    fun test() {
+        val method = "did:jwk"
+        val mapped = DidMethod.values().find { it.value == method }
+        assertThat(mapped).isEqualTo(DidMethod.DID_JWK)
     }
 }
