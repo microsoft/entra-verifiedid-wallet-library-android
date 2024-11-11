@@ -34,7 +34,7 @@ object VerifiedIdRequester {
             is Result.Failure -> {
                 throw VerifiedIdResponseCompletionException(
                     "Unable to complete issuance response",
-                    result.payload.cause
+                    result.payload
                 )
             }
         }
