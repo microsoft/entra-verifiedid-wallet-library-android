@@ -3,16 +3,20 @@
 package com.microsoft.walletlibrary.datasource.repository
 
 import com.microsoft.walletlibrary.datasource.db.entities.HolderIdentifierData
+import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.identifier.DidMethod
+import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifierCreator
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
-import com.microsoft.walletlibrary.identifier.HolderIdentifierCreator
 import com.microsoft.walletlibrary.util.HolderIdentifierCreationException
-import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
-internal class HolderIdentifierDataRepository(val libraryConfiguration: LibraryConfiguration) {
+internal class HolderIdentifierDataRepository {
 
-    private val holderIdentifierDataDao = libraryConfiguration.database.holderIdentifierDataDao()
+    private val database = VerifiableCredentialSdk.identifierService.getDatabase()
+    private val holderIdentifierDataDao =  database.holderIdentifierDataDao()
+
+    private val keyStore = VerifiableCredentialSdk.identifierService.getKeyStore()
+    private val holderIdentifierCreator = EncryptedSharedPreferencesIdentifierCreator(keyStore)
 
     private suspend fun insert(holderIdentifier: HolderIdentifierData) =
         holderIdentifierDataDao.insert(holderIdentifier)
@@ -32,7 +36,6 @@ internal class HolderIdentifierDataRepository(val libraryConfiguration: LibraryC
     }
 
     private suspend fun createNewHolderIdentifierAndStore(): HolderIdentifier {
-        val holderIdentifierCreator = HolderIdentifierCreator(libraryConfiguration.keyStore)
         val holderIdentifier =
             holderIdentifierCreator.createHolderIdentifier("ES256", DidMethod.DID_JWK)
         insert(holderIdentifier.convertToHolderIdentifierData())
@@ -40,7 +43,6 @@ internal class HolderIdentifierDataRepository(val libraryConfiguration: LibraryC
     }
 
     private fun convertToHolderIdentifier(holderIdentifierData: HolderIdentifierData): HolderIdentifier {
-        val holderIdentifierCreator = HolderIdentifierCreator(libraryConfiguration.keyStore)
         return holderIdentifierCreator.createHolderIdentifier(
             holderIdentifierData.algorithm,
             DidMethod.values().find { it.value == holderIdentifierData.didMethod }
@@ -51,6 +53,4 @@ internal class HolderIdentifierDataRepository(val libraryConfiguration: LibraryC
             holderIdentifierData.keyId
         )
     }
-
-
 }

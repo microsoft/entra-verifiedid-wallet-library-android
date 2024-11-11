@@ -28,7 +28,8 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : V
             PreviewFeatureFlags.FEATURE_FLAG_PROCESSOR_EXTENSION_SUPPORT,
             PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT,
             PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN,
-            PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_PRE_AUTH
+            PreviewFeatureFlags.FEATURE_FLAG_OPENID4VCI_PRE_AUTH,
+            PreviewFeatureFlags.FEATURE_FLAG_FIPS_COMPLIANT_IDENTIFIER
         ))
         .with(ExampleExtension())
         verifiedIdClient = builder.build()

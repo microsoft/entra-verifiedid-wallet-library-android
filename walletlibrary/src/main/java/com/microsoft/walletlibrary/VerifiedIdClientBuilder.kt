@@ -231,7 +231,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
     }
 
     private suspend fun getMainHolderIdentifier(libraryConfiguration: LibraryConfiguration): HolderIdentifier {
-        val holderIdentifierDataRepository = HolderIdentifierDataRepository(libraryConfiguration)
+        val holderIdentifierDataRepository = HolderIdentifierDataRepository()
         return holderIdentifierDataRepository.getMainHolderIdentifier()
     }
 
