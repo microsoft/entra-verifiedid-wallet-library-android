@@ -1,9 +1,11 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/**---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 package com.microsoft.walletlibrary.identifier
 
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.walletlibrary.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyUse
@@ -36,7 +38,7 @@ class HolderIdentifierCreatorTest {
 
         // Act
         val actualEncryptedSharedPreferencesIdentifier =
-            holderIdentifierCreator.createHolderIdentifier("main", "ES256", "did:jwk")
+            holderIdentifierCreator.createHolderIdentifier("ES256", DidMethod.DID_JWK)
 
         // Assert
         assertThat(actualEncryptedSharedPreferencesIdentifier.algorithm).isEqualTo("ES256")
@@ -56,16 +58,15 @@ class HolderIdentifierCreatorTest {
         assertThatThrownBy {
             val jwk = spyk(JWK.parse(jwkString), recordPrivateCalls = true)
             every {
-                holderIdentifierCreator["generateAndStoreKeyPair"](
+                holderIdentifierCreator["generateKeyPairAndStorePrivateKey"](
                     any<String>(),
-                    any<KeyGenAlgorithm>(),
                     any<KeyUse>()
                 )
             } returns jwk
-            every { jwk.keyID } returns "randomKeyID"
+            every { jwk.keyID } returns "main"
 
             // Act & Assert
-            holderIdentifierCreator.createHolderIdentifier("main", "ES256", "did:jwk")
+            holderIdentifierCreator.createHolderIdentifier("ES256", DidMethod.DID_JWK)
         }
             .isInstanceOf(ParseException::class.java)
             .hasMessage("Invalid EC JWK: The 'x' and 'y' public coordinates are not on the P-256 curve")

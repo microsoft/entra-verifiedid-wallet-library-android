@@ -1,4 +1,7 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/**---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 package com.microsoft.walletlibrary.identifier
 
@@ -6,6 +9,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.toPrivateJwk
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.KeyStoreException
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyUse
@@ -13,29 +17,30 @@ import java.util.UUID
 
 internal class HolderIdentifierCreator(private val encryptedKeyStore: EncryptedKeyStore) {
 
+    /**
+     * Creates a Holder Identifier based on the provided parameters.
+     * @param algorithm The algorithm to use for cryptographic operations
+     * @param didMethod The method for creating the DID (eg. did:jwk)
+     * @param keyId The reference to the key in the keyStore
+     * @return The Holder Identifier with the provided parameters.
+     */
     fun createHolderIdentifier(
         algorithm: String,
-        didMethod: String,
+        didMethod: DidMethod,
         keyId: String? = null
     ): EncryptedSharedPreferencesIdentifier {
-        val signingPublicKeyJwk = keyId?.let { fetchKey(it).toPublicJWK() } ?: generateKeyPairAndStorePrivateKey(algorithm)
+        val keyGenAlgorithm = JsonWebAlgorithm.values().find { it.name == algorithm }?.value ?: throw IllegalArgumentException("Unsupported algorithm")
+        val signingPublicKeyJwk = keyId?.let { fetchKey(it).toPublicJWK() } ?: generateKeyPairAndStorePrivateKey(keyGenAlgorithm)
         val did = DidCreator.createDid(signingPublicKeyJwk, didMethod)
         // Key Reference is always 0 for did:jwk DIDs.
         return EncryptedSharedPreferencesIdentifier(
             did,
             algorithm,
-            didMethod,
+            didMethod.value,
             "0",
             encryptedKeyStore,
             signingPublicKeyJwk.keyID
         )
-    }
-
-    private fun mapJWAToKeyGenAlgorithm(jwa: String): KeyGenAlgorithm {
-        return when (jwa) {
-            "ES256" -> KeyGenAlgorithm.P256
-            else -> throw IllegalArgumentException("Unsupported algorithm")
-        }
     }
 
     /**
@@ -44,10 +49,9 @@ internal class HolderIdentifierCreator(private val encryptedKeyStore: EncryptedK
      * @return returns the public Key in JWK format
      */
     private fun generateKeyPairAndStorePrivateKey(
-        algorithm: String,
+        keyGenAlgorithm: KeyGenAlgorithm = KeyGenAlgorithm.P256,
         use: KeyUse = KeyUse.SIGNATURE
     ): JWK {
-        val keyGenAlgorithm = mapJWAToKeyGenAlgorithm(algorithm)
         val keyId = generateRandomKeyId()
         val privateKey =
             CryptoOperations.generateKeyPair(keyGenAlgorithm).toPrivateJwk(keyId, use, Curve.P_256)
