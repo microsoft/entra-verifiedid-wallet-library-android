@@ -13,6 +13,9 @@ import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.util.HolderIdentifierCreationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
+/**
+ * Repository for managing Holder Identifier data in the database. It stores and retrieves the holder identifier data.
+ */
 internal class HolderIdentifierDataRepository {
 
     private val database = VerifiableCredentialSdk.identifierService.getDatabase()
@@ -27,7 +30,8 @@ internal class HolderIdentifierDataRepository {
     private suspend fun queryAllHolderIdentifierData(): List<HolderIdentifierData> =
         holderIdentifierDataDao.queryAllHolderIdentifiers()
 
-    suspend fun getMainHolderIdentifier(): HolderIdentifier {
+    // Get the main holder identifier from the database. If no holder identifier is created, creates a new one.
+    internal suspend fun getMainHolderIdentifier(): HolderIdentifier {
         val savedHolderIdentifier = queryAllHolderIdentifierData().firstOrNull()
         return if (savedHolderIdentifier != null) {
             // Convert the data to a HolderIdentifier object and return it.

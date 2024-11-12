@@ -9,12 +9,19 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
+/**
+ * Metadata about a holder identifier and the key that is tied to it.
+ */
 @Entity
 @Serializable
 internal data class HolderIdentifierData (
+    // The UUID of the private key in the encrypted shared preferences.
     @PrimaryKey
     val keyId: String,
+    // The DID method used to create the DID.
     val didMethod: String,
+    // The algorithm of the key used for cryptographic operations.
     val algorithm: String,
+    // The reference to the key that is used for cryptographic operations.
     val keyReference: String
 )
