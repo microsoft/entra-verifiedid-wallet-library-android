@@ -34,7 +34,7 @@ object SdkDbMigrations {
         object : Migration(2, 3) {
             @Suppress("MaxLineLength")
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("CREATE TABLE IF NOT EXISTS `HolderIdentifierData` (`keyId` TEXT NOT NULL, `didMethod` TEXT NOT NULL, `algorithm` TEXT NOT NULL, `keyReference` TEXT NOT NULL, PRIMARY KEY(`keyId`))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `HolderIdentifierData` (`keyId` TEXT NOT NULL, `id` TEXT NOT NULL, `didMethod` TEXT NOT NULL, `algorithm` TEXT NOT NULL, `keyReference` TEXT NOT NULL, PRIMARY KEY(`keyId`))")
             }
         }
     )

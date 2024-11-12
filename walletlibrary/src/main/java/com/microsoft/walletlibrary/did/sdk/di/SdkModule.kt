@@ -18,6 +18,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtDoma
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDatabase
+import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDbMigrations
 import com.microsoft.walletlibrary.did.sdk.datasource.network.interceptors.CorrelationVectorInterceptor
 import com.microsoft.walletlibrary.did.sdk.datasource.network.interceptors.UserAgentInterceptor
 import com.microsoft.walletlibrary.did.sdk.datasource.network.interceptors.WalletLibraryHeaderInterceptor
@@ -93,9 +94,11 @@ internal class SdkModule {
     @Provides
     @Singleton
     fun sdkDatabase(context: Context): SdkDatabase {
-        return Room.databaseBuilder(context, SdkDatabase::class.java, "vc-sdk-db")
-            .fallbackToDestructiveMigration() // TODO: Remove during public preview
-            .build()
+        val dbBuilder = Room.databaseBuilder(context, SdkDatabase::class.java, "vc-sdk-db")
+        SdkDbMigrations.MIGRATIONS.forEach {
+            dbBuilder.addMigrations(it)
+        }
+        return dbBuilder.build()
     }
 
     @Provides
