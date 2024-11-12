@@ -21,7 +21,7 @@ internal class Resolver @Inject constructor(
                 it.didDocument
             }
             .onFailure {
-                return Result.failure(ResolverException("Unable to resolve identifier $identifier", it.cause))
+                return Result.failure(ResolverException("Unable to resolve identifier $identifier", it))
             }
     }
 }

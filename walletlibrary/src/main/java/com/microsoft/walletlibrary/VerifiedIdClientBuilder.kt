@@ -133,9 +133,6 @@ class VerifiedIdClientBuilder(private val context: Context) {
             ),
             jsonSerializer
         )
-
-        val keyStore = VerifiableCredentialSdk.identifierService.getKeyStore()
-        val database = VerifiableCredentialSdk.identifierService.getDatabase()
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
         val identifierFactory = IdentifierFactory()
         val libraryConfiguration =
@@ -145,9 +142,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
                 jsonSerializer,
                 rootOfTrustResolver,
                 logger,
-                identifierFactory,
-                database,
-                keyStore
+                identifierFactory
             )
         runBlocking {
             fetchAllHolderIdentifiers(libraryConfiguration)
@@ -212,13 +207,13 @@ class VerifiedIdClientBuilder(private val context: Context) {
         }
     }
 
-    private suspend fun getDefaultIdentifier(keyStore: EncryptedKeyStore): HolderIdentifier? {
+    private suspend fun getDefaultIdentifier(): HolderIdentifier? {
         val identifier =
             when (val defaultIdentifier =
                 VerifiableCredentialSdk.identifierService.getMasterIdentifier()) {
                 is Result.Success -> {
                     defaultIdentifier.payload.toHolderIdentifier(
-                        keyStore
+                        VerifiableCredentialSdk.identifierService.getKeyStore()
                     )
                 }
 
@@ -230,16 +225,16 @@ class VerifiedIdClientBuilder(private val context: Context) {
         return identifier
     }
 
-    private suspend fun getMainHolderIdentifier(libraryConfiguration: LibraryConfiguration): HolderIdentifier {
+    private suspend fun getMainHolderIdentifier(): HolderIdentifier {
         val holderIdentifierDataRepository = HolderIdentifierDataRepository()
         return holderIdentifierDataRepository.getMainHolderIdentifier()
     }
 
     private suspend fun fetchAllHolderIdentifiers(libraryConfiguration: LibraryConfiguration) {
         if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_FIPS_COMPLIANT_IDENTIFIER)) {
-            identifiers.add(getMainHolderIdentifier(libraryConfiguration))
+            identifiers.add(getMainHolderIdentifier())
         } else {
-            val defaultHolderIdentifier = getDefaultIdentifier(libraryConfiguration.keyStore)
+            val defaultHolderIdentifier = getDefaultIdentifier()
             defaultHolderIdentifier?.let { identifiers.add(it) }
                 ?: SdkLog.e("Unable to fetch default holder identifier")
         }

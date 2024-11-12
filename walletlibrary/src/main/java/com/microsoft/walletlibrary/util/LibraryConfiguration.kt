@@ -1,7 +1,5 @@
 package com.microsoft.walletlibrary.util
 
-import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.identifier.IdentifierFactory
@@ -16,9 +14,7 @@ internal class LibraryConfiguration(
     val serializer: Json,
     val rootOfTrustResolver: RootOfTrustResolver? = null,
     val logger: WalletLibraryLogger,
-    val identifierFactory: IdentifierFactory,
-    val database: SdkDatabase,
-    val keyStore: EncryptedKeyStore
+    val identifierFactory: IdentifierFactory
 ) {
 
     // Determine if a preview feature is enabled.

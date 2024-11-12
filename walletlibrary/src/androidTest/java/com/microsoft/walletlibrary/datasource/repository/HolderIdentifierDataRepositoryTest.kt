@@ -10,7 +10,6 @@ import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifierCreator
-import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.nimbusds.jose.jwk.JWK
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -28,7 +27,6 @@ class HolderIdentifierDataRepositoryTest {
         EncryptedKeyStore(InstrumentationRegistry.getInstrumentation().targetContext)
     private var holderIdentifierDataRepository: HolderIdentifierDataRepository
     private val holderIdentifierDataDao: HolderIdentifierDataDao = mockk()
-    private val mockLibraryConfiguration: LibraryConfiguration = mockk()
 
     init {
         val sdkDatabase: SdkDatabase = mockk()
@@ -38,8 +36,6 @@ class HolderIdentifierDataRepositoryTest {
         coEvery { mockIdentifierService.getDatabase() } returns sdkDatabase
         coEvery { mockIdentifierService.getKeyStore() } returns keyStore
         every { sdkDatabase.holderIdentifierDataDao() } returns holderIdentifierDataDao
-        every { mockLibraryConfiguration.database } returns sdkDatabase
-        every { mockLibraryConfiguration.keyStore } returns keyStore
         val mockPrivateKeyJwk = mockk<JWK>()
         val jwkString =
             """{"kid": "keyId", "crv": "P-256","kty": "EC","x": "acbIQiuMs3i8_uszEjJ2tpTtRM4EU3yz91PH6CdH2V0","y": "_KcyLj9vWMptnmKtm46GqDz8wf74I5LKgrl2GzH3nSE"}"""

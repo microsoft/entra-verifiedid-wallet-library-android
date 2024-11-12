@@ -14,8 +14,6 @@ internal class LibraryConfigurationTest {
             mockk(),
             mockk(),
             mockk(),
-            mockk(),
-            mockk(),
             mockk()
         )
         assertThat(libraryConfiguration.isPreviewFeatureEnabled("OpenID4VCIAccessToken")).isEqualTo(
@@ -28,8 +26,6 @@ internal class LibraryConfigurationTest {
         val libraryConfiguration =
             LibraryConfiguration(
                 PreviewFeatureFlags(),
-                mockk(),
-                mockk(),
                 mockk(),
                 mockk(),
                 mockk(),
