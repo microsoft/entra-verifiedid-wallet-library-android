@@ -57,7 +57,8 @@ internal class HolderIdentifierDataRepository {
                     "Provided DID method is not supported",
                     VerifiedIdExceptions.HOLDER_IDENTIFIER_EXCEPTION.value
                 ),
-            holderIdentifierData.keyId
+            holderIdentifierData.keyId,
+            holderIdentifierData.id
         )
     }
 }

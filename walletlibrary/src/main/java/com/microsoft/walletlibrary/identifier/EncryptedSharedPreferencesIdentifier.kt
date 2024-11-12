@@ -32,7 +32,7 @@ internal class EncryptedSharedPreferencesIdentifier(
     }
 
     internal fun convertToHolderIdentifierData(): HolderIdentifierData {
-        return HolderIdentifierData(keyId, method, algorithm, keyReference)
+        return HolderIdentifierData(keyId, id, method, algorithm, keyReference)
     }
 
     override fun getPublicKey(): JWK {

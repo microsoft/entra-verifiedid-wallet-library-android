@@ -27,7 +27,8 @@ internal class EncryptedSharedPreferencesIdentifierCreator(private val encrypted
     override fun createHolderIdentifier(
         algorithm: String,
         didMethod: DidMethod,
-        keyId: String?
+        keyId: String?,
+        id: String?
     ): EncryptedSharedPreferencesIdentifier {
         val keyGenAlgorithm = JsonWebAlgorithm.values().find { it.name == algorithm }?.value
             ?: throw IllegalArgumentException("Unsupported algorithm")
@@ -35,7 +36,7 @@ internal class EncryptedSharedPreferencesIdentifierCreator(private val encrypted
             keyId?.let { fetchKey(it).toPublicJWK() } ?: generateKeyPairAndStorePrivateKey(
                 keyGenAlgorithm
             )
-        val did = DidCreator.createDid(signingPublicKeyJwk, didMethod)
+        val did = id ?: DidCreator.createDid(signingPublicKeyJwk, didMethod)
         // Key Reference is always 0 for did:jwk DIDs.
         return EncryptedSharedPreferencesIdentifier(
             did,

@@ -16,6 +16,7 @@ internal interface HolderIdentifierCreator {
     fun createHolderIdentifier(
         algorithm: String,
         didMethod: DidMethod,
-        keyId: String? = null
+        keyId: String? = null,
+        id: String? = null
     ): HolderIdentifier
 }

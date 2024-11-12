@@ -18,6 +18,8 @@ internal data class HolderIdentifierData (
     // The UUID of the private key in the encrypted shared preferences.
     @PrimaryKey
     val keyId: String,
+    // The unique identifier of the holder used for the Verified ID.
+    val id: String,
     // The DID method used to create the DID.
     val didMethod: String,
     // The algorithm of the key used for cryptographic operations.
