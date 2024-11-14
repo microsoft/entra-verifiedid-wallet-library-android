@@ -15,6 +15,7 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.payload.Registratio
 import com.microsoft.walletlibrary.did.sdk.identifier.models.payload.SuffixData
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.Constants.AES_KEY
+import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyUse
 import kotlinx.serialization.json.Json
@@ -66,7 +67,7 @@ internal class IdentifierCreator @Inject constructor(
      */
     private fun generateAndStoreKeyPair(use: KeyUse = KeyUse.SIGNATURE, keyGenAlgorithm: KeyGenAlgorithm = KeyGenAlgorithm.Secp256k1): JWK {
         val keyId = generateRandomKeyId()
-        val privateKey = CryptoOperations.generateKeyPair(keyGenAlgorithm).toPrivateJwk(keyId, use)
+        val privateKey = CryptoOperations.generateKeyPair(keyGenAlgorithm).toPrivateJwk(keyId, use, Curve.SECP256K1)
         keyStore.storeKey(keyId, privateKey)
         return privateKey.toPublicJWK()
     }

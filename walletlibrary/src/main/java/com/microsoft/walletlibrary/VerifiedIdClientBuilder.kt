@@ -216,6 +216,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
                         VerifiableCredentialSdk.identifierService.getKeyStore()
                     )
                 }
+
                 is Result.Failure -> {
                     SdkLog.e("Unable to fetch master identifier")
                     null
