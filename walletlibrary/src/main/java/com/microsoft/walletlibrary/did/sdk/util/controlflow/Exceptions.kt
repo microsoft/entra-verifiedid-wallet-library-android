@@ -91,7 +91,7 @@ internal class ClientException(message: String, retryable: Boolean) : NetworkExc
 
 internal class ForbiddenException(message: String, retryable: Boolean) : NetworkException(message, retryable)
 
-internal class NotFoundException(message: String, retryable: Boolean) : NetworkException(message, retryable)
+//internal class NotFoundException(message: String, retryable: Boolean) : NetworkException(message, retryable)
 
 internal class UnauthorizedException(message: String, retryable: Boolean) : NetworkException(message, retryable)
 

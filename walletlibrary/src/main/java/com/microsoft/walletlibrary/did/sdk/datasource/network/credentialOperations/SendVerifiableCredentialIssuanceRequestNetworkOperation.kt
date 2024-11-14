@@ -15,6 +15,8 @@ import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ForbiddenException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidPinException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
+import com.microsoft.walletlibrary.util.NetworkingException
+import com.microsoft.walletlibrary.util.VerifiedIdException
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
 
@@ -48,6 +50,7 @@ internal class SendVerifiableCredentialIssuanceRequestNetworkOperation(
                         return Result.failure(invalidPinException)
                     }
                 }
+                is NetworkingException -> return Result.failure(exception)
             }
         }
     }
