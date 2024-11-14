@@ -23,10 +23,10 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentatio
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
-import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
-import com.microsoft.walletlibrary.identifier.HolderIdentifier
+import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.mappings.presentation.addRequirements
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import io.mockk.every
@@ -42,8 +42,8 @@ class PresentationResponseFormatterTest {
     private val formatter: PresentationResponseFormatter =
         PresentationResponseFormatter(defaultTestSerializer, vpFormatter)
 
-    private val mockedIdentifier: HolderIdentifier = mockk()
-    private val slot = slot<String>()
+    private val mockedIdentifier: EncryptedSharedPreferencesIdentifier = mockk()
+    private val slot = slot<ByteArray>()
     private val signingKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
     private val expectedAudience: String = "audience2432"
@@ -68,7 +68,8 @@ class PresentationResponseFormatterTest {
     init {
         every { mockedIdentifier.id } returns expectedDid
         every { mockedIdentifier.keyReference } returns signingKeyRef
-        every { mockedIdentifier.sign(capture(slot).toByteArray()) } answers { slot.captured.toByteArray() }
+        every { mockedIdentifier.algorithm } returns "ES256K"
+        every { mockedIdentifier.sign(capture(slot)) } answers { slot.captured }
     }
 
     @Before
@@ -197,8 +198,9 @@ class PresentationResponseFormatterTest {
         assertThat(tokens.second.first().length).isGreaterThan(0)
         // serializer can do some magic for us on array or object so search for
         // beginning of vp_token declaration. This should be an object.
-        assertThat(tokens.first).contains("\"_vp_token\":{")
-        val actualIdToken = defaultTestSerializer.decodeFromString(PresentationResponseClaims.serializer(), tokens.first)
+        val idToken = JwsToken.deserialize(tokens.first).content()
+        assertThat(idToken).contains("\"_vp_token\":{")
+        val actualIdToken = defaultTestSerializer.decodeFromString(PresentationResponseClaims.serializer(), idToken)
         assertThat(actualIdToken.nonce).isEqualTo(expectedNonce)
         assertThat(actualIdToken.audience).isEqualTo(expectedAudience)
         assertThat(actualIdToken.subject).isEqualTo(expectedDid)
@@ -211,7 +213,8 @@ class PresentationResponseFormatterTest {
         assertThat(presentationSubmission.idFromPresentationRequest).isEqualTo(firstInputDefinitionId)
         assertThat(presentationSubmission.pathNested?.path).isEqualTo("$.verifiableCredential[0]")
 
-        val vpToken = defaultTestSerializer.decodeFromString(VerifiablePresentationContent.serializer(), tokens.second.first())
+        val firstVpToken = JwsToken.deserialize(tokens.second.first()).content()
+        val vpToken = defaultTestSerializer.decodeFromString(VerifiablePresentationContent.serializer(), firstVpToken)
         assertThat(vpToken.audience).isEqualTo(expectedAudience)
         assertThat(vpToken.nonce).isEqualTo(expectedNonce)
         assertThat(vpToken.issuerOfVp).isEqualTo(expectedDid)
@@ -294,8 +297,9 @@ class PresentationResponseFormatterTest {
         assertThat(tokens.second.first().length).isGreaterThan(0)
         // serializer can do some magic for us on array or object so search for
         // beginning of vp_token declaration. This should be an array of objects.
-        assertThat(tokens.first).contains("\"_vp_token\":[{")
-        val actualIdToken = defaultTestSerializer.decodeFromString(PresentationResponseClaims.serializer(), tokens.first)
+        val idToken = JwsToken.deserialize(tokens.first).content()
+        assertThat(idToken).contains("\"_vp_token\":[{")
+        val actualIdToken = defaultTestSerializer.decodeFromString(PresentationResponseClaims.serializer(), idToken)
         assertThat(actualIdToken.nonce).isEqualTo(expectedNonce)
         assertThat(actualIdToken.audience).isEqualTo(expectedAudience)
         assertThat(actualIdToken.subject).isEqualTo(expectedDid)
@@ -315,7 +319,8 @@ class PresentationResponseFormatterTest {
         assertThat(presentationSubmissionTwo.idFromPresentationRequest).isEqualTo(secondInputDefinitionId)
         assertThat(presentationSubmissionTwo.pathNested?.path).isEqualTo("$.verifiableCredential[0]")
 
-        val vpTokenOne = defaultTestSerializer.decodeFromString(VerifiablePresentationContent.serializer(), tokens.second[0])
+        val firstVpToken = JwsToken.deserialize(tokens.second[0]).content()
+        val vpTokenOne = defaultTestSerializer.decodeFromString(VerifiablePresentationContent.serializer(), firstVpToken)
         assertThat(vpTokenOne.audience).isEqualTo(expectedAudience)
         assertThat(vpTokenOne.nonce).isEqualTo(expectedNonce)
         assertThat(vpTokenOne.issuerOfVp).isEqualTo(expectedDid)
@@ -324,7 +329,8 @@ class PresentationResponseFormatterTest {
         assertThat(vpTokenOne.verifiablePresentation.verifiableCredential.size).isEqualTo(1)
         assertThat(vpTokenOne.verifiablePresentation.verifiableCredential[0]).isEqualTo(expectedVCRawOne)
 
-        val vpTokenTwo = defaultTestSerializer.decodeFromString(VerifiablePresentationContent.serializer(), tokens.second[1])
+        val secondVpToken = JwsToken.deserialize(tokens.second[1]).content()
+        val vpTokenTwo = defaultTestSerializer.decodeFromString(VerifiablePresentationContent.serializer(), secondVpToken)
         assertThat(vpTokenTwo.audience).isEqualTo(expectedAudience)
         assertThat(vpTokenTwo.nonce).isEqualTo(expectedNonce)
         assertThat(vpTokenTwo.issuerOfVp).isEqualTo(expectedDid)
@@ -396,8 +402,9 @@ class PresentationResponseFormatterTest {
         assertThat(tokens.second.first().length).isGreaterThan(0)
         // serializer can do some magic for us on array or object so search for
         // beginning of vp_token declaration. This should be an object.
-        assertThat(tokens.first).contains("\"_vp_token\":{")
-        val actualIdToken = defaultTestSerializer.decodeFromString(PresentationResponseClaims.serializer(), tokens.first)
+        val idToken = JwsToken.deserialize(tokens.first).content()
+        assertThat(idToken).contains("\"_vp_token\":{")
+        val actualIdToken = defaultTestSerializer.decodeFromString(PresentationResponseClaims.serializer(), idToken)
         assertThat(actualIdToken.nonce).isEqualTo(expectedNonce)
         assertThat(actualIdToken.audience).isEqualTo(expectedAudience)
         assertThat(actualIdToken.subject).isEqualTo(expectedDid)
@@ -414,7 +421,8 @@ class PresentationResponseFormatterTest {
         assertThat(presentationSubmissionTwo.idFromPresentationRequest).isEqualTo(secondInputDefinitionId)
         assertThat(presentationSubmissionTwo.pathNested?.path).isEqualTo("$.verifiableCredential[1]")
 
-        val vpTokenOne = defaultTestSerializer.decodeFromString(VerifiablePresentationContent.serializer(), tokens.second[0])
+        val firstVpToken = JwsToken.deserialize(tokens.second[0]).content()
+        val vpTokenOne = defaultTestSerializer.decodeFromString(VerifiablePresentationContent.serializer(), firstVpToken)
         assertThat(vpTokenOne.audience).isEqualTo(expectedAudience)
         assertThat(vpTokenOne.nonce).isEqualTo(expectedNonce)
         assertThat(vpTokenOne.issuerOfVp).isEqualTo(expectedDid)

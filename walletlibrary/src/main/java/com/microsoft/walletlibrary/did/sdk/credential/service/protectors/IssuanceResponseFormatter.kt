@@ -18,6 +18,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.DigestAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
+import com.microsoft.walletlibrary.identifier.JWKRepresentation
 import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
@@ -26,8 +27,7 @@ import javax.inject.Singleton
 @Singleton
 internal class IssuanceResponseFormatter @Inject constructor(
     private val serializer: Json,
-    private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
-    private val keyStore: EncryptedKeyStore
+    private val verifiablePresentationFormatter: VerifiablePresentationFormatter
 ) {
 
     fun formatResponse(
@@ -57,13 +57,13 @@ internal class IssuanceResponseFormatter @Inject constructor(
         responseId: String,
         attestationResponse: AttestationClaimModel
     ): String {
-        val key = keyStore.getKey(responder.keyReference)
+        val publicKey = (responder as JWKRepresentation).getPublicKey()
         val contents = IssuanceResponseClaims(issuanceResponse.request.contractUrl, attestationResponse).apply {
-            subject = key.computeThumbprint().toString()
+            subject = publicKey.computeThumbprint().toString()
             audience = issuanceResponse.audience
             did = responder.id
             pin = hashIssuancePin(issuanceResponse)
-            publicKeyJwk = key.toPublicJWK()
+            publicKeyJwk = publicKey
             responseCreationTime = issuedTime
             responseExpirationTime = expiryTime
             this.responseId = responseId

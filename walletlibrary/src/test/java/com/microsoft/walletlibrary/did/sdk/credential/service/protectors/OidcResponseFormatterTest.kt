@@ -1,18 +1,20 @@
 package com.microsoft.walletlibrary.did.sdk.credential.service.protectors
 
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.walletlibrary.did.sdk.credential.service.*
-import com.microsoft.walletlibrary.did.sdk.credential.service.models.RevocationRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
+import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedIdTokenMap
+import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedSelfAttestedClaimMap
+import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationResponseClaims
-import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.RevocationResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
-import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
-import com.microsoft.walletlibrary.identifier.HolderIdentifier
+import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.nimbusds.jose.jwk.JWK
 import io.mockk.every
 import io.mockk.mockk
@@ -27,13 +29,20 @@ class OidcResponseFormatterTest {
     // mocks for retrieving public key.
     private val mockedKeyStore: EncryptedKeyStore = mockk()
 
-    private val slot = slot<String>()
+    private val slot = slot<ByteArray>()
     private val mockedVerifiablePresentationFormatter: VerifiablePresentationFormatter = mockk()
     private val mockedVc: VerifiableCredential = mockk()
-    private val mockedIdentifier: HolderIdentifier = mockk()
+    private val mockedIdentifier: EncryptedSharedPreferencesIdentifier = mockk()
 
-    private val issuanceResponseFormatter: IssuanceResponseFormatter
-    private val presentationResponseFormatter: PresentationResponseFormatter
+    private val issuanceResponseFormatter: IssuanceResponseFormatter = IssuanceResponseFormatter(
+        defaultTestSerializer,
+        mockedVerifiablePresentationFormatter,
+    )
+    private val presentationResponseFormatter: PresentationResponseFormatter =
+        PresentationResponseFormatter(
+            defaultTestSerializer,
+            mockedVerifiablePresentationFormatter
+        )
 
     private val signingKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
@@ -53,11 +62,6 @@ class OidcResponseFormatterTest {
     private val expectedIdTokenConfig = "testIdTokenConfig234"
     private val expectedCredentialType: String = "type235"
 
-    private val revocationRequest: RevocationRequest = mockk()
-    private val mockedVcRaw = "testRawVc"
-    private val expectedRevocationAudience = "audience1234"
-    private val expectedRevokedRps = listOf("did:ion:test")
-    private val expectedRevocationReason = "testing revocation"
     private val mockedPresentationResponse: PresentationResponse = mockk()
     private val mockedNonce = "123456789876"
     private val mockedState = "mockedState"
@@ -75,19 +79,10 @@ class OidcResponseFormatterTest {
     private val mockedPresentationRequest: PresentationRequest = mockk()
 
     init {
-        issuanceResponseFormatter = IssuanceResponseFormatter(
-            defaultTestSerializer,
-            mockedVerifiablePresentationFormatter,
-            mockedKeyStore
-        )
-        presentationResponseFormatter = PresentationResponseFormatter(
-            defaultTestSerializer,
-            mockedVerifiablePresentationFormatter
-        )
         setUpGetPublicKey()
         setUpExpectedPresentations()
         every { mockedKeyStore.getKey(signingKeyRef) } returns expectedJsonWebKey
-        every { mockedIdentifier.sign(capture(slot).toByteArray()) } answers { slot.captured.toByteArray() }
+        every { mockedIdentifier.sign(capture(slot)) } answers { slot.captured }
         every {
             mockedVerifiablePresentationFormatter.createPresentation(
                 mockedVc,
@@ -116,6 +111,8 @@ class OidcResponseFormatterTest {
     private fun setUpGetPublicKey() {
         every { mockedIdentifier.keyReference } returns signingKeyRef
         every { mockedIdentifier.id } returns expectedDid
+        every { mockedIdentifier.getPublicKey() } returns expectedJsonWebKey
+        every { mockedIdentifier.algorithm } returns "ES256K"
     }
 
     private fun setUpExpectedPresentations() {
@@ -141,7 +138,7 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = defaultTestSerializer.decodeFromString(PresentationResponseClaims.serializer(), actualFormattedToken.first)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(PresentationResponseClaims.serializer(), JwsToken.deserialize(actualFormattedToken.first).content())
         // Assert
         assertEquals(expectedPresentationAudience, actualTokenContents.audience)
         assertEquals(mockedNonce, actualTokenContents.nonce)
@@ -162,7 +159,7 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), JwsToken.deserialize(actualFormattedToken).content())
         // Assert
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
@@ -187,7 +184,7 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), JwsToken.deserialize(actualFormattedToken).content())
         // Assert
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
@@ -213,7 +210,7 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), JwsToken.deserialize(actualFormattedToken).content())
         // Assert
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
@@ -240,7 +237,7 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), JwsToken.deserialize(actualFormattedToken).content())
         // Assert
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
@@ -268,7 +265,7 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), results)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), JwsToken.deserialize(results).content())
         // Assert
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)

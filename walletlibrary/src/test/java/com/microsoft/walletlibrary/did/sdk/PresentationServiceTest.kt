@@ -351,6 +351,7 @@ class PresentationServiceTest {
                 presentationRequest,
                 presentationResponse,
                 masterIdentifier,
+                emptyMap<String, String>(),
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
         } returns Result.Success(Unit)

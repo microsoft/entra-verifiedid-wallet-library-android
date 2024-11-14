@@ -22,14 +22,15 @@ class EncryptedSharedPreferencesIdentifierTest {
     @Test
     fun sign_useSecp256k1Key_signsSuccessfully() {
         // Arrange
-        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1).toPrivateJwk("keyReferenceTest1", KeyUse.SIGNATURE)
+        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1).toPrivateJwk("keyReferenceTest1", KeyUse.SIGNATURE, Curve.SECP256K1)
         keyStore.storeKey("keyReferenceTest1", privateKey)
         val encryptedSharedPreferencesIdentifier = EncryptedSharedPreferencesIdentifier(
             id = "id",
             algorithm = "ES256K",
             method = "method",
             keyReference = "keyReferenceTest1",
-            keyStore = keyStore
+            keyStore = keyStore,
+            keyId = "keyReferenceTest1"
         )
         val jwsHeader = JwsHeaderFormatter.formatHeader(encryptedSharedPreferencesIdentifier)
         val testData = "{\"iss\":\"joe\",\n" +
@@ -50,14 +51,15 @@ class EncryptedSharedPreferencesIdentifierTest {
     @Test
     fun sign_useP256Key_signsSuccessfully() {
         // Arrange
-        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.P256).toPrivateJwk("keyReferenceTest1", KeyUse.SIGNATURE, Curve.P_256)
+        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.P256).toPrivateJwk("keyReferenceTest1", KeyUse.SIGNATURE)
         keyStore.storeKey("keyReferenceTest1", privateKey)
         val encryptedSharedPreferencesIdentifier = EncryptedSharedPreferencesIdentifier(
             id = "id",
             algorithm = "ES256",
             method = "method",
             keyReference = "keyReferenceTest1",
-            keyStore = keyStore
+            keyStore = keyStore,
+            keyId = "keyReferenceTest1"
         )
         val jwsHeader = JwsHeaderFormatter.formatHeader(encryptedSharedPreferencesIdentifier)
         val testData = "{\"iss\":\"joe\",\n" +

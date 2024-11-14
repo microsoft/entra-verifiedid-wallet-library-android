@@ -58,7 +58,7 @@ class OpenId4VciIssuanceRequestTest {
         mockWalletLibraryLogger,
         mockIdentifierFactory
     )
-    private val slot = slot<String>()
+    private val slot = slot<ByteArray>()
     private val mockedIdentifier: EncryptedSharedPreferencesIdentifier = mockk()
     private val mockIdentifierService: IdentifierService = mockk()
     private val signingKeyRef: String = "sigKeyRef1243523"
@@ -107,9 +107,9 @@ class OpenId4VciIssuanceRequestTest {
         every { mockedKeyStore.getKey(signingKeyRef) } returns expectedJsonWebKey
         every {
             mockedIdentifier.sign(
-                capture(slot).toByteArray()
+                capture(slot)
             )
-        } answers { slot.captured.toByteArray() }
+        } answers { slot.captured }
         mockkStatic(VerifiableCredentialSdk::class)
         every { VerifiableCredentialSdk.identifierService } returns mockIdentifierService
     }

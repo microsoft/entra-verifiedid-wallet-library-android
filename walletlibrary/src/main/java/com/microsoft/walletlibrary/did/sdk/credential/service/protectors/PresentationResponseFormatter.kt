@@ -14,7 +14,6 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentatio
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
-import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import kotlinx.serialization.json.Json
 import java.util.UUID

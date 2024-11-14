@@ -8,7 +8,8 @@ package com.microsoft.walletlibrary.identifier
 import com.nimbusds.jose.jwk.JWK
 import io.mockk.every
 import io.mockk.spyk
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 import java.text.ParseException
 
@@ -27,7 +28,7 @@ class DidCreatorTest {
             DidCreator.createDid(jwk, DidMethod.DID_JWK)
 
         // Assert
-        Assertions.assertThat(actualDid).isEqualTo("did:jwk:eyJjcnYiOiJQLTI1NiIsImt0eSI6IkVDIiwieCI6ImFjYklRaXVNczNpOF91c3pFakoydHBUdFJNNEVVM3l6OTFQSDZDZEgyVjAiLCJ5IjoiX0tjeUxqOXZXTXB0bm1LdG00NkdxRHo4d2Y3NEk1TEtncmwyR3pIM25TRSJ9")
+        assertThat(actualDid).isEqualTo("did:jwk:eyJjcnYiOiJQLTI1NiIsImt0eSI6IkVDIiwieCI6ImFjYklRaXVNczNpOF91c3pFakoydHBUdFJNNEVVM3l6OTFQSDZDZEgyVjAiLCJ5IjoiX0tjeUxqOXZXTXB0bm1LdG00NkdxRHo4d2Y3NEk1TEtncmwyR3pIM25TRSJ9")
     }
 
     @Test
@@ -36,7 +37,7 @@ class DidCreatorTest {
         val jwkString =
             """{"crv": "P-256","kty": "EC","x": "acbIQiuMs3i8_uszEjJ2tpTtRM43yz91PH6CdH2V0","y": "_KcyLj9vWMptnmKtm46GqDz8wf74I5LKgrl2GzH3nSE"}"""
 
-        Assertions.assertThatThrownBy {
+        assertThatThrownBy {
             val jwk = spyk(JWK.parse(jwkString), recordPrivateCalls = true)
             every { jwk.keyID } returns "randomKeyID"
 

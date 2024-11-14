@@ -7,7 +7,9 @@ package com.microsoft.walletlibrary
 
 import android.content.Context
 import android.content.pm.PackageManager
+import com.microsoft.walletlibrary.datasource.repository.HolderIdentifierDataRepository
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
+import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
@@ -131,12 +133,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
             ),
             jsonSerializer
         )
-
-        val identifierFactory = IdentifierFactory()
-        identifierFactory.identifiers.addAll(identifiers)
-        val defaultIdentifier = getDefaultIdentifier()
-        defaultIdentifier?.let { identifierFactory.identifiers.add(it) }
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
+        val identifierFactory = IdentifierFactory()
         val libraryConfiguration =
             LibraryConfiguration(
                 previewFeatureFlags,
@@ -146,6 +144,10 @@ class VerifiedIdClientBuilder(private val context: Context) {
                 logger,
                 identifierFactory
             )
+        runBlocking {
+            fetchAllHolderIdentifiers(libraryConfiguration)
+        }
+        identifierFactory.identifiers.addAll(identifiers)
 
         val requestResolverFactory = RequestResolverFactory()
         registerRequestResolver(OpenIdURLRequestResolver(libraryConfiguration, preferHeaders))
@@ -205,8 +207,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
         }
     }
 
-    private fun getDefaultIdentifier(): HolderIdentifier? {
-        val identifier = runBlocking {
+    private suspend fun getDefaultIdentifier(): HolderIdentifier? {
+        val identifier =
             when (val defaultIdentifier =
                 VerifiableCredentialSdk.identifierService.getMasterIdentifier()) {
                 is Result.Success -> {
@@ -214,12 +216,27 @@ class VerifiedIdClientBuilder(private val context: Context) {
                         VerifiableCredentialSdk.identifierService.getKeyStore()
                     )
                 }
+
                 is Result.Failure -> {
                     SdkLog.e("Unable to fetch master identifier")
                     null
                 }
             }
-        }
         return identifier
+    }
+
+    private suspend fun getMainHolderIdentifier(): HolderIdentifier {
+        val holderIdentifierDataRepository = HolderIdentifierDataRepository()
+        return holderIdentifierDataRepository.getMainHolderIdentifier()
+    }
+
+    private suspend fun fetchAllHolderIdentifiers(libraryConfiguration: LibraryConfiguration) {
+        if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_FIPS_COMPLIANT_IDENTIFIER)) {
+            identifiers.add(getMainHolderIdentifier())
+        } else {
+            val defaultHolderIdentifier = getDefaultIdentifier()
+            defaultHolderIdentifier?.let { identifiers.add(it) }
+                ?: SdkLog.e("Unable to fetch default holder identifier")
+        }
     }
 }

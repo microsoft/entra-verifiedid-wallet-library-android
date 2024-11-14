@@ -7,6 +7,7 @@ package com.microsoft.walletlibrary.did.sdk
 
 import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.walletlibrary.did.sdk.identifier.IdentifierCreator
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
@@ -39,6 +40,10 @@ internal class IdentifierService @Inject constructor(
 
     internal fun getKeyStore(): EncryptedKeyStore {
         return keyStore
+    }
+
+    internal fun getDatabase(): SdkDatabase {
+        return identifierRepository.database
     }
 
     private suspend fun createMasterIdentifier(): Result<Identifier> {
