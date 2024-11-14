@@ -5,19 +5,13 @@ package com.microsoft.walletlibrary.did.sdk.datasource.repository
 import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.walletlibrary.did.sdk.datasource.db.dao.IdentifierDao
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
-import com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations.ResolveIdentifierNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.NotFoundException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
-import kotlin.Result as KotlinResult
 import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
 import io.mockk.coEvery
 import io.mockk.coJustRun
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkConstructor
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

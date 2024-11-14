@@ -1,6 +1,5 @@
 package com.microsoft.walletlibrary.util
 
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.NetworkException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import kotlinx.coroutines.CancellationException
 
@@ -14,26 +13,13 @@ internal suspend fun <T> getResult(block: suspend () -> T): VerifiedIdResult<T> 
         verifiedIdException.toVerifiedIdResult()
     } catch (exception: WalletLibraryException) {
         when (val innerException = exception.cause) {
-            is NetworkException -> {
-                val networkingException = NetworkingException(
-                    exception.message ?: "",
-                    VerifiedIdExceptions.NETWORKING_EXCEPTION.value,
-                    innerException.correlationVector,
-                    innerException.errorCode,
-                    innerException.innerErrorCodes,
-                    innerException.errorBody,
-                    innerException.retryable
-                )
-                networkingException.cause = innerException
-                networkingException.toVerifiedIdResult()
-            }
             is SdkException -> {
                 val malformedInputException = MalformedInputException(
                     exception.message ?: "",
                     VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value,
                     exception
                 )
-                malformedInputException.cause = exception.cause
+                malformedInputException.cause = innerException
                 malformedInputException.toVerifiedIdResult()
             }
             else -> {
@@ -42,7 +28,7 @@ internal suspend fun <T> getResult(block: suspend () -> T): VerifiedIdResult<T> 
                     VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value,
                     exception
                 )
-                unspecifiedVerifiedIdException.cause = exception.cause
+                unspecifiedVerifiedIdException.cause = innerException
                 unspecifiedVerifiedIdException.toVerifiedIdResult()
             }
         }

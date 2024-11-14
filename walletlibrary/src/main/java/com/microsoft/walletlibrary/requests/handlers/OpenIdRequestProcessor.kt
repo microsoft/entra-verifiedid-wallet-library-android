@@ -21,6 +21,7 @@ import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestPr
 import com.microsoft.walletlibrary.requests.requirements.VerifiedIdRequirement
 import com.microsoft.walletlibrary.util.InputCastingException
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.NonceProcessor
 import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequirementCastingException
 import com.microsoft.walletlibrary.util.UnSupportedProtocolException
@@ -97,6 +98,9 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
             presentationRequestContent.issuanceCallbackUrl
         )
         val issuanceRequestContent = rawManifest.mapToIssuanceRequestContent()
+        val identifier = libraryConfiguration.identifierFactory.getIdentifier().id
+        val nonce = NonceProcessor.getNonce(identifier)
+        issuanceRequestContent.setNonceForIdTokenRequirement(nonce)
         presentationRequestContent.injectedIdToken?.let {
             issuanceRequestContent.addRequirementsForIdTokenHint(
                 it

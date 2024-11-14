@@ -24,7 +24,7 @@ class IdTokenRequirement(
     val scope: String,
 
     // Nonce is generated using user DID.
-    val nonce: String,
+    private var _nonce: String,
 
     // Specific claims requested from id token.
     internal val claims: List<RequestedClaim>,
@@ -37,6 +37,14 @@ class IdTokenRequirement(
 
     internal var idToken: String? = null
 ) : Requirement {
+
+    // Readonly Verified ID that is currently fulfilling the requirement (if any)
+    val nonce: String
+        get() = this._nonce
+
+    internal fun setNonce(nonce: String) {
+        this._nonce = nonce
+    }
 
     // Validates the requirement and throws an exception if the requirement is invalid or not fulfilled.
     override fun validate(): VerifiedIdResult<Unit> {
