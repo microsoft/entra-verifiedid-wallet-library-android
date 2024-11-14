@@ -12,7 +12,7 @@ import java.security.interfaces.ECPublicKey
 /**
  * Returns a Nimbus private JWK built from Java key material. Currently hardcoded to SECP256k1.
  */
-internal fun KeyPair.toPrivateJwk(keyId: String, keyUse: KeyUse, curve: Curve = Curve.SECP256K1): JWK {
+internal fun KeyPair.toPrivateJwk(keyId: String, keyUse: KeyUse, curve: Curve = Curve.P_256): JWK {
     return ECKey.Builder(curve, public as ECPublicKey).privateKey(private).keyID(keyId).keyUse(keyUse).build()
 }
 
