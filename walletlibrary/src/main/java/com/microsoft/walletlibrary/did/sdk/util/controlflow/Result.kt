@@ -33,7 +33,7 @@ internal fun <T> KotlinResult<T>.toSDK(): Result<T> {
                 return Result.Failure(SdkException("Networking Exception", it))
             }
             else -> {
-                return Result.Failure(SdkException("Could not cast failure to SDK", it.cause))
+                return Result.Failure(SdkException("Unknown exception", it))
             }
         }
     }
