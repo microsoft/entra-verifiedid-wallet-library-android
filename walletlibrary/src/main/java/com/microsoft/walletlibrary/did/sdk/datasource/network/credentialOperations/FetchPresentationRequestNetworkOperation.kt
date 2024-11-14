@@ -11,10 +11,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.DidInHeaderAndPayloadNotMatching
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.ExpiredTokenException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
-//import com.microsoft.walletlibrary.did.sdk.util.controlflow.NotFoundException
-import com.microsoft.walletlibrary.util.NetworkingException
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
 
@@ -32,25 +29,6 @@ internal class FetchPresentationRequestNetworkOperation(
         val jwsTokenString = response.body.decodeToString()
         return verifyAndUnwrapPresentationRequest(jwsTokenString)
     }
-
-/*    override fun onFailure(exception: Throwable): Result<Nothing> {
-        return super.onFailure(exception).onFailure {
-            when (it) {
-                is NotFoundException -> {
-                    val expiredTokenException =
-                        ExpiredTokenException(exception.message ?: "", false)
-                    expiredTokenException.apply {
-                        correlationVector = it.correlationVector
-                        errorBody = it.errorBody
-                        errorCode = it.errorCode
-                        innerErrorCodes = it.innerErrorCodes
-                    }
-                    return Result.failure(expiredTokenException)
-                }
-                is NetworkingException -> return Result.failure(exception)
-            }
-        }
-    }*/
 
     private suspend fun verifyAndUnwrapPresentationRequest(jwsTokenString: String): Result<PresentationRequestContent> {
         val jwsToken = JwsToken.deserialize(jwsTokenString)

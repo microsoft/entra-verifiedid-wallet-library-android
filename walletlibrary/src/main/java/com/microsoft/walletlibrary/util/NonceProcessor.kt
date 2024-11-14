@@ -10,7 +10,7 @@ import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import kotlinx.coroutines.runBlocking
 import java.security.SecureRandom
 
-class NonceProcessor {
+object NonceProcessor {
 
     /**
      * Generates a random string that is used to associate a client session with an ID Token, and to mitigate replay

@@ -11,12 +11,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtVali
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.PostNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
-import com.microsoft.walletlibrary.did.sdk.util.Constants
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.ForbiddenException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidPinException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
-import com.microsoft.walletlibrary.util.NetworkingException
-import com.microsoft.walletlibrary.util.VerifiedIdException
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
 
@@ -32,27 +27,6 @@ internal class SendVerifiableCredentialIssuanceRequestNetworkOperation(
         val issuanceResponse = apiProvider.issuanceApis.parseIssuance(response)
         val jwsTokenString = issuanceResponse.vc
         return verifyAndUnWrapIssuanceResponse(jwsTokenString)
-    }
-
-    override fun onFailure(exception: Throwable): Result<Nothing> {
-        return super.onFailure(exception).onFailure {
-            when (it) {
-                is ForbiddenException -> {
-                    val innerErrorCode = it.innerErrorCodes?.substringAfterLast(",")
-                    if (innerErrorCode == Constants.INVALID_PIN) {
-                        val invalidPinException = InvalidPinException(exception.message ?: "", false)
-                        invalidPinException.apply {
-                            correlationVector = it.correlationVector
-                            errorBody = it.errorBody
-                            errorCode = it.errorCode
-                            innerErrorCodes = it.innerErrorCodes
-                        }
-                        return Result.failure(invalidPinException)
-                    }
-                }
-                is NetworkingException -> return Result.failure(exception)
-            }
-        }
     }
 
     private suspend fun verifyAndUnWrapIssuanceResponse(jwsTokenString: String): Result<VerifiableCredential> {

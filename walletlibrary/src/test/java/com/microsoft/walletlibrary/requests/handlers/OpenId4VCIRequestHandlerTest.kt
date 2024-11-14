@@ -1,6 +1,5 @@
 package com.microsoft.walletlibrary.requests.handlers
 
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.NetworkException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
@@ -15,6 +14,7 @@ import com.microsoft.walletlibrary.requests.requirements.OpenId4VCIPinRequiremen
 import com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdManifestIssuerStyle
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.NetworkingException
 import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
@@ -135,7 +135,7 @@ class OpenId4VCIRequestHandlerTest {
         // Arrange
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         coEvery { openId4VCIRequestHandler["fetchCredentialMetadata"](credentialIssuerEndpoint) } returns KotlinResult.failure<SdkException>(
-            NetworkException("Failed to fetch metadata", false)
+            NetworkingException("Failed to fetch metadata", VerifiedIdExceptions.NETWORKING_EXCEPTION.value, retryable = false)
         )
 
         runBlocking {
@@ -149,7 +149,7 @@ class OpenId4VCIRequestHandlerTest {
             assertThat(actualException).isInstanceOf(OpenId4VciRequestException::class.java)
             assertThat(actualException?.message).contains("Failed to fetch credential metadata")
             assertThat((actualException as OpenId4VciRequestException).innerError).isInstanceOf(
-                NetworkException::class.java
+                NetworkingException::class.java
             )
         }
     }

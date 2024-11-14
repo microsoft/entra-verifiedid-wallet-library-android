@@ -7,6 +7,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
 class IResponse(
     val status: Int,
@@ -57,7 +58,7 @@ class IResponse(
         }
         return NetworkingException(
             message = message,
-            code = code,
+            code = VerifiedIdExceptions.NETWORKING_EXCEPTION.value,
             correlationId = correlationId,
             statusCode = status.toString(),
             innerError = innerError,
