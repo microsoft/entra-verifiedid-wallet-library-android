@@ -74,4 +74,20 @@ internal class IssuanceRequestContent(
             groupRequirement.requirements.add(it)
         }
     }
+
+    internal fun setNonceForIdTokenRequirement(nonce: String) {
+        setNonceForIdTokenRequirement(requirement, nonce)
+    }
+
+    private fun setNonceForIdTokenRequirement(requirement: Requirement, nonce: String) {
+        when (requirement) {
+            is IdTokenRequirement -> requirement.setNonce(nonce)
+            is GroupRequirement -> {
+                val requirements = requirement.requirements
+                for (req in requirements) {
+                    setNonceForIdTokenRequirement(requirement, nonce)
+                }
+            }
+        }
+    }
 }

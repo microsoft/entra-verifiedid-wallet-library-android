@@ -40,12 +40,6 @@ internal open class AuthenticationException(message: String, cause: Throwable? =
 internal open class PresentationException(message: String, cause: Throwable? = null, retryable: Boolean = true) :
     AuthenticationException(message, cause, retryable)
 
-internal open class IssuanceException(message: String, cause: Throwable? = null, retryable: Boolean = true) :
-    AuthenticationException(message, cause, retryable)
-
-internal open class RevocationException(message: String? = null, cause: Throwable? = null, retryable: Boolean = true) :
-    SdkException(message, cause, retryable)
-
 internal open class ValidatorException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
     SdkException(message, cause, retryable)
 
@@ -65,8 +59,6 @@ internal class DidInHeaderAndPayloadNotMatching(message: String) : ValidatorExce
 
 internal class SubjectIdentifierTypeNotSupported(message: String) : ValidatorException(message)
 
-internal class DidMethodNotSupported(message: String) : ValidatorException(message)
-
 internal class VpFormatNotSupported(message: String) : ValidatorException(message)
 
 internal open class ResolverException(message: String, cause: Throwable? = null) : SdkException(message, cause)
@@ -77,30 +69,4 @@ internal class RegistrarException(message: String, cause: Throwable? = null) : S
 
 internal open class LocalNetworkException(message: String, cause: Throwable? = null) : SdkException(message, cause, true)
 
-internal open class NetworkException(message: String, retryable: Boolean) : SdkException(message, null, retryable) {
-    var requestId: String? = null
-    var correlationVector: String? = null
-    var errorCode: String? = null
-    var errorBody: String? = null
-    var innerErrorCodes: String? = null
-}
-
-internal class ServiceUnreachableException(message: String, retryable: Boolean) : NetworkException(message, retryable)
-
-internal class ClientException(message: String, retryable: Boolean) : NetworkException(message, retryable)
-
-internal class ForbiddenException(message: String, retryable: Boolean) : NetworkException(message, retryable)
-
-internal class NotFoundException(message: String, retryable: Boolean) : NetworkException(message, retryable)
-
-internal class UnauthorizedException(message: String, retryable: Boolean) : NetworkException(message, retryable)
-
-internal class RedirectException(message: String, retryable: Boolean) : NetworkException(message, retryable)
-
-internal class ExpiredTokenException(message: String, retryable: Boolean) : NetworkException(message, retryable)
-
-internal class InvalidPinException(message: String, retryable: Boolean) : NetworkException(message, retryable)
-
 internal class RepositoryException(message: String, cause: Throwable? = null) : SdkException(message, cause)
-
-internal class InvalidImageException(message: String, cause: Throwable? = null) : SdkException(message, cause)

@@ -1,6 +1,5 @@
 package com.microsoft.walletlibrary.util
 
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.NetworkException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import io.mockk.every
 import io.mockk.mockk
@@ -48,18 +47,18 @@ class VerifiedIdResultTest {
     @Test
     fun getResult_blockThrowsWalletLibraryExceptionCausedByNetworkException_returnsVerifiedIdResultFailureWithNetworkingException() {
         // Arrange
-        val mockNetworkException: NetworkException = mockk()
-        every { mockNetworkException.correlationVector } returns "abcd.1"
-        every { mockNetworkException.errorCode } returns "500"
-        every { mockNetworkException.innerErrorCodes } returns "500"
-        every { mockNetworkException.errorBody } returns "errorBody"
-        every { mockNetworkException.retryable } returns false
+        val mockNetworkException = NetworkingException(
+            "",
+            VerifiedIdExceptions.NETWORKING_EXCEPTION.value,
+            "abcd.1",
+            "500",
+            "badRequest",
+            "errorBody",
+            false
+        )
 
         val block = {
-            throw WalletLibraryException(
-                "Testing",
-                mockNetworkException
-            )
+            throw mockNetworkException
         }
 
         // Act
@@ -68,10 +67,9 @@ class VerifiedIdResultTest {
 
             // Assert
             assertThat(result.isFailure).isTrue
-            assertThat(result.exceptionOrNull() is NetworkingException).isTrue
-            assertThat((result.exceptionOrNull() as NetworkingException).cause).isEqualTo(
-                mockNetworkException
-            )
+            val exception = result.exceptionOrNull()
+            assertThat(exception is NetworkingException).isTrue
+            assertThat(exception).isEqualTo(mockNetworkException)
         }
     }
 

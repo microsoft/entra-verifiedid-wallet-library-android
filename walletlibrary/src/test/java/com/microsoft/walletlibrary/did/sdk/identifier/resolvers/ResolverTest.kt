@@ -5,10 +5,10 @@ package com.microsoft.walletlibrary.did.sdk.identifier.resolvers
 import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.LocalNetworkException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.NotFoundException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
+import com.microsoft.walletlibrary.util.NetworkingException
+import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -40,16 +40,17 @@ class ResolverTest {
     fun failedResolutionInvalidIdTest() {
         val resolver = Resolver("", identifierRepository)
         coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier) } returns KotlinResult.failure(
-            NotFoundException(
+            NetworkingException(
                 "Not Found",
-                true,
+                VerifiedIdExceptions.NETWORKING_EXCEPTION.value,
+                retryable = true,
             )
         )
         runBlocking {
             val actualResult = resolver.resolve(invalidIdentifier)
             assertThat(actualResult.isFailure).isEqualTo(true)
             assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
-            assertThat(actualResult.exceptionOrNull()?.cause).isInstanceOf(NotFoundException::class.java)
+            assertThat(actualResult.exceptionOrNull()?.cause).isInstanceOf(NetworkingException::class.java)
         }
     }
 

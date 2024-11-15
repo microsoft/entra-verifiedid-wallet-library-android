@@ -35,7 +35,7 @@ class JwsTokenTest {
     @Test
     fun signToken_supplyHolderIdentifier_SignsToken() {
         // Arrange
-        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.P256).toPrivateJwk("keyReferenceTest1", KeyUse.SIGNATURE, Curve.P_256)
+        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.P256).toPrivateJwk("keyReferenceTest1", KeyUse.SIGNATURE)
         keyStore.storeKey("keyReferenceTest1", privateKey)
         val encryptedSharedPreferencesIdentifier = EncryptedSharedPreferencesIdentifier(
             id = "id",

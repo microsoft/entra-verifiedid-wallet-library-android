@@ -6,6 +6,8 @@
 package com.microsoft.walletlibrary.did.sdk.util.controlflow
 
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
+import com.microsoft.walletlibrary.util.NetworkingException
+import com.microsoft.walletlibrary.util.VerifiedIdException
 import kotlinx.coroutines.CancellationException
 import kotlin.Result as KotlinResult
 
@@ -23,10 +25,16 @@ internal fun <T> KotlinResult<T>.toSDK(): Result<T> {
         }
     }
     this.exceptionOrNull()?.let {
-        if (it is SdkException) {
-            return Result.Failure(it)
-        } else {
-            return Result.Failure(SdkException("Could not cast failure to SDK", it.cause))
+        when (it) {
+            is SdkException -> {
+                return Result.Failure(it)
+            }
+            is NetworkingException -> {
+                return Result.Failure(SdkException("Networking Exception", it))
+            }
+            else -> {
+                return Result.Failure(SdkException("Unknown exception", it))
+            }
         }
     }
     return Result.Failure(SdkException("Unknown exception"))

@@ -9,7 +9,6 @@ import com.microsoft.walletlibrary.did.sdk.crypto.CryptoOperations
 import com.microsoft.walletlibrary.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.toPrivateJwk
-import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyUse
 import java.util.UUID
@@ -60,7 +59,7 @@ internal class EncryptedSharedPreferencesIdentifierCreator(private val encrypted
     ): JWK {
         val keyId = generateRandomKeyId()
         val privateKey =
-            CryptoOperations.generateKeyPair(keyGenAlgorithm).toPrivateJwk(keyId, use, Curve.P_256)
+            CryptoOperations.generateKeyPair(keyGenAlgorithm).toPrivateJwk(keyId, use)
         encryptedKeyStore.storeKey(keyId, privateKey)
         return privateKey.toPublicJWK()
     }
@@ -74,7 +73,7 @@ internal class EncryptedSharedPreferencesIdentifierCreator(private val encrypted
      *
      * @return returns the public Key in JWK format
      */
-    private fun fetchKey(keyReference: String): JWK {
-        return encryptedKeyStore.getKey(keyReference)
+    private fun fetchKey(keyId: String): JWK {
+        return encryptedKeyStore.getKey(keyId)
     }
 }
