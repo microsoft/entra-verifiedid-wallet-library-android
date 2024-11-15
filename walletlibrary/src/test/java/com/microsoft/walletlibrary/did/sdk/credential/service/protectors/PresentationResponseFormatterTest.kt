@@ -393,7 +393,7 @@ class PresentationResponseFormatterTest {
         val tokens = formatter.formatResponses(
             request,
             responses,
-            mockedIdentifier,
+            mockedIdentifier
         )
 
         // assert

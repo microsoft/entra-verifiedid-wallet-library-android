@@ -25,7 +25,7 @@ import kotlin.test.assertTrue
 
 internal class PresentationExchangeSubmissionGroupTest {
 
-    fun makeVerifiedId (sub: String): VerifiableCredential {
+    fun makeVerifiedId(sub: String): VerifiableCredential {
         return VerifiableCredential(
             com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential(
             "",
@@ -41,7 +41,7 @@ internal class PresentationExchangeSubmissionGroupTest {
                 sub,
             InputContract(
                 credentialIssuer = sub,
-                issuer = sub,
+                issuer = sub
             ),
             DisplayContract(
                 card = CardDescriptor("", "", "", "", null, ""),

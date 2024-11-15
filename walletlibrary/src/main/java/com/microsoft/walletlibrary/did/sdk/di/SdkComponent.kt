@@ -38,7 +38,6 @@ internal interface SdkComponent {
 
     fun presentationService(): PresentationService
 
-
     fun linkedDomainsService(): LinkedDomainsService
 
     fun correlationVectorService(): CorrelationVectorService

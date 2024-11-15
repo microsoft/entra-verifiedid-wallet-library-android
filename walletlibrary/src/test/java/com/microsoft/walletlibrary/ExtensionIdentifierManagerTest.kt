@@ -38,6 +38,7 @@ internal class ExtensionIdentifierManagerTest {
         every { libraryConfiguration.identifierFactory } returns mockIdentifierFactory
         every { mockIdentifierFactory.getIdentifier() } returns holderIdentifier
     }
+
     @Test
     fun createEphemeralSelfSignedVerifiedId_withIdentifier_createsVerifiedID() {
         // Arrange

@@ -13,5 +13,5 @@ import com.microsoft.walletlibrary.identifier.HolderIdentifier
 internal interface CryptoRequirement {
 
     // Determines if the provided HolderIdentifier satisfies the cryptographic requirement.
-    fun isSupported(holderIdentifier: HolderIdentifier) : Boolean
+    fun isSupported(holderIdentifier: HolderIdentifier): Boolean
 }

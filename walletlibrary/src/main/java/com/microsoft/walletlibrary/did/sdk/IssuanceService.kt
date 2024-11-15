@@ -105,6 +105,7 @@ internal class IssuanceService @Inject constructor(
      * Send an Issuance Response.
      *
      * @param response IssuanceResponse containing the requested attestations
+     * @param libraryConfiguration utilities needed for use in Wallet Library
      */
     suspend fun sendResponse(
         response: IssuanceResponse,

@@ -14,7 +14,6 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiP
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendPresentationResponsesNetworkOperation
-import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.DidDeepLinkUtil
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
@@ -103,6 +102,8 @@ internal class PresentationService @Inject constructor(
      *
      * @param presentationRequest request being responded to
      * @param response PresentationResponse to be formed, signed, and sent.
+     * @param additionalHeaders additional headers to be sent with the response
+     * @param libraryConfiguration utilities needed for use in Wallet Library
      */
     suspend fun sendResponse(
         presentationRequest: PresentationRequest,

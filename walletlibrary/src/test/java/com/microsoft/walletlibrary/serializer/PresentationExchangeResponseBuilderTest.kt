@@ -61,7 +61,7 @@ internal class PresentationExchangeResponseBuilderTest {
                 sub,
                 InputContract(
                     credentialIssuer = sub,
-                    issuer = sub,
+                    issuer = sub
                 ),
                 DisplayContract(
                     card = CardDescriptor("", "", "", "", null, ""),

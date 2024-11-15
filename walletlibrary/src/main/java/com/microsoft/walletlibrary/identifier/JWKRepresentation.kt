@@ -8,5 +8,5 @@ package com.microsoft.walletlibrary.identifier
 import com.nimbusds.jose.jwk.JWK
 
 internal interface JWKRepresentation {
-    fun getPublicKey() : JWK
+    fun getPublicKey(): JWK
 }

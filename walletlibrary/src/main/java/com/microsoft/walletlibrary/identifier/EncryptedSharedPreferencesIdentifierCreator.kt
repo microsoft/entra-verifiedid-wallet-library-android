@@ -22,6 +22,7 @@ internal class EncryptedSharedPreferencesIdentifierCreator(private val encrypted
      * @param algorithm The algorithm to use for cryptographic operations
      * @param didMethod The method for creating the DID (eg. did:jwk)
      * @param keyId The reference to the key in the keyStore
+     * @param id The DID of the Holder Identifier if there is one already created
      * @return The Holder Identifier with the provided parameters.
      */
     override fun createHolderIdentifier(

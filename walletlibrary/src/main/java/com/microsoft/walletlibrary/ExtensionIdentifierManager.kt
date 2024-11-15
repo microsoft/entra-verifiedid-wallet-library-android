@@ -39,7 +39,7 @@ class ExtensionIdentifierManager internal constructor(private val libraryConfigu
             )
             val identifier = libraryConfiguration.identifierFactory.getIdentifier()
 
-            val (issuedTime, expiryTime) = createIssuedAndExpiryTime(5 * 60)    // 5 minutes
+            val (issuedTime, expiryTime) = createIssuedAndExpiryTime(5 * 60)   // 5 minutes
             val jti = UUID.randomUUID().toString()
             val content = VerifiableCredentialContent(
                 jti,

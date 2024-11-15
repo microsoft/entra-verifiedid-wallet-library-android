@@ -19,7 +19,7 @@ import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 internal class HolderIdentifierDataRepository {
 
     private val database = VerifiableCredentialSdk.identifierService.getDatabase()
-    private val holderIdentifierDataDao =  database.holderIdentifierDataDao()
+    private val holderIdentifierDataDao = database.holderIdentifierDataDao()
 
     private val keyStore = VerifiableCredentialSdk.identifierService.getKeyStore()
     private val holderIdentifierCreator = EncryptedSharedPreferencesIdentifierCreator(keyStore)

@@ -6,8 +6,6 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentatio
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.JwsHeaderFormatter
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.createIssuedAndExpiryTime
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.toNative
-import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessorSerializer
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement

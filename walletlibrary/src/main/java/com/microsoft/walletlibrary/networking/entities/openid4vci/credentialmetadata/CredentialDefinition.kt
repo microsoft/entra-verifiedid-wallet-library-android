@@ -1,6 +1,5 @@
 package com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**

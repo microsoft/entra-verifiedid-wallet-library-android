@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import com.microsoft.walletlibrary.datasource.repository.HolderIdentifierDataRepository
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
-import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils

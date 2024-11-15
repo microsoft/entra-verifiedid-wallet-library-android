@@ -14,7 +14,7 @@ import com.nimbusds.jose.JWSSigner
 import com.nimbusds.jose.jca.JCAContext
 import com.nimbusds.jose.util.Base64URL
 
-internal class ECDSASignerWrapper(private val holderIdentifier: HolderIdentifier): JWSSigner {
+internal class ECDSASignerWrapper(private val holderIdentifier: HolderIdentifier) : JWSSigner {
     override fun getJCAContext(): JCAContext {
         TODO("Not yet implemented")
     }
