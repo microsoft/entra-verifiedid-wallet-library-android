@@ -85,7 +85,7 @@ internal class IssuanceRequestContent(
             is GroupRequirement -> {
                 val requirements = requirement.requirements
                 for (req in requirements) {
-                    setNonceForIdTokenRequirement(requirement, nonce)
+                    setNonceForIdTokenRequirement(req, nonce)
                 }
             }
         }
