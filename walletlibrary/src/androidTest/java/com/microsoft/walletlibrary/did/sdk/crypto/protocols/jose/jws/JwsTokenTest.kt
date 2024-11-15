@@ -62,7 +62,7 @@ class JwsTokenTest {
     }
 
     @Test
-    fun `deserializeAndVerify`() {
+    fun deserializeAndVerify() {
         val token = JwsToken.deserialize(
             "eyJhbGciOiJFUzI1NiJ9." +
                     "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFt" +
@@ -87,7 +87,7 @@ class JwsTokenTest {
     }
 
     @Test
-    fun `signAndVerify`() {
+    fun signAndVerify() {
         val testData = ByteArray(32, { it.toByte() })
         val token = JwsToken(testData, JWSAlgorithm.ES256K)
         token.sign(key)
@@ -98,7 +98,7 @@ class JwsTokenTest {
     }
 
     @Test
-    fun `signAndVerifyUsingEdCurve`() {
+    fun signAndVerifyUsingEdCurve() {
         val testData = "Just a test payload".toByteArray()
         val token = JwsToken(testData, JWSAlgorithm.EdDSA)
         token.sign(edKeyPair)

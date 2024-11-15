@@ -8,7 +8,6 @@ import com.microsoft.walletlibrary.requests.requirements.OpenId4VCIPinRequiremen
 import com.microsoft.walletlibrary.util.InvalidPinAttemptException
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.NetworkingException
-import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions

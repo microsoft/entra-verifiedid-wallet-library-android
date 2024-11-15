@@ -79,7 +79,7 @@ internal object VerifiableCredentialSdk {
         httpAgent: IHttpAgent = OkHttpAgent(),
         rootOfTrustResolver: RootOfTrustResolver? = null
     ) {
-        correlationVectorService = CorrelationVectorService( PreferenceManager.getDefaultSharedPreferences(context) )
+        correlationVectorService = CorrelationVectorService(PreferenceManager.getDefaultSharedPreferences(context))
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
             .userAgentInfo(userAgentInfo)

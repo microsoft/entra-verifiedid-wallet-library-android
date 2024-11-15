@@ -36,7 +36,7 @@ class OidcResponseFormatterTest {
 
     private val issuanceResponseFormatter: IssuanceResponseFormatter = IssuanceResponseFormatter(
         defaultTestSerializer,
-        mockedVerifiablePresentationFormatter,
+        mockedVerifiablePresentationFormatter
     )
     private val presentationResponseFormatter: PresentationResponseFormatter =
         PresentationResponseFormatter(
@@ -138,7 +138,10 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = defaultTestSerializer.decodeFromString(PresentationResponseClaims.serializer(), JwsToken.deserialize(actualFormattedToken.first).content())
+        val actualTokenContents = defaultTestSerializer.decodeFromString(
+            PresentationResponseClaims.serializer(),
+            JwsToken.deserialize(actualFormattedToken.first).content()
+        )
         // Assert
         assertEquals(expectedPresentationAudience, actualTokenContents.audience)
         assertEquals(mockedNonce, actualTokenContents.nonce)

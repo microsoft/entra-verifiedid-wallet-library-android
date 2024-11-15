@@ -7,7 +7,6 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.JwsHead
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.createIssuedAndExpiryTime
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.Constants
-import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeRequirement
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeVerifiedIdRequirement
@@ -16,7 +15,7 @@ import com.microsoft.walletlibrary.verifiedid.VCVerifiedIdSerializer
 import kotlinx.serialization.json.Json
 import java.util.UUID
 
-internal class PresentationExchangeSubmissionGroup (
+internal class PresentationExchangeSubmissionGroup(
     private val subject: HolderIdentifier
 ) {
     private var requirementAndCredential: MutableList<Pair<PresentationExchangeRequirement, String>> = mutableListOf()
@@ -25,8 +24,7 @@ internal class PresentationExchangeSubmissionGroup (
     fun canIncludeInGroup(requirement: Requirement): Boolean {
         (requirement as? PresentationExchangeVerifiedIdRequirement)?.let {
             // Only those of the same subject can be presented together
-            it.verifiedId?.let {
-                verifiedId ->
+            it.verifiedId?.let { verifiedId ->
                 val credentialSubject = VCVerifiedIdSerializer.serialize(verifiedId).contents.sub
                 if (credentialSubject != subject.id) {
                     return false
@@ -53,10 +51,12 @@ internal class PresentationExchangeSubmissionGroup (
         }
     }
 
-    fun getVerifiablePresentation(serializer: Json,
-                                  validityInterval: Int,
-                                  audience: String,
-                                  nonce: String): String {
+    fun getVerifiablePresentation(
+        serializer: Json,
+        validityInterval: Int,
+        audience: String,
+        nonce: String
+    ): String {
         val verifiablePresentation = VerifiablePresentationDescriptor(
             verifiableCredential = requirementAndCredential.map { it.second },
             context = listOf(Constants.VP_CONTEXT_URL),
@@ -87,11 +87,11 @@ internal class PresentationExchangeSubmissionGroup (
             return@mapIndexed PresentationSubmissionDescriptor(
                 idFromPresentationRequest = requirement.inputDescriptorId,
                 format = "jwt_vp",
-                path = "$[${presentationIndex}]",
+                path = "$[$presentationIndex]",
                 pathNested = PresentationSubmissionDescriptor(
                     idFromPresentationRequest = requirement.inputDescriptorId,
                     format = requirement.format.name,
-                    path = "$.verifiableCredential[${index}]"
+                    path = "$.verifiableCredential[$index]"
                 )
             )
         }

@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  */
 @Entity
 @Serializable
-internal data class HolderIdentifierData (
+internal data class HolderIdentifierData(
     // The UUID of the private key in the encrypted shared preferences.
     @PrimaryKey
     val keyId: String,

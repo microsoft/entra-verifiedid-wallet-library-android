@@ -109,7 +109,7 @@ class VerifiedIdRequesterTest {
     @Test
     fun completeIssuanceRequest_SuccessfulVerifiedCredentialFromSdk_ReturnsVerifiedId() {
         // Arrange
-        val expectedIssuedDate = Date(1234567*1000)
+        val expectedIssuedDate = Date(1234567 * 1000)
 
         runBlocking {
             // Act
