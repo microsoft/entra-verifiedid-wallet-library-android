@@ -7,7 +7,6 @@ package com.microsoft.walletlibrary.did.sdk.util.controlflow
 
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.util.NetworkingException
-import com.microsoft.walletlibrary.util.VerifiedIdException
 import kotlinx.coroutines.CancellationException
 import kotlin.Result as KotlinResult
 

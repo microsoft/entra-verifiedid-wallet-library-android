@@ -43,7 +43,7 @@ class ResolverTest {
             NetworkingException(
                 "Not Found",
                 VerifiedIdExceptions.NETWORKING_EXCEPTION.value,
-                retryable = true,
+                retryable = true
             )
         )
         runBlocking {
