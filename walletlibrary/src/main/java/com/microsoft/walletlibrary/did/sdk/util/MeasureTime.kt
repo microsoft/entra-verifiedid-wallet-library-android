@@ -23,6 +23,7 @@ internal inline fun <R> logTime(name: String, block: () -> R): R {
             DURATION to "$elapsedTime"
         )
     )
+    SdkLog.i("PerformanceMetrics $name '$elapsedTime'")
     return result
 }
 
@@ -54,5 +55,7 @@ internal inline fun logNetworkTime(name: String, block: () -> Result<IResponse>)
             "code" to "$code"
         )
     )
+    SdkLog.i("NetworkMetrics $name '$elapsedTime' statusCode:$code success:${result.isSuccess} " +
+            "mscv:$cvResponse request_id:$requestId")
     return result
 }

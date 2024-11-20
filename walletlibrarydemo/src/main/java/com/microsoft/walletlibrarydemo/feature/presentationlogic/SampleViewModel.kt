@@ -14,6 +14,7 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrarydemo.db.VerifiedIdDatabase
 import com.microsoft.walletlibrarydemo.db.entities.EncodedVerifiedId
 import com.microsoft.walletlibrarydemo.extension.ExampleExtension
+import com.microsoft.walletlibrarydemo.util.ConsoleLogger
 
 class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : ViewModel() {
     var verifiedIdRequest: VerifiedIdRequest<*>? = null
@@ -32,6 +33,7 @@ class SampleViewModel(@SuppressLint("StaticFieldLeak") val context: Context) : V
             PreviewFeatureFlags.FEATURE_FLAG_FIPS_COMPLIANT_IDENTIFIER
         ))
         .with(ExampleExtension())
+        builder.with(ConsoleLogger())
         verifiedIdClient = builder.build()
     }
 
