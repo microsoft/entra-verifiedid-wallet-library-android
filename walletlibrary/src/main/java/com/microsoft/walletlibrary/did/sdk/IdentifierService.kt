@@ -47,7 +47,7 @@ internal class IdentifierService @Inject constructor(
     }
 
     private suspend fun createMasterIdentifier(): Result<Identifier> {
-        return runResultTry {
+        return runResultTry("Identifier createMasterIdentifier") {
             val seed = CryptoOperations.generateSeed()
             keyStore.storeKey(MAIN_IDENTIFIER_REFERENCE, OctetSequenceKey.Builder(seed).build())
             val identifier = identifierCreator.create(MAIN_IDENTIFIER_REFERENCE)

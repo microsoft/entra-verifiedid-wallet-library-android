@@ -34,7 +34,7 @@ internal class BackupService @Inject constructor(
      * @return content of the backup ready to be written to a file
      */
     suspend fun exportBackup(unprotectedBackup: UnprotectedBackup, protectionMethod: ProtectionMethod): Result<ProtectedBackupData> {
-        return runResultTry {
+        return runResultTry("Backup exportBackup") {
             val unprotectedBackupData = backupProcessorFactory.export(unprotectedBackup)
             val protectedBackupData = protectionMethod.wrap(unprotectedBackupData, serializer)
             Result.Success(protectedBackupData)
@@ -53,7 +53,7 @@ internal class BackupService @Inject constructor(
      * @return the transformed and decrypted backup of the type found within protectedBackupData
      */
     suspend fun importBackup(protectedBackupData: ProtectedBackupData, protectionMethod: ProtectionMethod): Result<UnprotectedBackup> {
-        return runResultTry {
+        return runResultTry("Backup importBackup") {
             identityRepository.deleteAll()
             val unprotectedBackupData = protectionMethod.unwrap(protectedBackupData, serializer)
             val unprotectedBackup = backupProcessorFactory.import(unprotectedBackupData)
@@ -68,7 +68,7 @@ internal class BackupService @Inject constructor(
      * @return parsed backup
      */
     suspend fun parseBackup(backup: String): Result<ProtectedBackupData> {
-        return runResultTry {
+        return runResultTry("Backup parseBackup") {
             Result.Success(backupParser.parseBackup(backup))
         }
     }

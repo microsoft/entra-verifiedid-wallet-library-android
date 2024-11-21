@@ -52,7 +52,7 @@ internal class IssuanceService @Inject constructor(
     suspend fun getRequest(
         contractUrl: String
     ): Result<IssuanceRequest> {
-        return runResultTry {
+        return runResultTry("Issuance getRequest") {
             logTime("Issuance getRequest") {
                 val contract = fetchContract(contractUrl).toSDK().abortOnError()
                 val linkedDomainResult =
@@ -111,7 +111,7 @@ internal class IssuanceService @Inject constructor(
         response: IssuanceResponse,
         libraryConfiguration: LibraryConfiguration
     ): Result<VerifiableCredential> {
-        return runResultTry {
+        return runResultTry("Issuance sendResponse") {
             logTime("Issuance sendResponse") {
                 val identifier = libraryConfiguration.identifierFactory.getIdentifier()
                 val requestedVcMap = response.requestedVcMap
@@ -122,7 +122,7 @@ internal class IssuanceService @Inject constructor(
     }
 
     suspend fun sendCompletionResponse(completionResponse: IssuanceCompletionResponse, url: String): Result<Unit> {
-        return runResultTry {
+        return runResultTry("Issuance sendCompletionResponse") {
             logTime("Issuance sendCompletionResponse") {
                 SendIssuanceCompletionResponse(
                     url,

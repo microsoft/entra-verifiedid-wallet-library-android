@@ -40,7 +40,7 @@ internal class PresentationService @Inject constructor(
 ) {
 
     suspend fun getRequest(stringUri: String, preferHeaders: List<String>): Result<PresentationRequest> {
-        return runResultTry {
+        return runResultTry("Presentation getRequest") {
             logTime("Presentation getRequest") {
                 val uri = verifyUri(stringUri)
                 val presentationRequestContent = getPresentationRequestContent(uri, preferHeaders).abortOnError()
@@ -50,7 +50,7 @@ internal class PresentationService @Inject constructor(
     }
 
     internal suspend fun validateRequest(presentationRequestContent: PresentationRequestContent): Result<PresentationRequest> {
-        return runResultTry {
+        return runResultTry("Presentation validateRequest") {
             logTime("Presentation validateRequest") {
                 val linkedDomainResult = linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
                     presentationRequestContent.clientId
@@ -81,7 +81,7 @@ internal class PresentationService @Inject constructor(
     }
 
     private suspend fun isRequestValid(request: PresentationRequest): Result<Unit> {
-        return runResultTry {
+        return runResultTry("Presentation isRequestValid") {
             presentationRequestValidator.validate(request)
             Result.Success(Unit)
         }
@@ -111,7 +111,7 @@ internal class PresentationService @Inject constructor(
         additionalHeaders: Map<String, String>,
         libraryConfiguration: LibraryConfiguration
     ): Result<Unit> {
-        return runResultTry {
+        return runResultTry("Presentation sendResponse") {
             logTime("Presentation sendResponse") {
                 val identifier = libraryConfiguration.identifierFactory.getIdentifier()
                 formAndSendResponse(presentationRequest, response, identifier, additionalHeaders).abortOnError()
