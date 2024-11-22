@@ -45,6 +45,9 @@ internal class LinkedDomainsService @Inject constructor(
             )
             val linkedDomains = verifyLinkedDomainsUsingWellKnownDocument(identifierDocument)
             Result.success(linkedDomains)
+        } catch (ex: Exception) {
+            SdkLog.e("Linked Domains verification failed with exception $ex", ex)
+            Result.success(LinkedDomainMissing)
         }
     }
 
