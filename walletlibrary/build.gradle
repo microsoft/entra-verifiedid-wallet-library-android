@@ -47,11 +47,11 @@ android {
         pickFirst("META-INF/*.kotlin_module")
     }
     compileOptions {
-        sourceCompatibility jvmTarget
-        targetCompatibility jvmTarget
+        sourceCompatibility target_jvmTarget
+        targetCompatibility target_jvmTarget
     }
     kotlinOptions {
-        jvmTarget = jvmTarget
+        jvmTarget = target_jvmTarget
     }
     lintOptions {
         abortOnError false
