@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary.requests.openid4vci
 
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
@@ -24,12 +25,14 @@ import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.UserCanceledException
+import com.microsoft.walletlibrary.util.VerifiedIdException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.getResult
 import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.IdentifierDocumentResolver
+import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
 
 internal class OpenId4VciIssuanceRequest(
     // Attributes describing the requester (eg. name, logo).
@@ -60,6 +63,7 @@ internal class OpenId4VciIssuanceRequest(
             val response = formatAndSendIssuanceRequest()
             mapToVerifiedId(response)
         }
+        sendIssuanceCallbackIfRequestStateAndCallbackExist(result)
         return result
     }
 
@@ -180,5 +184,35 @@ internal class OpenId4VciIssuanceRequest(
 
     private fun getDidAndKeyIdFromHeader(kid: String): Pair<String?, String> {
         return JwaCryptoHelper.extractDidAndKeyId(kid)
+    }
+
+    private suspend fun sendIssuanceCallbackIfRequestStateAndCallbackExist(result: VerifiedIdResult<VerifiedId>) {
+        val requestState = credentialOffer.issuer_session
+        val issuanceCallbackUrl = credentialMetadata.notificationEndpoint ?: return
+
+        var issuanceCompletionCode: IssuanceCompletionResponse.IssuanceCompletionCode =
+            IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED
+        var issuanceCompletionErrorDetails: IssuanceCompletionResponse.IssuanceCompletionErrorDetails? =
+            null
+        result.fold(
+            onSuccess = {
+                issuanceCompletionCode =
+                    IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_SUCCESSFUL
+            },
+            onFailure = {
+                issuanceCompletionErrorDetails = when (it) {
+                    is VerifiedIdException -> IssuanceCompletionResponse.IssuanceCompletionErrorDetails.ISSUANCE_SERVICE_ERROR
+                    else -> IssuanceCompletionResponse.IssuanceCompletionErrorDetails.UNSPECIFIED_ERROR
+                }
+            }
+        )
+        val issuanceCompletionResponse = IssuanceCompletionResponse(
+            issuanceCompletionCode,
+            requestState,
+            issuanceCompletionErrorDetails
+        )
+        VerifiedIdRequester.sendIssuanceCallback(
+            issuanceCompletionResponse,
+            issuanceCallbackUrl)
     }
 }
