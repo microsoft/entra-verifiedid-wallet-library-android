@@ -74,6 +74,18 @@ internal class OpenId4VciIssuanceRequest(
 
     override suspend fun cancel(message: String?): VerifiedIdResult<Unit> {
         return getResult {
+            credentialMetadata.notificationEndpoint?.let {
+                val issuanceCompletionResponse = IssuanceCompletionResponse(
+                    IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
+                    credentialOffer.issuer_session,
+                    IssuanceCompletionResponse.IssuanceCompletionErrorDetails.USER_CANCELED
+                )
+                VerifiedIdRequester.sendIssuanceCallback(
+                    issuanceCompletionResponse,
+                    it
+                )
+            }
+
             throw UserCanceledException(
                 message ?: "User Canceled",
                 VerifiedIdExceptions.USER_CANCELED_EXCEPTION.value
