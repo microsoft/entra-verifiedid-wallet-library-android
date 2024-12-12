@@ -7,6 +7,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
+import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.networking.entities.openid4vci.RawOpenID4VCIResponse
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
@@ -200,7 +201,13 @@ internal class OpenId4VciIssuanceRequest(
 
     private suspend fun sendIssuanceCallbackIfRequestStateAndCallbackExist(result: VerifiedIdResult<VerifiedId>) {
         val requestState = credentialOffer.issuer_session
-        val issuanceCallbackUrl = credentialMetadata.notificationEndpoint ?: return
+
+        if (credentialMetadata.notificationEndpoint == null) {
+            SdkLog.w("Credential issuer metadata does not include a notification endpoint.")
+            return
+        }
+
+        val issuanceCallbackUrl = credentialMetadata.notificationEndpoint
 
         var issuanceCompletionCode: IssuanceCompletionResponse.IssuanceCompletionCode =
             IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED
