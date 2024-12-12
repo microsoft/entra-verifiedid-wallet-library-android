@@ -1,6 +1,7 @@
 package com.microsoft.walletlibrary.requests.handlers
 
 import android.net.Uri
+import android.util.MockHolderIdentifier
 import com.microsoft.walletlibrary.did.sdk.IssuanceService
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceRequest
@@ -32,6 +33,8 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.d
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.Logo
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
+import com.microsoft.walletlibrary.identifier.IdentifierFactory
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
 import com.microsoft.walletlibrary.util.LibraryConfiguration
@@ -116,6 +119,12 @@ class OpenIdRequestProcessorTest {
         logoPresent: Boolean,
         emptyClaims: Boolean
     ) {
+        val holder: HolderIdentifier = MockHolderIdentifier.make()
+
+        val factory = IdentifierFactory()
+        factory.identifiers.add(holder)
+        every { mockLibraryConfiguration.identifierFactory } returns factory
+
         mockkStatic(VerifiableCredentialSdk::class)
         every { VerifiableCredentialSdk.issuanceService } returns mockIssuanceService
         coEvery { mockIssuanceService.getRequest(expectedContractUrl) } returns Result.Success(
