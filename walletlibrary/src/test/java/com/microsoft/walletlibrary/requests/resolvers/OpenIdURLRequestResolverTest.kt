@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.requests.resolvers
 
+import android.util.Base64
 import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestNetworkOperation
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
@@ -114,7 +115,8 @@ class OpenIdURLRequestResolverTest {
         // Arrange
         mockVerifiedIdRequestURL = mockk()
         every { mockVerifiedIdRequestURL.url.getQueryParameter(Constants.REQUEST_URI) } returns "microsoft.com"
-        coEvery { openIdURLRequestResolver["fetchOpenID4VCIRequest"]("microsoft.com") } returns Result.success<ByteArray>(mockk())
+        val expected = "{\"foo\": \"bar\"}"
+        coEvery { openIdURLRequestResolver["fetchOpenID4VCIRequest"]("microsoft.com") } returns Result.success<ByteArray>(expected.toByteArray())
         every { mockLibraryConfiguration.isPreviewFeatureEnabled(any()) } returns false
         mockkObject(OpenIdResolver)
         coEvery { OpenIdResolver.getRequest(any(), any()) } returns mockk()
@@ -124,7 +126,7 @@ class OpenIdURLRequestResolverTest {
             val actualResult = openIdURLRequestResolver.resolve(mockVerifiedIdRequestURL)
 
             // Assert
-            assertThat(actualResult).isInstanceOf(OpenIdProcessedRequest::class.java)
+            assertThat(actualResult).isEqualTo(expected)
         }
     }
 
