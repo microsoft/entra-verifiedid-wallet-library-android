@@ -19,6 +19,10 @@ android {
     namespace 'com.microsoft.walletlibrary'
     compileSdkVersion compile_sdk_version as Integer
 
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
         minSdkVersion min_sdk_version as Integer
         targetSdkVersion target_sdk_version as Integer
@@ -43,11 +47,11 @@ android {
         pickFirst("META-INF/*.kotlin_module")
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility target_jvmTarget
+        targetCompatibility target_jvmTarget
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = target_jvmTarget
     }
     lintOptions {
         abortOnError false
@@ -66,7 +70,7 @@ android {
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier 'sources'
+    archiveClassifier = 'sources'
     destinationDirectory = reporting.file("$project.buildDir/outputs/jar/")
 }
 
