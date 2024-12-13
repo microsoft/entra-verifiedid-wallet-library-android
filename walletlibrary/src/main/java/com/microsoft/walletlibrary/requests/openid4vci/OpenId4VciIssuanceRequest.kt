@@ -75,17 +75,12 @@ internal class OpenId4VciIssuanceRequest(
 
     override suspend fun cancel(message: String?): VerifiedIdResult<Unit> {
         return getResult {
-            credentialMetadata.notificationEndpoint?.let {
-                val issuanceCompletionResponse = IssuanceCompletionResponse(
-                    IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
-                    credentialOffer.issuer_session,
-                    IssuanceCompletionResponse.IssuanceCompletionErrorDetails.USER_CANCELED
-                )
-                VerifiedIdRequester.sendIssuanceCallback(
-                    issuanceCompletionResponse,
-                    it
-                )
-            }
+            val issuanceCompletionResponse = IssuanceCompletionResponse(
+                IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
+                credentialOffer.issuer_session,
+                IssuanceCompletionResponse.IssuanceCompletionErrorDetails.USER_CANCELED
+            )
+            VerifiedIdRequester.sendIssuanceCallbackViaCredentialMetadata(credentialMetadata, issuanceCompletionResponse)
 
             throw UserCanceledException(
                 message ?: "User Canceled",
@@ -200,15 +195,6 @@ internal class OpenId4VciIssuanceRequest(
     }
 
     private suspend fun sendIssuanceCallbackIfRequestStateAndCallbackExist(result: VerifiedIdResult<VerifiedId>) {
-        val requestState = credentialOffer.issuer_session
-
-        if (credentialMetadata.notificationEndpoint == null) {
-            SdkLog.w("Credential issuer metadata does not include a notification endpoint.")
-            return
-        }
-
-        val issuanceCallbackUrl = credentialMetadata.notificationEndpoint
-
         var issuanceCompletionCode: IssuanceCompletionResponse.IssuanceCompletionCode =
             IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED
         var issuanceCompletionErrorDetails: IssuanceCompletionResponse.IssuanceCompletionErrorDetails? =
@@ -225,13 +211,12 @@ internal class OpenId4VciIssuanceRequest(
                 }
             }
         )
+
         val issuanceCompletionResponse = IssuanceCompletionResponse(
             issuanceCompletionCode,
-            requestState,
+            credentialOffer.issuer_session,
             issuanceCompletionErrorDetails
         )
-        VerifiedIdRequester.sendIssuanceCallback(
-            issuanceCompletionResponse,
-            issuanceCallbackUrl)
+        VerifiedIdRequester.sendIssuanceCallbackViaCredentialMetadata(credentialMetadata, issuanceCompletionResponse)
     }
 }

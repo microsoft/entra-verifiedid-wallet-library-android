@@ -10,7 +10,10 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.mappings.issuance.addRequirements
+import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
+import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.VerifiedIdResponseCompletionException
@@ -50,5 +53,14 @@ object VerifiedIdRequester {
                 issuanceCallbackUrl
             )
         }
+    }
+
+    internal suspend fun sendIssuanceCallbackViaCredentialMetadata(
+        credentialMetadata: CredentialMetadata,
+        issuanceCompletionResponse: IssuanceCompletionResponse?
+    ) {
+        credentialMetadata.notificationEndpoint?.let {
+            sendIssuanceCallback(issuanceCompletionResponse, it)
+        } ?: SdkLog.w("Credential issuer metadata does not include a notification endpoint.")
     }
 }
