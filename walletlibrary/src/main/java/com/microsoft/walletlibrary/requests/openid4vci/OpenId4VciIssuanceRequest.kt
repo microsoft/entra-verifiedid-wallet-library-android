@@ -80,7 +80,7 @@ internal class OpenId4VciIssuanceRequest(
                 credentialOffer.issuer_session,
                 IssuanceCompletionResponse.IssuanceCompletionErrorDetails.USER_CANCELED
             )
-            VerifiedIdRequester.sendIssuanceCallbackViaCredentialMetadata(credentialMetadata, issuanceCompletionResponse)
+            VerifiedIdRequester.sendIssuanceCallback(issuanceCompletionResponse, credentialMetadata.notificationEndpoint)
 
             throw UserCanceledException(
                 message ?: "User Canceled",
@@ -217,6 +217,6 @@ internal class OpenId4VciIssuanceRequest(
             credentialOffer.issuer_session,
             issuanceCompletionErrorDetails
         )
-        VerifiedIdRequester.sendIssuanceCallbackViaCredentialMetadata(credentialMetadata, issuanceCompletionResponse)
+        VerifiedIdRequester.sendIssuanceCallback(issuanceCompletionResponse, credentialMetadata.notificationEndpoint)
     }
 }

@@ -20,7 +20,7 @@ object VerifiedIdCompletionCallBack {
             redirectUrl
         )
         if (callbackResult is Result.Failure) {
-            WalletLibraryLogger.e("Unable to send issuance callback after issuance fails")
+            WalletLibraryLogger.e("Issuance callback failed.")
         }
     }
 }

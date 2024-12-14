@@ -44,23 +44,16 @@ object VerifiedIdRequester {
     }
 
     internal suspend fun sendIssuanceCallback(
-        issuanceCompletionResponse: IssuanceCompletionResponse?,
+        issuanceCompletionResponse: IssuanceCompletionResponse,
         issuanceCallbackUrl: String?
     ) {
-        if (issuanceCompletionResponse != null && issuanceCallbackUrl != null) {
+        if (issuanceCallbackUrl == null) {
+            SdkLog.w("Issuance callback endpoint is not defined.")
+        } else {
             VerifiedIdCompletionCallBack.sendIssuanceCompletionResponse(
                 issuanceCompletionResponse,
                 issuanceCallbackUrl
             )
         }
-    }
-
-    internal suspend fun sendIssuanceCallbackViaCredentialMetadata(
-        credentialMetadata: CredentialMetadata,
-        issuanceCompletionResponse: IssuanceCompletionResponse?
-    ) {
-        credentialMetadata.notificationEndpoint?.let {
-            sendIssuanceCallback(issuanceCompletionResponse, it)
-        } ?: SdkLog.w("Credential issuer metadata does not include a notification endpoint.")
     }
 }

@@ -130,7 +130,7 @@ class OpenId4VCIRequestHandler internal constructor(
                 IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
                 credentialOffer.issuer_session,
                 IssuanceCompletionResponse.IssuanceCompletionErrorDetails.FETCH_CONTRACT_ERROR)
-            VerifiedIdRequester.sendIssuanceCallbackViaCredentialMetadata(credentialMetadata, issuanceCompletionResponse)
+            VerifiedIdRequester.sendIssuanceCallback(issuanceCompletionResponse, credentialMetadata.notificationEndpoint)
 
             throw OpenId4VciValidationException(
                 "Failed to validate or transform credential metadata",
