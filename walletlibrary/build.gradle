@@ -45,6 +45,10 @@ android {
     }
     packagingOptions {
         pickFirst("META-INF/*.kotlin_module")
+        excludes.addAll([
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
+        ])
     }
     compileOptions {
         sourceCompatibility target_jvmTarget
