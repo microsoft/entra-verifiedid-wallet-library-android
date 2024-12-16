@@ -15,12 +15,20 @@ object VerifiedIdCompletionCallBack {
         issuanceCompletionResponse: IssuanceCompletionResponse,
         redirectUrl: String
     ) {
-        val callbackResult = VerifiableCredentialSdk.issuanceService.sendCompletionResponse(
-            issuanceCompletionResponse,
-            redirectUrl
-        )
-        if (callbackResult is Result.Failure) {
-            WalletLibraryLogger.e("Issuance callback failed.")
+        var callbackResult: Result<Unit>? = null
+        var exception: Exception? = null
+
+        try {
+            callbackResult = VerifiableCredentialSdk.issuanceService.sendCompletionResponse(
+                issuanceCompletionResponse,
+                redirectUrl
+            )
+        } catch (e: Exception) {
+            exception = e
+        }
+
+        if (callbackResult == null || callbackResult is Result.Failure) {
+            WalletLibraryLogger.e("Issuance callback failed.", exception)
         }
     }
 }
