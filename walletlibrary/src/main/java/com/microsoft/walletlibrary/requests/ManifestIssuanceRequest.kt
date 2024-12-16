@@ -63,17 +63,18 @@ internal class ManifestIssuanceRequest(
 
     override suspend fun cancel(message: String?): VerifiedIdResult<Unit> {
         return getResult {
-            val issuanceCompletionResponse = requestState?.let {
-                IssuanceCompletionResponse(
+            requestState?.let {
+                val issuanceCompletionResponse = IssuanceCompletionResponse(
                     IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
                     it,
                     IssuanceCompletionResponse.IssuanceCompletionErrorDetails.USER_CANCELED
                 )
+
+                VerifiedIdRequester.sendIssuanceCallback(
+                    issuanceCompletionResponse,
+                    issuanceCallbackUrl
+                )
             }
-            VerifiedIdRequester.sendIssuanceCallback(
-                issuanceCompletionResponse,
-                issuanceCallbackUrl
-            )
         }
     }
 

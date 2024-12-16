@@ -10,7 +10,10 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.mappings.issuance.addRequirements
+import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
+import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.VerifiedIdResponseCompletionException
@@ -41,10 +44,12 @@ object VerifiedIdRequester {
     }
 
     internal suspend fun sendIssuanceCallback(
-        issuanceCompletionResponse: IssuanceCompletionResponse?,
+        issuanceCompletionResponse: IssuanceCompletionResponse,
         issuanceCallbackUrl: String?
     ) {
-        if (issuanceCompletionResponse != null && issuanceCallbackUrl != null) {
+        if (issuanceCallbackUrl == null) {
+            SdkLog.w("Issuance callback endpoint is not defined.")
+        } else {
             VerifiedIdCompletionCallBack.sendIssuanceCompletionResponse(
                 issuanceCompletionResponse,
                 issuanceCallbackUrl

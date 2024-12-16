@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.requests.handlers
 
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialoffer.CredentialOffer
@@ -21,6 +22,7 @@ import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
+import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
 
 class OpenId4VCIRequestHandler internal constructor(
     private val libraryConfiguration: LibraryConfiguration,
@@ -56,36 +58,17 @@ class OpenId4VCIRequestHandler internal constructor(
         val credentialOffer = decodeCredentialOffer(rawRequest)
 
         // Fetch the credential metadata from the credential issuer in credential offer object.
-        fetchCredentialMetadata(credentialOffer.credential_issuer)
-            .onSuccess { credentialMetadata ->
-                validateCredentialMetadata(credentialMetadata, credentialOffer)
-                val supportedCredentialConfigurationId = getSupportedCredentialConfigurationId(
-                    credentialMetadata,
-                    credentialOffer
-                )
-
-                // Get the root of trust from the signed metadata.
-                val rootOfTrust = credentialMetadata.signedMetadata?.let {
-                    signedMetadataProcessor.process(it, credentialOffer.credential_issuer)
-                } ?: RootOfTrust("", false)
-
-                return transformToVerifiedIdRequest(
-                    credentialMetadata,
-                    supportedCredentialConfigurationId,
-                    credentialOffer,
-                    rootOfTrust
-                )
-            }
-            .onFailure {
+        return fetchCredentialMetadata(credentialOffer.credential_issuer).fold(
+            onSuccess = {
+                buildVerifiedIdRequestFromUnvalidatedCredentialMetadata(it, credentialOffer)
+            },
+            onFailure = {
                 throw OpenId4VciRequestException(
                     "Failed to fetch credential metadata ${it.message}",
                     VerifiedIdExceptions.CREDENTIAL_METADATA_FETCH_EXCEPTION.value,
                     it as Exception
                 )
             }
-        throw OpenId4VciValidationException(
-            "Failed to validate or transform credential metadata",
-            VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
         )
     }
 
@@ -119,6 +102,41 @@ class OpenId4VCIRequestHandler internal constructor(
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
             )
         return supportedCredentialConfigurationIds.first()
+    }
+
+    private suspend fun buildVerifiedIdRequestFromUnvalidatedCredentialMetadata(
+        credentialMetadata: CredentialMetadata,
+        credentialOffer: CredentialOffer
+    ): VerifiedIdRequest<*> {
+        try {
+            validateCredentialMetadata(credentialMetadata, credentialOffer)
+            val supportedCredentialConfigurationId = getSupportedCredentialConfigurationId(
+                credentialMetadata,
+                credentialOffer
+            )
+
+            // Get the root of trust from the signed metadata.
+            val rootOfTrust = credentialMetadata.signedMetadata?.let {
+                signedMetadataProcessor.process(it, credentialOffer.credential_issuer)
+            } ?: RootOfTrust("", false)
+
+            return transformToVerifiedIdRequest(
+                credentialMetadata,
+                supportedCredentialConfigurationId,
+                credentialOffer,
+                rootOfTrust)
+        } catch (e: Exception) {
+            val issuanceCompletionResponse = IssuanceCompletionResponse(
+                IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
+                credentialOffer.issuer_session,
+                IssuanceCompletionResponse.IssuanceCompletionErrorDetails.FETCH_CONTRACT_ERROR)
+            VerifiedIdRequester.sendIssuanceCallback(issuanceCompletionResponse, credentialMetadata.notificationEndpoint)
+
+            throw OpenId4VciValidationException(
+                "Failed to validate or transform credential metadata",
+                VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value,
+                e)
+        }
     }
 
     private suspend fun transformToVerifiedIdRequest(
