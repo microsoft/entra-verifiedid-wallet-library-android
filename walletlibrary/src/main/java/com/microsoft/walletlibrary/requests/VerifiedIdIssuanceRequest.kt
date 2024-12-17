@@ -25,8 +25,8 @@ interface VerifiedIdIssuanceRequest : VerifiedIdRequest<VerifiedId> {
     // Completes the request and returns a VerifiedID if successful.
     override suspend fun complete(): VerifiedIdResult<VerifiedId>
 
-    enum class VerifiedIdIssuanceRequestProtocol {
-        OPENID4VCI,
-        MANIFEST_ISSUANCE,
+    enum class VerifiedIdIssuanceRequestProtocol(val protocolName: String) {
+        OPENID4VCI("OpenID4VCIVerifiedId"),
+        MANIFEST_ISSUANCE("ManifestIssuance"),
     }
 }
