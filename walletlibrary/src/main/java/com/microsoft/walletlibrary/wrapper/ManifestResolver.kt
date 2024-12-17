@@ -31,25 +31,16 @@ internal object ManifestResolver {
                 RawManifest(request)
             }
             is Result.Failure -> {
-                val issuanceCompletionResponse = requestState?.let {
-                    IssuanceCompletionResponse(
+                requestState?.let {
+                    val issuanceCompletionResponse = IssuanceCompletionResponse(
                         IssuanceCompletionResponse.IssuanceCompletionCode.ISSUANCE_FAILED,
                         it,
                         IssuanceCompletionResponse.IssuanceCompletionErrorDetails.FETCH_CONTRACT_ERROR
                     )
+
+                    VerifiedIdRequester.sendIssuanceCallback(issuanceCompletionResponse, issuanceCallbackUrl)
                 }
-                try {
-                    if (issuanceCompletionResponse != null && issuanceCallbackUrl != null)
-                        VerifiedIdCompletionCallBack.sendIssuanceCompletionResponse(
-                            issuanceCompletionResponse,
-                            issuanceCallbackUrl
-                        )
-                } catch (exception: WalletLibraryException) {
-                    WalletLibraryLogger.e(
-                        "Unable to send issuance callback after fetching request",
-                        exception
-                    )
-                }
+
                 throw VerifiedIdRequestFetchException(
                     "Unable to fetch issuance request",
                     issuanceRequestResult.payload
