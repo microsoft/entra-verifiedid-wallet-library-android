@@ -17,6 +17,7 @@ import com.microsoft.walletlibrary.networking.formatters.OpenId4VciIssuanceReque
 import com.microsoft.walletlibrary.networking.operations.PostOpenID4VCINetworkOperation
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest
+import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest.VerifiedIdIssuanceRequestProtocol
 import com.microsoft.walletlibrary.requests.requirements.AccessTokenRequirement
 import com.microsoft.walletlibrary.requests.requirements.OpenId4VCIPinRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
@@ -56,6 +57,7 @@ internal class OpenId4VciIssuanceRequest(
 
     private val libraryConfiguration: LibraryConfiguration
 ) : VerifiedIdIssuanceRequest {
+    override val protocol = VerifiedIdIssuanceRequestProtocol.OPENID4VCI
 
     private val requestFormatter = OpenId4VciIssuanceRequestFormatter(libraryConfiguration)
 
