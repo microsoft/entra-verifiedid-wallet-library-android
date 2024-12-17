@@ -6,6 +6,7 @@
 package com.microsoft.walletlibrary.requests
 
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
+import com.microsoft.walletlibrary.requests.VerifiedIdIssuanceRequest.VerifiedIdIssuanceRequestProtocol
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.styles.RequesterStyle
@@ -41,6 +42,8 @@ internal class ManifestIssuanceRequest(
 
     private val libraryConfiguration: LibraryConfiguration
 ) : VerifiedIdIssuanceRequest {
+    override val protocol = VerifiedIdIssuanceRequestProtocol.MANIFEST_ISSUANCE
+
     // Completes the issuance request and returns a Result with VerifiedId if successful.
     override suspend fun complete(): VerifiedIdResult<VerifiedId> {
         val result = getResult {
