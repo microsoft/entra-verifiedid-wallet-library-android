@@ -7,7 +7,6 @@ import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
-import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.networking.entities.openid4vci.RawOpenID4VCIResponse
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
