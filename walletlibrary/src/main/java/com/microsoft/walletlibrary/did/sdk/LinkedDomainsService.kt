@@ -37,24 +37,35 @@ internal class LinkedDomainsService @Inject constructor(
             rootOfTrustResolver?.resolve(identifierDocument)
                 ?.let { Result.success(it.toLinkedDomainResult()) }
                 ?: throw SdkException("Root of trust resolver is not configured")
-        } catch (ex: SdkException) {
-            SdkLog.i(
+        } catch (ex: Exception) {
+            SdkLog.w(
                 "Linked Domains verification using resolver failed with exception $ex. " +
-                        "Verifying it using Well Known Document.",
+                    "Verifying it using Well Known Document.",
                 ex
             )
-            val linkedDomains = verifyLinkedDomainsUsingWellKnownDocument(identifierDocument)
-            Result.success(linkedDomains)
-        } catch (ex: Exception) {
-            SdkLog.e("Linked Domains verification failed with exception $ex", ex)
-            Result.success(LinkedDomainMissing)
+            try {
+                val linkedDomains = verifyLinkedDomainsUsingWellKnownDocument(identifierDocument)
+                Result.success(linkedDomains)
+            } catch (ex: Exception) {
+                SdkLog.w("Linked Domains verification failed with exception $ex", ex)
+                Result.success(LinkedDomainMissing)
+            }
         }
     }
 
     suspend fun fetchDocumentAndVerifyLinkedDomains(relyingPartyDid: String): Result<LinkedDomainResult> {
         resolveIdentifierDocument(relyingPartyDid)
-            .onSuccess { return validateLinkedDomains(it) }
-            .onFailure { return Result.failure(it) }
+            .onSuccess {
+                val linkedDomainsValidationResult = validateLinkedDomains(it)
+                if (linkedDomainsValidationResult.isFailure)
+                    SdkLog.w("Linked Domains validation failed")
+                return linkedDomainsValidationResult
+            }
+            .onFailure {
+                SdkLog.w("Failed to fetch identifier document because of ${it.message}", it)
+                return Result.failure(it)
+            }
+        SdkLog.w("Failed to fetch identifier document.")
         return Result.failure(SdkException("Failed to fetch identifier document"))
     }
 
@@ -89,7 +100,7 @@ internal class LinkedDomainsService @Inject constructor(
                 }
             }
             .onFailure {
-                SdkLog.i("Unable to fetch well-known config document from $domainUrl because of ${it.message}")
+                SdkLog.w("Unable to fetch well-known config document from $domainUrl because of ${it.message}")
                 return Result.success(LinkedDomainUnVerified(hostname))
             }
         return Result.success(LinkedDomainMissing)
