@@ -164,7 +164,6 @@ project.afterEvaluate {
         publications {
             walletlibrary(MavenPublication) {
                 from components.release
-                artifact(sourcesJar)
                 groupId = 'com.microsoft.entra.verifiedid'
                 artifactId = 'walletlibrary'
                 version = _version
