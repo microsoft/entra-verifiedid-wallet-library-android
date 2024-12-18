@@ -70,6 +70,13 @@ android {
             java.srcDirs 'src/main/java'
         }
     }
+    testOptions {
+        unitTests.all {
+            jvmArgs( // see https://mockk.io/doc/md/jdk16-access-exceptions.html
+                    "--add-opens", "java.base/java.util=ALL-UNNAMED"
+            )
+        }
+    }
 }
 
 task sourcesJar(type: Jar) {
