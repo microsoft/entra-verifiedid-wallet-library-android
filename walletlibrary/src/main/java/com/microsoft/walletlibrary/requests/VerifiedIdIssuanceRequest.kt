@@ -20,13 +20,8 @@ interface VerifiedIdIssuanceRequest : VerifiedIdRequest<VerifiedId> {
     val verifiedIdStyle: VerifiedIdStyle
 
     // Indicates the protocol to which the issuance request belongs.
-    val protocol: VerifiedIdIssuanceRequestProtocol
+    val protocol: String
 
     // Completes the request and returns a VerifiedID if successful.
     override suspend fun complete(): VerifiedIdResult<VerifiedId>
-
-    enum class VerifiedIdIssuanceRequestProtocol(val protocolName: String) {
-        OPENID4VCI("OpenID4VCIVerifiedId"),
-        MANIFEST_ISSUANCE("ManifestIssuance"),
-    }
 }
