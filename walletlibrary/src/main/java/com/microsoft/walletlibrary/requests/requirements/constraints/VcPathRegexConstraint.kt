@@ -7,7 +7,6 @@ import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentia
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.util.NoMatchForVcPathRegexConstraintException
 import com.microsoft.walletlibrary.verifiedid.VCVerifiedIdSerializer
-import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.serialization.json.Json
 import java.util.regex.Pattern
