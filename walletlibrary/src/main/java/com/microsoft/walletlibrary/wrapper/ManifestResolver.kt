@@ -10,8 +10,6 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecal
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.requests.rawrequests.RawManifest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
-import com.microsoft.walletlibrary.util.WalletLibraryException
-import com.microsoft.walletlibrary.util.WalletLibraryLogger
 
 /**
  * Wrapper class to wrap the get Issuance Request from VC SDK and return a raw request.
