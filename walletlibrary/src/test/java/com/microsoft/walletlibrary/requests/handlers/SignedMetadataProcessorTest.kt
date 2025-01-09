@@ -252,8 +252,10 @@ class SignedMetadataProcessorTest {
         val mockedResolver: Resolver = mockk()
         val mockedJwtValidator: JwtValidator = mockk()
         val mockRootOfTrustResolver = spyk(MockInjectedRootOfTrustResolver(), recordPrivateCalls = true)
-        val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer)
-        val linkedDomainsService = LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, mockRootOfTrustResolver)
+        val mockedJwtDomainLinkageCredentialValidator =
+            JwtDomainLinkageCredentialValidator(mockedJwtValidator, com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer)
+        val linkedDomainsService =
+            LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, mockRootOfTrustResolver)
         every { VerifiableCredentialSdk.linkedDomainsService } answers { linkedDomainsService }
         every { LinkedDomainsResolver["getLinkedDomainsService"]() } answers { linkedDomainsService }
         val signedMetadataTokenClaimsString =
@@ -283,8 +285,16 @@ class SignedMetadataProcessorTest {
         val mockedResolver: Resolver = mockk()
         val mockedJwtValidator: JwtValidator = mockk()
         val mockRootOfTrustResolver = spyk(MockInjectedRootOfTrustResolver(), recordPrivateCalls = true)
-        val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer)
-        val linkedDomainsService = spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, mockRootOfTrustResolver), recordPrivateCalls = true)
+        val mockedJwtDomainLinkageCredentialValidator =
+            JwtDomainLinkageCredentialValidator(mockedJwtValidator, com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer)
+        val linkedDomainsService = spyk(
+            LinkedDomainsService(
+                mockk(relaxed = true),
+                mockedResolver,
+                mockedJwtDomainLinkageCredentialValidator,
+                mockRootOfTrustResolver
+            ), recordPrivateCalls = true
+        )
         every { VerifiableCredentialSdk.linkedDomainsService } answers { linkedDomainsService }
         every { LinkedDomainsResolver["getLinkedDomainsService"]() } answers { linkedDomainsService }
         val signedMetadataTokenClaimsString =
@@ -318,8 +328,16 @@ class SignedMetadataProcessorTest {
         val mockedResolver: Resolver = mockk()
         val mockedJwtValidator: JwtValidator = mockk()
         val mockRootOfTrustResolver = spyk(MockInjectedRootOfTrustResolver(), recordPrivateCalls = true)
-        val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer)
-        val linkedDomainsService = spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, mockRootOfTrustResolver), recordPrivateCalls = true)
+        val mockedJwtDomainLinkageCredentialValidator =
+            JwtDomainLinkageCredentialValidator(mockedJwtValidator, com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer)
+        val linkedDomainsService = spyk(
+            LinkedDomainsService(
+                mockk(relaxed = true),
+                mockedResolver,
+                mockedJwtDomainLinkageCredentialValidator,
+                mockRootOfTrustResolver
+            ), recordPrivateCalls = true
+        )
         every { VerifiableCredentialSdk.linkedDomainsService } answers { linkedDomainsService }
         every { LinkedDomainsResolver["getLinkedDomainsService"]() } answers { linkedDomainsService }
         val signedMetadataTokenClaimsString =
