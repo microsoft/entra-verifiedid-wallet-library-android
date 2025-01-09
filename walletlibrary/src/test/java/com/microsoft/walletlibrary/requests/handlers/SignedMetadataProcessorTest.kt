@@ -1,10 +1,16 @@
 package com.microsoft.walletlibrary.requests.handlers
 
 import com.microsoft.walletlibrary.did.sdk.LinkedDomainsService
+import com.microsoft.walletlibrary.did.sdk.MockDidMetadata
+import com.microsoft.walletlibrary.did.sdk.MockInjectedRootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
+import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
+import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.DidMetadata
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
-import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.MockRootOfTrustResolver
+import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.mappings.getJwk
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.SignedMetadataTokenClaims
 import com.microsoft.walletlibrary.requests.RootOfTrust
@@ -18,10 +24,13 @@ import com.microsoft.walletlibrary.wrapper.IdentifierDocumentResolver
 import com.microsoft.walletlibrary.wrapper.LinkedDomainsResolver
 import com.nimbusds.jose.jwk.JWK
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerializationException
 import org.assertj.core.api.Assertions.assertThat
@@ -35,7 +44,7 @@ class SignedMetadataProcessorTest {
     private val mockIdentifierDocument = mockk<IdentifierDocument>()
     private val mockJwsToken: JwsToken = mockk()
     private val mockJwk = mockk<JWK>()
-    private val mockLinedDomainsService: LinkedDomainsService = mockk()
+    private val mockLinkedDomainsService: LinkedDomainsService = mockk()
 
     init {
         mockkStatic(VerifiableCredentialSdk::class)
@@ -43,7 +52,7 @@ class SignedMetadataProcessorTest {
         mockkStatic(LinkedDomainsResolver::class)
         mockkStatic("com.microsoft.walletlibrary.mappings.IdentifierDocumentMappingKt")
         mockkStatic("com.microsoft.walletlibrary.mappings.LinkedDomainMappingKt")
-        every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinedDomainsService
+        every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinkedDomainsService
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
         every { signedMetadataProcessor["deserializeSignedMetadata"](signedMetadataString) } returns mockJwsToken
     }
@@ -235,54 +244,100 @@ class SignedMetadataProcessorTest {
     }
 
     @Test
-    fun process_LinkedDomainsNotVerifiedByResolver_ReturnsUnverifiedRootOfTrust() {
+    fun process_LinkedDomainsVerifiedByResolver_ReturnsVerifiedRootOfTrust() {
         // Arrange
-        every { mockLibraryConfiguration.rootOfTrustResolver } returns MockRootOfTrustResolver(false)
         mockIdentifierDocument()
+        mockkStatic(VerifiableCredentialSdk::class)
+        mockkObject(LinkedDomainsResolver)
+        val mockedResolver: Resolver = mockk()
+        val mockedJwtValidator: JwtValidator = mockk()
+        val mockRootOfTrustResolver = spyk(MockInjectedRootOfTrustResolver(), recordPrivateCalls = true)
+        val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer)
+        val linkedDomainsService = LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, mockRootOfTrustResolver)
+        every { VerifiableCredentialSdk.linkedDomainsService } answers { linkedDomainsService }
+        every { LinkedDomainsResolver["getLinkedDomainsService"]() } answers { linkedDomainsService }
         val signedMetadataTokenClaimsString =
-            """{"sub":"testCredentialIssuer","iss": "did:web:test","iat": 1707859806}""".trimIndent()
-        mockJwsToken("did:web:test#signingKey-1", signedMetadataTokenClaimsString)
-        coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
-        coEvery { LinkedDomainsResolver.resolve(mockIdentifierDocument) } returns RootOfTrust(
-            "discover.did.microsoft.com",
-            false
-        )
+            """{"sub":"testCredentialIssuer","iss": "${MockDidMetadata.VALID_DOMAIN_DID.value}","iat": 1707859806}""".trimIndent()
+        mockJwsToken("${MockDidMetadata.VALID_DOMAIN_DID.value}#signingKey-1", signedMetadataTokenClaimsString)
+        coEvery { IdentifierDocumentResolver.resolveIdentifierDocument(MockDidMetadata.VALID_DOMAIN_DID.value) } returns mockIdentifierDocument
+        every { (mockIdentifierDocument as DidMetadata).id } returns MockDidMetadata.VALID_DOMAIN_DID.value
 
         runBlocking {
             // Act
-            val actualResult =
-                signedMetadataProcessor.process(signedMetadataString, credentialIssuer)
+            val actualResult = signedMetadataProcessor.process(signedMetadataString, credentialIssuer)
 
             // Assert
             assertThat(actualResult).isInstanceOf(RootOfTrust::class.java)
-            assertThat(actualResult.source).isEqualTo("discover.did.microsoft.com")
-            assertThat(actualResult.verified).isFalse
+            assertThat(actualResult.source).isEqualTo("validDomain")
+            assertThat(actualResult.verified).isTrue
+            coVerify { mockRootOfTrustResolver.resolve(any<DidMetadata>()) }
         }
     }
 
     @Test
-    fun process_LinkedDomainsVerifiedByResolver_ReturnsVerifiedRootOfTrust() {
+    fun process_LinkedDomainsNotVerifiedByResolverUsingWellKnownAndPasses_ReturnsVerifiedRootOfTrust() {
         // Arrange
-        every { mockLibraryConfiguration.rootOfTrustResolver } returns MockRootOfTrustResolver(true)
         mockIdentifierDocument()
+        mockkStatic(VerifiableCredentialSdk::class)
+        mockkObject(LinkedDomainsResolver)
+        val mockedResolver: Resolver = mockk()
+        val mockedJwtValidator: JwtValidator = mockk()
+        val mockRootOfTrustResolver = spyk(MockInjectedRootOfTrustResolver(), recordPrivateCalls = true)
+        val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer)
+        val linkedDomainsService = spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, mockRootOfTrustResolver), recordPrivateCalls = true)
+        every { VerifiableCredentialSdk.linkedDomainsService } answers { linkedDomainsService }
+        every { LinkedDomainsResolver["getLinkedDomainsService"]() } answers { linkedDomainsService }
         val signedMetadataTokenClaimsString =
-            """{"sub":"testCredentialIssuer","iss": "did:web:test","iat": 1707859806}""".trimIndent()
-        mockJwsToken("did:web:test#signingKey-1", signedMetadataTokenClaimsString)
-        coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } returns mockIdentifierDocument
-        coEvery { LinkedDomainsResolver.resolve(mockIdentifierDocument) } returns RootOfTrust(
-            "discover.did.microsoft.com",
-            true
+            """{"sub":"testCredentialIssuer","iss": "${MockDidMetadata.VALID_DOMAIN_DID.value}","iat": 1707859806}""".trimIndent()
+        mockJwsToken("${MockDidMetadata.VALID_DOMAIN_DID.value}#signingKey-1", signedMetadataTokenClaimsString)
+        coEvery { IdentifierDocumentResolver.resolveIdentifierDocument(MockDidMetadata.VALID_DOMAIN_DID.value) } returns mockIdentifierDocument
+        every { (mockIdentifierDocument as DidMetadata).id } returns MockDidMetadata.EMPTY_DOMAIN_DID.value
+        coEvery { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) } returns LinkedDomainVerified(
+            "testdomain"
         )
 
         runBlocking {
             // Act
-            val actualResult =
-                signedMetadataProcessor.process(signedMetadataString, credentialIssuer)
+            val actualResult = signedMetadataProcessor.process(signedMetadataString, credentialIssuer)
 
             // Assert
             assertThat(actualResult).isInstanceOf(RootOfTrust::class.java)
-            assertThat(actualResult.source).isEqualTo("discover.did.microsoft.com")
+            assertThat(actualResult.source).isEqualTo("testdomain")
             assertThat(actualResult.verified).isTrue
+            coVerify { mockRootOfTrustResolver.resolve(any<DidMetadata>()) }
+            verify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](any<IdentifierDocument>()) }
+        }
+    }
+
+    @Test
+    fun process_LinkedDomainsNotVerifiedByResolverUsingWellKnownAndFails_ReturnsMissingRootOfTrust() {
+        // Arrange
+        mockIdentifierDocument()
+        mockkStatic(VerifiableCredentialSdk::class)
+        mockkObject(LinkedDomainsResolver)
+        val mockedResolver: Resolver = mockk()
+        val mockedJwtValidator: JwtValidator = mockk()
+        val mockRootOfTrustResolver = spyk(MockInjectedRootOfTrustResolver(), recordPrivateCalls = true)
+        val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer)
+        val linkedDomainsService = spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, mockRootOfTrustResolver), recordPrivateCalls = true)
+        every { VerifiableCredentialSdk.linkedDomainsService } answers { linkedDomainsService }
+        every { LinkedDomainsResolver["getLinkedDomainsService"]() } answers { linkedDomainsService }
+        val signedMetadataTokenClaimsString =
+            """{"sub":"testCredentialIssuer","iss": "${MockDidMetadata.VALID_DOMAIN_DID.value}","iat": 1707859806}""".trimIndent()
+        mockJwsToken("${MockDidMetadata.VALID_DOMAIN_DID.value}#signingKey-1", signedMetadataTokenClaimsString)
+        coEvery { IdentifierDocumentResolver.resolveIdentifierDocument(MockDidMetadata.VALID_DOMAIN_DID.value) } returns mockIdentifierDocument
+        every { (mockIdentifierDocument as DidMetadata).id } returns MockDidMetadata.EMPTY_DOMAIN_DID.value
+
+        runBlocking {
+            // Act
+            val actualResult = signedMetadataProcessor.process(signedMetadataString, credentialIssuer)
+
+            // Assert
+            assertThat(actualResult).isInstanceOf(RootOfTrust::class.java)
+            assertThat(actualResult.source).isEqualTo("")
+            assertThat(actualResult.verified).isFalse
+            coVerify { mockRootOfTrustResolver.resolve(any<DidMetadata>()) }
+            verify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](any<IdentifierDocument>()) }
         }
     }
 

@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtDoma
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.DidMetadata
+import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.MockRootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
@@ -17,6 +18,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -30,6 +32,95 @@ class LinkedDomainsServiceTest {
         JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
     private val linkedDomainsService: LinkedDomainsService =
         spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
+
+    @Test
+    fun `injected root of trust resolver returns valid linked domain result`() {
+        val linkedDomainsService: LinkedDomainsService =
+            spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, MockInjectedRootOfTrustResolver()))
+        val mockIdentifierDocument = IdentifierDocument(id = MockDidMetadata.VALID_DOMAIN_DID.value)
+
+        runBlocking {
+            val linkedDomainsResult = linkedDomainsService.validateLinkedDomains(mockIdentifierDocument)
+            assertThat(linkedDomainsResult.isSuccess).isTrue
+            assertThat(linkedDomainsResult.getOrNull()).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((linkedDomainsResult.getOrNull() as LinkedDomainVerified).domainUrl).isEqualTo("validDomain")
+        }
+    }
+
+    @Test
+    fun `injected root of trust resolver returns empty domain and well-known config is not setup returns missing linked domain result`() {
+        val linkedDomainsService: LinkedDomainsService =
+            spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, MockInjectedRootOfTrustResolver()), recordPrivateCalls = true)
+        val mockIdentifierDocument = IdentifierDocument(id = MockDidMetadata.EMPTY_DOMAIN_DID.value)
+
+        runBlocking {
+            val linkedDomainsResult = linkedDomainsService.validateLinkedDomains(mockIdentifierDocument)
+            assertThat(linkedDomainsResult.isSuccess).isTrue
+            assertThat(linkedDomainsResult.getOrNull()).isInstanceOf(LinkedDomainMissing::class.java)
+        }
+        coVerify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) }
+    }
+
+    @Test
+    fun `injected root of trust resolver fails and well-known config is not setup returns missing linked domain result`() {
+        val linkedDomainsService: LinkedDomainsService =
+            spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, MockInjectedRootOfTrustResolver()), recordPrivateCalls = true)
+        val mockIdentifierDocument = IdentifierDocument(id = "failure")
+
+        runBlocking {
+            val linkedDomainsResult = linkedDomainsService.validateLinkedDomains(mockIdentifierDocument)
+            assertThat(linkedDomainsResult.isSuccess).isTrue
+            assertThat(linkedDomainsResult.getOrNull()).isInstanceOf(LinkedDomainMissing::class.java)
+        }
+        coVerify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) }
+    }
+
+    @Test
+    fun `injected root of trust resolver fails or returns empty and well-known config returns valid linked domain`() {
+        val linkedDomainsService: LinkedDomainsService =
+            spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, MockInjectedRootOfTrustResolver()), recordPrivateCalls = true)
+        val mockIdentifierDocument = IdentifierDocument(id = "failure")
+        coEvery { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) } returns LinkedDomainVerified("testdomain")
+
+        runBlocking {
+            val linkedDomainsResult = linkedDomainsService.validateLinkedDomains(mockIdentifierDocument)
+            assertThat(linkedDomainsResult.isSuccess).isTrue
+            assertThat(linkedDomainsResult.getOrNull()).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((linkedDomainsResult.getOrNull() as LinkedDomainVerified).domainUrl).isEqualTo("testdomain")
+        }
+        coVerify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) }
+    }
+
+    @Test
+    fun `injected root of trust resolver fails or returns empty and well-known config returns invalid linked domain`() {
+        val linkedDomainsService: LinkedDomainsService =
+            spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, MockInjectedRootOfTrustResolver()), recordPrivateCalls = true)
+        val mockIdentifierDocument = IdentifierDocument(id = "failure")
+        coEvery { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) } returns LinkedDomainUnVerified("testdomain")
+
+        runBlocking {
+            val linkedDomainsResult = linkedDomainsService.validateLinkedDomains(mockIdentifierDocument)
+            assertThat(linkedDomainsResult.isSuccess).isTrue
+            assertThat(linkedDomainsResult.getOrNull()).isInstanceOf(LinkedDomainUnVerified::class.java)
+            assertThat((linkedDomainsResult.getOrNull() as LinkedDomainUnVerified).domainUrl).isEqualTo("testdomain")
+        }
+        coVerify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) }
+    }
+
+    @Test
+    fun `injected root of trust resolver fails or returns empty and well-known config fails returns missing Linked Domain Result`() {
+        val linkedDomainsService: LinkedDomainsService =
+            spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator, MockInjectedRootOfTrustResolver()), recordPrivateCalls = true)
+        val mockIdentifierDocument = IdentifierDocument(id = "failure")
+        coEvery { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) } throws Exception()
+
+        runBlocking {
+            val linkedDomainsResult = linkedDomainsService.validateLinkedDomains(mockIdentifierDocument)
+            assertThat(linkedDomainsResult.isSuccess).isTrue
+            assertThat(linkedDomainsResult.getOrNull()).isInstanceOf(LinkedDomainMissing::class.java)
+        }
+        coVerify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) }
+    }
 
     @Test
     fun `test linked domains with single domain as string successfully`() {

@@ -21,10 +21,13 @@ internal object LinkedDomainsResolver : RootOfTrustResolver {
                 VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value
             )
         }
-        VerifiableCredentialSdk.linkedDomainsService.validateLinkedDomains(didMetadata)
+        val linkedDomainsService = getLinkedDomainsService()
+        linkedDomainsService.validateLinkedDomains(didMetadata)
             .map { it.toRootOfTrust() }
             .onSuccess { return it }
             .onFailure { return RootOfTrust("", false) }
         return RootOfTrust("", false)
     }
+
+    private fun getLinkedDomainsService() = VerifiableCredentialSdk.linkedDomainsService
 }

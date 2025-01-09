@@ -48,8 +48,7 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         validateSignedMetadata(jwsToken, jwk, credentialIssuer, did)
 
         // Return the root of trust from the identifier document along with its verification status.
-        val rootOfTrustResolver = libraryConfiguration.rootOfTrustResolver ?: LinkedDomainsResolver
-        return rootOfTrustResolver.resolve(identifierDocument)
+        return LinkedDomainsResolver.resolve(identifierDocument)
     }
 
     private fun deserializeSignedMetadata(signedMetadata: String): JwsToken {
