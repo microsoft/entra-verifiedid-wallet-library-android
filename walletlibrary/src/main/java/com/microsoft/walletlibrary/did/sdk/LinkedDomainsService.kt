@@ -20,6 +20,7 @@ import java.net.URL
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.coroutines.cancellation.CancellationException
 
 @Singleton
 internal class LinkedDomainsService @Inject constructor(
@@ -37,6 +38,9 @@ internal class LinkedDomainsService @Inject constructor(
             rootOfTrustResolver?.resolve(identifierDocument)
                 ?.let { Result.success(it.toLinkedDomainResult()) }
                 ?: throw SdkException("Root of trust resolver is not configured")
+        } catch (ex: CancellationException) {
+          SdkLog.w("Linked Domains verification using resolver failed with exception $ex. $ex")
+          throw ex
         } catch (ex: Exception) {
             SdkLog.w(
                 "Linked Domains verification using resolver failed with exception $ex. " +
