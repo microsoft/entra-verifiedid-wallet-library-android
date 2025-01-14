@@ -7,7 +7,7 @@ import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsof
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackup
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024BackupProcessor
-import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024UnProtectedBackup
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024UnprotectedBackup
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024UnProtectedBackupData
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.UnknownBackupFormatException
 import javax.inject.Inject
@@ -22,7 +22,7 @@ internal class BackupProcessorFactory @Inject constructor(
     private fun getProcessor(unprotectedBackup: UnprotectedBackup): BackupProcessor {
         return when (unprotectedBackup) {
             is Microsoft2020UnprotectedBackup -> microsoft2020BackupProcessor
-            is Microsoft2024UnProtectedBackup -> microsoft2024BackupProcessor
+            is Microsoft2024UnprotectedBackup -> microsoft2024BackupProcessor
             else -> throw UnknownBackupFormatException("Unknown backup type: ${unprotectedBackup::class.qualifiedName}")
         }
     }

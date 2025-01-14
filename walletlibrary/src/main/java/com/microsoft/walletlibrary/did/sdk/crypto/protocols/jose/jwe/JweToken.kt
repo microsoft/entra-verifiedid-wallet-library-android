@@ -26,7 +26,7 @@ import com.nimbusds.jose.jwk.OctetSequenceKey
 import com.nimbusds.jose.jwk.RSAKey
 import java.security.Key
 
-internal class JweToken private constructor(
+class JweToken private constructor(
     private var jweToken: JWEObject
 ) {
 

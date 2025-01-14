@@ -15,7 +15,7 @@ internal class KeyException(message: String, cause: Throwable? = null) : CryptoE
 
 internal class AlgorithmException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
-internal open class BackupException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
+open class BackupException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
     SdkException(message, cause, retryable)
 
 internal class UnknownBackupFormatException(message: String, cause: Throwable? = null) : BackupException(message, cause, false)

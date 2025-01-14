@@ -34,7 +34,7 @@ internal class Microsoft2024BackupProcessor @Inject constructor(
 ) : BackupProcessor {
 
     override suspend fun export(backup: UnprotectedBackup): UnprotectedBackupData {
-        if (backup !is Microsoft2024UnProtectedBackup) throw BackupException("Backup has wrong type ${backup::class.simpleName}")
+        if (backup !is Microsoft2024UnprotectedBackup) throw BackupException("Backup has wrong type ${backup::class.simpleName}")
         val vcMap = mutableMapOf<String, String>()
         val vcMetaMap = mutableMapOf<String, VcMetadata>()
         backup.verifiableCredentials.forEach { verifiableCredentialMetadataPair ->
@@ -71,7 +71,7 @@ internal class Microsoft2024BackupProcessor @Inject constructor(
         identifiers.forEach { id -> identityRepository.insert(id) }
 
         keyStore.storeKey(Constants.MAIN_IDENTIFIER_REFERENCE, JWK.parse(backupData.metaInf.seed))
-        return Microsoft2024UnProtectedBackup(
+        return Microsoft2024UnprotectedBackup(
             walletMetadata = backupData.metaInf,
             verifiableCredentials = transformVcs(backupData)
         )
