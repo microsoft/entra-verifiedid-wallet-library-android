@@ -6,18 +6,23 @@ import com.microsoft.walletlibrary.did.sdk.backup.UnprotectedBackup
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020BackupProcessor
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackup
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024BackupProcessor
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024UnProtectedBackup
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024UnProtectedBackupData
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.UnknownBackupFormatException
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class BackupProcessorFactory @Inject constructor(
-    private val microsoft2020BackupProcessor: Microsoft2020BackupProcessor
+    private val microsoft2020BackupProcessor: Microsoft2020BackupProcessor,
+    private val microsoft2024BackupProcessor: Microsoft2024BackupProcessor
 ) : BackupProcessor {
 
     private fun getProcessor(unprotectedBackup: UnprotectedBackup): BackupProcessor {
         return when (unprotectedBackup) {
             is Microsoft2020UnprotectedBackup -> microsoft2020BackupProcessor
+            is Microsoft2024UnProtectedBackup -> microsoft2024BackupProcessor
             else -> throw UnknownBackupFormatException("Unknown backup type: ${unprotectedBackup::class.qualifiedName}")
         }
     }
@@ -25,6 +30,7 @@ internal class BackupProcessorFactory @Inject constructor(
     private fun getProcessor(backupData: UnprotectedBackupData): BackupProcessor {
         return when (backupData) {
             is Microsoft2020UnprotectedBackupData -> microsoft2020BackupProcessor
+            is Microsoft2024UnProtectedBackupData -> microsoft2024BackupProcessor
             else -> throw UnknownBackupFormatException("Unknown backupData type: ${backupData::class.qualifiedName}")
         }
     }

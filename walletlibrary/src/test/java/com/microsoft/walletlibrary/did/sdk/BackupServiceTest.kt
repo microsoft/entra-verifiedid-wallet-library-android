@@ -3,6 +3,7 @@
 package com.microsoft.walletlibrary.did.sdk
 
 import android.util.BackupTestUtil
+import com.microsoft.walletlibrary.VerifiedIdClient
 import com.microsoft.walletlibrary.did.sdk.backup.BackupParser
 import com.microsoft.walletlibrary.did.sdk.backup.container.jwe.JwePasswordProtectedBackupData
 import com.microsoft.walletlibrary.did.sdk.backup.container.jwe.JwePasswordProtectionMethod
@@ -12,6 +13,7 @@ import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsof
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.RawIdentifierConverter
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.TestVcMetaData
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.WalletMetadata
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024BackupProcessor
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.FailedDecryptException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
@@ -631,7 +633,15 @@ class BackupServiceTest {
         RawIdentifierConverter(identifierRepository, keyStore),
         defaultTestSerializer
     )
-    private val backupProcessorFactory = BackupProcessorFactory(microsoft2020BackupProcessor)
+    private val microsoft2024BackupProcessor = Microsoft2024BackupProcessor(
+        identifierService,
+        identifierRepository,
+        keyStore,
+        RawIdentifierConverter(identifierRepository, keyStore),
+        defaultTestSerializer,
+        verifiedIdClient = mockk<VerifiedIdClient>()
+    )
+    private val backupProcessorFactory = BackupProcessorFactory(microsoft2020BackupProcessor, microsoft2024BackupProcessor)
 
     private val service = BackupService(jweBackupFactory, backupProcessorFactory, identifierRepository, defaultTestSerializer)
     private val password = "Big complex passsword you'll never be able to guess"
