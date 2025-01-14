@@ -2,6 +2,7 @@
 
 package com.microsoft.walletlibrary.wrapper
 
+import com.microsoft.walletlibrary.VerifiedIdClient
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.backup.UnprotectedBackup
 import com.microsoft.walletlibrary.did.sdk.backup.container.ProtectionMethod
@@ -11,17 +12,56 @@ import com.microsoft.walletlibrary.util.getResult
 
 object ExportHandler {
 
-    suspend fun exportBackup(unprotectedBackup: UnprotectedBackup, protectionMethod: ProtectionMethod): VerifiedIdResult<ProtectedBackupData> {
+    suspend fun exportBackup(
+        unprotectedBackup: UnprotectedBackup,
+        protectionMethod: ProtectionMethod,
+        verifiedIdClient: VerifiedIdClient
+    ): VerifiedIdResult<ProtectedBackupData> {
         return getResult {
-            when(val backupResult = VerifiableCredentialSdk.backupService.exportBackup(unprotectedBackup, protectionMethod)) {
+            when (val backupResult =
+                VerifiableCredentialSdk.backupService.exportBackup(unprotectedBackup, protectionMethod, verifiedIdClient)) {
                 is com.microsoft.walletlibrary.did.sdk.util.controlflow.Result.Success -> {
                     backupResult.payload
                 }
+
                 is com.microsoft.walletlibrary.did.sdk.util.controlflow.Result.Failure -> {
                     throw backupResult.payload
                 }
             }
 
+        }
+    }
+
+    suspend fun importBackup(
+        protectedBackupData: ProtectedBackupData,
+        protectionMethod: ProtectionMethod,
+        verifiedIdClient: VerifiedIdClient
+    ): VerifiedIdResult<UnprotectedBackup> {
+        return getResult {
+            when (val backupResult =
+                VerifiableCredentialSdk.backupService.importBackup(protectedBackupData, protectionMethod, verifiedIdClient)) {
+                is com.microsoft.walletlibrary.did.sdk.util.controlflow.Result.Success -> {
+                    backupResult.payload
+                }
+
+                is com.microsoft.walletlibrary.did.sdk.util.controlflow.Result.Failure -> {
+                    throw backupResult.payload
+                }
+            }
+        }
+    }
+
+    suspend fun parseBackup(backup: String): VerifiedIdResult<ProtectedBackupData> {
+        return getResult {
+            when (val backupResult = VerifiableCredentialSdk.backupService.parseBackup(backup)) {
+                is com.microsoft.walletlibrary.did.sdk.util.controlflow.Result.Success -> {
+                    backupResult.payload
+                }
+
+                is com.microsoft.walletlibrary.did.sdk.util.controlflow.Result.Failure -> {
+                    throw backupResult.payload
+                }
+            }
         }
     }
 }

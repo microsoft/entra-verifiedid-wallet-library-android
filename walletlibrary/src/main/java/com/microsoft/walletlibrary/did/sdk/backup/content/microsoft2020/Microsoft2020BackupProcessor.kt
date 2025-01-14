@@ -2,6 +2,7 @@
 
 package com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020
 
+import com.microsoft.walletlibrary.VerifiedIdClient
 import com.microsoft.walletlibrary.did.sdk.IdentifierService
 import com.microsoft.walletlibrary.did.sdk.backup.UnprotectedBackup
 import com.microsoft.walletlibrary.did.sdk.backup.content.BackupProcessor
@@ -28,7 +29,7 @@ internal class Microsoft2020BackupProcessor @Inject constructor(
     private val jsonSerializer: Json
 ) : BackupProcessor {
 
-    override suspend fun export(backup: UnprotectedBackup): UnprotectedBackupData {
+    override suspend fun export(backup: UnprotectedBackup, verifiedIdClient: VerifiedIdClient): UnprotectedBackupData {
         if (backup !is Microsoft2020UnprotectedBackup) throw BackupException("Backup has wrong type ${backup::class.simpleName}")
         val vcMap = mutableMapOf<String, String>()
         val vcMetaMap = mutableMapOf<String, VcMetadata>()
@@ -49,7 +50,7 @@ internal class Microsoft2020BackupProcessor @Inject constructor(
         )
     }
 
-    override suspend fun import(backupData: UnprotectedBackupData): UnprotectedBackup {
+    override suspend fun import(backupData: UnprotectedBackupData, verifiedIdClient: VerifiedIdClient): UnprotectedBackup {
         if (backupData !is Microsoft2020UnprotectedBackupData) throw BackupException("BackupData has wrong type ${backupData::class.simpleName}")
         val identifiers = mutableListOf<Identifier>()
         var keySet = setOf<JWK>()

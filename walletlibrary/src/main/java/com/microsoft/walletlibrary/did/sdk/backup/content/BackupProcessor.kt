@@ -2,10 +2,11 @@
 
 package com.microsoft.walletlibrary.did.sdk.backup.content
 
+import com.microsoft.walletlibrary.VerifiedIdClient
 import com.microsoft.walletlibrary.did.sdk.backup.UnprotectedBackup
 
 internal interface BackupProcessor {
-    suspend fun export(backup: UnprotectedBackup): UnprotectedBackupData
+    suspend fun export(backup: UnprotectedBackup, verifiedIdClient: VerifiedIdClient): UnprotectedBackupData
 
-    suspend fun import(backupData: UnprotectedBackupData): UnprotectedBackup
+    suspend fun import(backupData: UnprotectedBackupData, verifiedIdClient: VerifiedIdClient): UnprotectedBackup
 }

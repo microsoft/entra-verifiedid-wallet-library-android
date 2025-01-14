@@ -6,6 +6,7 @@
 package com.microsoft.walletlibrary
 
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
+import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
@@ -57,6 +58,7 @@ class VerifiedIdClient(
         return try {
             VerifiedIdResult.success(serializer.decodeFromString(encodedVerifiedId))
         } catch (exception: Exception) {
+            SdkLog.d("Failed to decode VC", exception)
             MalformedInputException(
                 "Malformed Input Exception",
                 VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value,

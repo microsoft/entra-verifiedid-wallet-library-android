@@ -13,6 +13,7 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.microsoft.walletlibrary.did.sdk.CorrelationVectorService
 import com.microsoft.walletlibrary.did.sdk.backup.content.UnprotectedBackupData
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024UnprotectedBackupData
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.DomainLinkageCredentialValidator
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.OidcPresentationRequestValidator
@@ -123,6 +124,7 @@ internal class SdkModule {
                 SerializersModule {
                     polymorphic(UnprotectedBackupData::class) {
                         subclass(Microsoft2020UnprotectedBackupData::class)
+                        subclass(Microsoft2024UnprotectedBackupData::class)
                     }
                 }
             encodeDefaults = false

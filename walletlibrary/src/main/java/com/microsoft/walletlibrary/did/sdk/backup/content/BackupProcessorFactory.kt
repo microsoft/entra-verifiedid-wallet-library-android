@@ -2,13 +2,14 @@
 
 package com.microsoft.walletlibrary.did.sdk.backup.content
 
+import com.microsoft.walletlibrary.VerifiedIdClient
 import com.microsoft.walletlibrary.did.sdk.backup.UnprotectedBackup
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020BackupProcessor
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackup
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024BackupProcessor
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024UnprotectedBackup
-import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024UnProtectedBackupData
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024UnprotectedBackupData
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.UnknownBackupFormatException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,16 +31,16 @@ internal class BackupProcessorFactory @Inject constructor(
     private fun getProcessor(backupData: UnprotectedBackupData): BackupProcessor {
         return when (backupData) {
             is Microsoft2020UnprotectedBackupData -> microsoft2020BackupProcessor
-            is Microsoft2024UnProtectedBackupData -> microsoft2024BackupProcessor
+            is Microsoft2024UnprotectedBackupData -> microsoft2024BackupProcessor
             else -> throw UnknownBackupFormatException("Unknown backupData type: ${backupData::class.qualifiedName}")
         }
     }
 
-    override suspend fun export(backup: UnprotectedBackup): UnprotectedBackupData {
-        return getProcessor(backup).export(backup)
+    override suspend fun export(backup: UnprotectedBackup, verifiedIdClient: VerifiedIdClient): UnprotectedBackupData {
+        return getProcessor(backup).export(backup, verifiedIdClient)
     }
 
-    override suspend fun import(backupData: UnprotectedBackupData): UnprotectedBackup {
-        return getProcessor(backupData).import(backupData)
+    override suspend fun import(backupData: UnprotectedBackupData, verifiedIdClient: VerifiedIdClient): UnprotectedBackup {
+        return getProcessor(backupData).import(backupData, verifiedIdClient)
     }
 }

@@ -9,17 +9,12 @@ import com.microsoft.walletlibrary.did.sdk.backup.content.BackupProcessor
 import com.microsoft.walletlibrary.did.sdk.backup.content.UnprotectedBackupData
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.RawIdentifierConverter
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.VcMetadata
-import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.BackupException
-import com.microsoft.walletlibrary.verifiedid.VCVerifiedIdSerializer
 import com.nimbusds.jose.jwk.JWK
-import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,19 +23,18 @@ internal class Microsoft2024BackupProcessor @Inject constructor(
     private val identifierService: IdentifierService,
     private val identityRepository: IdentifierRepository,
     private val keyStore: EncryptedKeyStore,
-    private val rawIdentifierConverter: RawIdentifierConverter,
-    private val jsonSerializer: Json,
-    private val verifiedIdClient: VerifiedIdClient
+    private val rawIdentifierConverter: RawIdentifierConverter
 ) : BackupProcessor {
 
-    override suspend fun export(backup: UnprotectedBackup): UnprotectedBackupData {
+    override suspend fun export(backup: UnprotectedBackup, verifiedIdClient: VerifiedIdClient): UnprotectedBackupData {
         if (backup !is Microsoft2024UnprotectedBackup) throw BackupException("Backup has wrong type ${backup::class.simpleName}")
         val vcMap = mutableMapOf<String, String>()
         val vcMetaMap = mutableMapOf<String, VcMetadata>()
         backup.verifiableCredentials.forEach { verifiableCredentialMetadataPair ->
-            val verifiedId = verifiedIdClient.decodeVerifiedId(verifiableCredentialMetadataPair.first).getOrNull()
+            val encodedVerifiedId = verifiableCredentialMetadataPair.first
+            val verifiedId = verifiedIdClient.decodeVerifiedId(encodedVerifiedId).getOrNull()
                 ?: throw BackupException("Failed to decode VC")
-            vcMap[verifiedId.id] = VCVerifiedIdSerializer.serialize(verifiedId).raw
+            vcMap[verifiedId.id] = encodedVerifiedId
             vcMetaMap[verifiedId.id] = verifiableCredentialMetadataPair.second
         }
 
@@ -48,7 +42,7 @@ internal class Microsoft2024BackupProcessor @Inject constructor(
         The created key is retrieved from keystore and used as seed in wallet metadata below.*/
         identifierService.getMasterIdentifier()
         backup.walletMetadata.seed = keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE).toJSONString()
-        return Microsoft2024UnProtectedBackupData(
+        return Microsoft2024UnprotectedBackupData(
             vcs = vcMap,
             vcsMetaInf = vcMetaMap,
             metaInf = backup.walletMetadata,
@@ -56,8 +50,8 @@ internal class Microsoft2024BackupProcessor @Inject constructor(
         )
     }
 
-    override suspend fun import(backupData: UnprotectedBackupData): UnprotectedBackup {
-        if (backupData !is Microsoft2024UnProtectedBackupData) throw BackupException("BackupData has wrong type ${backupData::class.simpleName}")
+    override suspend fun import(backupData: UnprotectedBackupData, verifiedIdClient: VerifiedIdClient): UnprotectedBackup {
+        if (backupData !is Microsoft2024UnprotectedBackupData) throw BackupException("BackupData has wrong type ${backupData::class.simpleName}")
         val identifiers = mutableListOf<Identifier>()
         var keySet = setOf<JWK>()
 
@@ -77,17 +71,10 @@ internal class Microsoft2024BackupProcessor @Inject constructor(
         )
     }
 
-    private fun transformVcs(backup: Microsoft2024UnProtectedBackupData): List<Pair<String, VcMetadata>> {
+    private fun transformVcs(backup: Microsoft2024UnprotectedBackupData): List<Pair<String, VcMetadata>> {
         val vcList = ArrayList<Pair<String, VcMetadata>>()
         backup.vcs.forEach { mapEntry ->
-            val (jti, rawVcToken) = mapEntry
-            val jwsToken = JwsToken.deserialize(rawVcToken)
-            val verifiableCredentialContent = jsonSerializer.decodeFromString(
-                VerifiableCredentialContent.serializer(), jwsToken.content())
-            val vc = VerifiableCredential(verifiableCredentialContent.jti, rawVcToken, verifiableCredentialContent)
-            val verifiedId = VCVerifiedIdSerializer.deserialize(vc)
-            val encodedVerifiedId = verifiedIdClient.encode(verifiedId).getOrNull()
-                ?: throw BackupException("Failed to encode VC")
+            val (jti, encodedVerifiedId) = mapEntry
             if (backup.vcsMetaInf[jti] == null) throw BackupException("Corrupt backup. MetaInf for $jti is missing.")
             vcList.add(Pair(encodedVerifiedId, backup.vcsMetaInf[jti]!!))
         }

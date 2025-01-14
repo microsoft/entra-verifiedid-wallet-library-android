@@ -18,20 +18,20 @@ internal class AlgorithmException(message: String, cause: Throwable? = null) : C
 open class BackupException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
     SdkException(message, cause, retryable)
 
-internal class UnknownBackupFormatException(message: String, cause: Throwable? = null) : BackupException(message, cause, false)
+class UnknownBackupFormatException(message: String, cause: Throwable? = null) : BackupException(message, cause, false)
 
-internal class UnknownProtectionMethodException(message: String, cause: Throwable? = null) : BackupException(message, cause, false)
+class UnknownProtectionMethodException(message: String, cause: Throwable? = null) : BackupException(message, cause, false)
 
-internal class NoBackupException(message: String = "", retryable: Boolean = false) : BackupException(message, null, retryable)
+class NoBackupException(message: String = "", retryable: Boolean = false) : BackupException(message, null, retryable)
 
 internal open class MalformedBackupException(message: String, cause: Throwable? = null) : BackupException(message, cause, false)
 
 internal class MalformedIdentityException(message: String, cause: Throwable? = null) : MalformedBackupException(message, cause)
 
-internal class FailedDecryptException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
+class FailedDecryptException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
     BackupException(message, cause, retryable)
 
-internal class BadPasswordException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
+class BadPasswordException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
     BackupException(message, cause, retryable)
 
 internal open class AuthenticationException(message: String, cause: Throwable? = null, retryable: Boolean = true) :
