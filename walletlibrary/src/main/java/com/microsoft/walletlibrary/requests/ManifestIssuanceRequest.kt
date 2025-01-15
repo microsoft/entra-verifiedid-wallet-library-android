@@ -41,6 +41,8 @@ internal class ManifestIssuanceRequest(
 
     private val libraryConfiguration: LibraryConfiguration
 ) : VerifiedIdIssuanceRequest {
+    override val protocol = "ManifestIssuance"
+
     // Completes the issuance request and returns a Result with VerifiedId if successful.
     override suspend fun complete(): VerifiedIdResult<VerifiedId> {
         val result = getResult {

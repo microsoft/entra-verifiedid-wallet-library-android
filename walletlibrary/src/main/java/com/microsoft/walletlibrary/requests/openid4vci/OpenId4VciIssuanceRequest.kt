@@ -55,6 +55,7 @@ internal class OpenId4VciIssuanceRequest(
 
     private val libraryConfiguration: LibraryConfiguration
 ) : VerifiedIdIssuanceRequest {
+    override val protocol = "OpenID4VCIVerifiedId"
 
     private val requestFormatter = OpenId4VciIssuanceRequestFormatter(libraryConfiguration)
 

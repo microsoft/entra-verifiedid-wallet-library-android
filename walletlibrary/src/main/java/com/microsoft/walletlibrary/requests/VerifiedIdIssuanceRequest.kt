@@ -19,6 +19,9 @@ interface VerifiedIdIssuanceRequest : VerifiedIdRequest<VerifiedId> {
     // Attributes describing the Verified ID (eg. name, issuer, logo, background and text colors).
     val verifiedIdStyle: VerifiedIdStyle
 
+    // Indicates the protocol to which the issuance request belongs.
+    val protocol: String
+
     // Completes the request and returns a VerifiedID if successful.
     override suspend fun complete(): VerifiedIdResult<VerifiedId>
 }
