@@ -1,10 +1,11 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.compose'
     id "org.jetbrains.kotlin.plugin.serialization" version "$kotlin_version"
+    id("com.google.devtools.ksp")
 }
 
-apply plugin: 'kotlin-kapt'
 apply plugin: 'maven-publish'
 
 repositories {
@@ -84,7 +85,7 @@ dependencies {
     implementation "androidx.core:core-ktx:$androidx_core_version"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0"
     implementation "com.google.dagger:dagger:$dagger_version"
-    kapt "com.google.dagger:dagger-compiler:$dagger_version"
+    ksp "com.google.dagger:dagger-compiler:$dagger_version"
 
     implementation "com.squareup.retrofit2:retrofit:$retrofit2_version"
     implementation "com.squareup.retrofit2:converter-scalars:$retrofit2_version"
@@ -92,7 +93,7 @@ dependencies {
 
     implementation "androidx.room:room-runtime:$androidx_room_persistence_version"
     implementation "androidx.room:room-ktx:$androidx_room_persistence_version"
-    kapt "androidx.room:room-compiler:$androidx_room_persistence_version"
+    ksp "androidx.room:room-compiler:$androidx_room_persistence_version"
 
     implementation "com.squareup.okhttp3:okhttp:$com_squareup_okhttp3_okhttp_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$com_squareup_okhttp3_okhttp_version"
