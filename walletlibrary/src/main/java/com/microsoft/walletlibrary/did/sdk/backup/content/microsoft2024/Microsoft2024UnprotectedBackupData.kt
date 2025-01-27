@@ -3,7 +3,6 @@
 package com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024
 
 import com.microsoft.walletlibrary.did.sdk.backup.content.UnprotectedBackupData
-import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.RawIdentity
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.VcMetadata
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.WalletMetadata
 import kotlinx.serialization.SerialName
@@ -15,7 +14,7 @@ internal data class Microsoft2024UnprotectedBackupData(
     val vcs: Map<String, String>,
     val vcsMetaInf: Map<String, VcMetadata>,
     val metaInf: WalletMetadata,
-    val identifiers: List<RawIdentity>
+    val identifiers: List<String>
 ) : UnprotectedBackupData() {
     override val type: String
         get() = MICROSOFT_BACKUP_TYPE

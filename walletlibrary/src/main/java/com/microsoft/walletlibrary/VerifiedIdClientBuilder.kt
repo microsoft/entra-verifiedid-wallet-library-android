@@ -7,6 +7,8 @@ package com.microsoft.walletlibrary
 
 import android.content.Context
 import android.content.pm.PackageManager
+import com.microsoft.walletlibrary.datasource.db.entities.HolderIdentifierData
+import com.microsoft.walletlibrary.datasource.db.entities.HolderIdentifierStoredProperties
 import com.microsoft.walletlibrary.datasource.repository.HolderIdentifierDataRepository
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
@@ -64,6 +66,9 @@ class VerifiedIdClientBuilder(private val context: Context) {
         }
         polymorphic(VerifiedIdStyle::class) {
             subclass(BasicVerifiedIdStyle::class)
+        }
+        polymorphic(HolderIdentifierStoredProperties::class) {
+            subclass(HolderIdentifierData::class)
         }
     }
     private var jsonSerializer = Json {

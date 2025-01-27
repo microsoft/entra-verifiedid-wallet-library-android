@@ -8,6 +8,7 @@ package com.microsoft.walletlibrary.datasource.repository
 import com.microsoft.walletlibrary.datasource.db.entities.HolderIdentifierData
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.identifier.DidMethod
+import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifier
 import com.microsoft.walletlibrary.identifier.EncryptedSharedPreferencesIdentifierCreator
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.util.HolderIdentifierCreationException
@@ -27,8 +28,21 @@ internal class HolderIdentifierDataRepository {
     private suspend fun insert(holderIdentifier: HolderIdentifierData) =
         holderIdentifierDataDao.insert(holderIdentifier)
 
-    private suspend fun queryAllHolderIdentifierData(): List<HolderIdentifierData> =
+    internal suspend fun insert(holderIdentifier: HolderIdentifier) {
+        when (holderIdentifier) {
+            is EncryptedSharedPreferencesIdentifier -> insert(holderIdentifier.convertToHolderIdentifierData())
+            else -> throw HolderIdentifierCreationException(
+                "Provided holder identifier is not supported",
+                VerifiedIdExceptions.HOLDER_IDENTIFIER_EXCEPTION.value
+            )
+        }
+    }
+
+    internal suspend fun queryAllHolderIdentifierData(): List<HolderIdentifierData> =
         holderIdentifierDataDao.queryAllHolderIdentifiers()
+
+    internal suspend fun queryAllHolderIdentifiers(): List<HolderIdentifier> =
+        queryAllHolderIdentifierData().map { convertToHolderIdentifier(it) }
 
     // Get the main holder identifier from the database. If no holder identifier is created, creates a new one.
     internal suspend fun getMainHolderIdentifier(): HolderIdentifier {
@@ -49,7 +63,7 @@ internal class HolderIdentifierDataRepository {
         return holderIdentifier
     }
 
-    private fun convertToHolderIdentifier(holderIdentifierData: HolderIdentifierData): HolderIdentifier {
+    internal fun convertToHolderIdentifier(holderIdentifierData: HolderIdentifierData): HolderIdentifier {
         return holderIdentifierCreator.createHolderIdentifier(
             holderIdentifierData.algorithm,
             DidMethod.values().find { it.value == holderIdentifierData.didMethod }

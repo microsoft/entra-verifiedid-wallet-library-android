@@ -26,4 +26,4 @@ internal data class HolderIdentifierData(
     val algorithm: String,
     // The reference to the key that is used for cryptographic operations.
     val keyReference: String
-)
+) : HolderIdentifierStoredProperties()
