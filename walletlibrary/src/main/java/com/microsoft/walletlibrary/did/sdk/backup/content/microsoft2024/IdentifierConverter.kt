@@ -3,13 +3,11 @@
 package com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024
 
 import com.microsoft.walletlibrary.datasource.db.entities.HolderIdentifierData
-import com.microsoft.walletlibrary.datasource.db.entities.HolderIdentifierStoredProperties
 import com.microsoft.walletlibrary.datasource.repository.HolderIdentifierDataRepository
 import com.microsoft.walletlibrary.did.sdk.backup.content.UnprotectedBackupData
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.RawIdentifierConverter
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.RawIdentity
 import com.microsoft.walletlibrary.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.BackupException
@@ -25,7 +23,6 @@ import javax.inject.Singleton
 
 @Singleton
 internal class IdentifierConverter @Inject constructor(
-    private val identityRepository: IdentifierRepository,
     private val rawIdentifierConverter: RawIdentifierConverter,
     private val serializer: Json
 ) {
@@ -36,7 +33,7 @@ internal class IdentifierConverter @Inject constructor(
             val rawHolderIdentifier = createRawHolderIdentifier(it)
             encodeRawHolderIdentifier(rawHolderIdentifier)
         }
-        val rawIdentities = identityRepository.queryAllLocal().map { did -> rawIdentifierConverter.createRawIdentifier(did) }
+        val rawIdentities = rawIdentifierConverter.identityRepository.queryAllLocal().map { did -> rawIdentifierConverter.createRawIdentifier(did) }
         val encodedRawIdentities = rawIdentities.map { encodeIdentifier(it) }
         return encodedRawIdentities + encodedHolderIdentifiers
     }
@@ -97,7 +94,7 @@ internal class IdentifierConverter @Inject constructor(
                 keySet = keySet.union(pair.second)
                 keySet.forEach { key -> importKey(key, keyStore) }
                 keyStore.storeKey(Constants.MAIN_IDENTIFIER_REFERENCE, JWK.parse(backupData.metaInf.seed))
-                identityRepository.insert(pair.first)
+                rawIdentifierConverter.identityRepository.insert(pair.first)
             }
         }
     }

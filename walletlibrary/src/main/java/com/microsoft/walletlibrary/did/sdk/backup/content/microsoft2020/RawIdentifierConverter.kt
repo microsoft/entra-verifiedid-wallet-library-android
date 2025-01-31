@@ -15,7 +15,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class RawIdentifierConverter @Inject constructor(
-    private val identityRepository: IdentifierRepository,
+    internal val identityRepository: IdentifierRepository,
     private val keyStore: EncryptedKeyStore
 ) {
 

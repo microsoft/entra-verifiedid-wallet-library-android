@@ -13,6 +13,7 @@ import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsof
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.RawIdentifierConverter
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.TestVcMetaData
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.WalletMetadata
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.IdentifierConverter
 import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024BackupProcessor
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.FailedDecryptException
@@ -29,6 +30,7 @@ class BackupServiceTest {
     private val keyStore = BackupTestUtil.getMockKeyStore()
     private val identifierService: IdentifierService = mockk()
     private val masterIdentifier: Identifier = mockk()
+    private val verifiedIdClient: VerifiedIdClient = mockk()
 
     // String has to be split as it is too long for the compiler to accept it
     private val testBackupString =
@@ -635,11 +637,8 @@ class BackupServiceTest {
     )
     private val microsoft2024BackupProcessor = Microsoft2024BackupProcessor(
         identifierService,
-        identifierRepository,
         keyStore,
-        RawIdentifierConverter(identifierRepository, keyStore),
-        defaultTestSerializer,
-        verifiedIdClient = mockk<VerifiedIdClient>()
+        IdentifierConverter(RawIdentifierConverter(identifierRepository, keyStore), defaultTestSerializer)
     )
     private val backupProcessorFactory = BackupProcessorFactory(microsoft2020BackupProcessor, microsoft2024BackupProcessor)
 
@@ -658,10 +657,10 @@ class BackupServiceTest {
         coEvery { identifierService.getMasterIdentifier() } returns Result.Success(masterIdentifier)
         runBlocking {
             val protectionMethod = JwePasswordProtectionMethod(password)
-            val protectedBackupData = (service.exportBackup(backup, protectionMethod) as Result.Success).payload
+            val protectedBackupData = (service.exportBackup(backup, protectionMethod, verifiedIdClient) as Result.Success).payload
             assertThat(protectedBackupData).isInstanceOf(JwePasswordProtectedBackupData::class.java)
 
-            val result = service.importBackup(protectedBackupData, protectionMethod)
+            val result = service.importBackup(protectedBackupData, protectionMethod, verifiedIdClient)
             val actualBackup = (result as Result.Success).payload
             assertThat(actualBackup).isEqualToComparingFieldByFieldRecursively(backup)
         }
@@ -673,10 +672,10 @@ class BackupServiceTest {
         runBlocking {
             val protectionMethod = JwePasswordProtectionMethod(password)
             val protectionMethod2 = JwePasswordProtectionMethod("wrong password")
-            val protectedBackupData = (service.exportBackup(backup, protectionMethod) as Result.Success).payload
+            val protectedBackupData = (service.exportBackup(backup, protectionMethod, verifiedIdClient) as Result.Success).payload
             assertThat(protectedBackupData).isInstanceOf(JwePasswordProtectedBackupData::class.java)
 
-            val exception = (service.importBackup(protectedBackupData, protectionMethod2) as Result.Failure).payload
+            val exception = (service.importBackup(protectedBackupData, protectionMethod2, verifiedIdClient) as Result.Failure).payload
             assertThat(exception).isInstanceOf(FailedDecryptException::class.java)
         }
     }
