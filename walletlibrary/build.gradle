@@ -1,10 +1,11 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.compose'
     id "org.jetbrains.kotlin.plugin.serialization" version "$kotlin_version"
+    id("com.google.devtools.ksp")
 }
 
-apply plugin: 'kotlin-kapt'
 apply plugin: 'maven-publish'
 
 repositories {
@@ -18,6 +19,10 @@ def _version = "1.0.0"
 android {
     namespace 'com.microsoft.walletlibrary'
     compileSdkVersion compile_sdk_version as Integer
+
+    buildFeatures {
+        buildConfig true
+    }
 
     defaultConfig {
         minSdkVersion min_sdk_version as Integer
@@ -43,11 +48,11 @@ android {
         pickFirst("META-INF/*.kotlin_module")
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility target_jvmTarget
+        targetCompatibility target_jvmTarget
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = target_jvmTarget
     }
     lintOptions {
         abortOnError false
@@ -64,23 +69,11 @@ android {
     }
 }
 
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier 'sources'
-    destinationDirectory = reporting.file("$project.buildDir/outputs/jar/")
-}
-
-tasks.whenTaskAdded { task ->
-    if (task.name.contains("assemble")) {
-        task.dependsOn 'sourcesJar'
-    }
-}
-
 dependencies {
     implementation "androidx.core:core-ktx:$androidx_core_version"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0"
     implementation "com.google.dagger:dagger:$dagger_version"
-    kapt "com.google.dagger:dagger-compiler:$dagger_version"
+    ksp "com.google.dagger:dagger-compiler:$dagger_version"
 
     implementation "com.squareup.retrofit2:retrofit:$retrofit2_version"
     implementation "com.squareup.retrofit2:converter-scalars:$retrofit2_version"
@@ -88,7 +81,7 @@ dependencies {
 
     implementation "androidx.room:room-runtime:$androidx_room_persistence_version"
     implementation "androidx.room:room-ktx:$androidx_room_persistence_version"
-    kapt "androidx.room:room-compiler:$androidx_room_persistence_version"
+    ksp "androidx.room:room-compiler:$androidx_room_persistence_version"
 
     implementation "com.squareup.okhttp3:okhttp:$com_squareup_okhttp3_okhttp_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$com_squareup_okhttp3_okhttp_version"
@@ -98,6 +91,13 @@ dependencies {
     // KTX
     implementation "androidx.collection:collection-ktx:$collections_ktx_version"
     implementation "androidx.core:core-ktx:$androidx_core_version"
+
+    // Jetpack Compose
+    def composeBom = platform("androidx.compose:compose-bom:$jetpack_compose_bom_version")
+    implementation composeBom
+    androidTestImplementation composeBom
+    // Compiler
+    implementation 'androidx.compose.runtime:runtime'
 
     //other
     implementation "androidx.preference:preference-ktx:$androidx_preference_version"
@@ -149,7 +149,6 @@ project.afterEvaluate {
         publications {
             walletlibrary(MavenPublication) {
                 from components.release
-                artifact(sourcesJar)
                 groupId = 'com.microsoft.entra.verifiedid'
                 artifactId = 'walletlibrary'
                 version = _version
