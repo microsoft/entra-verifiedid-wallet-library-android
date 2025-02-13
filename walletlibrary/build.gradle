@@ -69,18 +69,6 @@ android {
     }
 }
 
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier = 'sources'
-    destinationDirectory = reporting.file("$project.buildDir/outputs/jar/")
-}
-
-tasks.whenTaskAdded { task ->
-    if (task.name.contains("assemble")) {
-        task.dependsOn 'sourcesJar'
-    }
-}
-
 dependencies {
     implementation "androidx.core:core-ktx:$androidx_core_version"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0"
@@ -161,7 +149,6 @@ project.afterEvaluate {
         publications {
             walletlibrary(MavenPublication) {
                 from components.release
-                artifact(sourcesJar)
                 groupId = 'com.microsoft.entra.verifiedid'
                 artifactId = 'walletlibrary'
                 version = _version
