@@ -19,7 +19,7 @@ class VerifiedIdsAdapter(
     RecyclerView.Adapter<VerifiedIdsAdapter.VerifiedIdsViewHolder>() {
     private var selected = false
 
-    sealed class VerifiedIdsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    open class VerifiedIdsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         class VerifiedIdVc(val binding: RequirementVerifiedidRowBinding) :
             VerifiedIdsViewHolder(binding.root)
     }

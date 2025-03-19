@@ -10,7 +10,7 @@ import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedclaimRowBi
 class VerifiedIdAdapter(private val verifiedIdClaims: ArrayList<VerifiedIdClaim>) :
     RecyclerView.Adapter<VerifiedIdAdapter.VerifiedIdClaimsViewHolder>() {
 
-    sealed class VerifiedIdClaimsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    open class VerifiedIdClaimsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         class VcClaim(val binding: RequirementVerifiedclaimRowBinding) :
             VerifiedIdClaimsViewHolder(binding.root)
     }

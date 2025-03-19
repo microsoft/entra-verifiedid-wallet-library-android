@@ -216,7 +216,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
                     )
                 }
 
-                is Result.Failure -> {
+                else -> {
                     SdkLog.e("Unable to fetch master identifier")
                     null
                 }

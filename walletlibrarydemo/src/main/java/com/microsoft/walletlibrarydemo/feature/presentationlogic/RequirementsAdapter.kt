@@ -23,7 +23,7 @@ import com.microsoft.walletlibrarydemo.databinding.RequirementVerifiedidBinding
 import com.microsoft.walletlibrarydemo.extension.ExtensionRequirement
 import kotlinx.coroutines.runBlocking
 
-sealed class RequirementViewHolder(view: View): RecyclerView.ViewHolder(view)
+open class RequirementViewHolder(view: View): RecyclerView.ViewHolder(view)
 class SelfAttestedHolder(val binding: RequirementTextRowBinding): RequirementViewHolder(binding.root)
 class PinHolder(val binding: RequirementTextRowBinding): RequirementViewHolder(binding.root)
 class OpenId4VciPinHolder(val binding: RequirementTextRowBinding): RequirementViewHolder(binding.root)

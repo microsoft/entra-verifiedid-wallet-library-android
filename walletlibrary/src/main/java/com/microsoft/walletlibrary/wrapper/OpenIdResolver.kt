@@ -43,6 +43,9 @@ object OpenIdResolver {
                     presentationRequestResult.payload
                 )
             }
+            else -> {
+                throw VerifiedIdRequestFetchException("Unable to fetch presentation request")
+            }
         }
     }
 

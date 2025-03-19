@@ -12,7 +12,7 @@ import kotlin.Result as KotlinResult
 
 typealias Success = Boolean
 
-internal sealed class Result<out S> {
+internal open class Result<out S> {
     class Success<out S>(val payload: S) : Result<S>()
     class Failure(val payload: SdkException) : Result<Nothing>()
 }
@@ -47,6 +47,9 @@ internal fun <S> Result<S>.toNative(): KotlinResult<S> {
         is Result.Failure -> {
             KotlinResult.failure(this.payload)
         }
+        else -> {
+            KotlinResult.failure(Exception())
+        }
     }
 }
 
@@ -54,18 +57,21 @@ internal fun <U, T> Result<T>.map(transform: (T) -> U): Result<U> =
     when (this) {
         is Result.Success -> Result.Success(transform(payload))
         is Result.Failure -> this
+        else -> Result.Failure(SdkException())
     }
 
 internal fun <T> Result<T>.mapError(transform: (SdkException) -> SdkException): Result<T> =
     when (this) {
         is Result.Success -> this
         is Result.Failure -> Result.Failure(transform(payload))
+        else -> this
     }
 
 internal fun <U, T> Result<T>.andThen(transform: (T) -> Result<U>): Result<U> =
     when (this) {
         is Result.Success -> transform(payload)
         is Result.Failure -> this
+        else -> Result.Failure(SdkException())
     }
 
 internal suspend fun <T> runResultTry(block: suspend RunResultTryContext.() -> Result<T>): Result<T> =
@@ -88,6 +94,7 @@ internal class RunResultTryContext {
         when (this) {
             is Result.Success -> payload
             is Result.Failure -> throw RunResultTryAbortion(payload as Any)
+            else -> throw RunResultTryAbortion({})
         }
 }
 

@@ -2,6 +2,7 @@
 
 package com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -21,7 +22,6 @@ import kotlinx.serialization.json.JsonPrimitive
  * The format is a Key/Value pair where key can be "jwt_vp" and value is a list of String.
  * @see [Presentation Exchange] (https://identity.foundation/presentation-exchange/#presentation-definition)
  */
-@Serializer(forClass = List::class)
 internal class PresentationRequestFormatSerializer(@Suppress("UNUSED_PARAMETER") dataSerializer: KSerializer<String>) :
     KSerializer<List<String>> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("format", PrimitiveKind.STRING)

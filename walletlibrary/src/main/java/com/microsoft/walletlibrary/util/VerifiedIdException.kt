@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.util
 
-sealed class VerifiedIdException(
+open class VerifiedIdException(
     message: String,
     val code: String,
     val correlationId: String? = null,

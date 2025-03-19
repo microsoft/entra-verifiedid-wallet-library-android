@@ -55,6 +55,7 @@ internal class JwtValidator @Inject constructor(
                 publicKeys.filter { publicKey -> JwaCryptoHelper.extractDidAndKeyId(publicKey.id).second == keyId }.map { it.publicKeyJwk }
             }
             is Result.Failure -> throw ValidatorException("Unable to fetch public keys", requesterDidDocument.payload)
+            else -> throw ValidatorException("Unable to fetch public keys")
         }
     }
 }
