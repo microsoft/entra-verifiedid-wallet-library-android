@@ -14,7 +14,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentatio
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal sealed class Request(val entityName: String, val entityIdentifier: String) {
+internal abstract class Request(val entityName: String, val entityIdentifier: String) {
     abstract val linkedDomainResult: LinkedDomainResult
 }
 

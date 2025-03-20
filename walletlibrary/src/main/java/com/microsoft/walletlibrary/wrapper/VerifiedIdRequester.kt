@@ -38,6 +38,9 @@ object VerifiedIdRequester {
                     result.payload.cause
                 )
             }
+            else -> {
+                throw VerifiedIdResponseCompletionException("Unable to complete issuance response")
+            }
         }
     }
 

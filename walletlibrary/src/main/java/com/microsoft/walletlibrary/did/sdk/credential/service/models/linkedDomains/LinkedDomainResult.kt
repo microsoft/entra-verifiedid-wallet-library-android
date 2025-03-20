@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal sealed class LinkedDomainResult
+internal open class LinkedDomainResult
 
 @Serializable
 @SerialName("LinkedDomainVerified")

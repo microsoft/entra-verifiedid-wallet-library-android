@@ -19,5 +19,6 @@ internal fun LinkedDomainResult.toRootOfTrust(): RootOfTrust {
         is LinkedDomainVerified -> RootOfTrust(domainUrl, true)
         is LinkedDomainUnVerified -> RootOfTrust(domainUrl, false)
         is LinkedDomainMissing -> RootOfTrust("", false)
+        else -> RootOfTrust("", false)
     }
 }

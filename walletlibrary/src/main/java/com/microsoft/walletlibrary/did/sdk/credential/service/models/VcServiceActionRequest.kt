@@ -11,7 +11,7 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 /**
  * Sealed Class for Requests to the Verifiable Credential Service to do a certain action on a Verifiable Credential.
  */
-internal sealed class VcServiceActionRequest(val audience: String)
+internal open class VcServiceActionRequest(val audience: String)
 
 internal data class RevocationRequest(
     val verifiableCredential: VerifiableCredential,

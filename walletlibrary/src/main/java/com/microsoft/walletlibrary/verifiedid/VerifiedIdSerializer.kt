@@ -8,7 +8,7 @@ package com.microsoft.walletlibrary.verifiedid
 /**
  * Defines the behavior of serializing a Verified ID
  */
-sealed interface VerifiedIdSerializer<SerializedFormat> {
+interface VerifiedIdSerializer<SerializedFormat> {
 
     class VerifiedIdSerializationNotSupported: Error() {
 

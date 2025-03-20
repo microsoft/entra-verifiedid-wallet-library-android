@@ -88,6 +88,10 @@ internal class IssuanceService @Inject constructor(
                     SdkLog.e("Could not get DID", result.payload)
                     ""
                 }
+                else -> {
+                    SdkLog.e("Could not get DID")
+                    ""
+                }
             }
         }
         val digest = CryptoOperations.digest(did.toByteArray(), DigestAlgorithm.Sha512)

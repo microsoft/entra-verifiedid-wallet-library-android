@@ -27,6 +27,7 @@ import com.microsoft.walletlibrary.did.sdk.identifier.registrars.SidetreeRegistr
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import dagger.Module
 import dagger.Provides
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.plus
@@ -73,6 +74,7 @@ internal class SdkModule {
             .build()
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     @Provides
     @Singleton
     fun defaultRetrofit(okHttpClient: OkHttpClient, serializer: Json): Retrofit {

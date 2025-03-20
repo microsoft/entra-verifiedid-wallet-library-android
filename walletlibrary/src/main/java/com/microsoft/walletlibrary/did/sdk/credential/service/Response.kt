@@ -16,7 +16,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentatio
  * @param request request from which response is created
  * @param audience entity to send the response to.
  */
-internal sealed class Response(open val request: Request, val audience: String)
+internal open class Response(open val request: Request, val audience: String)
 
 internal class IssuanceResponse(override val request: IssuanceRequest) :
     Response(request, request.contract.input.credentialIssuer) {

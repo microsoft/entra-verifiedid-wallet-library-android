@@ -44,6 +44,7 @@ internal object ManifestResolver {
                     issuanceRequestResult.payload
                 )
             }
+            else -> throw VerifiedIdRequestFetchException("Unable to fetch issuance request")
         }
     }
 }
