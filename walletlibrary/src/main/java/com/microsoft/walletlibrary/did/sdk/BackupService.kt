@@ -2,6 +2,7 @@
 
 package com.microsoft.walletlibrary.did.sdk
 
+import com.microsoft.walletlibrary.VerifiedIdClient
 import com.microsoft.walletlibrary.did.sdk.backup.BackupParser
 import com.microsoft.walletlibrary.did.sdk.backup.UnprotectedBackup
 import com.microsoft.walletlibrary.did.sdk.backup.container.ProtectionMethod
@@ -33,9 +34,9 @@ internal class BackupService @Inject constructor(
      * @param protectionMethod the type of this parameter determines the protection method applied
      * @return content of the backup ready to be written to a file
      */
-    suspend fun exportBackup(unprotectedBackup: UnprotectedBackup, protectionMethod: ProtectionMethod): Result<ProtectedBackupData> {
+    suspend fun exportBackup(unprotectedBackup: UnprotectedBackup, protectionMethod: ProtectionMethod, verifiedIdClient: VerifiedIdClient): Result<ProtectedBackupData> {
         return runResultTry {
-            val unprotectedBackupData = backupProcessorFactory.export(unprotectedBackup)
+            val unprotectedBackupData = backupProcessorFactory.export(unprotectedBackup, verifiedIdClient)
             val protectedBackupData = protectionMethod.wrap(unprotectedBackupData, serializer)
             Result.Success(protectedBackupData)
         }
@@ -52,11 +53,11 @@ internal class BackupService @Inject constructor(
      * @param protectionMethod the type and contents of this parameter determines the protection method used to unwrap and decrypt the backup
      * @return the transformed and decrypted backup of the type found within protectedBackupData
      */
-    suspend fun importBackup(protectedBackupData: ProtectedBackupData, protectionMethod: ProtectionMethod): Result<UnprotectedBackup> {
+    suspend fun importBackup(protectedBackupData: ProtectedBackupData, protectionMethod: ProtectionMethod, verifiedIdClient: VerifiedIdClient): Result<UnprotectedBackup> {
         return runResultTry {
             identityRepository.deleteAll()
             val unprotectedBackupData = protectionMethod.unwrap(protectedBackupData, serializer)
-            val unprotectedBackup = backupProcessorFactory.import(unprotectedBackupData)
+            val unprotectedBackup = backupProcessorFactory.import(unprotectedBackupData, verifiedIdClient)
             Result.Success(unprotectedBackup)
         }
     }

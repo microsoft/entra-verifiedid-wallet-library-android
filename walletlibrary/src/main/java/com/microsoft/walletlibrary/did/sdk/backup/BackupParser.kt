@@ -4,7 +4,7 @@ package com.microsoft.walletlibrary.did.sdk.backup
 
 import com.microsoft.walletlibrary.did.sdk.backup.container.jwe.JwePasswordProtectedBackupData
 import com.microsoft.walletlibrary.did.sdk.backup.content.ProtectedBackupData
-import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
+import com.microsoft.walletlibrary.did.sdk.backup.content.microsoft2024.Microsoft2024UnprotectedBackupData
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jwe.JweToken
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.UnknownBackupFormatException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.UnknownProtectionMethodException
@@ -17,7 +17,7 @@ internal class BackupParser @Inject constructor() {
         val token = JweToken.deserialize(jweString)
         val cty = token.contentType
         // for now we only know microsoft password, fail early.
-        if (cty != Microsoft2020UnprotectedBackupData.MICROSOFT_BACKUP_TYPE) {
+        if (cty != Microsoft2024UnprotectedBackupData.MICROSOFT_BACKUP_TYPE) {
             throw UnknownBackupFormatException("Backup of an unknown format: $cty")
         }
         val alg = token.getKeyAlgorithm()

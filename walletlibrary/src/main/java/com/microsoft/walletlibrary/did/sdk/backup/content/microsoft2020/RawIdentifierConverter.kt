@@ -15,7 +15,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class RawIdentifierConverter @Inject constructor(
-    private val identityRepository: IdentifierRepository,
+    internal val identityRepository: IdentifierRepository,
     private val keyStore: EncryptedKeyStore
 ) {
 
@@ -95,7 +95,7 @@ internal class RawIdentifierConverter @Inject constructor(
         return jwk.keyID ?: throw KeyException("Imported JWK has no key id.")
     }
 
-    private fun createRawIdentifier(identity: Identifier): RawIdentity {
+    internal fun createRawIdentifier(identity: Identifier): RawIdentity {
         return RawIdentity(
             id = identity.id,
             name = identity.name,

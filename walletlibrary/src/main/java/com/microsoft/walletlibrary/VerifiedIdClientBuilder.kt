@@ -7,6 +7,8 @@ package com.microsoft.walletlibrary
 
 import android.content.Context
 import android.content.pm.PackageManager
+import com.microsoft.walletlibrary.datasource.db.entities.HolderIdentifierData
+import com.microsoft.walletlibrary.datasource.db.entities.HolderIdentifierStoredProperties
 import com.microsoft.walletlibrary.datasource.repository.HolderIdentifierDataRepository
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
@@ -40,6 +42,7 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.plus
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 
@@ -56,16 +59,19 @@ class VerifiedIdClientBuilder(private val context: Context) {
     private val previewFeatureFlagsSupported = mutableListOf<String>()
     private var preferHeaders = mutableListOf<String>()
     private val extensionBuilders = mutableListOf<VerifiedIdExtension>()
-    private val jsonSerializer = Json {
-        serializersModule = SerializersModule {
-            polymorphic(VerifiedId::class) {
-                subclass(VerifiableCredential::class)
-                subclass(OpenId4VciVerifiedId::class)
-            }
-            polymorphic(VerifiedIdStyle::class) {
-                subclass(BasicVerifiedIdStyle::class)
-            }
+    private val jsonSerializersModule = SerializersModule {
+        polymorphic(VerifiedId::class) {
+            subclass(VerifiableCredential::class)
+            subclass(OpenId4VciVerifiedId::class)
         }
+        polymorphic(VerifiedIdStyle::class) {
+            subclass(BasicVerifiedIdStyle::class)
+        }
+        polymorphic(HolderIdentifierStoredProperties::class) {
+            subclass(HolderIdentifierData::class)
+        }
+    }
+    private var jsonSerializer = Json {
         ignoreUnknownKeys = true
         isLenient = true
     }
@@ -109,6 +115,16 @@ class VerifiedIdClientBuilder(private val context: Context) {
         return this
     }
 
+    fun with(polymorphicSerializersModule: SerializersModule): VerifiedIdClientBuilder {
+        val json = Json {
+            serializersModule = polymorphicSerializersModule + jsonSerializersModule
+            ignoreUnknownKeys = true
+            isLenient = true
+        }
+        this.jsonSerializer = json
+        return this
+    }
+
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
     fun build(): VerifiedIdClient {
         val vcSdkLogConsumer = WalletLibraryVCSDKLogConsumer(logger)
@@ -118,6 +134,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
             context,
             logConsumer = vcSdkLogConsumer,
             userAgentInfo = userAgentInfo,
+            polymorphicJsonSerializers = jsonSerializer.serializersModule,
             walletLibraryVersionInfo = walletLibraryVersionInfo,
             httpAgent = httpAgent,
             rootOfTrustResolver = rootOfTrustResolver

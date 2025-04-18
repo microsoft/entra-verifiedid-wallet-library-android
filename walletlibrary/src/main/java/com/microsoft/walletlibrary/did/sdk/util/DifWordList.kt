@@ -9,7 +9,7 @@ import java.security.SecureRandom
 import java.util.Locale
 import java.util.regex.Pattern
 
-internal object DifWordList {
+object DifWordList {
     lateinit var wordList: List<String>
 
     fun initialize(context: Context) {
