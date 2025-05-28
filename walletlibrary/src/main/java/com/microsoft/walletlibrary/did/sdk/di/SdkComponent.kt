@@ -6,7 +6,6 @@
 package com.microsoft.walletlibrary.did.sdk.di
 
 import android.content.Context
-import com.microsoft.walletlibrary.did.sdk.BackupService
 import com.microsoft.walletlibrary.did.sdk.CorrelationVectorService
 import com.microsoft.walletlibrary.did.sdk.IdentifierService
 import com.microsoft.walletlibrary.did.sdk.IssuanceService
@@ -41,8 +40,6 @@ internal interface SdkComponent {
     fun linkedDomainsService(): LinkedDomainsService
 
     fun correlationVectorService(): CorrelationVectorService
-
-    fun backupAndRestoreService(): BackupService
 
     @Component.Builder
     interface Builder {
