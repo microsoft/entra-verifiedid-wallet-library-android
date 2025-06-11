@@ -21,19 +21,19 @@ internal class PostVerifiablePresentationNetworkOperation(
     private val serializer: Json
 ) : PostNetworkOperation<VerifiablePresentationResponse>() {
     override val call: suspend () -> Result<IResponse> = {
-        if (vpTokens.size > 1) {
-            apiProvider.presentationApis.sendResponses(
-                url,
-                idToken,
-                vpTokens,
-                state,
-                additionalHeaders
-            )
-        } else {
+        if (vpTokens.size == 1) {
             apiProvider.presentationApis.sendResponse(
                 url,
                 idToken,
                 vpTokens.first(),
+                state,
+                additionalHeaders
+            )
+        } else {
+            apiProvider.presentationApis.sendResponses(
+                url,
+                idToken,
+                vpTokens,
                 state,
                 additionalHeaders
             )
