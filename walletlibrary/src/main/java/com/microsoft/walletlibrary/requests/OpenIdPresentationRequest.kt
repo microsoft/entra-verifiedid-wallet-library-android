@@ -63,6 +63,7 @@ internal class OpenIdPresentationRequest(
                     request.presentationRequest.content.clientId,
                     request.presentationRequest.content.nonce,
                 )
+                
 
                 val result = if (vpTokens.size > 1) {
                     libraryConfiguration.httpAgentApiProvider.presentationApis.sendResponses(
