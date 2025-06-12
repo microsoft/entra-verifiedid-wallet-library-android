@@ -2,11 +2,12 @@
 
 package com.microsoft.walletlibrary.networking.entities
 
+import com.microsoft.walletlibrary.verifiedid.PresentationVerified
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class VerifiablePresentationResponse (
+internal data class VerifiablePresentationResponse (
     @SerialName("redirect_uri")
-    val redirectUrl: String? = null
-)
+    override val redirectUri: String? = null
+) : PresentationVerified

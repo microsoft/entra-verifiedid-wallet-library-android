@@ -18,6 +18,7 @@ import com.microsoft.walletlibrary.util.VerifiedIdException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.getResult
+import com.microsoft.walletlibrary.verifiedid.PresentationVerified
 import com.microsoft.walletlibrary.verifiedid.StringVerifiedIdSerializer
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
 import kotlinx.coroutines.runBlocking
@@ -54,7 +55,7 @@ internal class OpenIdPresentationRequest(
     }
 
     // Completes the presentation request and returns Result with success status if successful.
-    override suspend fun complete(): VerifiedIdResult<VerifiablePresentationResponse> {
+    override suspend fun complete(): VerifiedIdResult<PresentationVerified> {
         return getResult {
             if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT)) {
                 sendPresentationRequest()
@@ -62,6 +63,19 @@ internal class OpenIdPresentationRequest(
                 sendPresentationRequestDeprecated()
             }
         }
+    }
+
+    override suspend fun cancel(message: String?): VerifiedIdResult<Unit> {
+        return getResult {
+            throw UserCanceledException(
+                message ?: "User Canceled",
+                VerifiedIdExceptions.USER_CANCELED_EXCEPTION.value
+            )
+        }
+    }
+
+    override fun getNonce(): String {
+        return request.presentationRequest.content.nonce
     }
 
     private suspend fun sendPresentationRequest(): VerifiablePresentationResponse {
@@ -86,14 +100,20 @@ internal class OpenIdPresentationRequest(
             libraryConfiguration.serializer
         ).fire()
             .onSuccess { response -> return response }
-            .onFailure { error -> throw error }
+            .onFailure {
+                throw VerifiedIdException(
+                    "Failed to send presentation request. ${it.message}",
+                    VerifiedIdExceptions.REQUEST_SEND_EXCEPTION.value
+                )
+            }
+
         throw VerifiedIdException(
             "Failed to send presentation request.",
             VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value
         )
     }
 
-    private suspend fun sendPresentationRequestDeprecated(): VerifiablePresentationResponse {
+    private suspend fun sendPresentationRequestDeprecated(): PresentationVerified {
         return runBlocking {
             OpenIdResponder.sendPresentationResponse(
                 request.presentationRequest,
@@ -103,18 +123,5 @@ internal class OpenIdPresentationRequest(
             )
             VerifiablePresentationResponse()
         }
-    }
-
-    override suspend fun cancel(message: String?): VerifiedIdResult<Unit> {
-        return getResult {
-            throw UserCanceledException(
-                message ?: "User Canceled",
-                VerifiedIdExceptions.USER_CANCELED_EXCEPTION.value
-            )
-        }
-    }
-
-    override fun getNonce(): String {
-        return request.presentationRequest.content.nonce
     }
 }

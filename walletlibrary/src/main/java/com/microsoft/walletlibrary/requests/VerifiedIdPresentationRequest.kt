@@ -5,18 +5,18 @@
 
 package com.microsoft.walletlibrary.requests
 
-import com.microsoft.walletlibrary.networking.entities.VerifiablePresentationResponse
 import com.microsoft.walletlibrary.util.VerifiedIdResult
+import com.microsoft.walletlibrary.verifiedid.PresentationVerified
 
 /**
  * VerifiedIdPresentationRequest handles information contained in an presentation request like the visual
  * styling of requester, requirements needed in order to complete the request and information about
  * trust model of requester like domain url and verification status.
  */
-interface VerifiedIdPresentationRequest : VerifiedIdRequest<VerifiablePresentationResponse> {
+interface VerifiedIdPresentationRequest : VerifiedIdRequest<PresentationVerified> {
 
     // Completes the request and returns nothing if successful.
-    override suspend fun complete(): VerifiedIdResult<VerifiablePresentationResponse>
+    override suspend fun complete(): VerifiedIdResult<PresentationVerified>
 
     fun getNonce(): String?
 }
