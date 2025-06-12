@@ -6,6 +6,7 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.PostNetworkOperati
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.networking.entities.VerifiablePresentationResponse
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
 /**
@@ -41,15 +42,13 @@ internal class PostVerifiablePresentationNetworkOperation(
     }
 
     override suspend fun toResult(response: IResponse): Result<VerifiablePresentationResponse> {
-        val content = response.body.decodeToString()
-
-        if (content.isNotEmpty() && content.isNotBlank()) {
-            return serializer.decodeFromString(
+        return try {
+            serializer.decodeFromString(
                 VerifiablePresentationResponse.serializer(),
-                content
+                response.body.decodeToString()
             ).let { Result.success(it) }
+        } catch (e: SerializationException) {
+            Result.success(VerifiablePresentationResponse())
         }
-
-       return Result.success(VerifiablePresentationResponse())
     }
 }
