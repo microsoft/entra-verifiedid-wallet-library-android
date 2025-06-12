@@ -41,9 +41,15 @@ internal class PostVerifiablePresentationNetworkOperation(
     }
 
     override suspend fun toResult(response: IResponse): Result<VerifiablePresentationResponse> {
-        return serializer.decodeFromString(
-            VerifiablePresentationResponse.serializer(),
-            response.body.decodeToString()
-        ).let { Result.success(it) }
+        val content = response.body.decodeToString()
+
+        if (content.isNotEmpty() && content.isNotBlank()) {
+            return serializer.decodeFromString(
+                VerifiablePresentationResponse.serializer(),
+                content
+            ).let { Result.success(it) }
+        }
+
+       return Result.success(VerifiablePresentationResponse())
     }
 }
