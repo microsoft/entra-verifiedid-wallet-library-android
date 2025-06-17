@@ -2,10 +2,10 @@
 
 package com.microsoft.walletlibrary.networking.entities
 
-import com.microsoft.walletlibrary.verifiedid.PresentationVerified
+import com.microsoft.walletlibrary.verifiedid.SuccessfulCompletionResult
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class VerifiablePresentationResponse (
+internal data class SuccessfulCompletionResponse (
     override val redirectUri: String? = null
-) : PresentationVerified
+) : SuccessfulCompletionResult
