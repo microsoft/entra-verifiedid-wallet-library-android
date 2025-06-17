@@ -4,9 +4,8 @@ package com.microsoft.walletlibrary.networking.operations
 
 import com.microsoft.walletlibrary.did.sdk.datasource.network.PostNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
-import com.microsoft.walletlibrary.networking.entities.VerifiablePresentationResponse
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
-import kotlinx.serialization.SerializationException
+import com.microsoft.walletlibrary.verifiedid.SuccessfulCompletionResult
 import kotlinx.serialization.json.Json
 
 /**
@@ -20,7 +19,7 @@ internal class PostVerifiablePresentationNetworkOperation(
     private val additionalHeaders: Map<String, String> = emptyMap(),
     private val apiProvider: HttpAgentApiProvider,
     private val serializer: Json
-) : PostNetworkOperation<VerifiablePresentationResponse>() {
+) : PostNetworkOperation<SuccessfulCompletionResult>() {
     override val call: suspend () -> Result<IResponse> = {
         if (vpTokens.size == 1) {
             apiProvider.presentationApis.sendResponse(
@@ -41,14 +40,16 @@ internal class PostVerifiablePresentationNetworkOperation(
         }
     }
 
-    override suspend fun toResult(response: IResponse): Result<VerifiablePresentationResponse> {
-        return try {
-            serializer.decodeFromString(
-                VerifiablePresentationResponse.serializer(),
-                response.body.decodeToString()
-            ).let { Result.success(it) }
-        } catch (e: SerializationException) {
-            Result.success(VerifiablePresentationResponse())
-        }
+    override suspend fun toResult(response: IResponse): Result<SuccessfulCompletionResult> {
+        return serializer.decodeFromString(
+            SuccessfulCompletionResult.serializer(),
+            response.body.decodeToString()
+        ).let { Result.success(it) }
+
+        // return try {
+        //
+        // } catch (e: SerializationException) {
+        //     Result.success(Emp)
+        // }
     }
 }

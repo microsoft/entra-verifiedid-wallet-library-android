@@ -2,7 +2,10 @@
 
 package com.microsoft.walletlibrary.verifiedid
 
+import kotlinx.serialization.Serializable
+
 /**
- * Data model for a verified Verifiable Presentation
+ * Data model of a generic successfully completed operation.
  */
-sealed interface CompletionResult
+@Serializable
+sealed interface SuccessfulCompletionResult

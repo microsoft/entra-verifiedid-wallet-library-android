@@ -2,10 +2,10 @@
 
 package com.microsoft.walletlibrary.networking.entities
 
-import com.microsoft.walletlibrary.verifiedid.SuccessfulCompletionResult
+import com.microsoft.walletlibrary.verifiedid.ImplicitAuthenticationResult
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class SuccessfulCompletionResponse (
-    override val redirectUri: String? = null
-) : SuccessfulCompletionResult
+internal data class ImplicitAuthenticationResponse (
+    override val redirectUri: String
+) : ImplicitAuthenticationResult

@@ -5,7 +5,7 @@
 
 package com.microsoft.walletlibrary.requests
 
-import com.microsoft.walletlibrary.networking.entities.VerifiablePresentationResponse
+import com.microsoft.walletlibrary.networking.entities.EmptyResponse
 import com.microsoft.walletlibrary.networking.operations.PostVerifiablePresentationNetworkOperation
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.requirements.Requirement
@@ -18,8 +18,8 @@ import com.microsoft.walletlibrary.util.VerifiedIdException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.util.getResult
-import com.microsoft.walletlibrary.verifiedid.PresentationVerified
 import com.microsoft.walletlibrary.verifiedid.StringVerifiedIdSerializer
+import com.microsoft.walletlibrary.verifiedid.SuccessfulCompletionResult
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
 import kotlinx.coroutines.runBlocking
 
@@ -55,7 +55,7 @@ internal class OpenIdPresentationRequest(
     }
 
     // Completes the presentation request and returns Result with success status if successful.
-    override suspend fun complete(): VerifiedIdResult<PresentationVerified> {
+    override suspend fun complete(): VerifiedIdResult<SuccessfulCompletionResult> {
         return getResult {
             if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT)) {
                 sendPresentationRequest()
@@ -78,7 +78,7 @@ internal class OpenIdPresentationRequest(
         return request.presentationRequest.content.nonce
     }
 
-    private suspend fun sendPresentationRequest(): VerifiablePresentationResponse {
+    private suspend fun sendPresentationRequest(): SuccessfulCompletionResult {
         val builder = PresentationExchangeResponseBuilder(libraryConfiguration)
         builder.serialize(requirement, StringVerifiedIdSerializer)
         val vpTokens = builder.buildVpTokens(
@@ -113,7 +113,7 @@ internal class OpenIdPresentationRequest(
         )
     }
 
-    private suspend fun sendPresentationRequestDeprecated(): PresentationVerified {
+    private suspend fun sendPresentationRequestDeprecated(): SuccessfulCompletionResult {
         return runBlocking {
             OpenIdResponder.sendPresentationResponse(
                 request.presentationRequest,
@@ -121,7 +121,7 @@ internal class OpenIdPresentationRequest(
                 additionalHeaders,
                 libraryConfiguration
             )
-            VerifiablePresentationResponse()
+            EmptyResponse()
         }
     }
 }
