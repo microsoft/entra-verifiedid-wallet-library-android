@@ -37,5 +37,7 @@ internal data class Registration(
     val subjectSyntaxTypesSupported: List<String> = emptyList(),
 
     @SerialName("vp_formats")
-    val vpFormats: VpFormats? = null
+    val vpFormats: VpFormats? = null,
+
+    var scenario: String? = null
 )
