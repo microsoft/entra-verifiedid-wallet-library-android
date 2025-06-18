@@ -4,6 +4,7 @@ package com.microsoft.walletlibrary.networking.operations
 
 import com.microsoft.walletlibrary.did.sdk.datasource.network.PostNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
+import com.microsoft.walletlibrary.networking.entities.EmptyResponse
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import com.microsoft.walletlibrary.verifiedid.SuccessfulCompletionResult
 import kotlinx.serialization.json.Json
@@ -41,18 +42,25 @@ internal class PostVerifiablePresentationNetworkOperation(
     }
 
     override suspend fun toResult(response: IResponse): Result<SuccessfulCompletionResult> {
-        return serializer.decodeFromString(
-            SuccessfulCompletionResult.serializer(),
-            normalizeResponseBodyAsJson(response.body.decodeToString())
-        ).let { Result.success(it) }
+        val normalizedBody = preprocessResponseBody(response.body.decodeToString())
+
+        // We deal with empty response explicitly since polymorphic serialization requires at least one property (either optional
+        // or required) to discriminate.
+        if (normalizedBody.isNullOrEmpty()) {
+            return Result.success(EmptyResponse())
+        }
+
+        return serializer.decodeFromString(SuccessfulCompletionResult.serializer(), normalizedBody).let {
+            Result.success(it)
+        }
     }
 
-    private fun normalizeResponseBodyAsJson(responseBody: String): String {
+    private fun preprocessResponseBody(responseBody: String): String? {
         val trimmedResponseBody = responseBody.trim()
 
-        // Present API does not always respond with JSON.
-        if (trimmedResponseBody.isBlank() || trimmedResponseBody.isEmpty() || trimmedResponseBody == "OK") {
-            return "{}"
+        // Present API does not always respond with JSON, so we can treat "OK" as empty.
+        if (trimmedResponseBody == "OK") {
+            return null
         }
 
         return  trimmedResponseBody
