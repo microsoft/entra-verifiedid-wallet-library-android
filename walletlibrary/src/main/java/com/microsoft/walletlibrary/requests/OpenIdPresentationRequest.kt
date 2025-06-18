@@ -36,6 +36,9 @@ internal class OpenIdPresentationRequest(
     // Root of trust of the requester (eg. linked domains).
     override val rootOfTrust: RootOfTrust,
 
+    // Identifies the presentation scenario.
+    override val scenario: String?,
+
     val request: OpenIdProcessedRequest,
 
     private val libraryConfiguration: LibraryConfiguration

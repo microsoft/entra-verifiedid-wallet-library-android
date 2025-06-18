@@ -84,6 +84,7 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
             partialRequest.requesterStyle,
             partialRequest.requirement,
             partialRequest.rootOfTrust,
+            presentationRequestContent.scenario,
             rawRequest,
             libraryConfiguration
         )
