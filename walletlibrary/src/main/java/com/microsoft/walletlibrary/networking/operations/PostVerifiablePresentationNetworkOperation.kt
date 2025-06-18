@@ -43,13 +43,18 @@ internal class PostVerifiablePresentationNetworkOperation(
     override suspend fun toResult(response: IResponse): Result<SuccessfulCompletionResult> {
         return serializer.decodeFromString(
             SuccessfulCompletionResult.serializer(),
-            response.body.decodeToString()
+            normalizeResponseBodyAsJson(response.body.decodeToString())
         ).let { Result.success(it) }
+    }
 
-        // return try {
-        //
-        // } catch (e: SerializationException) {
-        //     Result.success(Emp)
-        // }
+    private fun normalizeResponseBodyAsJson(responseBody: String): String {
+        val trimmedResponseBody = responseBody.trim()
+
+        // Present API does not always respond with JSON.
+        if (trimmedResponseBody.isBlank() || trimmedResponseBody.isEmpty() || trimmedResponseBody == "OK") {
+            return "{}"
+        }
+
+        return  trimmedResponseBody
     }
 }
