@@ -63,6 +63,6 @@ internal class PostVerifiablePresentationNetworkOperation(
             return null
         }
 
-        return  trimmedResponseBody
+        return trimmedResponseBody
     }
 }

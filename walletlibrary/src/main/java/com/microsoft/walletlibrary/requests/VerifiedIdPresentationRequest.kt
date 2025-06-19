@@ -5,7 +5,6 @@
 
 package com.microsoft.walletlibrary.requests
 
-import com.microsoft.walletlibrary.requests.styles.RequesterStyle
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.verifiedid.SuccessfulCompletionResult
 
