@@ -39,5 +39,6 @@ internal data class Registration(
     @SerialName("vp_formats")
     val vpFormats: VpFormats? = null,
 
+    @SerialName("client_scenario")
     var scenario: String? = null
 )
