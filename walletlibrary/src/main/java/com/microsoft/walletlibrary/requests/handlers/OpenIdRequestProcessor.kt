@@ -25,6 +25,7 @@ import com.microsoft.walletlibrary.util.NonceProcessor
 import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequirementCastingException
 import com.microsoft.walletlibrary.util.UnSupportedProtocolException
+import com.microsoft.walletlibrary.verifiedid.SuccessfulCompletionResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.ManifestResolver
 
@@ -64,7 +65,7 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
     private fun handlePresentationRequest(
         presentationRequestContent: PresentationRequestContent,
         rawRequest: OpenIdProcessedRequest
-    ): VerifiedIdRequest<Unit> {
+    ): VerifiedIdRequest<SuccessfulCompletionResult> {
         var partialRequest = VerifiedIdPartialRequest(
             presentationRequestContent.requesterStyle,
             null,
@@ -83,6 +84,7 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
             partialRequest.requesterStyle,
             partialRequest.requirement,
             partialRequest.rootOfTrust,
+            presentationRequestContent.scenario,
             rawRequest,
             libraryConfiguration
         )

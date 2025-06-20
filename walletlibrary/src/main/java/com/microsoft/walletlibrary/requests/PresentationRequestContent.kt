@@ -26,5 +26,7 @@ internal class PresentationRequestContent(
 
     internal val issuanceCallbackUrl: String? = null,
 
-    internal val requestState: String? = null
+    internal val requestState: String? = null,
+
+    internal val scenario: String? = null
 )

@@ -48,7 +48,8 @@ internal class VerifiedIdOpenIdJwtRawRequest(
                 )
             },
             presentationRequest.content.redirectUrl,
-            presentationRequest.content.state
+            presentationRequest.content.state,
+            presentationRequest.content.registration.scenario
         )
     }
 }
