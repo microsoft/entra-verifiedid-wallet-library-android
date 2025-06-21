@@ -232,7 +232,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
     private suspend fun fetchAllHolderIdentifiers(libraryConfiguration: LibraryConfiguration) {
         if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_FIPS_COMPLIANT_IDENTIFIER)) {
             identifiers.add(getMainHolderIdentifier())
-        } else {
+        }
+        if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_LEGACY_IDENTIFIER)) {
             val defaultHolderIdentifier = getDefaultIdentifier()
             defaultHolderIdentifier?.let { identifiers.add(it) }
                 ?: SdkLog.e("Unable to fetch default holder identifier")

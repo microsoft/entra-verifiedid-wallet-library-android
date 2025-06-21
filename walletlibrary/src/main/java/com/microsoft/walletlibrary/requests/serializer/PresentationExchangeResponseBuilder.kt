@@ -9,9 +9,12 @@ import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessorSerializer
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
+import com.microsoft.walletlibrary.requests.requirements.MatchingSubjectCryptoRequirement
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeRequirement
+import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeVerifiedIdRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.verifiedid.VCVerifiedIdSerializer
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdSerializer
 import java.util.UUID
 
@@ -40,7 +43,14 @@ internal class PresentationExchangeResponseBuilder(
                         }
                     }
                     // create a new group
-                    val identifier = libraryConfiguration.identifierFactory.getIdentifier()
+                    // Use the credential's subject if this is a verified ID requirement
+                    val identifier = (requirement as? PresentationExchangeVerifiedIdRequirement)?.let {
+                        it.verifiedId?.let { verifiedId ->
+                            val credentialSubject = VCVerifiedIdSerializer.serialize(verifiedId).contents.sub
+                            libraryConfiguration.identifierFactory.getIdentifier(MatchingSubjectCryptoRequirement(credentialSubject))
+                        }
+                        // Otherwise use the default identifier
+                    } ?: libraryConfiguration.identifierFactory.getIdentifier()
                     val group = PresentationExchangeSubmissionGroup(identifier)
                     group.include(requirement, rawCredential)
                     vpTokens.add(group)
