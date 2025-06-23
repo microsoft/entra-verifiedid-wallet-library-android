@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.requests.serializer
 
+import androidx.annotation.VisibleForTesting
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.VpTokenInResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
@@ -18,11 +19,13 @@ import com.microsoft.walletlibrary.verifiedid.VCVerifiedIdSerializer
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdSerializer
 import java.util.UUID
 
-internal class PresentationExchangeResponseBuilder(
+@VisibleForTesting
+internal open class PresentationExchangeResponseBuilder(
     private val libraryConfiguration: LibraryConfiguration
 ) : RequestProcessorSerializer<String> {
 
-    private var vpTokens: MutableList<PresentationExchangeSubmissionGroup> = mutableListOf()
+    @VisibleForTesting
+    internal var vpTokens: MutableList<PresentationExchangeSubmissionGroup> = mutableListOf()
 
     /**
      * Processes and serializes this requirement using Requirement.serialize
@@ -116,7 +119,8 @@ internal class PresentationExchangeResponseBuilder(
         return createAndSignToken(identifier, token)
     }
 
-    private fun createAndSignToken(identifier: HolderIdentifier, jsonContent: String): String {
+    @VisibleForTesting
+    protected open fun createAndSignToken(identifier: HolderIdentifier, jsonContent: String): String {
         val jwsHeader = JwsHeaderFormatter.formatHeader(identifier)
         val jwsToken = JwsToken(jsonContent, jwsHeader)
         return jwsToken.sign(identifier)

@@ -11,10 +11,9 @@ import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 
 /**
  * IdentifierFactory holds a list of identifiers and returns a identifier based on the cryptographic requirement.
+ * @param identifiers List of available identifiers, arranged with FIPS compliant identifiers first.
  */
-internal class IdentifierFactory {
-    // List of available identifiers, arranged with FIPS compliant identifiers first.
-    internal val identifiers = ArrayList<HolderIdentifier>()
+internal class IdentifierFactory(internal val identifiers: MutableList<HolderIdentifier> = ArrayList<HolderIdentifier>()) {
 
     // Returns the first identifier in the list that satisfies the provided cryptographic requirement.
     internal fun getIdentifier(cryptoRequirement: CryptoRequirement? = null): HolderIdentifier {
