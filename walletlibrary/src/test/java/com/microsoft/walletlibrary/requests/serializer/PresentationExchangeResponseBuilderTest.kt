@@ -117,7 +117,7 @@ internal class PresentationExchangeResponseBuilderTest {
         serializer = Json.Default,
         rootOfTrustResolver = mockk(),
         logger = loggerMock,
-        identifierFactory = IdentifierFactory(mutableListOf(identifierOne, identifierTwo)),
+        identifierFactory = IdentifierFactory(mutableListOf(identifierOne, identifierTwo))
     )
 
     @Test
@@ -138,14 +138,14 @@ internal class PresentationExchangeResponseBuilderTest {
     fun serialize_withNoGroups_createsGroup() {
         val peBuilder = PresentationExchangeResponseBuilder(configuration)
 
-        assert(peBuilder.vpTokens.size == 0) {"Expected no VP token groups before serialization"}
+        assert(peBuilder.vpTokens.size == 0) { "Expected no VP token groups before serialization" }
         val requirement = PresentationExchangeVerifiedIdRequirement("foo",
             credentialOne.types,
             inputDescriptorId = "foo")
         requirement.fulfill(credentialOne)
         runBlocking {
             peBuilder.serialize(requirement, serializerMock)
-            assert(peBuilder.vpTokens.size == 1) {"Expected a VP token group for requirement"}
+            assert(peBuilder.vpTokens.size == 1) { "Expected a VP token group for requirement" }
         }
     }
 
@@ -153,7 +153,7 @@ internal class PresentationExchangeResponseBuilderTest {
     fun serialize_withGroup_addsToGroup() {
         val peBuilder = PresentationExchangeResponseBuilder(configuration)
 
-        assert(peBuilder.vpTokens.size == 0) {"Expected no VP token groups before serialization"}
+        assert(peBuilder.vpTokens.size == 0) { "Expected no VP token groups before serialization" }
         val requirementOne = PresentationExchangeVerifiedIdRequirement("foo",
             credentialOne.types,
             inputDescriptorId = "foo")
@@ -165,7 +165,7 @@ internal class PresentationExchangeResponseBuilderTest {
         runBlocking {
             peBuilder.serialize(requirementOne, serializerMock)
             peBuilder.serialize(requirementTwo, serializerMock)
-            assert(peBuilder.vpTokens.size == 1) {"Expected a single VP token group for requirement"}
+            assert(peBuilder.vpTokens.size == 1) { "Expected a single VP token group for requirement" }
         }
     }
 
@@ -173,7 +173,7 @@ internal class PresentationExchangeResponseBuilderTest {
     fun serialize_withExclusiveGroup_createsGroup() {
         val peBuilder = PresentationExchangeResponseBuilder(configuration)
 
-        assert(peBuilder.vpTokens.size == 0) {"Expected no VP token groups before serialization"}
+        assert(peBuilder.vpTokens.size == 0) { "Expected no VP token groups before serialization" }
         val requirementOne = PresentationExchangeVerifiedIdRequirement("foo",
             credentialOne.types,
             inputDescriptorId = "foo")
@@ -186,7 +186,7 @@ internal class PresentationExchangeResponseBuilderTest {
         runBlocking {
             peBuilder.serialize(requirementOne, serializerMock)
             peBuilder.serialize(requirementTwo, serializerMock)
-            assert(peBuilder.vpTokens.size == 2) {"Expected 2 VP token groups"}
+            assert(peBuilder.vpTokens.size == 2) { "Expected 2 VP token groups" }
         }
     }
 
@@ -194,7 +194,7 @@ internal class PresentationExchangeResponseBuilderTest {
     fun serialize_withDifferentGroupSubject_createsGroup() {
         val peBuilder = PresentationExchangeResponseBuilder(configuration)
 
-        assert(peBuilder.vpTokens.size == 0) {"Expected no VP token groups before serialization"}
+        assert(peBuilder.vpTokens.size == 0) { "Expected no VP token groups before serialization" }
         val requirementOne = PresentationExchangeVerifiedIdRequirement("foo",
             credentialOne.types,
             inputDescriptorId = "foo")
@@ -206,7 +206,7 @@ internal class PresentationExchangeResponseBuilderTest {
         runBlocking {
             peBuilder.serialize(requirementOne, serializerMock)
             peBuilder.serialize(requirementTwo, serializerMock)
-            assert(peBuilder.vpTokens.size == 2) {"Expected 2 VP token groups"}
+            assert(peBuilder.vpTokens.size == 2) { "Expected 2 VP token groups" }
         }
     }
 
@@ -222,19 +222,18 @@ internal class PresentationExchangeResponseBuilderTest {
     fun buildVpTokens_withVPs_returnsListOfVPs() {
         val mockVP = mockk<PresentationExchangeSubmissionGroup>()
         val expectedVP = "fooBarBaz"
-        every {mockVP.getVerifiablePresentation(any(), any(), "aud", "nonce")} returns expectedVP
+        every { mockVP.getVerifiablePresentation(any(), any(), "aud", "nonce") } returns expectedVP
 
         val peBuilder = PresentationExchangeResponseBuilder(configuration)
         peBuilder.vpTokens.add(mockVP)
         val actual = peBuilder.buildVpTokens("aud", "nonce")
-        assert(actual == listOf(expectedVP) ) {"Expected VP returned to be '${expectedVP}'"}
+        assert(actual == listOf(expectedVP)) { "Expected VP returned to be '$expectedVP'" }
     }
 
     @Test
     fun buildIdToken_buildsIdToken() {
         // need to substitute actual key-signing
-        class PresentationExchangeResponseBuilderWithoutCrypto (configuration: LibraryConfiguration, private val payloadCapture: CapturingSlot<String>)
-            :PresentationExchangeResponseBuilder(configuration) {
+        class PresentationExchangeResponseBuilderWithoutCrypto(configuration: LibraryConfiguration, private val payloadCapture: CapturingSlot<String>) : PresentationExchangeResponseBuilder(configuration) {
                 override fun createAndSignToken(identifier: HolderIdentifier, jsonContent: String): String {
                     payloadCapture.captured = jsonContent
                     return ""
@@ -250,15 +249,15 @@ internal class PresentationExchangeResponseBuilderTest {
 
         runBlocking {
             peBuilder.buildIdToken(expectedDefinition, expectedClient, expectedNonce)
-            assert(payloadCaptured.isCaptured) {"expected to capture unsigned payload"}
+            assert(payloadCaptured.isCaptured) { "expected to capture unsigned payload" }
             val result = configuration.serializer.decodeFromString(PresentationResponseClaims.serializer(), payloadCaptured.captured)
             assert(result.subject == identifierOne.id) { "sub not first identifier." }
-            assert( result.audience == expectedClient) { "aud not client id." }
+            assert(result.audience == expectedClient) { "aud not client id." }
             assert(result.nonce == expectedNonce) { "nonce value mismatched." }
             assert(result.vpToken.size == 1) { "expected 1 submission" }
             val peSubmission = result.vpToken[0]
             assert(peSubmission.presentationSubmission.definitionId == expectedDefinition) { "pe definition mismatched." }
-            assert(peSubmission.presentationSubmission.presentationSubmissionDescriptors.isEmpty()) { "No presentation descriptors are expected. "}
+            assert(peSubmission.presentationSubmission.presentationSubmissionDescriptors.isEmpty()) { "No presentation descriptors are expected. " }
         }
     }
 }
