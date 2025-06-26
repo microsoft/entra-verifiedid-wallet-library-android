@@ -67,12 +67,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
             polymorphic(VerifiedIdStyle::class) {
                 subclass(BasicVerifiedIdStyle::class)
             }
-            polymorphic(SuccessfulCompletionResult::class) {
-                subclass(ImplicitAuthenticationResponse::class)
-                // Empty response is dealt with explicitly, so we don't include it here.
-            }
         }
-        classDiscriminator
         ignoreUnknownKeys = true
         isLenient = true
     }
