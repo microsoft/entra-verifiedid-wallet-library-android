@@ -72,6 +72,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
                 // Empty response is dealt with explicitly, so we don't include it here.
             }
         }
+        classDiscriminator
         ignoreUnknownKeys = true
         isLenient = true
     }
