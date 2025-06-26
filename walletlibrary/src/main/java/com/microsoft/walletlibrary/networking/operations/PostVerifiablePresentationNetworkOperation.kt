@@ -42,7 +42,7 @@ internal class PostVerifiablePresentationNetworkOperation(
     }
 
     override suspend fun toResult(response: IResponse): Result<SuccessfulCompletionResult> {
-        val normalizedBody = preprocessResponseBody(response.body.decodeToString())
+        var normalizedBody = preprocessResponseBody(response.body.decodeToString())
 
         // We deal with empty response explicitly since polymorphic serialization requires at least one property (either optional
         // or required) to discriminate.
