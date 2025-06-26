@@ -17,7 +17,6 @@ import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.identifier.IdentifierFactory
 import com.microsoft.walletlibrary.mappings.identifier.toHolderIdentifier
-import com.microsoft.walletlibrary.networking.entities.ImplicitAuthenticationResponse
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdExtension
@@ -36,7 +35,6 @@ import com.microsoft.walletlibrary.util.WalletLibraryVCSDKLogConsumer
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
 import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
-import com.microsoft.walletlibrary.verifiedid.SuccessfulCompletionResult
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import kotlinx.coroutines.runBlocking
