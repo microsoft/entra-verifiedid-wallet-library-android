@@ -16,7 +16,6 @@ internal object SuccessfulCompletionResultSerializer : JsonContentPolymorphicSer
         if (json.containsKey("redirect_uri")) {
             return ImplicitAuthenticationResponse.serializer()
         }
-
         return EmptyResponse.serializer()
     }
 }
