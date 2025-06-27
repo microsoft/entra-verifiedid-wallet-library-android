@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 /**
  * Data model of a generic successfully completed operation.
  */
-@Serializable(SuccessfulCompletionResultSerializer::class)
+@Serializable
 sealed interface SuccessfulCompletionResult
