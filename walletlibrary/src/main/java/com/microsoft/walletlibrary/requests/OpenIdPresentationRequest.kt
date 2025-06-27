@@ -37,7 +37,7 @@ internal class OpenIdPresentationRequest(
     override val rootOfTrust: RootOfTrust,
 
     // Identifies the presentation scenario.
-    override var scenario: String?,
+    override val scenario: String?,
 
     val request: OpenIdProcessedRequest,
 
