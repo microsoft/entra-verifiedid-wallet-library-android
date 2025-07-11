@@ -41,7 +41,9 @@ internal class VerifiableCredential(
         return claims
     }
 
-    override fun isHolder(identity: HolderIdentifier): Boolean {
-        return raw.contents.sub == identity.id
+    override fun getMetadata(): VerifiedIdMetadata {
+        return VerifiedIdMetadata(
+            holderID = raw.contents.sub
+        )
     }
 }

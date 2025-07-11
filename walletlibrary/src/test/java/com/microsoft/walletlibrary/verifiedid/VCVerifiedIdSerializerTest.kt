@@ -132,7 +132,7 @@ class MockVerifiedId : VerifiedId {
         return emptyList<VerifiedIdClaim>() as ArrayList<VerifiedIdClaim>
     }
 
-    override fun isHolder(identity: HolderIdentifier): Boolean {
-        return false
+    override fun getMetadata(): VerifiedIdMetadata {
+        return VerifiedIdMetadata()
     }
 }

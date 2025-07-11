@@ -30,6 +30,6 @@ interface VerifiedId {
     // Return list of claims in the Verified ID.
     fun getClaims(): ArrayList<VerifiedIdClaim>
 
-    // True iff identity is the holder of this credential
-    fun isHolder(identity: HolderIdentifier): Boolean
+    // Gets metadata associated with this credential
+    fun getMetadata(): VerifiedIdMetadata
 }
