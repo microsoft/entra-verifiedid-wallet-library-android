@@ -12,6 +12,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.V
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.CardDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.requests.styles.NoneVerifiedIdStyle
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import com.microsoft.walletlibrary.util.defaultTestSerializer
@@ -129,5 +130,9 @@ class MockVerifiedId : VerifiedId {
 
     override fun getClaims(): ArrayList<VerifiedIdClaim> {
         return emptyList<VerifiedIdClaim>() as ArrayList<VerifiedIdClaim>
+    }
+
+    override fun isHolder(identity: HolderIdentifier): Boolean {
+        return false
     }
 }

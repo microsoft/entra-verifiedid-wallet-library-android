@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.verifiedid
 
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.requests.styles.VerifiedIdStyle
 import java.util.Date
 
@@ -28,4 +29,7 @@ interface VerifiedId {
 
     // Return list of claims in the Verified ID.
     fun getClaims(): ArrayList<VerifiedIdClaim>
+
+    // True iff identity is the holder of this credential
+    fun isHolder(identity: HolderIdentifier): Boolean
 }
