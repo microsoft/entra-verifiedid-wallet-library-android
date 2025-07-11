@@ -3,6 +3,7 @@
 package com.microsoft.walletlibrary.verifiedid
 
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import kotlinx.serialization.Serializable
 import java.util.Date
@@ -42,6 +43,12 @@ internal class OpenId4VciVerifiedId(
             claims.add(createVerifiedIdClaim(claimIdentifier, claimValue))
         }
         return claims
+    }
+
+    override fun getMetadata(): VerifiedIdMetadata {
+        return VerifiedIdMetadata(
+            holderID = raw.contents.sub
+        )
     }
 
     private fun createVerifiedIdClaim(claimReference: String, claimValue: Any): VerifiedIdClaim {

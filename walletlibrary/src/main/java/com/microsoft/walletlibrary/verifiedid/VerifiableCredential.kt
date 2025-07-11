@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary.verifiedid
 
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.mappings.issuance.toVerifiedIdStyle
 import com.microsoft.walletlibrary.requests.styles.NoneVerifiedIdStyle
 import kotlinx.serialization.Serializable
@@ -38,5 +39,11 @@ internal class VerifiableCredential(
                 ?: claims.add(VerifiedIdClaim(claimIdentifier, claimValue, null, null))
         }
         return claims
+    }
+
+    override fun getMetadata(): VerifiedIdMetadata {
+        return VerifiedIdMetadata(
+            holderID = raw.contents.sub
+        )
     }
 }
