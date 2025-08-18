@@ -116,6 +116,8 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
             rawManifest,
             presentationRequestContent.issuanceCallbackUrl,
             presentationRequestContent.requestState,
+            presentationRequestContent.scenario,
+            presentationRequestContent.continuation,
             libraryConfiguration
         )
     }

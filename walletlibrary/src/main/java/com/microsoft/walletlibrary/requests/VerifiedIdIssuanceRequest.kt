@@ -15,6 +15,9 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedId
  * trust model of requester like domain url and verification status.
  */
 interface VerifiedIdIssuanceRequest : VerifiedIdRequest<VerifiedId> {
+    val scenario: String?
+
+    val continuation: Continuation?
 
     // Attributes describing the Verified ID (eg. name, issuer, logo, background and text colors).
     val verifiedIdStyle: VerifiedIdStyle

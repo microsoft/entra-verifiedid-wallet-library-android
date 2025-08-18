@@ -39,6 +39,10 @@ internal class ManifestIssuanceRequest(
 
     private var requestState: String? = null,
 
+    override val scenario: String? = null,
+
+    override val continuation: Continuation? = null,
+
     private val libraryConfiguration: LibraryConfiguration
 ) : VerifiedIdIssuanceRequest {
     // Completes the issuance request and returns a Result with VerifiedId if successful.
