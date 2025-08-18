@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.mappings.issuance.toPinRequirement
 import com.microsoft.walletlibrary.mappings.presentation.getRequesterStyle
 import com.microsoft.walletlibrary.mappings.presentation.toRequirement
 import com.microsoft.walletlibrary.mappings.toRootOfTrust
+import com.microsoft.walletlibrary.requests.Continuation
 import com.microsoft.walletlibrary.requests.InjectedIdToken
 import com.microsoft.walletlibrary.requests.PresentationRequestContent
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
@@ -37,6 +38,11 @@ internal class VerifiedIdOpenIdJwtRawRequest(
                 GroupRequirementOperator.ALL
             )
         }
+
+        val continuation = presentationRequest.content.continuation?.let {
+            Continuation(it.upn, it.url, it.payload)
+        }
+
         return PresentationRequestContent(
             presentationRequest.getRequesterStyle(),
             requirement,
@@ -49,7 +55,8 @@ internal class VerifiedIdOpenIdJwtRawRequest(
             },
             presentationRequest.content.redirectUrl,
             presentationRequest.content.state,
-            presentationRequest.content.registration.scenario
+            presentationRequest.content.registration.scenario,
+            continuation,
         )
     }
 }

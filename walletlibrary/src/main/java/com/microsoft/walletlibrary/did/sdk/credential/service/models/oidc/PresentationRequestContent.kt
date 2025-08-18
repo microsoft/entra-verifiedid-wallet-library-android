@@ -60,5 +60,9 @@ internal data class PresentationRequestContent(
     val pinDetails: PinDetails? = null,
 
     @SerialName("id_token_hint")
-    val idTokenHint: String? = null
+    val idTokenHint: String? = null,
+
+    val continuation: Continuation? = null
+
+
 )

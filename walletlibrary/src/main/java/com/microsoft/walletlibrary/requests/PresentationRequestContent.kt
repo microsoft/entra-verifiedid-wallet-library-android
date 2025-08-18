@@ -28,5 +28,7 @@ internal class PresentationRequestContent(
 
     internal val requestState: String? = null,
 
-    internal val scenario: String? = null
+    internal val scenario: String? = null,
+
+    internal val continuation: Continuation? = null
 )
