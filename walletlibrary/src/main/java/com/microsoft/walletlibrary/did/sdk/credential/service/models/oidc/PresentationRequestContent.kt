@@ -63,6 +63,4 @@ internal data class PresentationRequestContent(
     val idTokenHint: String? = null,
 
     val continuation: Continuation? = null
-
-
 )
