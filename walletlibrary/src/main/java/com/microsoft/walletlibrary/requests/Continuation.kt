@@ -2,7 +2,7 @@
 
 package com.microsoft.walletlibrary.requests
 
-data class Continuation (
+data class Continuation(
     // Uniquely identifies subject of continuation token.
     val upn: String,
 
@@ -10,5 +10,5 @@ data class Continuation (
     val url: String,
 
     // Actual continuation token.
-    val payload: String,
+    val payload: String
 )

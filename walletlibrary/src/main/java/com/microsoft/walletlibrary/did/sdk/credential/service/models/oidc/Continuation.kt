@@ -5,7 +5,7 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class Continuation (
+internal data class Continuation(
     // Uniquely identifies subject of continuation token.
     val upn: String,
 
@@ -13,5 +13,5 @@ internal data class Continuation (
     val url: String,
 
     // Actual continuation token.
-    val payload: String,
+    val payload: String
 )

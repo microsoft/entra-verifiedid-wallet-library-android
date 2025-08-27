@@ -58,8 +58,8 @@ internal class OpenId4VciIssuanceRequest(
 
     override val scenario: String? = null,
 
-    override val continuation: Continuation? = null,
-) : VerifiedIdIssuanceRequest {
+    override val continuation: Continuation? = null
+): VerifiedIdIssuanceRequest {
 
     private val requestFormatter = OpenId4VciIssuanceRequestFormatter(libraryConfiguration)
 
