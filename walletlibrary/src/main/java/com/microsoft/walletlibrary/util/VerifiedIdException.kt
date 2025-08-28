@@ -86,3 +86,10 @@ class CryptoException(
     val innerError: Exception? = null,
     correlationId: String? = null
 ) : VerifiedIdException(message, code, correlationId)
+
+class AcmaRequestException(
+    message: String,
+    code: String,
+    val innerError: Exception? = null,
+    correlationId: String? = null
+) : VerifiedIdException(message, code, correlationId)

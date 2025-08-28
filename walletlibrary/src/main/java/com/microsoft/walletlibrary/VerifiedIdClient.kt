@@ -6,10 +6,15 @@
 package com.microsoft.walletlibrary
 
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
+import com.microsoft.walletlibrary.networking.entities.tlr.request.RawAcmaResponse
+import com.microsoft.walletlibrary.requests.Continuation
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdRequest
+import com.microsoft.walletlibrary.requests.handlers.AcmaHandler
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
+import com.microsoft.walletlibrary.requests.tlr.AcmaRequest
+import com.microsoft.walletlibrary.requests.tlr.BaseAcmaRequest
 import com.microsoft.walletlibrary.util.MalformedInputException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
@@ -27,7 +32,8 @@ class VerifiedIdClient(
     internal val requestResolverFactory: RequestResolverFactory,
     internal val requestProcessorFactory: RequestProcessorFactory,
     internal val logger: WalletLibraryLogger,
-    private val serializer: Json
+    private val serializer: Json,
+    private val acmaHandler: AcmaHandler
 ) {
 
     // Creates an issuance or presentation request based on the provided input.
@@ -39,6 +45,10 @@ class VerifiedIdClient(
             val requestHandler = requestProcessorFactory.getHandler(rawRequest)
             requestHandler.handleRequest(rawRequest)
         }
+    }
+
+    fun createAcmaRequest(continuation: Continuation): BaseAcmaRequest {
+        return acmaHandler.createRequest(continuation)
     }
 
     fun encode(verifiedId: VerifiedId): VerifiedIdResult<String> {

@@ -20,6 +20,7 @@ import com.microsoft.walletlibrary.mappings.identifier.toHolderIdentifier
 import com.microsoft.walletlibrary.requests.RequestProcessorFactory
 import com.microsoft.walletlibrary.requests.RequestResolverFactory
 import com.microsoft.walletlibrary.requests.VerifiedIdExtension
+import com.microsoft.walletlibrary.requests.handlers.AcmaHandler
 import com.microsoft.walletlibrary.requests.handlers.OpenId4VCIRequestHandler
 import com.microsoft.walletlibrary.requests.handlers.OpenIdRequestProcessor
 import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
@@ -166,7 +167,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
             requestResolverFactory,
             requestProcessorFactory,
             logger,
-            jsonSerializer
+            jsonSerializer,
+            AcmaHandler(libraryConfiguration)
         )
     }
 
