@@ -8,4 +8,7 @@ package com.microsoft.walletlibrary.verifiedid
 interface ImplicitAuthenticationResult : SuccessfulCompletionResult {
     // Redirect URI returned by presentation.
     val redirectUri: String
+
+    // Optional payload to POST to redirect URI.
+    val payload: String?
 }

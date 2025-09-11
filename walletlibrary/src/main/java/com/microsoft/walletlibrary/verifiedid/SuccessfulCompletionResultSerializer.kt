@@ -13,7 +13,7 @@ internal object SuccessfulCompletionResultSerializer : JsonContentPolymorphicSer
     override fun selectDeserializer(element: JsonElement): DeserializationStrategy<out SuccessfulCompletionResult> {
         val json = element.jsonObject
 
-        if (json.containsKey("redirect_uri")) {
+        if (json.containsKey(ImplicitAuthenticationResponse.REDIRECT_URI_KEY_NAME)) {
             return ImplicitAuthenticationResponse.serializer()
         }
         return EmptyResponse.serializer()

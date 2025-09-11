@@ -8,6 +8,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class ImplicitAuthenticationResponse(
-    @SerialName("redirect_uri")
-    override val redirectUri: String
-) : ImplicitAuthenticationResult
+    @SerialName(REDIRECT_URI_KEY_NAME)
+    override val redirectUri: String,
+
+    override val payload: String? = null
+) : ImplicitAuthenticationResult {
+    companion object {
+        internal const val REDIRECT_URI_KEY_NAME = "redirect_uri"
+    }
+}
