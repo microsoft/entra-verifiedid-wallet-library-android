@@ -13,5 +13,8 @@ internal data class Continuation(
     val url: String,
 
     // Actual continuation token.
-    val payload: String
+    val payload: String,
+
+    // Uniquely identifies the entire flow for correlation.
+    val correlationId: String
 )

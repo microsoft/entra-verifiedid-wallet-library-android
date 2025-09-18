@@ -14,8 +14,6 @@ import com.microsoft.walletlibrary.verifiedid.SuccessfulCompletionResult
  * trust model of requester like domain url and verification status.
  */
 interface VerifiedIdPresentationRequest : VerifiedIdRequest<SuccessfulCompletionResult> {
-    val scenario: String?
-
     // Completes the request and returns nothing if successful.
     override suspend fun complete(): VerifiedIdResult<SuccessfulCompletionResult>
 

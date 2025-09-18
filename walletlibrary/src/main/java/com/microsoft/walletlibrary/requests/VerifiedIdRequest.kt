@@ -24,6 +24,9 @@ interface VerifiedIdRequest<out T> {
     // Root of trust of the requester (eg. linked domains).
     val rootOfTrust: RootOfTrust
 
+    // Scenario
+    val scenario: String?
+
     // Indicates whether request is satisfied on client side.
     fun isSatisfied(): Boolean
 
