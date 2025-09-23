@@ -40,7 +40,7 @@ internal class VerifiedIdOpenIdJwtRawRequest(
         }
 
         val continuation = presentationRequest.content.continuation?.let {
-            Continuation(it.upn, it.url, it.payload)
+            Continuation(it.upn, it.url, it.payload, it.correlationId)
         }
 
         return PresentationRequestContent(
