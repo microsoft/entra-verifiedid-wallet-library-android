@@ -63,7 +63,8 @@ class IResponse(
             statusCode = status.toString(),
             innerError = innerError,
             errorBody = bodyAsString,
-            retryable = retryable
+            retryable = retryable,
+            headers = headers
         )
     }
 }
