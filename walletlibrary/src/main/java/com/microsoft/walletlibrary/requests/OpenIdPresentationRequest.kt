@@ -106,7 +106,8 @@ internal class OpenIdPresentationRequest(
             .onFailure {
                 throw VerifiedIdException(
                     "Failed to send presentation request. ${it.message}",
-                    VerifiedIdExceptions.REQUEST_SEND_EXCEPTION.value
+                    VerifiedIdExceptions.REQUEST_SEND_EXCEPTION.value,
+                    cause = it
                 )
             }
 

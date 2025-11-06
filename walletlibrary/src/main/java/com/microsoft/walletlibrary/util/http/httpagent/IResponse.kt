@@ -14,11 +14,20 @@ class IResponse(
     val headers: Map<String, String>,
     val body: ByteArray
 ) {
+    companion object {
+        fun getHeaderCaseInsensitive(headerName: String, headers: Map<String, String>): String? {
+            val headerKey = headers.keys.first {
+                it.trim().equals(headerName.trim(), ignoreCase = true)
+            } ?: return null
+            return headers[headerKey]
+        }
+    }
+
     fun toNetworkingException(): NetworkingException {
         var code = status.toString()
         var innerError: String? = null
         var message = ""
-        var correlationId: String? = headers["ms-cv"]
+        var correlationId: String? = IResponse.getHeaderCaseInsensitive("ms-cv", headers)
         var bodyAsString: String? = null
         val retryable: Boolean = headers.containsKey(HttpHeaders.RETRY_AFTER)
         try {

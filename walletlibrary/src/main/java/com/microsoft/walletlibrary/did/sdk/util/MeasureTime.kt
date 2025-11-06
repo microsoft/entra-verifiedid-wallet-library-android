@@ -32,8 +32,8 @@ internal inline fun logNetworkTime(name: String, block: () -> Result<IResponse>)
     var cvResponse = "none"
     var requestId = "none"
     val result = block().onSuccess {
-        cvResponse = it.headers[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
-        requestId = it.headers[Constants.REQUEST_ID_HEADER] ?: "none"
+        cvResponse = IResponse.getHeaderCaseInsensitive(Constants.CORRELATION_VECTOR_HEADER, it.headers) ?: "none"
+        requestId = IResponse.getHeaderCaseInsensitive( Constants.REQUEST_ID_HEADER, it.headers) ?: "none"
         code = it.status
     }.onFailure {
         (it as? NetworkingException)?.let {

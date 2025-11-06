@@ -24,7 +24,7 @@ internal object SdkLog {
 
     private const val ORIGINAL_CALLER_STACK_INDEX = 2
     private val ANONYMOUS_CLASS = Pattern.compile("(\\$\\d+)+$")
-    private val CONSUMERS: MutableList<Consumer> = ArrayList()
+    private val CONSUMERS: MutableSet<Consumer> = mutableSetOf()
 
     fun addConsumer(consumer: Consumer) = CONSUMERS.add(consumer)
 
