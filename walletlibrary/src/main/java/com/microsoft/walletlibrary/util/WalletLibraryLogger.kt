@@ -22,7 +22,7 @@ object WalletLibraryLogger {
 
     private const val ORIGINAL_CALLER_STACK_INDEX = 2
     private val ANONYMOUS_CLASS = Pattern.compile("(\\$\\d+)+$")
-    internal val CONSUMERS: MutableList<Consumer> = ArrayList()
+    internal val CONSUMERS: MutableSet<Consumer> = mutableSetOf()
 
     fun addConsumer(consumer: Consumer) = CONSUMERS.add(consumer)
 

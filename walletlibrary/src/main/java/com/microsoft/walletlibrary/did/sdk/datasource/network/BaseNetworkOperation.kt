@@ -34,7 +34,7 @@ internal abstract class BaseNetworkOperation<T> {
                 return onFailure(it)
             }
         } catch (exception: IOException) {
-            SdkLog.i("Failed to send request because of ${exception.message}", exception)
+            SdkLog.e("Failed to send request because of ${exception.message}", exception)
             return Result.failure(LocalNetworkException("Failed to send request because of ${exception.message}", exception))
         }
         return Result.failure(SdkException("Failed to get a response"))
@@ -44,7 +44,8 @@ internal abstract class BaseNetworkOperation<T> {
     open fun onFailure(exception: Throwable): Result<Nothing> {
         (exception as? NetworkingException)?.let {
             error ->
-            SdkLog.i("HttpError: ${error.code} body: ${error.errorBody} cv: ${error.correlationId}", exception)
+            val requestId = IResponse.getHeaderCaseInsensitive("request-id", error.headers)
+            SdkLog.e("HttpError: ${error.code} body: ${error.errorBody} cv: ${error.correlationId} request-id: $requestId", exception)
         }
         return Result.failure(exception)
     }

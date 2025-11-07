@@ -18,7 +18,8 @@ class NetworkingException(
     val statusCode: String? = null,
     val innerError: String? = null,
     val errorBody: String? = null,
-    val retryable: Boolean = false
+    val retryable: Boolean = false,
+    val headers: Map<String, String> = emptyMap()
 ) : VerifiedIdException(message, code, correlationId)
 
 class RequirementNotMetException(

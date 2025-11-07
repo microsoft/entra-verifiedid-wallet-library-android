@@ -111,12 +111,12 @@ class VerifiedIdClientBuilder(private val context: Context) {
 
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
     fun build(): VerifiedIdClient {
-        val vcSdkLogConsumer = WalletLibraryVCSDKLogConsumer(logger)
+        WalletLibraryVCSDKLogConsumer.logger = logger
         val userAgentInfo = getUserAgent(context)
         val walletLibraryVersionInfo = getWalletLibraryVersionInfo()
         VerifiableCredentialSdk.init(
             context,
-            logConsumer = vcSdkLogConsumer,
+            logConsumer = WalletLibraryVCSDKLogConsumer,
             userAgentInfo = userAgentInfo,
             walletLibraryVersionInfo = walletLibraryVersionInfo,
             httpAgent = httpAgent,
