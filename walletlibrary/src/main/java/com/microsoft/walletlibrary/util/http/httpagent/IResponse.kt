@@ -16,7 +16,7 @@ class IResponse(
 ) {
     companion object {
         fun getHeaderCaseInsensitive(headerName: String, headers: Map<String, String>): String? {
-            val headerKey = headers.keys.first {
+            val headerKey = headers.keys.firstOrNull {
                 it.trim().equals(headerName.trim(), ignoreCase = true)
             } ?: return null
             return headers[headerKey]
