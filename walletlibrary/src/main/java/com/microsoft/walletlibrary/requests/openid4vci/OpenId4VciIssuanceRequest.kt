@@ -62,6 +62,12 @@ internal class OpenId4VciIssuanceRequest(
 ) : VerifiedIdIssuanceRequest {
     private val requestFormatter = OpenId4VciIssuanceRequestFormatter(libraryConfiguration)
 
+    override val credentialIssuer: String?
+        get() = credentialMetadata.credentialIssuer
+
+    override val credentialEndpoint: String?
+        get() = credentialMetadata.credentialEndpoint
+
     override suspend fun complete(): VerifiedIdResult<VerifiedId> {
         val result = getResult {
             val response = formatAndSendIssuanceRequest()

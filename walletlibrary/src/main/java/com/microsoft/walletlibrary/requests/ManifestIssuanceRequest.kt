@@ -45,6 +45,13 @@ internal class ManifestIssuanceRequest(
 
     private val libraryConfiguration: LibraryConfiguration
 ) : VerifiedIdIssuanceRequest {
+
+    override val credentialIssuer: String?
+        get() = request.rawRequest.contract.input.credentialIssuer
+
+    override val credentialEndpoint: String?
+        get() = null // Legacy flow uses credentialIssuer as POST target
+
     // Completes the issuance request and returns a Result with VerifiedId if successful.
     override suspend fun complete(): VerifiedIdResult<VerifiedId> {
         val result = getResult {
