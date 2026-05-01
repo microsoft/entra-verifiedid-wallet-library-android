@@ -30,9 +30,9 @@ interface VerifiedIdIssuanceRequest : VerifiedIdRequest<VerifiedId> {
         get() = null
 
     /**
-     * The credential endpoint URL where the credential request/token is POSTed.
+     * The credential endpoint URL where the credential request is POSTed.
      *
-     * This is available for OpenID4VCI issuance. It may be null for legacy manifest issuance.
+     * This is available for OpenID4VCI issuance. It will be null for legacy manifest issuance.
      */
     val credentialEndpoint: String?
         get() = null
