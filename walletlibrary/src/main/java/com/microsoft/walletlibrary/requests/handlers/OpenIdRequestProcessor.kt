@@ -99,6 +99,7 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
             presentationRequestContent.requestState,
             presentationRequestContent.issuanceCallbackUrl
         )
+
         val issuanceRequestContent = rawManifest.mapToIssuanceRequestContent()
         val identifier = libraryConfiguration.identifierFactory.getIdentifier().id
         val nonce = NonceProcessor.getNonce(identifier)
