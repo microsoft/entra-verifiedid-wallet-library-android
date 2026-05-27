@@ -17,10 +17,28 @@ The library runs on a minimum sdk version 26. The app consuming the library shou
 
 ## Installation
 
+Releases are not maintained for this repository. To use this library, add this project as a submodule to your repository. 
+
+> You may wish to fork this repo to adjust gradle files as appropriate.
+
+```
+git submodule add https://github.com/microsoft/entra-verifiedid-wallet-library-android.git
+```
+
+Then either use the Android Studio "New Module" and "Import..." option with the `/walletlibrary` folder, or manually add the module by modifying  
+
+`settings.gradle`
+```gradle
+include ':walletlibrary'
+project(':walletlibrary').projectDir = new File(rootDir, 'entra-verifiedid-wallet-library-android/walletlibrary/')
+```
+
+Copy the expected variables from `gradle.properties` into the root project's `gradle.properties`.
+
 Add to your app's build.gradle to add Wallet Library as a dependency:
 ```kotlin
 dependencies {
-    implementation 'com.microsoft.entra.verifiedid:walletlibrary:1.0.0'
+    implementation project(':walletlibrary')
 }
 ```
 Add to repositories section of your app's settings.gradle.
