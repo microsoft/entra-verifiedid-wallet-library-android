@@ -7,6 +7,7 @@ package com.microsoft.walletlibrary.did.sdk
 
 import android.content.Context
 import androidx.preference.PreferenceManager
+import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.di.DaggerSdkComponent
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.util.DifWordList
@@ -42,6 +43,9 @@ internal object VerifiableCredentialSdk {
 
     @JvmStatic
     internal lateinit var linkedDomainsService: LinkedDomainsService
+
+    @JvmStatic
+    internal lateinit var jwtValidator: JwtValidator
 
     @JvmStatic
     internal lateinit var correlationVectorService: CorrelationVectorService
@@ -91,6 +95,7 @@ internal object VerifiableCredentialSdk {
         issuanceService = sdkComponent.issuanceService()
         presentationService = sdkComponent.presentationService()
         linkedDomainsService = sdkComponent.linkedDomainsService()
+        jwtValidator = sdkComponent.jwtValidator()
         correlationVectorService = sdkComponent.correlationVectorService()
         identifierService = sdkComponent.identifierManager()
 

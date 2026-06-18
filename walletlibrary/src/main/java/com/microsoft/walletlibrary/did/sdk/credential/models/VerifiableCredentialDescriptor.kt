@@ -22,7 +22,8 @@ internal data class VerifiableCredentialDescriptor(
     @Serializable(with = CredentialSubjectSerializer::class)
     val credentialSubject: Map<String, String>,
 
-    val credentialStatus: ServiceDescriptor? = null,
+    @Serializable(with = CredentialStatusDescriptorSerializer::class)
+    val credentialStatus: CredentialStatusDescriptor? = null,
 
     val revokeService: ServiceDescriptor? = null
 )

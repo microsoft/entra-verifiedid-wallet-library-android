@@ -20,8 +20,8 @@ import kotlinx.serialization.json.JsonPrimitive
 
 /**
  * This class serializes/deserializes serviceEndpoint property in IdentifierDocument.
- * The serviceEndpoint can be a String or Key/Value pair where key is "origins" and value is a list of String.
- * It only supports service endpoint of type "LinkedDomains".
+ * The serviceEndpoint can be a String or Key/Value pair where the key is one of [ServiceEndpointKeys]
+ * (currently "origins" for LinkedDomains or "instances" for IdentityHub) and the value is a list of String.
  * @see [Well Known DID Configuration] (https://identity.foundation/.well-known/resources/did-configuration/#linked-domain-service-endpoint)
  */
 internal class IdentifierDocLinkedDomainsServiceEndpointSerializer(@Suppress("UNUSED_PARAMETER") dataSerializer: KSerializer<String>) :
@@ -36,11 +36,12 @@ internal class IdentifierDocLinkedDomainsServiceEndpointSerializer(@Suppress("UN
         return when (val serviceEndpointJsonElement = (decoder as JsonDecoder).decodeJsonElement()) {
             is JsonPrimitive -> listOf(serviceEndpointJsonElement.content)
             is JsonObject -> {
-                val jsonObjectKey = serviceEndpointJsonElement.keys.find { it.equals(
-                    ServiceEndpointKeys.Origins.value, true) }
+                val jsonObjectKey = serviceEndpointJsonElement.keys.find { key ->
+                    ServiceEndpointKeys.values().any { it.value.equals(key, true) }
+                }
                 if (jsonObjectKey != null) {
-                    val jsonArray = serviceEndpointJsonElement[jsonObjectKey] as JsonArray
-                    jsonArray.map { jsonElement -> (jsonElement as JsonPrimitive).content }
+                    val jsonArray = serviceEndpointJsonElement[jsonObjectKey] as? JsonArray ?: return emptyList()
+                    jsonArray.mapNotNull { jsonElement -> (jsonElement as? JsonPrimitive)?.content }
                 } else emptyList()
             }
             else -> throw LinkedDomainEndpointInUnknownFormatException("Linked Domains service endpoint is not in the correct format")
@@ -49,5 +50,6 @@ internal class IdentifierDocLinkedDomainsServiceEndpointSerializer(@Suppress("UN
 }
 
 enum class ServiceEndpointKeys(val value: String) {
-    Origins("origins")
+    Origins("origins"),
+    Instances("instances")
 }

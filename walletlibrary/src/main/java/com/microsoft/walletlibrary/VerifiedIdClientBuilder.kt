@@ -34,6 +34,7 @@ import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.WalletLibraryVCSDKLogConsumer
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
+import com.microsoft.walletlibrary.did.sdk.StatusCheckService
 import com.microsoft.walletlibrary.verifiedid.OpenId4VciVerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
@@ -162,11 +163,14 @@ class VerifiedIdClientBuilder(private val context: Context) {
         registerRequestHandler(OpenId4VCIRequestHandler(libraryConfiguration), extensions)
         requestProcessorFactory.requestProcessors.addAll(requestProcessors)
 
+        val statusCheckService = StatusCheckService(apiProvider, jsonSerializer, VerifiableCredentialSdk.jwtValidator)
+
         return VerifiedIdClient(
             requestResolverFactory,
             requestProcessorFactory,
             logger,
-            jsonSerializer
+            jsonSerializer,
+            statusCheckService
         )
     }
 
