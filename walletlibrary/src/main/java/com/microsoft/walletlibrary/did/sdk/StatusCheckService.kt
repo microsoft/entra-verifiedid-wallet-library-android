@@ -79,7 +79,11 @@ internal class StatusCheckService(
     }
 
     private suspend fun fetchAndCheckStatusList(descriptor: CredentialStatusDescriptor, issuerDid: String): VerifiedIdStatus {
-        val url = resolveStatusListUrl(descriptor.effectiveStatusListCredential)
+        val statusCredRaw = descriptor.effectiveStatusListCredential
+        SdkLog.i("$TAG fetchAndCheckStatusList: id='${descriptor.id}' effectiveStatusListCredential='$statusCredRaw' statusPurpose='${descriptor.statusPurpose}' issuerDid='$issuerDid'")
+        val url = resolveStatusListUrl(statusCredRaw)
+        SdkLog.i("$TAG fetchAndCheckStatusList: resolveStatusListUrl returned '$url'")
+        url
             ?: run {
                 // DID-relative status list credential (any DID method, matching the Entra server's
                 // isDidRelatedUrl) or the older urn:uuid: form — resolve via the issuer's IdentityHub.
@@ -92,7 +96,7 @@ internal class StatusCheckService(
                 return VerifiedIdStatus.Unknown
             }
 
-        SdkLog.i("$TAG path=DirectUrl")
+        SdkLog.i("$TAG path=DirectUrl url=$url")
         val response = apiProvider.statusListApi.getStatusListCredential(url).getOrElse {
             SdkLog.w("$TAG result=Unknown (status list fetch failed)", it)
             return VerifiedIdStatus.Unknown
@@ -160,34 +164,47 @@ internal class StatusCheckService(
     }
 
     private suspend fun resolveDidWebUrl(didUrl: String): String? {
+        SdkLog.i("$TAG resolveDidWebUrl: didUrl='$didUrl'")
         val did = didUrl.substringBefore('?')
         val serviceName = didUrlQueryParameter(didUrl, "service") ?: "IdentityHub"
         val queries = didUrlQueryParameter(didUrl, "queries")
+        SdkLog.i("$TAG resolveDidWebUrl: did='$did' serviceName='$serviceName' queriesPresent=${queries != null}")
 
-        val didDocumentUrl = didWebToDocumentUrl(did) ?: return null
-
-        val response = apiProvider.statusListApi.getStatusListCredential(didDocumentUrl).getOrElse {
+        val didDocumentUrl = didWebToDocumentUrl(did) ?: run {
+            SdkLog.w("$TAG resolveDidWebUrl: didWebToDocumentUrl returned null for did='$did'")
             return null
         }
+        SdkLog.i("$TAG resolveDidWebUrl: fetching DID doc at '$didDocumentUrl'")
+
+        val response = apiProvider.statusListApi.getStatusListCredential(didDocumentUrl).getOrElse {
+            SdkLog.w("$TAG resolveDidWebUrl: DID doc fetch threw", it)
+            return null
+        }
+        SdkLog.i("$TAG resolveDidWebUrl: DID doc HTTP ${response.status}")
         if (response.status !in HTTP_SUCCESS_RANGE) return null
 
         return try {
             val body = response.body.decodeToString()
             val root = json.parseToJsonElement(body).jsonObject
-            val services = root["service"]?.jsonArray ?: return null
+            val services = root["service"]?.jsonArray ?: run {
+                SdkLog.w("$TAG resolveDidWebUrl: no 'service' array in DID doc")
+                return null
+            }
 
             val serviceEndpoint = services.firstOrNull { serviceElement ->
                 val svc = serviceElement.jsonObject
                 val id = svc["id"]?.jsonPrimitive?.content ?: ""
                 val type = svc["type"]?.jsonPrimitive?.content ?: ""
-                // Match by service type, or id anchored on '#<service>' (so "#MyIdentityHub" won't match).
                 type == serviceName || id.endsWith("#$serviceName")
             }?.jsonObject?.get("serviceEndpoint")?.let { endpoint ->
-                // serviceEndpoint can be a plain string or an array of strings
                 try { endpoint.jsonPrimitive.content } catch (_: Exception) {
                     try { endpoint.jsonArray.firstOrNull()?.jsonPrimitive?.content } catch (_: Exception) { null }
                 }
-            } ?: return null
+            } ?: run {
+                SdkLog.w("$TAG resolveDidWebUrl: no matching service endpoint for '$serviceName'")
+                return null
+            }
+            SdkLog.i("$TAG resolveDidWebUrl: serviceEndpoint='$serviceEndpoint'")
 
             if (queries != null) {
                 Uri.parse(serviceEndpoint).buildUpon()
@@ -197,7 +214,8 @@ internal class StatusCheckService(
             } else {
                 serviceEndpoint
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            SdkLog.w("$TAG resolveDidWebUrl: parse threw", e)
             null
         }
     }
@@ -249,21 +267,19 @@ internal class StatusCheckService(
      */
     private suspend fun extractStatusListInfo(responseBody: String, expectedIssuerDid: String): Pair<String, String>? {
         return try {
-            // Require a signed JWT; never read bits from unsigned bytes.
             val jwsToken = tryDeserializeJws(responseBody)
                 ?: run {
-                    SdkLog.w("$TAG status list is not a signed JWT; refusing to trust unsigned status data")
+                    // Not a JWT here — caller (e.g. CollectionsQuery path) may retry on an inner payload.
+                    SdkLog.i("$TAG extractStatusListInfo: body is not a signed JWT; returning null so caller can try envelope fallback")
                     return null
                 }
-            // Verify signature.
             if (!jwtValidator.verifySignature(jwsToken)) {
-                SdkLog.w("$TAG status list JWT signature verification failed")
+                SdkLog.w("$TAG extractStatusListInfo: status list JWT signature verification failed")
                 return null
             }
-            // Signer DID must be the credential's issuer.
             if (expectedIssuerDid.isNotBlank() &&
                 !jwtValidator.validateDidInHeaderAndPayload(jwsToken, expectedIssuerDid)) {
-                SdkLog.w("$TAG status list JWT signer does not match credential issuer")
+                SdkLog.w("$TAG extractStatusListInfo: status list JWT signer does not match credential issuer")
                 return null
             }
             val jsonBody = jwsToken.content()
@@ -271,7 +287,7 @@ internal class StatusCheckService(
             // Reject an expired (replayed) list; no exp = no constraint.
             val exp = root["exp"]?.jsonPrimitive?.longOrNull
             if (exp != null && exp + STATUS_LIST_CLOCK_SKEW_SECONDS < Date().time / 1000) {
-                SdkLog.w("$TAG status list JWT is expired (exp=$exp); refusing to trust a possibly replayed list")
+                SdkLog.w("$TAG extractStatusListInfo: status list JWT is expired (exp=$exp)")
                 return null
             }
             val subject = root["credentialSubject"]?.jsonObject
@@ -279,9 +295,10 @@ internal class StatusCheckService(
                 ?: return null
             val encodedList = subject["encodedList"]?.jsonPrimitive?.content ?: return null
             val statusPurpose = subject["statusPurpose"]?.jsonPrimitive?.content ?: "revocation"
+            SdkLog.i("$TAG extractStatusListInfo: signed-JWT verified (encodedListLen=${encodedList.length} statusPurpose=$statusPurpose)")
             Pair(encodedList, statusPurpose)
         } catch (e: Exception) {
-            SdkLog.w("$TAG result=Unknown (failed to verify/parse status list response)", e)
+            SdkLog.w("$TAG extractStatusListInfo: failed to verify/parse status list response", e)
             null
         }
     }
@@ -373,7 +390,10 @@ internal class StatusCheckService(
 
             // Try direct parse first (in case response is the VC itself), then dig into envelope
             val statusListInfo = extractStatusListInfo(responseBody, issuerDid)
-                ?: extractStatusListFromCollectionsResponse(responseBody, issuerDid)
+                ?: run {
+                    SdkLog.i("$TAG IdentityHub: CollectionsQuery body is the envelope, not the status-list JWT — trying envelope fallback")
+                    extractStatusListFromCollectionsResponse(responseBody, issuerDid)
+                }
                 ?: run {
                     SdkLog.w("$TAG result=Unknown (IdentityHub path: could not extract status list from CollectionsQuery response)")
                     return VerifiedIdStatus.Unknown
@@ -477,15 +497,23 @@ internal class StatusCheckService(
                     val decoded = base64DecodeToString(data)
                     if (decoded != null) {
                         val result = extractStatusListInfo(decoded, expectedIssuerDid)
-                        if (result != null) return result
+                        if (result != null) {
+                            SdkLog.i("$TAG IdentityHub envelope fallback: extracted signed status-list JWT from base64-decoded entries[].data")
+                            return result
+                        }
                     }
                     // Fallback: in case `data` is already a JWT or JSON.
                     val result = extractStatusListInfo(data, expectedIssuerDid)
-                    if (result != null) return result
+                    if (result != null) {
+                        SdkLog.i("$TAG IdentityHub envelope fallback: extracted signed status-list JWT from raw entries[].data")
+                        return result
+                    }
                 }
             }
+            SdkLog.w("$TAG IdentityHub envelope fallback: no signed status-list JWT found in replies[].entries[].data")
             null
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            SdkLog.w("$TAG IdentityHub envelope fallback: parse threw", e)
             null
         }
     }
