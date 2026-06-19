@@ -8,22 +8,10 @@ package com.microsoft.walletlibrary.did.sdk.credential.models
 import kotlinx.serialization.Serializable
 
 /**
- * Credential status entry embedded in a Verifiable Credential JWT.
- *
- * Mirrors the credential-status types the Entra status service supports. All use the same
- * GZIP-compressed bitstring encoding; they differ only in which URL/index field names are used:
- *
- * | type                       | URL field                  | index field             | notes                                  |
- * |----------------------------|----------------------------|-------------------------|----------------------------------------|
- * | RevocationList2021Status   | statusListCredential       | statusListIndex         | Entra DID-relative URL (IdentityHub).  |
- * |                            |                            |                         | Bit index may instead come from the    |
- * |                            |                            |                         | `urn:uuid:<id>?bit-index=N` id.        |
- * | StatusList2021Entry        | statusListCredential       | statusListIndex         | W3C StatusList2021 spec; HTTPS URL.    |
- * | RevocationList2020Status   | revocationListCredential   | revocationListIndex     | Older format; HTTPS URL.               |
- *
- * Use [effectiveStatusListCredential] and [effectiveStatusListIndex] instead of the raw fields
- * so callers do not need to branch on [type]. For the `urn:uuid:` IdentityHub case, the bit index
- * is parsed from the id's `bit-index` query parameter by the status check itself.
+ * Credential status entry embedded in a Verifiable Credential JWT. Covers the Entra/W3C variants
+ * (RevocationList2021Status, StatusList2021Entry, RevocationList2020Status), which differ only in
+ * field names — use [effectiveStatusListCredential]/[effectiveStatusListIndex] so callers need not
+ * branch on [type].
  */
 @Serializable
 internal data class CredentialStatusDescriptor(

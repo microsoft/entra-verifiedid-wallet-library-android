@@ -32,17 +32,11 @@ import java.util.zip.GZIPInputStream
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential as WalletVerifiableCredential
 
 /**
- * Determines the [VerifiedIdStatus] of a [VerifiedId].
- *
- * Check order:
- * 1. Expiry — evaluated from the credential's own `expiresOn` field, no network call.
- * 2. W3C StatusList2021 — fetches the issuer's status list and checks the credential's bit.
- *
- * The signature and issuer validation performed here is defense-in-depth. The authoritative status
- * enforcement happens server-side when a [VerifiedId] is presented.
- *
- * Returns [VerifiedIdStatus.NoStatusEndpoint] when the credential carries no status endpoint, and
- * [VerifiedIdStatus.Unknown] when the status could not be determined (e.g. network or format error).
+ * Determines the [VerifiedIdStatus] of a [VerifiedId]: first expiry (from the credential's own
+ * `expiresOn`, no network), then W3C StatusList2021 (fetch the issuer's list and check the bit).
+ * The signature/issuer/exp checks here are defense-in-depth; the server is authoritative at
+ * presentation. Returns [VerifiedIdStatus.NoStatusEndpoint] when there is no status endpoint and
+ * [VerifiedIdStatus.Unknown] when the status can't be determined.
  */
 internal class StatusCheckService(
     private val apiProvider: HttpAgentApiProvider,
@@ -147,15 +141,7 @@ internal class StatusCheckService(
         }
     }
 
-    /**
-     * Resolves the status list credential URL to a fetchable HTTPS URL.
-     * Supports direct HTTPS URLs and `did:web:` DID URLs.
-     *
-     * For `did:web:domain?service=IdentityHub&queries=xxx`:
-     *  1. Fetches the DID document at https://domain/.well-known/did.json
-     *  2. Locates the named service endpoint
-     *  3. Returns `<endpoint>?queries=xxx`
-     */
+    /** Resolves the status list credential to a fetchable HTTPS URL (direct https, or did:web via its DID document). */
     private suspend fun resolveStatusListUrl(url: String): String? {
         if (url.startsWith("https://")) return if (isWellFormedHttpsUrl(url)) url else null
         if (url.startsWith("did:web:")) return resolveDidWebUrl(url)
@@ -173,10 +159,9 @@ internal class StatusCheckService(
     }
 
     private suspend fun resolveDidWebUrl(didUrl: String): String? {
-        val parsed = Uri.parse(didUrl)
         val did = didUrl.substringBefore('?')
-        val serviceName = parsed.getQueryParameter("service") ?: "IdentityHub"
-        val queries = parsed.getQueryParameter("queries")
+        val serviceName = didUrlQueryParameter(didUrl, "service") ?: "IdentityHub"
+        val queries = didUrlQueryParameter(didUrl, "queries")
 
         val didDocumentUrl = didWebToDocumentUrl(did) ?: return null
 
@@ -194,9 +179,7 @@ internal class StatusCheckService(
                 val svc = serviceElement.jsonObject
                 val id = svc["id"]?.jsonPrimitive?.content ?: ""
                 val type = svc["type"]?.jsonPrimitive?.content ?: ""
-                // Match by exact service type or a fragment-anchored id (e.g. "did:web:...#IdentityHub").
-                // The id fragment is anchored with '#' so an unrelated service whose id merely ends
-                // with the same text (e.g. "#MyIdentityHub") is not mistakenly selected.
+                // Match by service type, or id anchored on '#<service>' (so "#MyIdentityHub" won't match).
                 type == serviceName || id.endsWith("#$serviceName")
             }?.jsonObject?.get("serviceEndpoint")?.let { endpoint ->
                 // serviceEndpoint can be a plain string or an array of strings
@@ -232,6 +215,21 @@ internal class StatusCheckService(
         pathSegments.forEach { builder.appendPath(it) }
         builder.appendPath("did.json")
         return builder.build().toString()
+    }
+
+    /**
+     * Reads a query parameter from a `did:`/`urn:` URL. android.net.Uri treats these as opaque, so
+     * Uri.getQueryParameter returns null for them; parse the query substring directly. Entra does not
+     * percent-encode these values (base64url, digits, service names), so no decoding is applied.
+     */
+    private fun didUrlQueryParameter(url: String, key: String): String? {
+        val query = url.substringAfter('?', "")
+        if (query.isEmpty()) return null
+        for (pair in query.split('&')) {
+            val eq = pair.indexOf('=')
+            if (eq >= 0 && pair.substring(0, eq) == key) return pair.substring(eq + 1)
+        }
+        return null
     }
 
     /**
@@ -320,19 +318,9 @@ internal class StatusCheckService(
     }
 
     /**
-     * Resolves a DID-relative status list credential via the issuer's IdentityHub. Handles both Entra
-     * encodings: the older `urn:uuid:UUID?bit-index=N` id form, and the
-     * `<issuerDid>?service=IdentityHub&queries=<base64url([{...,objectId}])>` statusListCredential form.
-     * Flow:
-     * 1. Resolve issuer DID document via the SDK's configured DID resolver.
-     * 2. Find the `IdentityHub` service entry and take the first endpoint URL
-     *    (the serializer normalises both `{"instances":[...]}` and `{"origins":[...]}` shapes).
-     * 3. POST CollectionsQuery to that hub URL to get the StatusList2021 credential.
-     * 4. Check the bit at [bitIndex].
-     *
-     * No hostnames are hardcoded here — every URL is sourced from either the VC itself
-     * or the resolved DID document, with the resolver host controlled by the host app
-     * via [com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk.init]'s `resolverUrl` parameter.
+     * Resolves a DID-relative status list via the issuer's IdentityHub (handles both the
+     * `urn:uuid:...?bit-index=N` and `did:...?service=IdentityHub&queries=...` forms): resolve the
+     * issuer DID document, POST a CollectionsQuery to its IdentityHub endpoint, then check the bit.
      */
     private suspend fun checkStatusViaIdentityHub(descriptor: CredentialStatusDescriptor, issuerDid: String): VerifiedIdStatus {
         val objectId = resolveIdentityHubObjectId(descriptor)
@@ -427,7 +415,7 @@ internal class StatusCheckService(
         // did-relative form: "<issuerDid>?service=IdentityHub&queries=<base64url([{...,objectId}])>".
         val statusCred = descriptor.effectiveStatusListCredential
         if (statusCred.startsWith("did:")) {
-            val encodedQueries = Uri.parse(statusCred).getQueryParameter("queries") ?: return null
+            val encodedQueries = didUrlQueryParameter(statusCred, "queries") ?: return null
             return try {
                 val decoded = Base64.decode(encodedQueries, Constants.BASE64_URL_SAFE).decodeToString()
                 json.parseToJsonElement(decoded).jsonArray
@@ -442,7 +430,7 @@ internal class StatusCheckService(
     /** Bit index from the `urn:uuid:...?bit-index=N` id when present, else the descriptor's index. */
     private fun resolveStatusListBitIndex(descriptor: CredentialStatusDescriptor): Int {
         if (descriptor.id.startsWith("urn:uuid:")) {
-            Uri.parse(descriptor.id).getQueryParameter("bit-index")?.toIntOrNull()?.let { return it }
+            didUrlQueryParameter(descriptor.id, "bit-index")?.toIntOrNull()?.let { return it }
         }
         return descriptor.effectiveStatusListIndex
     }
@@ -466,13 +454,8 @@ internal class StatusCheckService(
     }
 
     /**
-     * Extracts the StatusList2021 (encodedList, statusPurpose) from an IdentityHub CollectionsQuery
-     * response envelope. Digs into `replies[].entries[].data` entries.
-     *
-     * In Entra IdentityHub responses, `data` is a base64(url)-encoded JWT containing the VC.
-     * We base64-decode it first to recover the JWT, then hand it to [extractStatusListInfo].
-     * The raw string is also tried as a last-resort fallback in case a hub ever returns
-     * the JWT or JSON directly.
+     * Extracts the status list from a CollectionsQuery envelope: each `replies[].entries[].data` is a
+     * base64url-encoded JWT, decoded then passed to [extractStatusListInfo] (raw value tried as fallback).
      */
     private suspend fun extractStatusListFromCollectionsResponse(responseBody: String, expectedIssuerDid: String): Pair<String, String>? {
         return try {
@@ -498,13 +481,7 @@ internal class StatusCheckService(
         }
     }
 
-    /**
-     * Base64url-decodes the IdentityHub `data` field to a UTF-8 string.
-     *
-     * IdentityHub entries are base64url-encoded (matching the status service, which encodes with
-     * base64url), so a single URL-safe decode is used. Returns null if decoding fails or the result
-     * does not look like a JWT (`eyJ`) or JSON (`{`).
-     */
+    /** Base64url-decodes the IdentityHub `data` field; returns null unless it looks like a JWT (`eyJ`) or JSON (`{`). */
     private fun base64DecodeToString(encoded: String): String? {
         return try {
             val text = Base64.decode(encoded, Constants.BASE64_URL_SAFE).decodeToString()

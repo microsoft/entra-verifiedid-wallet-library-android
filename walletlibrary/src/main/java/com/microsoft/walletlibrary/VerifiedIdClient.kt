@@ -69,13 +69,8 @@ class VerifiedIdClient internal constructor(
     }
 
     /**
-     * Returns the current [VerifiedIdStatus] of [verifiedId].
-     *
-     * Evaluates expiry (from the credential's own data) and, when the credential carries a
-     * status endpoint, the issuer's W3C StatusList2021 revocation/suspension state.
-     * Returns [VerifiedIdStatus.NoStatusEndpoint] when the credential has no status endpoint, and
-     * [VerifiedIdStatus.Unknown] when the status could not be determined (e.g. network or format error).
-     * How the result is acted upon is left to the caller.
+     * Returns the current [VerifiedIdStatus] of [verifiedId] (expiry, then StatusList2021 if the
+     * credential has a status endpoint). How to act on the result is left to the caller.
      */
     suspend fun checkVerifiedIdStatus(verifiedId: VerifiedId): VerifiedIdResult<VerifiedIdStatus> {
         return getResult { statusCheckService.checkVerifiedIdStatus(verifiedId) }

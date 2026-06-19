@@ -11,18 +11,9 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonTransformingSerializer
 
 /**
- * Deserialises [CredentialStatusDescriptor] from either of the two W3C VC shapes:
- *
- *  - Object form (the common case Entra emits today):
- *    `"credentialStatus": { "id": "...", "type": "..." }`
- *  - Array form (allowed by the W3C VC Data Model so an issuer can attach multiple
- *    purposes — e.g. one revocation list and one suspension list):
- *    `"credentialStatus": [ { ... }, { ... } ]`
- *
- * Today the wallet only acts on a single descriptor, so for the array case we keep the
- * first entry. This prevents the whole VC from failing to deserialise if an issuer ever
- * starts emitting the array form. When suspension support is added, this should be
- * upgraded to expose the full list.
+ * Deserialises [CredentialStatusDescriptor] from either W3C VC shape: an object
+ * (`"credentialStatus": {...}`) or an array (`"credentialStatus": [{...}]`). The wallet acts on a
+ * single descriptor, so the array form keeps the first entry rather than failing to deserialise.
  */
 internal object CredentialStatusDescriptorSerializer :
     JsonTransformingSerializer<CredentialStatusDescriptor>(CredentialStatusDescriptor.serializer()) {
