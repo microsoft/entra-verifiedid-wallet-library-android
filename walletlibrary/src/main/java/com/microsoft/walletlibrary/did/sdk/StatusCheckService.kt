@@ -22,6 +22,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
@@ -52,6 +53,8 @@ internal class StatusCheckService(
     private companion object {
         const val TAG = "VID_STATUS_CHECK"
         val HTTP_SUCCESS_RANGE = 200..299
+        // Clock skew for the status list JWT exp check (mirrors the server's clockTolerance).
+        const val STATUS_LIST_CLOCK_SKEW_SECONDS = 300L
     }
 
     suspend fun checkVerifiedIdStatus(verifiedId: VerifiedId): VerifiedIdStatus {
@@ -112,6 +115,11 @@ internal class StatusCheckService(
                     SdkLog.w("$TAG result=Unknown (could not extract status list from response)")
                     return VerifiedIdStatus.Unknown
                 }
+
+            if (!statusPurposeMatches(descriptor, statusPurpose)) {
+                SdkLog.w("$TAG result=Unknown (statusPurpose mismatch: credential=${descriptor.statusPurpose}, list=$statusPurpose)")
+                return VerifiedIdStatus.Unknown
+            }
 
             val decompressed = decodeAndDecompress(encodedList)
                 ?: run {
@@ -212,52 +220,53 @@ internal class StatusCheckService(
 
     private fun didWebToDocumentUrl(did: String): String? {
         if (!did.startsWith("did:web:")) return null
-        val parts = did.removePrefix("did:web:").split(":")
-        // First segment is the host (with an optional %3A-encoded port); the rest are path segments.
-        val builder = Uri.Builder().scheme("https").encodedAuthority(Uri.decode(parts[0]))
-        if (parts.size == 1) {
-            builder.appendPath(".well-known").appendPath("did.json")
-        } else {
-            parts.drop(1).forEach { builder.appendPath(Uri.decode(it)) }
-            builder.appendPath("did.json")
-        }
+
+        // did:web is ':'-separated: the first element is the host (with an optional %3A-encoded
+        // port); the rest are path segments. With no path segments the document lives at
+        // /.well-known/did.json, otherwise at /<path>/did.json.
+        val segments = did.removePrefix("did:web:").split(":").map { Uri.decode(it) }
+        val host = segments.first()
+        val pathSegments = segments.drop(1).ifEmpty { listOf(".well-known") }
+
+        val builder = Uri.Builder().scheme("https").encodedAuthority(host)
+        pathSegments.forEach { builder.appendPath(it) }
+        builder.appendPath("did.json")
         return builder.build().toString()
     }
 
     /**
-     * Parses the status list credential response body (JWT or plain JSON) and returns
-     * the (encodedList, statusPurpose) pair from `credentialSubject`.
-     *
-     * Handles both shapes:
-     *  - Flat VC JSON: `{ "credentialSubject": { "encodedList": ... } }`
-     *  - JWT-VC payload: `{ "vc": { "credentialSubject": { "encodedList": ... } } }`
-     *
-     * When the body is a signed JWT, its signature is verified AND its signer DID is bound to
-     * [expectedIssuerDid] (the DID that issued the credential being checked). This mirrors the Entra
-     * status service, which validates the status list against the expected issuer — not merely that
-     * it is signed by some resolvable DID. Either check failing yields null (treated as Unknown).
+     * Extracts (encodedList, statusPurpose) from a status list credential, which MUST be a signed JWT.
+     * Verifies the signature, binds the signer DID to [expectedIssuerDid], and enforces `exp` when
+     * present. Unsigned bodies and any failed check yield null (treated as Unknown), mirroring the
+     * Entra status service which never reads bits from unsigned data.
      */
     private suspend fun extractStatusListInfo(responseBody: String, expectedIssuerDid: String): Pair<String, String>? {
         return try {
+            // Require a signed JWT; never read bits from unsigned bytes.
             val jwsToken = tryDeserializeJws(responseBody)
-            val jsonBody = if (jwsToken != null) {
-                // 1. Authenticity: the JWT must carry a valid signature from its own signing key.
-                if (!jwtValidator.verifySignature(jwsToken)) {
-                    SdkLog.w("$TAG status list JWT signature verification failed")
+                ?: run {
+                    SdkLog.w("$TAG status list is not a signed JWT; refusing to trust unsigned status data")
                     return null
                 }
-                // 2. Provenance: the signer must be the credential's issuer. Without this, a status
-                //    list validly signed by any other resolvable DID would be accepted.
-                if (expectedIssuerDid.isNotBlank() &&
-                    !jwtValidator.validateDidInHeaderAndPayload(jwsToken, expectedIssuerDid)) {
-                    SdkLog.w("$TAG status list JWT signer does not match credential issuer")
-                    return null
-                }
-                jwsToken.content()
-            } else {
-                responseBody
+            // Verify signature.
+            if (!jwtValidator.verifySignature(jwsToken)) {
+                SdkLog.w("$TAG status list JWT signature verification failed")
+                return null
             }
+            // Signer DID must be the credential's issuer.
+            if (expectedIssuerDid.isNotBlank() &&
+                !jwtValidator.validateDidInHeaderAndPayload(jwsToken, expectedIssuerDid)) {
+                SdkLog.w("$TAG status list JWT signer does not match credential issuer")
+                return null
+            }
+            val jsonBody = jwsToken.content()
             val root = json.parseToJsonElement(jsonBody).jsonObject
+            // Reject an expired (replayed) list; no exp = no constraint.
+            val exp = root["exp"]?.jsonPrimitive?.longOrNull
+            if (exp != null && exp + STATUS_LIST_CLOCK_SKEW_SECONDS < Date().time / 1000) {
+                SdkLog.w("$TAG status list JWT is expired (exp=$exp); refusing to trust a possibly replayed list")
+                return null
+            }
             val subject = root["credentialSubject"]?.jsonObject
                 ?: root["vc"]?.jsonObject?.get("credentialSubject")?.jsonObject
                 ?: return null
@@ -287,6 +296,12 @@ internal class StatusCheckService(
         } catch (_: Exception) {
             null
         }
+    }
+
+    /** True if the credential's declared statusPurpose (if any) matches the list's; blank = no constraint. */
+    private fun statusPurposeMatches(descriptor: CredentialStatusDescriptor, listStatusPurpose: String): Boolean {
+        val declared = descriptor.statusPurpose
+        return declared.isEmpty() || declared == listStatusPurpose
     }
 
     /**
@@ -368,6 +383,11 @@ internal class StatusCheckService(
                 }
 
             val (encodedList, statusPurpose) = statusListInfo
+
+            if (!statusPurposeMatches(descriptor, statusPurpose)) {
+                SdkLog.w("$TAG result=Unknown (IdentityHub path: statusPurpose mismatch: credential=${descriptor.statusPurpose}, list=$statusPurpose)")
+                return VerifiedIdStatus.Unknown
+            }
 
             val decompressed = decodeAndDecompress(encodedList)
                 ?: run {

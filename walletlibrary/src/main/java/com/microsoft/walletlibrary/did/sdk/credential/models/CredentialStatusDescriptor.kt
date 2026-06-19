@@ -29,6 +29,9 @@ import kotlinx.serialization.Serializable
 internal data class CredentialStatusDescriptor(
     val id: String,
     val type: String,
+    // W3C StatusList2021Entry: whether a set bit means revocation or suspension. Older
+    // RevocationList2021Status credentials may omit it, so it defaults to empty ("no constraint").
+    val statusPurpose: String = "",
     // RevocationList2021Status / StatusList2021Entry field names
     val statusListIndex: Int = 0,
     val statusListCredential: String = "",

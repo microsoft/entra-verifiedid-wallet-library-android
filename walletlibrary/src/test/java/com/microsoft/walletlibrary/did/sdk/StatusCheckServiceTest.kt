@@ -65,7 +65,7 @@ class StatusCheckServiceTest {
     }
 
     /** Builds a StatusList2021 status list JSON body whose bit at [flaggedIndex] (if non-null) is set. */
-    private fun buildStatusListJson(statusPurpose: String, flaggedIndex: Int?): String {
+    private fun buildStatusListJson(statusPurpose: String, flaggedIndex: Int?, exp: Long? = null): String {
         val bitstring = ByteArray(125)
         flaggedIndex?.let { index ->
             bitstring[index / 8] = (bitstring[index / 8].toInt() or (1 shl (index % 8))).toByte()
@@ -74,12 +74,14 @@ class StatusCheckServiceTest {
             GZIPOutputStream(baos).use { it.write(bitstring) }
         }.toByteArray()
         val encodedList = Base64.getUrlEncoder().withoutPadding().encodeToString(compressed)
-        return """{"credentialSubject":{"encodedList":"$encodedList","statusPurpose":"$statusPurpose"}}"""
+        val expPart = if (exp != null) ""","exp":$exp""" else ""
+        return """{"credentialSubject":{"encodedList":"$encodedList","statusPurpose":"$statusPurpose"}$expPart}"""
     }
 
-    private fun directUrlStatus(index: Int) = CredentialStatusDescriptor(
+    private fun directUrlStatus(index: Int, statusPurpose: String = "") = CredentialStatusDescriptor(
         id = "status-1",
         type = "StatusList2021Entry",
+        statusPurpose = statusPurpose,
         statusListIndex = index,
         statusListCredential = STATUS_LIST_URL
     )
@@ -131,7 +133,9 @@ class StatusCheckServiceTest {
     fun checkVerifiedIdStatus_statusListBitClear_returnsValid() {
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
-            okResponse(buildStatusListJson(statusPurpose = "revocation", flaggedIndex = null))
+            okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = null))
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -142,7 +146,9 @@ class StatusCheckServiceTest {
     fun checkVerifiedIdStatus_statusListBitSetForRevocation_returnsRevoked() {
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
-            okResponse(buildStatusListJson(statusPurpose = "revocation", flaggedIndex = 5))
+            okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 5))
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -153,7 +159,9 @@ class StatusCheckServiceTest {
     fun checkVerifiedIdStatus_statusListBitSetForSuspension_returnsSuspended() {
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
-            okResponse(buildStatusListJson(statusPurpose = "suspension", flaggedIndex = 5))
+            okResponse(signedStatusListJwt(statusPurpose = "suspension", flaggedIndex = 5))
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -165,7 +173,9 @@ class StatusCheckServiceTest {
         // The generated status list holds 1000 bits; an index past the end is indeterminate.
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 100_000))
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
-            okResponse(buildStatusListJson(statusPurpose = "revocation", flaggedIndex = null))
+            okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = null))
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -238,12 +248,85 @@ class StatusCheckServiceTest {
         assertEquals(VerifiedIdStatus.Revoked, result)
     }
 
+    @Test
+    fun checkVerifiedIdStatus_unsignedJsonStatusList_returnsUnknown() {
+        // An attacker-controlled, unsigned JSON status list with the bit set must NOT be trusted:
+        // a valid credential must never be reported Revoked/Suspended from unsigned status data.
+        val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
+        coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
+            okResponse(buildStatusListJson(statusPurpose = "revocation", flaggedIndex = 5))
+
+        val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
+
+        assertEquals(VerifiedIdStatus.Unknown, result)
+    }
+
+    @Test
+    fun checkVerifiedIdStatus_statusPurposeMismatch_returnsUnknown() {
+        // Credential declares "revocation" but the (validly signed) status list is for "suspension".
+        // A set bit must not be interpreted against a purpose the issuer did not declare here.
+        val verifiedId = buildVerifiableCredential(
+            credentialStatus = directUrlStatus(index = 5, statusPurpose = "revocation")
+        )
+        coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
+            okResponse(signedStatusListJwt(statusPurpose = "suspension", flaggedIndex = 5))
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
+
+        val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
+
+        assertEquals(VerifiedIdStatus.Unknown, result)
+    }
+
+    @Test
+    fun checkVerifiedIdStatus_statusPurposeMatchesAndBitSet_returnsRevoked() {
+        val verifiedId = buildVerifiableCredential(
+            credentialStatus = directUrlStatus(index = 5, statusPurpose = "revocation")
+        )
+        coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
+            okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 5))
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
+
+        val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
+
+        assertEquals(VerifiedIdStatus.Revoked, result)
+    }
+    @Test
+    fun checkVerifiedIdStatus_expiredSignedStatusList_returnsUnknown() {
+        // A validly signed but expired status list could be a replay of a stale snapshot; it must
+        // not be trusted to mark a now-valid credential as revoked.
+        val pastEpochSeconds = System.currentTimeMillis() / 1000 - 100_000
+        val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
+        coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
+            okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 5, exp = pastEpochSeconds))
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
+
+        val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
+
+        assertEquals(VerifiedIdStatus.Unknown, result)
+    }
+
+    @Test
+    fun checkVerifiedIdStatus_unexpiredSignedStatusListBitSet_returnsRevoked() {
+        val futureEpochSeconds = System.currentTimeMillis() / 1000 + 100_000
+        val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
+        coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
+            okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 5, exp = futureEpochSeconds))
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
+
+        val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
+
+        assertEquals(VerifiedIdStatus.Revoked, result)
+    }
     /** Builds a compact JWS whose payload is the StatusList2021 status list JSON. */
-    private fun signedStatusListJwt(statusPurpose: String, flaggedIndex: Int?): String {
+    private fun signedStatusListJwt(statusPurpose: String, flaggedIndex: Int?, exp: Long? = null): String {
         val header = Base64.getUrlEncoder().withoutPadding()
             .encodeToString("""{"alg":"ES256"}""".toByteArray())
         val payload = Base64.getUrlEncoder().withoutPadding()
-            .encodeToString(buildStatusListJson(statusPurpose, flaggedIndex).toByteArray())
+            .encodeToString(buildStatusListJson(statusPurpose, flaggedIndex, exp).toByteArray())
         return "$header.$payload.AAAA"
     }
 

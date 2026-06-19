@@ -1,6 +1,7 @@
 package com.microsoft.walletlibrary
 
 import com.microsoft.walletlibrary.did.sdk.CorrelationVectorService
+import com.microsoft.walletlibrary.did.sdk.StatusCheckService
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
@@ -28,7 +29,6 @@ import com.microsoft.walletlibrary.util.UnSupportedProtocolException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.util.UnspecifiedVerifiedIdException
 import com.microsoft.walletlibrary.util.VerifiedIdResult
-import com.microsoft.walletlibrary.did.sdk.StatusCheckService
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.defaultTestSerializer
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
