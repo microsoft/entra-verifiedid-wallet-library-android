@@ -9,7 +9,7 @@ internal class WalletLibraryVCSDKLogConsumerTest {
     companion object {
         private val walletLibraryLogger: WalletLibraryLogger = WalletLibraryLogger
         private val walletLibraryVCSDKLogConsumer: WalletLibraryVCSDKLogConsumer =
-            WalletLibraryVCSDKLogConsumer(walletLibraryLogger)
+            WalletLibraryVCSDKLogConsumer.apply { logger = walletLibraryLogger }
 
         @BeforeClass
         @JvmStatic
