@@ -21,6 +21,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -328,6 +329,51 @@ class StatusCheckServiceTest {
         val payload = Base64.getUrlEncoder().withoutPadding()
             .encodeToString(buildStatusListJson(statusPurpose, flaggedIndex, exp).toByteArray())
         return "$header.$payload.AAAA"
+    }
+
+    /** Invokes the private didUrlQueryParameter via reflection so it stays private in production. */
+    private fun invokeDidUrlQueryParameter(url: String, key: String): String? {
+        val method = StatusCheckService::class.java
+            .getDeclaredMethod("didUrlQueryParameter", String::class.java, String::class.java)
+            .apply { isAccessible = true }
+        return method.invoke(statusCheckService, url, key) as String?
+    }
+
+    @Test
+    fun didUrlQueryParameter_didWebServiceAndQueries_returnsValues() {
+        val url = "did:web:example.com?service=IdentityHub&queries=eyJhIjoxfQ"
+        assertEquals("IdentityHub", invokeDidUrlQueryParameter(url, "service"))
+        assertEquals("eyJhIjoxfQ", invokeDidUrlQueryParameter(url, "queries"))
+    }
+
+    @Test
+    fun didUrlQueryParameter_urnUuidBitIndex_returnsValue() {
+        assertEquals("42", invokeDidUrlQueryParameter("urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=42", "bit-index"))
+    }
+
+    @Test
+    fun didUrlQueryParameter_percentEncodedValue_isUrlDecoded() {
+        assertEquals("a/b c", invokeDidUrlQueryParameter("did:web:example.com?x=a%2Fb%20c", "x"))
+    }
+
+    @Test
+    fun didUrlQueryParameter_fragmentIsExcluded() {
+        assertEquals("IdentityHub", invokeDidUrlQueryParameter("did:web:example.com?service=IdentityHub#frag", "service"))
+    }
+
+    @Test
+    fun didUrlQueryParameter_missingKey_returnsNull() {
+        assertNull(invokeDidUrlQueryParameter("did:web:example.com?service=IdentityHub", "queries"))
+    }
+
+    @Test
+    fun didUrlQueryParameter_noQuery_returnsNull() {
+        assertNull(invokeDidUrlQueryParameter("did:web:example.com", "service"))
+    }
+
+    @Test
+    fun didUrlQueryParameter_keyWithEmptyValue_returnsEmptyString() {
+        assertEquals("", invokeDidUrlQueryParameter("did:web:example.com?service=", "service"))
     }
 
     private companion object {

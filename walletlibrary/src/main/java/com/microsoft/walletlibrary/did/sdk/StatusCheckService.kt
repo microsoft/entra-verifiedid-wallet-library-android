@@ -27,6 +27,7 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 import java.io.ByteArrayInputStream
+import java.net.URLDecoder
 import java.util.Date
 import java.util.zip.GZIPInputStream
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential as WalletVerifiableCredential
@@ -218,18 +219,26 @@ internal class StatusCheckService(
     }
 
     /**
-     * Reads a query parameter from a `did:`/`urn:` URL. android.net.Uri treats these as opaque, so
-     * Uri.getQueryParameter returns null for them; parse the query substring directly. Entra does not
-     * percent-encode these values (base64url, digits, service names), so no decoding is applied.
+     * Reads a query parameter from an opaque `did:`/`urn:` URL. The `?...` lives in the URI's
+     * scheme-specific part (java.net.URI leaves `rawQuery` null for opaque URIs but separates the
+     * `#fragment`), so read the query from there and URL-decode the matching key/value pair.
      */
     private fun didUrlQueryParameter(url: String, key: String): String? {
-        val query = url.substringAfter('?', "")
-        if (query.isEmpty()) return null
-        for (pair in query.split('&')) {
-            val eq = pair.indexOf('=')
-            if (eq >= 0 && pair.substring(0, eq) == key) return pair.substring(eq + 1)
+        return try {
+            val uri = java.net.URI(url)
+            val rawQuery = uri.rawQuery ?: uri.rawSchemeSpecificPart.substringAfter('?', "")
+            if (rawQuery.isEmpty()) return null
+            for (pair in rawQuery.split('&')) {
+                val eq = pair.indexOf('=')
+                val rawKey = if (eq >= 0) pair.substring(0, eq) else pair
+                if (URLDecoder.decode(rawKey, "UTF-8") == key) {
+                    return URLDecoder.decode(if (eq >= 0) pair.substring(eq + 1) else "", "UTF-8")
+                }
+            }
+            null
+        } catch (_: Exception) {
+            null
         }
-        return null
     }
 
     /**
