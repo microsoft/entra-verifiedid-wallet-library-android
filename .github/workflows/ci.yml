@@ -20,9 +20,12 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - uses: gradle/actions/setup-gradle@v4
         with:
           cache-disabled: true
 
       - name: Run unit tests
-        run: ./gradlew :walletlibrary:testDebugUnitTest --no-daemon
+        run: chmod +x ./gradlew && ./gradlew :walletlibrary:testDebugUnitTest --no-daemon
