@@ -12,6 +12,15 @@ import kotlinx.serialization.Serializable
  * (RevocationList2021Status, StatusList2021Entry, RevocationList2020Status), which differ only in
  * field names — use [effectiveStatusListCredential]/[effectiveStatusListIndex] so callers need not
  * branch on [type].
+ *
+ * Field name mapping:
+ * - StatusList2021Entry / RevocationList2021Status → `statusListCredential`, `statusListIndex`
+ * - RevocationList2020Status (older Entra VCs)     → `revocationListCredential`, `revocationListIndex`
+ *
+ * The [revocationListCredential] fallback in [effectiveStatusListCredential] is intentional: both
+ * field names point to the same concept (URL of the issuer's status bitstring), but older
+ * credential types use the "revocationList" prefix. See the W3C StatusList2021 spec (§5.1) and
+ * the Entra revocation-list schema for background.
  */
 @Serializable
 internal data class CredentialStatusDescriptor(
@@ -22,16 +31,16 @@ internal data class CredentialStatusDescriptor(
     val statusPurpose: String = "",
     // RevocationList2021Status / StatusList2021Entry field names
     val statusListIndex: Int = 0,
-    val statusListCredential: String = "",
-    // RevocationList2020Status field names
+    val statusListCredential: String? = null,
+    // RevocationList2020Status field names (older Entra credentials)
     val revocationListIndex: Int = 0,
-    val revocationListCredential: String = ""
+    val revocationListCredential: String? = null
 ) {
     /** URL of the status list credential, normalised across all known type variants. */
     val effectiveStatusListCredential: String
-        get() = statusListCredential.ifEmpty { revocationListCredential }
+        get() = statusListCredential ?: revocationListCredential ?: ""
 
     /** Bit index within the status list bitstring, normalised across all known type variants. */
     val effectiveStatusListIndex: Int
-        get() = if (statusListCredential.isNotEmpty()) statusListIndex else revocationListIndex
+        get() = if (statusListCredential != null) statusListIndex else revocationListIndex
 }

@@ -230,7 +230,7 @@ class StatusCheckServiceTest {
     fun checkVerifiedIdStatus_jwtStatusListWithInvalidSignature_returnsUnknown() {
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
         val header = Base64.getUrlEncoder().withoutPadding()
-            .encodeToString("""{"alg":"ES256"}""".toByteArray())
+            .encodeToString("""{ "alg":"ES256"}""".toByteArray())
         val payload = Base64.getUrlEncoder().withoutPadding()
             .encodeToString(buildStatusListJson(statusPurpose = "revocation", flaggedIndex = 5).toByteArray())
         val signedStatusList = "$header.$payload.AAAA"
@@ -350,8 +350,7 @@ class StatusCheckServiceTest {
     fun checkVerifiedIdStatus_identityHub_didResolutionFails_returnsUnknown() {
         val descriptor = CredentialStatusDescriptor(
             id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=7",
-            type = "RevocationList2021Status",
-            statusListCredential = ""
+            type = "RevocationList2021Status"
         )
         val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
         coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any()) } returns
@@ -366,8 +365,7 @@ class StatusCheckServiceTest {
     fun checkVerifiedIdStatus_identityHub_noIdentityHubServiceInDidDoc_returnsUnknown() {
         val descriptor = CredentialStatusDescriptor(
             id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=7",
-            type = "RevocationList2021Status",
-            statusListCredential = ""
+            type = "RevocationList2021Status"
         )
         val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
         val identifierDoc = IdentifierDocument(id = "did:web:issuer.example").apply {
@@ -387,8 +385,7 @@ class StatusCheckServiceTest {
     fun checkVerifiedIdStatus_identityHub_collectionsQueryPostFails_returnsUnknown() {
         val descriptor = CredentialStatusDescriptor(
             id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=7",
-            type = "RevocationList2021Status",
-            statusListCredential = ""
+            type = "RevocationList2021Status"
         )
         val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
         val identifierDoc = IdentifierDocument(id = "did:web:issuer.example").apply {
@@ -410,8 +407,7 @@ class StatusCheckServiceTest {
     fun checkVerifiedIdStatus_identityHub_collectionsQueryReturnsNon2xx_returnsUnknown() {
         val descriptor = CredentialStatusDescriptor(
             id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=7",
-            type = "RevocationList2021Status",
-            statusListCredential = ""
+            type = "RevocationList2021Status"
         )
         val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
         val identifierDoc = IdentifierDocument(id = "did:web:issuer.example").apply {
@@ -433,8 +429,7 @@ class StatusCheckServiceTest {
     fun checkVerifiedIdStatus_identityHub_envelopeWithBase64JwtEntry_bitSet_returnsRevoked() {
         val descriptor = CredentialStatusDescriptor(
             id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=7",
-            type = "RevocationList2021Status",
-            statusListCredential = ""
+            type = "RevocationList2021Status"
         )
         val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
         val identifierDoc = IdentifierDocument(id = "did:web:issuer.example").apply {
@@ -464,8 +459,7 @@ class StatusCheckServiceTest {
     fun checkVerifiedIdStatus_identityHub_envelopeWithRawJwtEntry_bitClear_returnsValid() {
         val descriptor = CredentialStatusDescriptor(
             id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=7",
-            type = "RevocationList2021Status",
-            statusListCredential = ""
+            type = "RevocationList2021Status"
         )
         val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
         val identifierDoc = IdentifierDocument(id = "did:web:issuer.example").apply {
@@ -495,8 +489,7 @@ class StatusCheckServiceTest {
         // Some IdentityHub implementations return the status list JWT directly (not wrapped in envelope)
         val descriptor = CredentialStatusDescriptor(
             id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=7",
-            type = "RevocationList2021Status",
-            statusListCredential = ""
+            type = "RevocationList2021Status"
         )
         val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
         val identifierDoc = IdentifierDocument(id = "did:web:issuer.example").apply {
@@ -523,8 +516,7 @@ class StatusCheckServiceTest {
     fun checkVerifiedIdStatus_identityHub_envelopeWithInvalidSignature_returnsUnknown() {
         val descriptor = CredentialStatusDescriptor(
             id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=7",
-            type = "RevocationList2021Status",
-            statusListCredential = ""
+            type = "RevocationList2021Status"
         )
         val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
         val identifierDoc = IdentifierDocument(id = "did:web:issuer.example").apply {
@@ -553,7 +545,7 @@ class StatusCheckServiceTest {
     /** Builds a compact JWS whose payload is the StatusList2021 status list JSON. */
     private fun signedStatusListJwt(statusPurpose: String, flaggedIndex: Int?, exp: Long? = null): String {
         val header = Base64.getUrlEncoder().withoutPadding()
-            .encodeToString("""{"alg":"ES256"}""".toByteArray())
+            .encodeToString("""{ "alg":"ES256"}""".toByteArray())
         val payload = Base64.getUrlEncoder().withoutPadding()
             .encodeToString(buildStatusListJson(statusPurpose, flaggedIndex, exp).toByteArray())
         return "$header.$payload.AAAA"

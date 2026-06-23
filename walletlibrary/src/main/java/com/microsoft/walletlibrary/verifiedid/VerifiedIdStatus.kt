@@ -7,32 +7,32 @@ package com.microsoft.walletlibrary.verifiedid
 
 /**
  * The status of a [VerifiedId], returned by
- * [com.microsoft.walletlibrary.VerifiedIdClient.checkVerifiedIdStatus]. See each subtype below.
+ * [com.microsoft.walletlibrary.VerifiedIdClient.checkVerifiedIdStatus]. See each value below.
  */
-sealed class VerifiedIdStatus {
+enum class VerifiedIdStatus {
     /** The credential is valid and has not been revoked, suspended, or expired. */
-    object Valid : VerifiedIdStatus()
+    Valid,
 
     /** The issuer has revoked this credential. */
-    object Revoked : VerifiedIdStatus()
+    Revoked,
 
     /** The issuer has temporarily suspended this credential. */
-    object Suspended : VerifiedIdStatus()
+    Suspended,
 
     /**
      * The credential's `expiresOn` date has passed. Determined from the credential's own
      * `expiresOn` field, without fetching the issuer's status list — unlike [Revoked]/[Suspended].
      */
-    object Expired : VerifiedIdStatus()
+    Expired,
 
     /**
      * Status could not be determined (e.g. network error, unrecognised response format, or the
      * status list URL uses a DID method not yet supported).
      */
-    object Unknown : VerifiedIdStatus()
+    Unknown,
 
     /**
      * The credential does not carry a `credentialStatus` field, so no status endpoint exists.
      */
-    object NoStatusEndpoint : VerifiedIdStatus()
+    NoStatusEndpoint
 }
