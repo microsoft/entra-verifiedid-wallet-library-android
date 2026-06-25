@@ -13,6 +13,8 @@ import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.util.MalformedInputException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
+import com.microsoft.walletlibrary.did.sdk.StatusCheckService
+import com.microsoft.walletlibrary.verifiedid.VerifiedIdStatus
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.getResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
@@ -23,11 +25,12 @@ import kotlinx.serialization.json.Json
 /**
  * VerifiedIdClient is configured by builder and is used to create requests.
  */
-class VerifiedIdClient(
+class VerifiedIdClient internal constructor(
     internal val requestResolverFactory: RequestResolverFactory,
     internal val requestProcessorFactory: RequestProcessorFactory,
     internal val logger: WalletLibraryLogger,
-    private val serializer: Json
+    private val serializer: Json,
+    private val statusCheckService: StatusCheckService
 ) {
 
     // Creates an issuance or presentation request based on the provided input.
@@ -63,5 +66,13 @@ class VerifiedIdClient(
                 exception
             ).toVerifiedIdResult()
         }
+    }
+
+    /**
+     * Returns the current [VerifiedIdStatus] of [verifiedId] (expiry, then StatusList2021 if the
+     * credential has a status endpoint). How to act on the result is left to the caller.
+     */
+    suspend fun checkVerifiedIdStatus(verifiedId: VerifiedId): VerifiedIdResult<VerifiedIdStatus> {
+        return getResult { statusCheckService.checkVerifiedIdStatus(verifiedId) }
     }
 }
