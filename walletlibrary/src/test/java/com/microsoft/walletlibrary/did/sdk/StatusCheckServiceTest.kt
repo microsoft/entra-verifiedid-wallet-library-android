@@ -293,6 +293,7 @@ class StatusCheckServiceTest {
 
         assertEquals(VerifiedIdStatus.Revoked, result)
     }
+
     @Test
     fun checkVerifiedIdStatus_expiredSignedStatusList_returnsUnknown() {
         // A validly signed but expired status list could be a replay of a stale snapshot; it must
@@ -322,6 +323,7 @@ class StatusCheckServiceTest {
 
         assertEquals(VerifiedIdStatus.Revoked, result)
     }
+
     /** Builds a compact JWS whose payload is the StatusList2021 status list JSON. */
     private fun signedStatusListJwt(statusPurpose: String, flaggedIndex: Int?, exp: Long? = null): String {
         val header = Base64.getUrlEncoder().withoutPadding()
@@ -336,7 +338,7 @@ class StatusCheckServiceTest {
         val method = StatusCheckService::class.java
             .getDeclaredMethod("didUrlQueryParameter", String::class.java, String::class.java)
             .apply { isAccessible = true }
-        return method.invoke(statusCheckService, url, key) as String?
+        return method.invoke(statusCheckService, url, key) as? String
     }
 
     @Test
