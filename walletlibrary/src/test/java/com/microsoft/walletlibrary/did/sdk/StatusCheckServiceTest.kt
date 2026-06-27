@@ -556,7 +556,7 @@ class StatusCheckServiceTest {
         val method = StatusCheckService::class.java
             .getDeclaredMethod("didUrlQueryParameter", String::class.java, String::class.java)
             .apply { isAccessible = true }
-        return method.invoke(statusCheckService, url, key) as String?
+        return method.invoke(statusCheckService, url, key) as? String
     }
 
     @Test
