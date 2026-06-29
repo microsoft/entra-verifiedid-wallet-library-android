@@ -289,7 +289,19 @@ class VerifiedIdClientTest {
             )
         )
         val expectedEncoding =
-            """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC","issuedBy":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","logo":{"uri":"testlogo.com","description":"test logo"},"description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle","name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":"","logo":{"url":"testlogo.com","altText":"test logo"}}}"""
+            """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential",""" +
+                """"raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],""" +
+                """"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},""" +
+                """"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},""" +
+                """"display":{"card":{"title":"Test VC","issuedBy":"Test Issuer",""" +
+                """"backgroundColor":"#000000","textColor":"#ffffff",""" +
+                """"logo":{"uri":"testlogo.com","description":"test logo"},"description":""},""" +
+                """"consent":{"instructions":""},""" +
+                """"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},""" +
+                """"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle",""" +
+                """"name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000",""" +
+                """"textColor":"#ffffff","description":"",""" +
+                """"logo":{"url":"testlogo.com","altText":"test logo"}}}"""
 
         // Act
         val actualEncodedVc = verifiedIdClient.encode(vc)
@@ -400,7 +412,17 @@ class VerifiedIdClientTest {
             )
         )
         val encodedVc =
-            """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC","issuedBy":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle","name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""}}"""
+            """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential",""" +
+                """"raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],""" +
+                """"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me",""" +
+                """"iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"",""" +
+                """"credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC",""" +
+                """"issuedBy":"Test Issuer","backgroundColor":"#000000",""" +
+                """"textColor":"#ffffff","description":""},"consent":{"instructions":""},""" +
+                """"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},""" +
+                """"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle",""" +
+                """"name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000",""" +
+                """"textColor":"#ffffff","description":""}}"""
 
         // Act
         val actualDecodedVc = verifiedIdClient.decodeVerifiedId(encodedVc)
@@ -436,7 +458,17 @@ class VerifiedIdClientTest {
                 mockStatusCheckService
             )
         val encodedVc =
-            """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential","raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me","iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"","credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC","issuedBy":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""},"consent":{"instructions":""},"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle","name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000","textColor":"#ffffff","description":""}}"""
+            """{"type":"com.microsoft.walletlibrary.verifiedid.VerifiableCredential",""" +
+                """"raw":{"jti":"123","raw":"raw","contents":{"jti":"456","vc":{"@context":[],""" +
+                """"type":["TestVC"],"credentialSubject":{"claim1":"value1"}},"sub":"me",""" +
+                """"iss":"Test","iat":1234567}},"contract":{"id":"1","input":{"id":"",""" +
+                """"credentialIssuer":"","issuer":""},"display":{"card":{"title":"Test VC",""" +
+                """"issuedBy":"Test Issuer","backgroundColor":"#000000",""" +
+                """"textColor":"#ffffff","description":""},"consent":{"instructions":""},""" +
+                """"claims":{"vc.credentialSubject.claim1":{"type":"text","label":"name 1"}}}},""" +
+                """"style":{"type":"com.microsoft.walletlibrary.requests.styles.BasicVerifiedIdStyle",""" +
+                """"name":"Test VC","issuer":"Test Issuer","backgroundColor":"#000000",""" +
+                """"textColor":"#ffffff","description":""}}"""
         every {
             serializer.decodeFromString(
                 VerifiableCredential.serializer(),
