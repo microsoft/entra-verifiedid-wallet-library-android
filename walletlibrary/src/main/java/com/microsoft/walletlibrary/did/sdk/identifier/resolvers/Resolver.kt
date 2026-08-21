@@ -18,7 +18,14 @@ internal class Resolver @Inject constructor(
     suspend fun resolve(identifier: String): Result<IdentifierDocument> {
         return identifierRepository.resolveIdentifier(baseUrl, identifier)
             .map {
-                it.didDocument
+                val resolvedDidDocument = it.didDocument
+                val resolvedId = resolvedDidDocument.id
+                if (resolvedId.isNullOrBlank() || resolvedId != identifier) {
+                    throw ResolverException(
+                        "Resolved DID document id '$resolvedId' does not match requested identifier '$identifier'"
+                    )
+                }
+                resolvedDidDocument
             }
             .onFailure {
                 return Result.failure(ResolverException("Unable to resolve identifier $identifier", it))

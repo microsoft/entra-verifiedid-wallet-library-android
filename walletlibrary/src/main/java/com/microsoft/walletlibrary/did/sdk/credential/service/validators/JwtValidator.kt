@@ -52,7 +52,14 @@ internal class JwtValidator @Inject constructor(
             is Result.Success -> {
                 val publicKeys = requesterDidDocument.payload.verificationMethod
                 if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")
-                publicKeys.filter { publicKey -> JwaCryptoHelper.extractDidAndKeyId(publicKey.id).second == keyId }.map { it.publicKeyJwk }
+                // Require both the DID and the key fragment of each verificationMethod.id to match the
+                // requested DID, not just the fragment.
+                val matchingKeys = publicKeys.filter { publicKey ->
+                    val (verificationMethodDid, verificationMethodKeyId) = JwaCryptoHelper.extractDidAndKeyId(publicKey.id)
+                    verificationMethodKeyId == keyId && (verificationMethodDid == null || verificationMethodDid == did)
+                }
+                if (matchingKeys.isEmpty()) throw ValidatorException("No public key found in identifier document matching DID '$did' and key id '$keyId'")
+                matchingKeys.map { it.publicKeyJwk }
             }
             is Result.Failure -> throw ValidatorException("Unable to fetch public keys", requesterDidDocument.payload)
             else -> throw ValidatorException("Unable to fetch public keys")
