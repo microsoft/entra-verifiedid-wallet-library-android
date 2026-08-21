@@ -6,11 +6,32 @@ internal object JwaCryptoHelper {
     fun extractDidAndKeyId(keyId: String): Pair<String?, String> {
         val match = matchDidAndKeyId(keyId)
         return match ?: throw ValidatorException("JWS contains no key id")
-        }
+    }
 
     fun extractDidAndKeyRef(keyId: String): Pair<String?, String> {
         val match = matchDidAndKeyId(keyId)
         return match ?: Pair(null, keyId)
+    }
+
+    internal fun isSyntacticallyValidDid(did: String): Boolean {
+        if (!did.startsWith("did:")) return false
+
+        val segments = did.removePrefix("did:").split(":")
+        if (segments.size < 2) return false
+
+        val method = segments.first()
+        if (!method.matches(Regex("^[a-zA-Z0-9]+$"))) return false
+
+        return segments.drop(1).all { segment ->
+            segment.isNotBlank() &&
+                segment != "." &&
+                segment != ".." &&
+                !segment.contains('/') &&
+                !segment.contains('?') &&
+                !segment.contains('#') &&
+                !segment.any { it.isWhitespace() } &&
+                segment.matches(Regex("^[A-Za-z0-9._%-]+$"))
+        }
     }
 
     private fun matchDidAndKeyId(keyId: String): Pair<String?, String>? {
@@ -29,11 +50,5 @@ internal object JwaCryptoHelper {
                 }, fragment
             )
         } else matches
-    }
-
-    // Reject DID values containing characters that could be used to manipulate resolver request
-    // construction (path traversal, query/path injection, whitespace) instead of a valid DID.
-    private fun isSyntacticallyValidDid(did: String): Boolean {
-        return Regex("^did:[a-zA-Z0-9]+:[A-Za-z0-9._%-]+(?::[A-Za-z0-9._%-]+)*$").matches(did)
     }
 }

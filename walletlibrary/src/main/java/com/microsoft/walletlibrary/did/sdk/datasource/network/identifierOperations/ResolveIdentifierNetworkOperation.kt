@@ -5,6 +5,7 @@
 
 package com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations
 
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
@@ -18,7 +19,7 @@ internal class ResolveIdentifierNetworkOperation @Inject constructor(private val
     // Reject identifiers containing characters that could redirect the request to an unintended path
     // (e.g. '/', '?', '#', whitespace, '..') before they are concatenated into the resolver URL.
     private val sanitizedIdentifier: String = identifier.also {
-        if (it.isBlank() || !Regex("^did:[a-zA-Z0-9]+:[A-Za-z0-9._%-]+(?::[A-Za-z0-9._%-]+)*$").matches(it)) {
+        if (it.isBlank() || !JwaCryptoHelper.isSyntacticallyValidDid(it)) {
             throw ResolverException("Identifier '$it' is not a syntactically valid DID")
         }
     }

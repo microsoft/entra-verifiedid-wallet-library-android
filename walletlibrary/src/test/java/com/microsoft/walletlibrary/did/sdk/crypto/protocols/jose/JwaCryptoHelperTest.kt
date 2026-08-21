@@ -26,4 +26,26 @@ class JwaCryptoHelperTest {
             Assertions.assertThat(exception).isInstanceOf(ValidatorException::class.java)
         }
     }
+
+    @Test
+    fun `reject invalid did before fragment when extracting key id`() {
+        val malformedKid = "did:web:example.com:..:evil#kid"
+
+        try {
+            JwaCryptoHelper.extractDidAndKeyId(malformedKid)
+            org.junit.Assert.fail("Expected malformed DID to be rejected")
+        } catch (exception: Exception) {
+            Assertions.assertThat(exception).isInstanceOf(ValidatorException::class.java)
+            Assertions.assertThat(exception.message).contains("invalid DID")
+        }
+    }
+
+    @Test
+    fun `allow empty did prefix while preserving key fragment`() {
+        val emptyDidKid = "#kid-123"
+
+        val actual = JwaCryptoHelper.extractDidAndKeyId(emptyDidKid)
+
+        assertThat(actual).isEqualTo(Pair(null, "kid-123"))
+    }
 }

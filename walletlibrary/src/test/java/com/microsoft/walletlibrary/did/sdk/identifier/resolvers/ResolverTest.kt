@@ -70,4 +70,19 @@ class ResolverTest {
             assertThat(actualResult.exceptionOrNull()?.cause).isInstanceOf(LocalNetworkException::class.java)
         }
     }
+
+    @Test
+    fun failedResolutionMismatchedDocumentIdTest() {
+        val resolver = Resolver("", identifierRepository)
+        val mismatchedId = "did:ion:another-id"
+        val mismatchedDocument = expectedIdentifierResponse.copy(didDocument = expectedIdentifierResponse.didDocument.copy(id = mismatchedId))
+        coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
+
+        runBlocking {
+            val actualResult = resolver.resolve(expectedIdentifier)
+            assertThat(actualResult.isFailure).isEqualTo(true)
+            assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
+            assertThat(actualResult.exceptionOrNull()?.message).contains("does not match requested identifier")
+        }
+    }
 }
