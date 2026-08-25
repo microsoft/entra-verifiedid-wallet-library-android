@@ -55,6 +55,8 @@ POWERLIFT_API_KEY=
 INTUNE_POWERLIFT_API_KEY=
 ```
 
+The same resolved values are provided to local unit tests as environment variables and JVM system properties, so tests can use either `System.getenv("SECRET_NAME")` or `System.getProperty("SECRET_NAME")`.
+
 A CI workflow can load the same values from Azure Key Vault:
 
 1. Configure an Azure workload identity with a federated credential for this repository and grant it the Key Vault Secrets User role on the vault.

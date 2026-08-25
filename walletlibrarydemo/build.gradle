@@ -50,6 +50,10 @@ android {
     buildFeatures.viewBinding = true
 }
 
+tasks.withType(Test).configureEach {
+    rootProject.ext.configureSecretTestTask(it)
+}
+
 dependencies {
     // Jetpack Compose
     def composeBom = platform("androidx.compose:compose-bom:$jetpack_compose_bom_version")
