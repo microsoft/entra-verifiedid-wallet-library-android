@@ -48,7 +48,6 @@ For local development, copy `secrets.example.properties` to `secrets.properties`
 
 ```properties
 GOOGLE_API_KEY=
-DEFENDER_POWERLIFT_API_KEY=
 COMPANY_PORTAL_POWERLIFT_API_KEY=
 OUTLOOK_POWERLIFT_API_KEY=
 POWERLIFT_API_KEY=
@@ -61,10 +60,10 @@ A CI workflow can load the same values from Azure Key Vault:
 
 1. Configure an Azure workload identity with a federated credential for this repository and grant it the Key Vault Secrets User role on the vault.
 2. Set repository variables for `AZURE_KEYVAULT_NAME`, `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_SUBSCRIPTION_ID`.
-3. Create secrets named `google-api-key`, `defender-powerlift-api-key`, `company-portal-powerlift-api-key`, `outlook-powerlift-api-key`, `powerlift-api-key`, and `intune-powerlift-api-key`.
+3. Create secrets named `google-api-key`, `company-portal-powerlift-api-key`, `outlook-powerlift-api-key`, `powerlift-api-key`, and `intune-powerlift-api-key`.
 4. Use `azure/login` with OIDC, retrieve each secret with `az keyvault secret show`, mask the value, and export it only to the build step that needs it.
 
-Values injected into `BuildConfig` are packaged in the APK and can be extracted. Use API restrictions appropriate to the Android application, and keep privileged service credentials behind a server-side API instead.
+Values injected into `BuildConfig` are packaged in the APK and can be extracted. All Google API keys must be restricted in Google Cloud to the intended Android package name and signing-certificate SHA-1 fingerprint, and limited to only the required APIs, as recommended by Google. Keep privileged service credentials behind a server-side API instead.
 
 Add to your app's build.gradle to add Wallet Library as a dependency:
 ```kotlin
