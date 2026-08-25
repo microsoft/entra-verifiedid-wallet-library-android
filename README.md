@@ -35,6 +35,28 @@ project(':walletlibrary').projectDir = new File(rootDir, 'entra-verifiedid-walle
 
 Copy the expected variables from `gradle.properties` into the root project's `gradle.properties`.
 
+### Secrets configuration
+
+Do not commit API keys or access tokens to this repository. Gradle reads secret values from the first available source in this order:
+
+1. Gradle properties supplied with `-PSECRET_NAME=value`
+2. Environment variables
+3. A local, git-ignored `secrets.properties` file
+4. A local, git-ignored `local.properties` file
+
+For local development, copy `secrets.example.properties` to `secrets.properties` and fill in only the values required by your consuming app:
+
+```properties
+GOOGLE_API_KEY=
+DEFENDER_POWERLIFT_API_KEY=
+COMPANY_PORTAL_POWERLIFT_API_KEY=
+OUTLOOK_POWERLIFT_API_KEY=
+POWERLIFT_API_KEY=
+INTUNE_POWERLIFT_API_KEY=
+```
+
+CI can load the same values from Azure Key Vault by setting repository variables for `AZURE_KEYVAULT_NAME`, `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_SUBSCRIPTION_ID`. The workflow expects the Key Vault secret names `google-api-key`, `defender-powerlift-api-key`, `company-portal-powerlift-api-key`, `outlook-powerlift-api-key`, `powerlift-api-key`, and `intune-powerlift-api-key`.
+
 Add to your app's build.gradle to add Wallet Library as a dependency:
 ```kotlin
 dependencies {

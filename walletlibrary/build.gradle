@@ -30,6 +30,12 @@ android {
         versionCode 1
         versionName _version
         buildConfigField 'String', 'WalletLibraryVersion', "\"$_version\""
+        buildConfigField 'String', 'GOOGLE_API_KEY', rootProject.ext.secretBuildConfigString('GOOGLE_API_KEY')
+        buildConfigField 'String', 'DEFENDER_POWERLIFT_API_KEY', rootProject.ext.secretBuildConfigString('DEFENDER_POWERLIFT_API_KEY')
+        buildConfigField 'String', 'COMPANY_PORTAL_POWERLIFT_API_KEY', rootProject.ext.secretBuildConfigString('COMPANY_PORTAL_POWERLIFT_API_KEY')
+        buildConfigField 'String', 'OUTLOOK_POWERLIFT_API_KEY', rootProject.ext.secretBuildConfigString('OUTLOOK_POWERLIFT_API_KEY')
+        buildConfigField 'String', 'POWERLIFT_API_KEY', rootProject.ext.secretBuildConfigString('POWERLIFT_API_KEY')
+        buildConfigField 'String', 'INTUNE_POWERLIFT_API_KEY', rootProject.ext.secretBuildConfigString('INTUNE_POWERLIFT_API_KEY')
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         
