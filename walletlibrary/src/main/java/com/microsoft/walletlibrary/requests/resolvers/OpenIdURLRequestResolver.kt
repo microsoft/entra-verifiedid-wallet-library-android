@@ -18,6 +18,7 @@ import com.microsoft.walletlibrary.util.RequestURIMissingException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
+import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -47,13 +48,13 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
             ?: throw RequestURIMissingException("Request URI is not provided in ${verifiedIdRequestInput.url}.")
         fetchOpenID4VCIRequest(requestUri)
             .onSuccess { requestPayload ->
+                val requestPayloadString = requestPayload.decodeToString()
                 return try {
                     // Checks if the decoded string is a valid json, If not, fallback to old issuance flow.
-                    val requestPayloadString = requestPayload.decodeToString()
                     JSONObject(requestPayloadString)
                     requestPayloadString
-                } catch (e: Exception) {
-                    OpenIdResolver.validateSignedRequest(requestPayload.decodeToString())
+                } catch (exception: JSONException) {
+                    OpenIdResolver.validateSignedRequest(requestPayloadString)
                 }
             }
             .onFailure {
