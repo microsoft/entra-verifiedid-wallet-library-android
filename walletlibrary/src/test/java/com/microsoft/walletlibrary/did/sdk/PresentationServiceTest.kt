@@ -20,6 +20,7 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.
 import com.microsoft.walletlibrary.did.sdk.identifier.models.payload.document.IdentifierDocumentService
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.DidInHeaderAndPayloadNotMatching
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
@@ -27,6 +28,7 @@ import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import io.mockk.coEvery
 import io.mockk.coJustRun
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
@@ -296,6 +298,44 @@ class PresentationServiceTest {
             assertThat((actualRequest as Result.Failure).payload).isInstanceOf(
                 InvalidSignatureException::class.java
             )
+            coVerify(exactly = 0) {
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any())
+            }
+        }
+    }
+
+    @Test
+    fun `test validating signed request fails with invalid signature`() {
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns false
+
+        runBlocking {
+            val actualRequest = presentationService.validateSignedRequest(expectedPresentationRequestJwt)
+
+            assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
+            assertThat((actualRequest as Result.Failure).payload).isInstanceOf(
+                InvalidSignatureException::class.java
+            )
+            coVerify(exactly = 0) {
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any())
+            }
+        }
+    }
+
+    @Test
+    fun `test validating signed request fails when signer does not match client id`() {
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        every { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns false
+
+        runBlocking {
+            val actualRequest = presentationService.validateSignedRequest(expectedPresentationRequestJwt)
+
+            assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
+            assertThat((actualRequest as Result.Failure).payload).isInstanceOf(
+                DidInHeaderAndPayloadNotMatching::class.java
+            )
+            coVerify(exactly = 0) {
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any())
+            }
         }
     }
 
@@ -412,6 +452,7 @@ class PresentationServiceTest {
             expectedPresentationRequest
         )
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        every { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
     }
 
     private fun mockPresentationRequestWithInvalidSignatureFromNetwork() {

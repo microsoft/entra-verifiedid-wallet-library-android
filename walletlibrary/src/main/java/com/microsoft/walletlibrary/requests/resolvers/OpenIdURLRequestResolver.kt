@@ -6,8 +6,6 @@
 package com.microsoft.walletlibrary.requests.resolvers
 
 import android.net.Uri
-import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
-import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.networking.operations.FetchOpenID4VCIRequestNetworkOperation
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
@@ -20,7 +18,6 @@ import com.microsoft.walletlibrary.util.RequestURIMissingException
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
-import com.nimbusds.jose.JWSObject
 import org.json.JSONObject
 
 /**
@@ -56,13 +53,7 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
                     JSONObject(requestPayloadString)
                     requestPayloadString
                 } catch (e: Exception) {
-                    val jwsToken = JWSObject.parse(requestPayload.decodeToString())
-                    val presentationRequestContent =
-                        libraryConfiguration.serializer.decodeFromString(
-                            PresentationRequestContent.serializer(),
-                            JwsToken(jwsToken).content()
-                        )
-                    OpenIdResolver.validateRequest(presentationRequestContent, jwsToken.payload.toJSONObject())
+                    OpenIdResolver.validateSignedRequest(requestPayload.decodeToString())
                 }
             }
             .onFailure {

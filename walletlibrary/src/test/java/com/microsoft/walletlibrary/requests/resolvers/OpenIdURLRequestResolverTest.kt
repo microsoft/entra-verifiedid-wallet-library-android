@@ -13,6 +13,7 @@ import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
@@ -114,10 +115,12 @@ class OpenIdURLRequestResolverTest {
         // Arrange
         mockVerifiedIdRequestURL = mockk()
         every { mockVerifiedIdRequestURL.url.getQueryParameter(Constants.REQUEST_URI) } returns "microsoft.com"
-        coEvery { openIdURLRequestResolver["fetchOpenID4VCIRequest"]("microsoft.com") } returns Result.success<ByteArray>(mockk())
+        val signedRequest = "signed-request"
+        coEvery { openIdURLRequestResolver["fetchOpenID4VCIRequest"]("microsoft.com") } returns
+            Result.success(signedRequest.encodeToByteArray())
         every { mockLibraryConfiguration.isPreviewFeatureEnabled(any()) } returns false
         mockkObject(OpenIdResolver)
-        coEvery { OpenIdResolver.getRequest(any(), any()) } returns mockk()
+        coEvery { OpenIdResolver.validateSignedRequest(signedRequest) } returns mockk()
 
         runBlocking {
             // Act
@@ -125,6 +128,7 @@ class OpenIdURLRequestResolverTest {
 
             // Assert
             assertThat(actualResult).isInstanceOf(OpenIdProcessedRequest::class.java)
+            coVerify(exactly = 1) { OpenIdResolver.validateSignedRequest(signedRequest) }
         }
     }
 
