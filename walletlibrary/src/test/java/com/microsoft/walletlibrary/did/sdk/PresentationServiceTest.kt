@@ -305,6 +305,39 @@ class PresentationServiceTest {
     }
 
     @Test
+    fun `test validating signed request succeeds with valid signed request`() {
+        val expectedPresentationRequestContent = defaultTestSerializer.decodeFromString(
+            PresentationRequestContent.serializer(),
+            expectedPresentationRequestString
+        )
+        mockIdentifierAndLinkedDomains()
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        every { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
+        coJustRun { presentationRequestValidator.validate(any()) }
+
+        runBlocking {
+            val actualRequest = presentationService.validateSignedRequest(expectedPresentationRequestJwt)
+
+            assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
+            val actualPresentationRequest = (actualRequest as Result.Success).payload
+            assertPresentationRequestContent(
+                actualPresentationRequest.content,
+                expectedPresentationRequestContent
+            )
+            assertThat(actualPresentationRequest.linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((actualPresentationRequest.linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo(
+                mockedIdentifierDocumentServiceEndpoint
+            )
+            coVerify(exactly = 1) {
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(expectedEntityIdentifier)
+            }
+            coVerify(exactly = 1) {
+                presentationRequestValidator.validate(actualPresentationRequest)
+            }
+        }
+    }
+
+    @Test
     fun `test validating signed request fails with invalid signature`() {
         coEvery { mockedJwtValidator.verifySignature(any()) } returns false
 
