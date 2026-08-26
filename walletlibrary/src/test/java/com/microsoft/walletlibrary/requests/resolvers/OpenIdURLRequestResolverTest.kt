@@ -19,6 +19,7 @@ import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.spyk
+import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
@@ -120,15 +121,19 @@ class OpenIdURLRequestResolverTest {
             Result.success(signedRequest.encodeToByteArray())
         every { mockLibraryConfiguration.isPreviewFeatureEnabled(any()) } returns false
         mockkObject(OpenIdResolver)
-        coEvery { OpenIdResolver.validateSignedRequest(signedRequest) } returns mockk()
+        try {
+            coEvery { OpenIdResolver.validateSignedRequest(signedRequest) } returns mockk()
 
-        runBlocking {
-            // Act
-            val actualResult = openIdURLRequestResolver.resolve(mockVerifiedIdRequestURL)
+            runBlocking {
+                // Act
+                val actualResult = openIdURLRequestResolver.resolve(mockVerifiedIdRequestURL)
 
-            // Assert
-            assertThat(actualResult).isInstanceOf(OpenIdProcessedRequest::class.java)
-            coVerify(exactly = 1) { OpenIdResolver.validateSignedRequest(signedRequest) }
+                // Assert
+                assertThat(actualResult).isInstanceOf(OpenIdProcessedRequest::class.java)
+                coVerify(exactly = 1) { OpenIdResolver.validateSignedRequest(signedRequest) }
+            }
+        } finally {
+            unmockkObject(OpenIdResolver)
         }
     }
 
