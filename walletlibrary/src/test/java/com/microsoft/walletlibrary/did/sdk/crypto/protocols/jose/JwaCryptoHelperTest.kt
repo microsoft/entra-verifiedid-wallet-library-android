@@ -48,4 +48,11 @@ class JwaCryptoHelperTest {
 
         assertThat(actual).isEqualTo(Pair(null, "kid-123"))
     }
+
+    @Test
+    fun `allow malformed did when validation is disabled`() {
+        val actual = JwaCryptoHelper.extractDidAndKeyId("did:web:example.com:..:evil#kid", false)
+
+        assertThat(actual).isEqualTo(Pair("did:web:example.com:..:evil", "kid"))
+    }
 }

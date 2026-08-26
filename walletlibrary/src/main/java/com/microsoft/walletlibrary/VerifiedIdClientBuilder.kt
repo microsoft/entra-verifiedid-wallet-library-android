@@ -115,13 +115,17 @@ class VerifiedIdClientBuilder(private val context: Context) {
         WalletLibraryVCSDKLogConsumer.logger = logger
         val userAgentInfo = getUserAgent(context)
         val walletLibraryVersionInfo = getWalletLibraryVersionInfo()
+        val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
         VerifiableCredentialSdk.init(
             context,
             logConsumer = WalletLibraryVCSDKLogConsumer,
             userAgentInfo = userAgentInfo,
             walletLibraryVersionInfo = walletLibraryVersionInfo,
             httpAgent = httpAgent,
-            rootOfTrustResolver = rootOfTrustResolver
+            rootOfTrustResolver = rootOfTrustResolver,
+            didResolverHardeningEnabled = previewFeatureFlags.isPreviewFeatureSupported(
+                PreviewFeatureFlags.FEATURE_FLAG_DID_RESOLVER_HARDENING
+            )
         )
 
         val apiProvider = HttpAgentApiProvider(
@@ -133,7 +137,6 @@ class VerifiedIdClientBuilder(private val context: Context) {
             ),
             jsonSerializer
         )
-        val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
         val identifierFactory = IdentifierFactory()
         val libraryConfiguration =
             LibraryConfiguration(

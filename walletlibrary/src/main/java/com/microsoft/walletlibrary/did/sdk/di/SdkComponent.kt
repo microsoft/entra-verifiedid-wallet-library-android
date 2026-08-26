@@ -71,5 +71,10 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun rootOfTrustResolver(@Named("rootOfTrustResolver") rootOfTrustResolver: RootOfTrustResolver? = null): Builder
+
+        @BindsInstance
+        fun didResolverHardeningEnabled(
+            @Named("didResolverHardeningEnabled") enabled: Boolean
+        ): Builder
     }
 }

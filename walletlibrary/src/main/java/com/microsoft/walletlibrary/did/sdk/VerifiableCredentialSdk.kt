@@ -78,7 +78,8 @@ internal object VerifiableCredentialSdk {
         resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers",
         walletLibraryVersionInfo: String = "",
         httpAgent: IHttpAgent = OkHttpAgent(),
-        rootOfTrustResolver: RootOfTrustResolver? = null
+        rootOfTrustResolver: RootOfTrustResolver? = null,
+        didResolverHardeningEnabled: Boolean = true
     ) {
         correlationVectorService = CorrelationVectorService(PreferenceManager.getDefaultSharedPreferences(context))
         val sdkComponent = DaggerSdkComponent.builder()
@@ -90,6 +91,7 @@ internal object VerifiableCredentialSdk {
             .resolverUrl(resolverUrl)
             .polymorphicJsonSerializer(polymorphicJsonSerializers)
             .rootOfTrustResolver(rootOfTrustResolver)
+            .didResolverHardeningEnabled(didResolverHardeningEnabled)
             .build()
 
         issuanceService = sdkComponent.issuanceService()

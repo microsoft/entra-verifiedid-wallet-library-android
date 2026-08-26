@@ -36,4 +36,22 @@ internal class LibraryConfigurationTest {
             false
         )
     }
+
+    @Test
+    fun testDidResolverHardeningIsEnabledByDefault() {
+        val libraryConfiguration = LibraryConfiguration(
+            PreviewFeatureFlags(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk()
+        )
+
+        assertThat(
+            libraryConfiguration.isPreviewFeatureEnabled(
+                PreviewFeatureFlags.FEATURE_FLAG_DID_RESOLVER_HARDENING
+            )
+        ).isTrue()
+    }
 }

@@ -36,7 +36,7 @@ class JwtValidatorTest {
     private val expectedKid: String = "$expectedDid#kidTest2353"
 
     init {
-        validator = JwtValidator(mockedResolver)
+        validator = JwtValidator(mockedResolver, true)
         setUpResolver()
         mockkObject(JwsToken)
     }

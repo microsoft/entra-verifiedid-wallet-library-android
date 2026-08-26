@@ -20,11 +20,25 @@ class ResolveIdentifierNetworkOperationTest {
         val apiProvider: HttpAgentApiProvider = mockk(relaxed = true)
 
         val throwable = catchThrowable {
-            ResolveIdentifierNetworkOperation(apiProvider, "https://resolver.example", "did:web:example.com:..:evil")
+            ResolveIdentifierNetworkOperation(apiProvider, "https://resolver.example", "did:web:example.com:..:evil", true)
         }
 
         assertThat(throwable).isInstanceOf(ResolverException::class.java)
         assertThat(throwable.message).contains("is not a syntactically valid DID")
+    }
+
+    @Test
+    fun `allows malformed did when hardening is disabled`() {
+        val apiProvider: HttpAgentApiProvider = mockk(relaxed = true)
+
+        val operation = ResolveIdentifierNetworkOperation(
+            apiProvider,
+            "https://resolver.example",
+            "did:web:example.com:..:evil",
+            false
+        )
+
+        assertThat(operation.identifier).isEqualTo("did:web:example.com:..:evil")
     }
 
     @Test
@@ -38,7 +52,7 @@ class ResolveIdentifierNetworkOperationTest {
         coEvery { identifierApi.resolveIdentifier("https://resolver.example/did:example:123") } returns Result.success(response)
         every { identifierApi.toIdentifierResponse(response) } returns identifierResponse
 
-        val operation = ResolveIdentifierNetworkOperation(apiProvider, "https://resolver.example", "did:example:123")
+        val operation = ResolveIdentifierNetworkOperation(apiProvider, "https://resolver.example", "did:example:123", true)
 
         runBlocking {
             val result = operation.fire()

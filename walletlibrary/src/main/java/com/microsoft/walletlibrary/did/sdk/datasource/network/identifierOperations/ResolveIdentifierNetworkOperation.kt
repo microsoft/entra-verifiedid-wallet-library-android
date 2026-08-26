@@ -12,14 +12,20 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import javax.inject.Inject
+import javax.inject.Named
 
-internal class ResolveIdentifierNetworkOperation @Inject constructor(private val apiProvider: HttpAgentApiProvider, url: String, val identifier: String) :
+internal class ResolveIdentifierNetworkOperation @Inject constructor(
+    private val apiProvider: HttpAgentApiProvider,
+    url: String,
+    val identifier: String,
+    @Named("didResolverHardeningEnabled") private val didResolverHardeningEnabled: Boolean
+) :
     GetNetworkOperation<IdentifierResponse>() {
 
     // Reject identifiers containing characters that could redirect the request to an unintended path
     // (e.g. '/', '?', '#', whitespace, '..') before they are concatenated into the resolver URL.
     private val sanitizedIdentifier: String = identifier.also {
-        if (it.isBlank() || !JwaCryptoHelper.isSyntacticallyValidDid(it)) {
+        if (didResolverHardeningEnabled && (it.isBlank() || !JwaCryptoHelper.isSyntacticallyValidDid(it))) {
             throw ResolverException("Identifier '$it' is not a syntactically valid DID")
         }
     }

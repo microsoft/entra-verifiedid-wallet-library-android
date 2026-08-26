@@ -3,7 +3,7 @@ package com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
 
 internal object JwaCryptoHelper {
-    fun extractDidAndKeyId(keyId: String): Pair<String?, String> {
+    fun extractDidAndKeyId(keyId: String, validateDid: Boolean = true): Pair<String?, String> {
         val match = matchDidAndKeyId(keyId)
         return match ?: throw ValidatorException("JWS contains no key id")
     }
@@ -39,7 +39,7 @@ internal object JwaCryptoHelper {
         return if (matches != null) {
             val did = matches.groupValues[1]
             val fragment = matches.groupValues[2]
-            if (did.isNotBlank() && !isSyntacticallyValidDid(did)) {
+            if (validateDid && did.isNotBlank() && !isSyntacticallyValidDid(did)) {
                 throw ValidatorException("JWS key id contains an invalid DID: $did")
             }
             Pair(

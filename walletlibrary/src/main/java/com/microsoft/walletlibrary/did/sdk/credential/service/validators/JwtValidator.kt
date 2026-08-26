@@ -13,6 +13,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.nimbusds.jose.jwk.JWK
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -20,7 +21,8 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class JwtValidator @Inject constructor(
-    private val resolver: Resolver
+    private val resolver: Resolver,
+    @Named("didResolverHardeningEnabled") private val didResolverHardeningEnabled: Boolean
 ) {
 
     /**
@@ -55,8 +57,10 @@ internal class JwtValidator @Inject constructor(
                 // Require both the DID and the key fragment of each verificationMethod.id to match the
                 // requested DID, not just the fragment.
                 val matchingKeys = publicKeys.filter { publicKey ->
-                    val (verificationMethodDid, verificationMethodKeyId) = JwaCryptoHelper.extractDidAndKeyId(publicKey.id)
-                    verificationMethodKeyId == keyId && (verificationMethodDid == null || verificationMethodDid == did)
+                    val (verificationMethodDid, verificationMethodKeyId) =
+                        JwaCryptoHelper.extractDidAndKeyId(publicKey.id, didResolverHardeningEnabled)
+                    verificationMethodKeyId == keyId &&
+                        (!didResolverHardeningEnabled || verificationMethodDid == null || verificationMethodDid == did)
                 }
                 if (matchingKeys.isEmpty()) throw ValidatorException("No public key found in identifier document matching DID '$did' and key id '$keyId'")
                 matchingKeys.map { it.publicKeyJwk }

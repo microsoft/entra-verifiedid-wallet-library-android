@@ -13,14 +13,15 @@ import javax.inject.Named
 
 internal class Resolver @Inject constructor(
     @Named("resolverUrl") private val baseUrl: String,
-    private val identifierRepository: IdentifierRepository
+    private val identifierRepository: IdentifierRepository,
+    @Named("didResolverHardeningEnabled") private val didResolverHardeningEnabled: Boolean
 ) {
     suspend fun resolve(identifier: String): Result<IdentifierDocument> {
         return identifierRepository.resolveIdentifier(baseUrl, identifier)
-            .map {
+            .mapCatching {
                 val resolvedDidDocument = it.didDocument
                 val resolvedId = resolvedDidDocument.id
-                if (resolvedId.isNullOrBlank() || resolvedId != identifier) {
+                if (didResolverHardeningEnabled && (resolvedId.isNullOrBlank() || resolvedId != identifier)) {
                     throw ResolverException(
                         "Resolved DID document id '$resolvedId' does not match requested identifier '$identifier'"
                     )
