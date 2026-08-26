@@ -17,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import java.text.ParseException
 
 class OpenIdResolverTest {
     private val mockPresentationService: PresentationService = mockk()
@@ -81,6 +82,17 @@ class OpenIdResolverTest {
                 OpenIdResolver.validateRequest(mockPresentationRequestContent, emptyMap())
             }
         }.isInstanceOf(VerifiedIdRequestFetchException::class.java)
+    }
+
+    @Test
+    fun resolveOpenIdRequest_MalformedSignedRequest_ThrowsVerifiedIdRequestFetchException() {
+        Assertions.assertThatThrownBy {
+            runBlocking {
+                OpenIdResolver.validateSignedRequest("malformed-request")
+            }
+        }
+            .isInstanceOf(VerifiedIdRequestFetchException::class.java)
+            .hasCauseInstanceOf(ParseException::class.java)
     }
 
     @Test
