@@ -40,7 +40,7 @@ object OpenIdResolver {
                 "Unable to parse signed presentation request",
                 exception
             )
-        }
+        } ?: throw VerifiedIdRequestFetchException("Signed presentation request payload is not a JSON object")
         val presentationRequestResult = VerifiableCredentialSdk.presentationService.validateSignedRequest(jwsTokenString)
         return handleRequestResult(presentationRequestResult, rawRequest)
     }
