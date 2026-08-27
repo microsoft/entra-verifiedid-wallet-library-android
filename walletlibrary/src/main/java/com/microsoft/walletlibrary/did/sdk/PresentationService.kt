@@ -103,10 +103,10 @@ internal class PresentationService @Inject constructor(
 
     private suspend fun verifyAndUnwrapPresentationRequest(jwsTokenString: String): Result<PresentationRequestContent> {
         val jwsToken = JwsToken.deserialize(jwsTokenString)
-        val presentationRequestContent =
-            serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
+        val presentationRequestContent =
+            serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
         if (!jwtValidator.validateDidInHeaderAndPayload(jwsToken, presentationRequestContent.clientId))
             throw DidInHeaderAndPayloadNotMatching(
                 "DID used to sign the presentation request doesn't match the DID in presentation request."
