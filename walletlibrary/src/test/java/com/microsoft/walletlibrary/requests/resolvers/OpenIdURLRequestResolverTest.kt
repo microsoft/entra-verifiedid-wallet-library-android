@@ -13,11 +13,13 @@ import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
 import com.microsoft.walletlibrary.wrapper.OpenIdResolver
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.spyk
+import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
@@ -114,17 +116,24 @@ class OpenIdURLRequestResolverTest {
         // Arrange
         mockVerifiedIdRequestURL = mockk()
         every { mockVerifiedIdRequestURL.url.getQueryParameter(Constants.REQUEST_URI) } returns "microsoft.com"
-        coEvery { openIdURLRequestResolver["fetchOpenID4VCIRequest"]("microsoft.com") } returns Result.success<ByteArray>(mockk())
+        val signedRequest = "signed-request"
+        coEvery { openIdURLRequestResolver["fetchOpenID4VCIRequest"]("microsoft.com") } returns
+            Result.success(signedRequest.encodeToByteArray())
         every { mockLibraryConfiguration.isPreviewFeatureEnabled(any()) } returns false
         mockkObject(OpenIdResolver)
-        coEvery { OpenIdResolver.getRequest(any(), any()) } returns mockk()
+        try {
+            coEvery { OpenIdResolver.validateSignedRequest(signedRequest) } returns mockk()
 
-        runBlocking {
-            // Act
-            val actualResult = openIdURLRequestResolver.resolve(mockVerifiedIdRequestURL)
+            runBlocking {
+                // Act
+                val actualResult = openIdURLRequestResolver.resolve(mockVerifiedIdRequestURL)
 
-            // Assert
-            assertThat(actualResult).isInstanceOf(OpenIdProcessedRequest::class.java)
+                // Assert
+                assertThat(actualResult).isInstanceOf(OpenIdProcessedRequest::class.java)
+                coVerify(exactly = 1) { OpenIdResolver.validateSignedRequest(signedRequest) }
+            }
+        } finally {
+            unmockkObject(OpenIdResolver)
         }
     }
 

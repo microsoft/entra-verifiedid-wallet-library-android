@@ -17,6 +17,8 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import java.text.ParseException
+import java.util.Base64
 
 class OpenIdResolverTest {
     private val mockPresentationService: PresentationService = mockk()
@@ -79,6 +81,34 @@ class OpenIdResolverTest {
         Assertions.assertThatThrownBy {
             runBlocking {
                 OpenIdResolver.validateRequest(mockPresentationRequestContent, emptyMap())
+            }
+        }.isInstanceOf(VerifiedIdRequestFetchException::class.java)
+    }
+
+    @Test
+    fun resolveOpenIdRequest_MalformedSignedRequest_ThrowsVerifiedIdRequestFetchException() {
+        Assertions.assertThatThrownBy {
+            runBlocking {
+                OpenIdResolver.validateSignedRequest("malformed-request")
+            }
+        }
+            .isInstanceOf(VerifiedIdRequestFetchException::class.java)
+            .hasCauseInstanceOf(ParseException::class.java)
+    }
+
+    @Test
+    fun resolveOpenIdRequest_SignedRequestPayloadNotJsonObject_ThrowsVerifiedIdRequestFetchException() {
+        // Arrange
+        val encoder = Base64.getUrlEncoder().withoutPadding()
+        val header = encoder.encodeToString("{\"alg\":\"HS256\"}".toByteArray())
+        val payload = encoder.encodeToString("[1,2,3]".toByteArray())
+        val signature = encoder.encodeToString("signature".toByteArray())
+        val jwsTokenString = "$header.$payload.$signature"
+
+        // Act and Assert
+        Assertions.assertThatThrownBy {
+            runBlocking {
+                OpenIdResolver.validateSignedRequest(jwsTokenString)
             }
         }.isInstanceOf(VerifiedIdRequestFetchException::class.java)
     }

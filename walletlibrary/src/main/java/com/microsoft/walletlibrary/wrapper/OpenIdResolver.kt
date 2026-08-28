@@ -13,6 +13,8 @@ import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.rawrequests.RequestType
 import com.microsoft.walletlibrary.requests.rawrequests.VerifiedIdOpenIdJwtRawRequest
 import com.microsoft.walletlibrary.util.VerifiedIdRequestFetchException
+import com.nimbusds.jose.JWSObject
+import java.text.ParseException
 
 /**
  * Wrapper class to wrap the get Presentation Request from VC SDK and return a raw request.
@@ -27,6 +29,19 @@ object OpenIdResolver {
 
     internal suspend fun validateRequest(requestContent: PresentationRequestContent, rawRequest: Map<String, Any>): OpenIdProcessedRequest {
         val presentationRequestResult = VerifiableCredentialSdk.presentationService.validateRequest(requestContent)
+        return handleRequestResult(presentationRequestResult, rawRequest)
+    }
+
+    internal suspend fun validateSignedRequest(jwsTokenString: String): OpenIdProcessedRequest {
+        val rawRequest = try {
+            JWSObject.parse(jwsTokenString).payload.toJSONObject()
+        } catch (exception: ParseException) {
+            throw VerifiedIdRequestFetchException(
+                "Unable to parse signed presentation request",
+                exception
+            )
+        } ?: throw VerifiedIdRequestFetchException("Signed presentation request payload is not a JSON object")
+        val presentationRequestResult = VerifiableCredentialSdk.presentationService.validateSignedRequest(jwsTokenString)
         return handleRequestResult(presentationRequestResult, rawRequest)
     }
 

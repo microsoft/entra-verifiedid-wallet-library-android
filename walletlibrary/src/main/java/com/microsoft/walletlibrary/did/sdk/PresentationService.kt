@@ -16,6 +16,7 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperatio
 import com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperations.SendPresentationResponsesNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.DidDeepLinkUtil
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.DidInHeaderAndPayloadNotMatching
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
@@ -62,6 +63,15 @@ internal class PresentationService @Inject constructor(
         }
     }
 
+    internal suspend fun validateSignedRequest(jwsTokenString: String): Result<PresentationRequest> {
+        return runResultTry {
+            val presentationRequestContent =
+                verifyAndUnwrapPresentationRequest(jwsTokenString, validateSignerDid = true).abortOnError()
+            val presentationRequest = validateRequest(presentationRequestContent).abortOnError()
+            Result.Success(presentationRequest)
+        }
+    }
+
     private fun verifyUri(uri: String): Uri {
         val url = Uri.parse(uri)
         if (!DidDeepLinkUtil.isDidDeepLink(url)) {
@@ -88,10 +98,25 @@ internal class PresentationService @Inject constructor(
     }
 
     private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(jwsTokenString: String): Result<PresentationRequestContent> {
+        return verifyAndUnwrapPresentationRequest(jwsTokenString, validateSignerDid = false)
+    }
+
+    private suspend fun verifyAndUnwrapPresentationRequest(
+        jwsTokenString: String,
+        validateSignerDid: Boolean
+    ): Result<PresentationRequestContent> {
         val jwsToken = JwsToken.deserialize(jwsTokenString)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
-        return Result.Success(serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content()))
+        val presentationRequestContent =
+            serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
+        if (validateSignerDid &&
+            !jwtValidator.validateDidInHeaderAndPayload(jwsToken, presentationRequestContent.clientId)
+        )
+            throw DidInHeaderAndPayloadNotMatching(
+                "DID used to sign the presentation request doesn't match the DID in presentation request."
+            )
+        return Result.Success(presentationRequestContent)
     }
 
     private suspend fun fetchRequest(url: String, preferHeaders: List<String>) =
