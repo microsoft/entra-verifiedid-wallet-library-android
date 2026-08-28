@@ -305,6 +305,28 @@ class PresentationServiceTest {
     }
 
     @Test
+    fun `test request param does not require signer to match client id`() {
+        val mockUri = mockk<Uri>()
+        mockIdentifierAndLinkedDomains()
+        every { presentationService["verifyUri"](suppliedOpenIdUrl) } returns mockUri
+        every { mockUri.getQueryParameter("request") } returns expectedPresentationRequestJwt
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coJustRun { presentationRequestValidator.validate(any()) }
+
+        runBlocking {
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl, emptyList())
+
+            assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
+            verify(exactly = 0) {
+                mockedJwtValidator.validateDidInHeaderAndPayload(any(), any())
+            }
+            coVerify(exactly = 1) {
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(expectedEntityIdentifier)
+            }
+        }
+    }
+
+    @Test
     fun `test validating signed request succeeds with valid signed request`() {
         val expectedPresentationRequestContent = defaultTestSerializer.decodeFromString(
             PresentationRequestContent.serializer(),

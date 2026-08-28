@@ -66,7 +66,7 @@ internal class PresentationService @Inject constructor(
     internal suspend fun validateSignedRequest(jwsTokenString: String): Result<PresentationRequest> {
         return runResultTry {
             val presentationRequestContent =
-                verifyAndUnwrapPresentationRequest(jwsTokenString).abortOnError()
+                verifyAndUnwrapPresentationRequest(jwsTokenString, validateSignerDid = true).abortOnError()
             val presentationRequest = validateRequest(presentationRequestContent).abortOnError()
             Result.Success(presentationRequest)
         }
@@ -98,16 +98,21 @@ internal class PresentationService @Inject constructor(
     }
 
     private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(jwsTokenString: String): Result<PresentationRequestContent> {
-        return verifyAndUnwrapPresentationRequest(jwsTokenString)
+        return verifyAndUnwrapPresentationRequest(jwsTokenString, validateSignerDid = false)
     }
 
-    private suspend fun verifyAndUnwrapPresentationRequest(jwsTokenString: String): Result<PresentationRequestContent> {
+    private suspend fun verifyAndUnwrapPresentationRequest(
+        jwsTokenString: String,
+        validateSignerDid: Boolean
+    ): Result<PresentationRequestContent> {
         val jwsToken = JwsToken.deserialize(jwsTokenString)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
         val presentationRequestContent =
             serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
-        if (!jwtValidator.validateDidInHeaderAndPayload(jwsToken, presentationRequestContent.clientId))
+        if (validateSignerDid &&
+            !jwtValidator.validateDidInHeaderAndPayload(jwsToken, presentationRequestContent.clientId)
+        )
             throw DidInHeaderAndPayloadNotMatching(
                 "DID used to sign the presentation request doesn't match the DID in presentation request."
             )
