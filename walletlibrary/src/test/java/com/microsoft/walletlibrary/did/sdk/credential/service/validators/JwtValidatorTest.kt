@@ -36,7 +36,7 @@ class JwtValidatorTest {
     private val expectedKid: String = "$expectedDid#kidTest2353"
 
     init {
-        validator = JwtValidator(mockedResolver)
+        validator = JwtValidator(mockedResolver, true)
         setUpResolver()
         mockkObject(JwsToken)
     }
@@ -99,6 +99,27 @@ class JwtValidatorTest {
                 fail()
             } catch (exception: Exception) {
                 assertThat(exception).isInstanceOf(ValidatorException::class.java)
+            }
+        }
+    }
+
+    @Test
+    fun `rejects verification method when DID does not match requested DID`() {
+        coEvery { mockedResolver.resolve(expectedDid) } returns Result.success(mockedIdentifierDocument)
+        every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns true
+        every { mockedJwsToken.keyId } returns expectedKid
+        every { mockedIdentifierDocument.verificationMethod } returns listOf(mockedIdentifierDocumentPublicKey)
+        every { mockedIdentifierDocumentPublicKey.id } returns "did:attacker:123#kidTest2353"
+        every { mockedIdentifierDocumentPublicKey.publicKeyJwk } returns mockedPublicKeyJwk
+        every { mockedPublicKeyJwk.keyType } returns KeyType.EC
+
+        runBlocking {
+            try {
+                validator.verifySignature(mockedJwsToken)
+                fail("Expected mismatched DID verification method to be rejected")
+            } catch (exception: Exception) {
+                assertThat(exception).isInstanceOf(ValidatorException::class.java)
+                assertThat(exception.message).contains("No public key found in identifier document matching DID")
             }
         }
     }

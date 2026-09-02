@@ -5,16 +5,32 @@
 
 package com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations
 
+import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import javax.inject.Inject
+import javax.inject.Named
 
-internal class ResolveIdentifierNetworkOperation @Inject constructor(private val apiProvider: HttpAgentApiProvider, url: String, val identifier: String) :
+internal class ResolveIdentifierNetworkOperation @Inject constructor(
+    private val apiProvider: HttpAgentApiProvider,
+    url: String,
+    val identifier: String,
+    @Named("didResolverHardeningEnabled") private val didResolverHardeningEnabled: Boolean
+) :
     GetNetworkOperation<IdentifierResponse>() {
 
-    override val call: suspend () -> Result<IResponse> = { apiProvider.identifierApi.resolveIdentifier("$url/$identifier") }
+    // Reject identifiers containing characters that could redirect the request to an unintended path
+    // (e.g. '/', '?', '#', whitespace, '..') before they are concatenated into the resolver URL.
+    private val sanitizedIdentifier: String = identifier.also {
+        if (didResolverHardeningEnabled && (it.isBlank() || !JwaCryptoHelper.isSyntacticallyValidDid(it))) {
+            throw ResolverException("Identifier '$it' is not a syntactically valid DID")
+        }
+    }
+
+    override val call: suspend () -> Result<IResponse> = { apiProvider.identifierApi.resolveIdentifier("$url/$sanitizedIdentifier") }
     override suspend fun toResult(response: IResponse): Result<IdentifierResponse> {
         return Result.success(apiProvider.identifierApi.toIdentifierResponse(response))
     }

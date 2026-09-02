@@ -10,12 +10,17 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiP
 import com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations.ResolveIdentifierNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import javax.inject.Inject
+import javax.inject.Named
 
-internal class IdentifierRepository @Inject constructor(val database: SdkDatabase, val apiProvider: HttpAgentApiProvider) {
+internal class IdentifierRepository @Inject constructor(
+    val database: SdkDatabase,
+    val apiProvider: HttpAgentApiProvider,
+    @Named("didResolverHardeningEnabled") private val didResolverHardeningEnabled: Boolean
+) {
     private val identifierDao = database.identifierDao()
 
     suspend fun resolveIdentifier(url: String, identifier: String) = ResolveIdentifierNetworkOperation(
-        apiProvider, url, identifier
+        apiProvider, url, identifier, didResolverHardeningEnabled
     ).fire()
 
     suspend fun insert(identifier: Identifier) = identifierDao.insert(identifier)
