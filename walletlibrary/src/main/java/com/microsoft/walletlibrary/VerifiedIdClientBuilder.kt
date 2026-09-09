@@ -123,8 +123,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
             walletLibraryVersionInfo = walletLibraryVersionInfo,
             httpAgent = httpAgent,
             rootOfTrustResolver = rootOfTrustResolver,
-            didResolverHardeningEnabled = previewFeatureFlags.isPreviewFeatureSupported(
-                PreviewFeatureFlags.FEATURE_FLAG_DID_RESOLVER_HARDENING
+            didResolverHardeningEnabled = !previewFeatureFlags.isPreviewFeatureSupported(
+                PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
             )
         )
 

@@ -3,6 +3,7 @@ package com.microsoft.walletlibrary
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.walletlibrary.requests.resolvers.OpenIdURLRequestResolver
+import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.FixMethodOrder
@@ -112,5 +113,24 @@ class VerifiedIdClientBuilderTest {
             )
         ).isFalse
 
+    }
+
+    @Test
+    fun builder5_WithLegacyResolverFlag_ReturnsVerifiedIdClientWithFeatureEnabled() {
+        // Arrange
+        setupInput(1)
+        verifiedIdClientBuilder.with(
+            listOf(PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER)
+        )
+
+        // Act
+        val actualResult = verifiedIdClientBuilder.build()
+
+        // Assert
+        assertThat(
+            (actualResult.requestResolverFactory.requestResolvers.first() as OpenIdURLRequestResolver).libraryConfiguration.isPreviewFeatureEnabled(
+                PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
+            )
+        ).isTrue()
     }
 }

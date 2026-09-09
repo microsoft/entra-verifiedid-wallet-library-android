@@ -38,7 +38,7 @@ internal class LibraryConfigurationTest {
     }
 
     @Test
-    fun testDidResolverHardeningIsEnabledByDefault() {
+    fun testLegacyResolverIsDisabledByDefault() {
         val libraryConfiguration = LibraryConfiguration(
             PreviewFeatureFlags(),
             mockk(),
@@ -50,8 +50,8 @@ internal class LibraryConfigurationTest {
 
         assertThat(
             libraryConfiguration.isPreviewFeatureEnabled(
-                PreviewFeatureFlags.FEATURE_FLAG_DID_RESOLVER_HARDENING
+                PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
             )
-        ).isTrue()
+        ).isFalse()
     }
 }

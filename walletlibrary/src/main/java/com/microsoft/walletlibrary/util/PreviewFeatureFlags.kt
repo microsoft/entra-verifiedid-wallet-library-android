@@ -25,8 +25,8 @@ data class PreviewFeatureFlags(val previewFeatureFlags: List<String> = emptyList
         // Feature flag to enable non-FIPS identifier
         const val FEATURE_FLAG_LEGACY_IDENTIFIER = "LegacyIdentifier"
 
-        // Feature flag to enable DID resolver hardening
-        const val FEATURE_FLAG_DID_RESOLVER_HARDENING = "DidResolverHardening"
+        // Feature flag to enable the legacy DID resolver behavior
+        const val FEATURE_FLAG_ENABLE_LEGACY_RESOLVER = "EnableLegacyResolver"
     }
 
     private var supportedPreviewFeatureFlags =
@@ -36,7 +36,7 @@ data class PreviewFeatureFlags(val previewFeatureFlags: List<String> = emptyList
             FEATURE_FLAG_PROCESSOR_EXTENSION_SUPPORT to false,
             FEATURE_FLAG_FIPS_COMPLIANT_IDENTIFIER to false,
             FEATURE_FLAG_LEGACY_IDENTIFIER to false,
-            FEATURE_FLAG_DID_RESOLVER_HARDENING to true)
+            FEATURE_FLAG_ENABLE_LEGACY_RESOLVER to false)
 
     init {
         previewFeatureFlags.forEach {
