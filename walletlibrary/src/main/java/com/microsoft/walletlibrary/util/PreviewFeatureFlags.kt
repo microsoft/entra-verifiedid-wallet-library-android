@@ -5,6 +5,15 @@ package com.microsoft.walletlibrary.util
  */
 data class PreviewFeatureFlags(val previewFeatureFlags: List<String> = emptyList()) {
 
+    constructor(
+        previewFeatureFlags: List<String>,
+        previewFeatureFlagsToDisable: List<String>
+    ) : this(previewFeatureFlags) {
+        previewFeatureFlagsToDisable.forEach {
+            supportedPreviewFeatureFlags[it] = false
+        }
+    }
+
     companion object {
         // Feature flags for Access Token flow preview feature.
         const val FEATURE_FLAG_OPENID4VCI_ACCESS_TOKEN = "OpenID4VCIAccessToken"
