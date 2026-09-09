@@ -55,7 +55,6 @@ class VerifiedIdClientBuilder(private val context: Context) {
     private val requestResolvers = mutableListOf<RequestResolver>()
     private val requestProcessors = mutableListOf<RequestProcessor<*>>()
     private val previewFeatureFlagsSupported = mutableListOf<String>()
-    private val previewFeatureFlagsDisabled = mutableListOf<String>()
     private var preferHeaders = mutableListOf<String>()
     private val extensionBuilders = mutableListOf<VerifiedIdExtension>()
     private val jsonSerializer = Json {
@@ -106,12 +105,6 @@ class VerifiedIdClientBuilder(private val context: Context) {
         return this
     }
 
-    // An optional method to provide a list of preview features to be disabled by the client.
-    fun without(previewFeatureFlagsToDisable: List<String>): VerifiedIdClientBuilder {
-        previewFeatureFlagsDisabled.addAll(previewFeatureFlagsToDisable)
-        return this
-    }
-
     fun with(identifier: HolderIdentifier): VerifiedIdClientBuilder {
         identifiers.add(identifier)
         return this
@@ -122,8 +115,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         WalletLibraryVCSDKLogConsumer.logger = logger
         val userAgentInfo = getUserAgent(context)
         val walletLibraryVersionInfo = getWalletLibraryVersionInfo()
-        val previewFeatureFlags =
-            PreviewFeatureFlags(previewFeatureFlagsSupported, previewFeatureFlagsDisabled)
+        val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
         VerifiableCredentialSdk.init(
             context,
             logConsumer = WalletLibraryVCSDKLogConsumer,
@@ -131,8 +123,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
             walletLibraryVersionInfo = walletLibraryVersionInfo,
             httpAgent = httpAgent,
             rootOfTrustResolver = rootOfTrustResolver,
-            didResolverHardeningEnabled = previewFeatureFlags.isPreviewFeatureSupported(
-                PreviewFeatureFlags.FEATURE_FLAG_DID_RESOLVER_HARDENING
+            didResolverHardeningEnabled = !previewFeatureFlags.isPreviewFeatureSupported(
+                PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
             )
         )
 

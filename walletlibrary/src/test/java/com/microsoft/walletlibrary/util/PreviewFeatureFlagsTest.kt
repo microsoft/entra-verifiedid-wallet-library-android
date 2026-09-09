@@ -6,14 +6,14 @@ import org.junit.Test
 internal class PreviewFeatureFlagsTest {
 
     @Test
-    fun didResolverHardeningIsEnabledByDefault() {
+    fun legacyResolverIsDisabledByDefault() {
         val previewFeatureFlags = PreviewFeatureFlags()
 
         assertThat(
             previewFeatureFlags.isPreviewFeatureSupported(
-                PreviewFeatureFlags.FEATURE_FLAG_DID_RESOLVER_HARDENING
+                PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
             )
-        ).isTrue()
+        ).isFalse()
     }
 
     @Test
@@ -30,30 +30,15 @@ internal class PreviewFeatureFlagsTest {
     }
 
     @Test
-    fun didResolverHardeningIsDisabledWhenIncludedInDisabledList() {
+    fun legacyResolverIsEnabledWhenIncludedInEnabledList() {
         val previewFeatureFlags = PreviewFeatureFlags(
-            emptyList(),
-            listOf(PreviewFeatureFlags.FEATURE_FLAG_DID_RESOLVER_HARDENING)
+            listOf(PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER)
         )
 
         assertThat(
             previewFeatureFlags.isPreviewFeatureSupported(
-                PreviewFeatureFlags.FEATURE_FLAG_DID_RESOLVER_HARDENING
+                PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
             )
-        ).isFalse()
-    }
-
-    @Test
-    fun disabledFeatureTakesPrecedenceOverEnabledFeature() {
-        val previewFeatureFlags = PreviewFeatureFlags(
-            listOf(PreviewFeatureFlags.FEATURE_FLAG_DID_RESOLVER_HARDENING),
-            listOf(PreviewFeatureFlags.FEATURE_FLAG_DID_RESOLVER_HARDENING)
-        )
-
-        assertThat(
-            previewFeatureFlags.isPreviewFeatureSupported(
-                PreviewFeatureFlags.FEATURE_FLAG_DID_RESOLVER_HARDENING
-            )
-        ).isFalse()
+        ).isTrue()
     }
 }

@@ -116,11 +116,11 @@ class VerifiedIdClientBuilderTest {
     }
 
     @Test
-    fun builder5_WithoutPreviewFeatureFlag_ReturnsVerifiedIdClientWithFeatureDisabled() {
+    fun builder5_WithLegacyResolverFlag_ReturnsVerifiedIdClientWithFeatureEnabled() {
         // Arrange
         setupInput(1)
-        verifiedIdClientBuilder.without(
-            listOf(PreviewFeatureFlags.FEATURE_FLAG_DID_RESOLVER_HARDENING)
+        verifiedIdClientBuilder.with(
+            listOf(PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER)
         )
 
         // Act
@@ -129,8 +129,8 @@ class VerifiedIdClientBuilderTest {
         // Assert
         assertThat(
             (actualResult.requestResolverFactory.requestResolvers.first() as OpenIdURLRequestResolver).libraryConfiguration.isPreviewFeatureEnabled(
-                PreviewFeatureFlags.FEATURE_FLAG_DID_RESOLVER_HARDENING
+                PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
             )
-        ).isFalse()
+        ).isTrue()
     }
 }
