@@ -40,7 +40,7 @@ class SignedMetadataProcessorTest {
     private val mockLibraryConfiguration: LibraryConfiguration = mockk()
     private val signedMetadataProcessor = spyk(SignedMetadataProcessor(mockLibraryConfiguration))
     private val signedMetadataString = "testSignedMetadata"
-    private val credentialIssuer = "testCredentialIssuer"
+    private val credentialIssuer = "https://validdomain/credential-issuer"
     private val mockIdentifierDocument = mockk<IdentifierDocument>()
     private val mockJwsToken: JwsToken = mockk()
     private val mockJwk = mockk<JWK>()
@@ -259,7 +259,7 @@ class SignedMetadataProcessorTest {
         every { VerifiableCredentialSdk.linkedDomainsService } answers { linkedDomainsService }
         every { LinkedDomainsResolver["getLinkedDomainsService"]() } answers { linkedDomainsService }
         val signedMetadataTokenClaimsString =
-            """{"sub":"testCredentialIssuer","iss": "${MockDidMetadata.VALID_DOMAIN_DID.value}","iat": 1707859806}""".trimIndent()
+            """{"sub":"$credentialIssuer","iss": "${MockDidMetadata.VALID_DOMAIN_DID.value}","iat": 1707859806}""".trimIndent()
         mockJwsToken("${MockDidMetadata.VALID_DOMAIN_DID.value}#signingKey-1", signedMetadataTokenClaimsString)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument(MockDidMetadata.VALID_DOMAIN_DID.value) } returns mockIdentifierDocument
         every { (mockIdentifierDocument as DidMetadata).id } returns MockDidMetadata.VALID_DOMAIN_DID.value
@@ -298,12 +298,12 @@ class SignedMetadataProcessorTest {
         every { VerifiableCredentialSdk.linkedDomainsService } answers { linkedDomainsService }
         every { LinkedDomainsResolver["getLinkedDomainsService"]() } answers { linkedDomainsService }
         val signedMetadataTokenClaimsString =
-            """{"sub":"testCredentialIssuer","iss": "${MockDidMetadata.VALID_DOMAIN_DID.value}","iat": 1707859806}""".trimIndent()
+            """{"sub":"$credentialIssuer","iss": "${MockDidMetadata.VALID_DOMAIN_DID.value}","iat": 1707859806}""".trimIndent()
         mockJwsToken("${MockDidMetadata.VALID_DOMAIN_DID.value}#signingKey-1", signedMetadataTokenClaimsString)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument(MockDidMetadata.VALID_DOMAIN_DID.value) } returns mockIdentifierDocument
         every { (mockIdentifierDocument as DidMetadata).id } returns MockDidMetadata.EMPTY_DOMAIN_DID.value
         coEvery { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) } returns LinkedDomainVerified(
-            "testdomain"
+            "validdomain"
         )
 
         runBlocking {
@@ -312,7 +312,7 @@ class SignedMetadataProcessorTest {
 
             // Assert
             assertThat(actualResult).isInstanceOf(RootOfTrust::class.java)
-            assertThat(actualResult.source).isEqualTo("testdomain")
+            assertThat(actualResult.source).isEqualTo("validdomain")
             assertThat(actualResult.verified).isTrue
             coVerify { mockRootOfTrustResolver.resolve(any<DidMetadata>()) }
             verify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](any<IdentifierDocument>()) }
@@ -320,7 +320,7 @@ class SignedMetadataProcessorTest {
     }
 
     @Test
-    fun process_LinkedDomainsNotVerifiedByResolverUsingWellKnownAndFails_ReturnsMissingRootOfTrust() {
+    fun process_LinkedDomainsNotVerifiedByResolverUsingWellKnownAndFails_ThrowsException() {
         // Arrange
         mockIdentifierDocument()
         mockkStatic(VerifiableCredentialSdk::class)
@@ -341,21 +341,82 @@ class SignedMetadataProcessorTest {
         every { VerifiableCredentialSdk.linkedDomainsService } answers { linkedDomainsService }
         every { LinkedDomainsResolver["getLinkedDomainsService"]() } answers { linkedDomainsService }
         val signedMetadataTokenClaimsString =
-            """{"sub":"testCredentialIssuer","iss": "${MockDidMetadata.VALID_DOMAIN_DID.value}","iat": 1707859806}""".trimIndent()
+            """{"sub":"$credentialIssuer","iss": "${MockDidMetadata.VALID_DOMAIN_DID.value}","iat": 1707859806}""".trimIndent()
         mockJwsToken("${MockDidMetadata.VALID_DOMAIN_DID.value}#signingKey-1", signedMetadataTokenClaimsString)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument(MockDidMetadata.VALID_DOMAIN_DID.value) } returns mockIdentifierDocument
         every { (mockIdentifierDocument as DidMetadata).id } returns MockDidMetadata.EMPTY_DOMAIN_DID.value
 
         runBlocking {
             // Act
+            val actualResult = runCatching {
+                signedMetadataProcessor.process(signedMetadataString, credentialIssuer)
+            }
+
+            // Assert
+            assertThat(actualResult.isFailure).isTrue
+            val actualException = actualResult.exceptionOrNull()
+            assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
+            assertThat(actualException?.message).isEqualTo(
+                "Signed metadata DID is not linked to the credential issuer origin"
+            )
+            coVerify { mockRootOfTrustResolver.resolve(any<DidMetadata>()) }
+            verify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](any<IdentifierDocument>()) }
+        }
+    }
+
+    @Test
+    fun process_LinkedDomainDoesNotMatchCredentialIssuerOrigin_ThrowsException() {
+        // Arrange
+        mockIdentifierDocument()
+        val issuerDid = "did:web:attacker.example"
+        val signedMetadataTokenClaimsString =
+            """{"sub":"https://issuer.example/credential-issuer","iss":"$issuerDid","iat":1707859806}"""
+        mockJwsToken("$issuerDid#signingKey-1", signedMetadataTokenClaimsString)
+        coEvery { IdentifierDocumentResolver.resolveIdentifierDocument(issuerDid) } returns mockIdentifierDocument
+        coEvery {
+            LinkedDomainsResolver.resolve(mockIdentifierDocument)
+        } returns RootOfTrust("attacker.example", true)
+
+        runBlocking {
+            // Act
+            val actualResult = runCatching {
+                signedMetadataProcessor.process(
+                    signedMetadataString,
+                    "https://issuer.example/credential-issuer"
+                )
+            }
+
+            // Assert
+            assertThat(actualResult.isFailure).isTrue
+            val actualException = actualResult.exceptionOrNull()
+            assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
+            assertThat(actualException?.message).isEqualTo(
+                "Signed metadata DID is not linked to the credential issuer origin"
+            )
+        }
+    }
+
+    @Test
+    fun process_LinkedDomainMatchesCanonicalCredentialIssuerOrigin_ReturnsVerifiedRootOfTrust() {
+        // Arrange
+        mockIdentifierDocument()
+        val issuerDid = "did:web:issuer.example"
+        val credentialIssuer = "https://ISSUER.example:443/credential-issuer"
+        val signedMetadataTokenClaimsString =
+            """{"sub":"$credentialIssuer","iss":"$issuerDid","iat":1707859806}"""
+        val expectedRootOfTrust = RootOfTrust("issuer.example", true)
+        mockJwsToken("$issuerDid#signingKey-1", signedMetadataTokenClaimsString)
+        coEvery { IdentifierDocumentResolver.resolveIdentifierDocument(issuerDid) } returns mockIdentifierDocument
+        coEvery {
+            LinkedDomainsResolver.resolve(mockIdentifierDocument)
+        } returns expectedRootOfTrust
+
+        runBlocking {
+            // Act
             val actualResult = signedMetadataProcessor.process(signedMetadataString, credentialIssuer)
 
             // Assert
-            assertThat(actualResult).isInstanceOf(RootOfTrust::class.java)
-            assertThat(actualResult.source).isEqualTo("")
-            assertThat(actualResult.verified).isFalse
-            coVerify { mockRootOfTrustResolver.resolve(any<DidMetadata>()) }
-            verify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](any<IdentifierDocument>()) }
+            assertThat(actualResult).isEqualTo(expectedRootOfTrust)
         }
     }
 

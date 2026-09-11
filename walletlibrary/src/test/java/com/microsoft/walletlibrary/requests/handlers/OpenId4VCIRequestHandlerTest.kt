@@ -155,6 +155,32 @@ class OpenId4VCIRequestHandlerTest {
     }
 
     @Test
+    fun handleRequestTest_CredentialIssuerIsNotHttpsOrigin_ThrowsBeforeFetchingMetadata() {
+        // Arrange
+        every { mockLibraryConfiguration.serializer } returns defaultTestSerializer
+        val invalidCredentialOffer = expectedCredentialOfferString.replace(
+            credentialIssuerEndpoint,
+            "did:web:attacker.example"
+        )
+
+        runBlocking {
+            // Act
+            val actualHandleRequestResult = runCatching {
+                openId4VCIRequestHandler.handleRequest(invalidCredentialOffer)
+            }
+
+            // Assert
+            assertThat(actualHandleRequestResult.isFailure).isTrue
+            val actualException = actualHandleRequestResult.exceptionOrNull()
+            assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
+            assertThat(actualException?.message).isEqualTo("Credential issuer is not a valid HTTPS URL")
+            assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
+                VerifiedIdExceptions.MALFORMED_CREDENTIAL_OFFER_EXCEPTION.value
+            )
+        }
+    }
+
+    @Test
     fun handleRequestTest_ValidateCredentialMetadataNoCredentialIssuer_ThrowsException() {
         // Arrange
         every { mockLibraryConfiguration.serializer } returns defaultTestSerializer

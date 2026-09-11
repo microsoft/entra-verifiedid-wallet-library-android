@@ -24,6 +24,15 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         signedMetadata: String,
         credentialIssuer: String
     ): RootOfTrust {
+        val credentialIssuerOrigin = try {
+            CredentialIssuerOrigin.fromCredentialIssuer(credentialIssuer)
+        } catch (exception: Exception) {
+            throw OpenId4VciValidationException(
+                "Credential issuer is not a valid HTTPS URL",
+                VerifiedIdExceptions.MALFORMED_SIGNED_METADATA_EXCEPTION.value,
+                exception
+            )
+        }
         val jwsToken = deserializeSignedMetadata(signedMetadata)
 
         // Extract the DID and Key ID from the signed metadata token header.
@@ -47,8 +56,9 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
             )
         validateSignedMetadata(jwsToken, jwk, credentialIssuer, did)
 
-        // Return the root of trust from the identifier document along with its verification status.
-        return LinkedDomainsResolver.resolve(identifierDocument)
+        val rootOfTrust = LinkedDomainsResolver.resolve(identifierDocument)
+        validateLinkedDomain(rootOfTrust, credentialIssuerOrigin)
+        return rootOfTrust
     }
 
     private fun deserializeSignedMetadata(signedMetadata: String): JwsToken {
@@ -85,6 +95,28 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
             throw TokenValidationException(
                 "Signature is invalid on Signed metadata",
                 VerifiedIdExceptions.INVALID_SIGNATURE_EXCEPTION.value
+            )
+        }
+    }
+
+    private fun validateLinkedDomain(rootOfTrust: RootOfTrust, credentialIssuerOrigin: String) {
+        val linkedDomainOrigin = try {
+            if (!rootOfTrust.verified || rootOfTrust.source.isBlank()) {
+                throw IllegalArgumentException("Linked domain verification failed.")
+            }
+            CredentialIssuerOrigin.fromLinkedDomain(rootOfTrust.source)
+        } catch (exception: Exception) {
+            throw OpenId4VciValidationException(
+                "Signed metadata DID is not linked to the credential issuer origin",
+                VerifiedIdExceptions.MALFORMED_SIGNED_METADATA_EXCEPTION.value,
+                exception
+            )
+        }
+
+        if (linkedDomainOrigin != credentialIssuerOrigin) {
+            throw OpenId4VciValidationException(
+                "Signed metadata DID is not linked to the credential issuer origin",
+                VerifiedIdExceptions.MALFORMED_SIGNED_METADATA_EXCEPTION.value
             )
         }
     }
