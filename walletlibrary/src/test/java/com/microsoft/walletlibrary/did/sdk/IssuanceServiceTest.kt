@@ -174,7 +174,13 @@ class IssuanceServiceTest {
         } returns formattedResponse
         every { mockedPresentationAttestation.credentialType } returns "TestCredentialType"
         every { mockedPresentationAttestation.validityInterval } returns 1000
-        coEvery { issuanceService["sendResponse"](formattedResponse, issuanceResponse.audience) } returns Result.Success(expectedVerifiableCredential)
+        coEvery {
+            issuanceService["sendResponse"](
+                formattedResponse,
+                issuanceResponse.audience,
+                issuanceResponse.request.contract.input.issuer
+            )
+        } returns Result.Success(expectedVerifiableCredential)
 
         runBlocking {
             val createdVerifiableCredential = issuanceService.sendResponse(issuanceResponse, mockLibraryConfiguration)
