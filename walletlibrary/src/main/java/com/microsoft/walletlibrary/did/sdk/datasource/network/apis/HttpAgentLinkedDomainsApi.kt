@@ -19,6 +19,6 @@ internal class HttpAgentLinkedDomainsApi(private val agent: IHttpAgent,
         return json.decodeFromString(LinkedDomainsResponse.serializer(), response.body.decodeToString())
     }
     suspend fun fetchWellKnownConfigDocument (overrideUrl: String): Result<IResponse> {
-        return agent.get(overrideUrl, httpAgentUtils.defaultHeaders())
+        return agent.getWithoutRedirects(overrideUrl, httpAgentUtils.defaultHeaders())
     }
 }

@@ -6,12 +6,14 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomai
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResponses.LinkedDomainsResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.validators.DomainLinkageCredentialValidator
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.DidMetadata
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
+import com.microsoft.walletlibrary.did.sdk.identifier.models.payload.document.IdentifierDocumentService
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.MockRootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import io.mockk.coEvery
@@ -227,6 +229,70 @@ class LinkedDomainsServiceTest {
             assertThat(actualLinkedDomainsResultResponse).isInstanceOf(KotlinResult.success(LinkedDomainVerified)::class.java)
             assertThat((actualLinkedDomainsResultResponse.getOrNull() as? LinkedDomainVerified)?.domainUrl).isEqualTo(hostnameOfUrl)
         }
+    }
+
+    @Test
+    fun `linked domains exact HTTPS origin is canonicalized before verification`() {
+        val validator: DomainLinkageCredentialValidator = mockk()
+        val service = spyk(
+            LinkedDomainsService(mockk(relaxed = true), mockedResolver, validator),
+            recordPrivateCalls = true
+        )
+        val identifierDocument = IdentifierDocument(id = "did:example:issuer").also {
+            it.service = listOf(
+                IdentifierDocumentService(
+                    id = "#linked-domains",
+                    type = "LinkedDomains",
+                    serviceEndpoint = listOf("HTTPS://Example.COM:443/")
+                )
+            )
+        }
+        val response = LinkedDomainsResponse("", listOf("linked-domain-jwt"))
+
+        coEvery { service["getWellKnownConfigDocument"]("https://example.com") } returns KotlinResult.success(response)
+        coEvery {
+            validator.validate("linked-domain-jwt", "did:example:issuer", "https://example.com")
+        } returns true
+
+        runBlocking {
+            val result = service.validateLinkedDomains(identifierDocument)
+
+            val linkedDomainResult = result.getOrNull()
+            assertThat(linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo("example.com")
+        }
+        coVerify(exactly = 1) { service["getWellKnownConfigDocument"]("https://example.com") }
+        coVerify(exactly = 1) {
+            validator.validate("linked-domain-jwt", "did:example:issuer", "https://example.com")
+        }
+    }
+
+    @Test
+    fun `linked domains HTTPS endpoint with subpath is rejected without network request`() {
+        val validator: DomainLinkageCredentialValidator = mockk(relaxed = true)
+        val service = spyk(
+            LinkedDomainsService(mockk(relaxed = true), mockedResolver, validator),
+            recordPrivateCalls = true
+        )
+        val identifierDocument = IdentifierDocument(id = "did:example:issuer").also {
+            it.service = listOf(
+                IdentifierDocumentService(
+                    id = "#linked-domains",
+                    type = "LinkedDomains",
+                    serviceEndpoint = listOf("https://example.com/attacker-controlled")
+                )
+            )
+        }
+
+        runBlocking {
+            val result = service.validateLinkedDomains(identifierDocument)
+
+            val linkedDomainResult = result.getOrNull()
+            assertThat(linkedDomainResult).isInstanceOf(LinkedDomainUnVerified::class.java)
+            assertThat((linkedDomainResult as LinkedDomainUnVerified).domainUrl).isEqualTo("example.com")
+        }
+        coVerify(exactly = 0) { service["getWellKnownConfigDocument"](any<String>()) }
+        coVerify(exactly = 0) { validator.validate(any(), any(), any()) }
     }
 
     @Test
