@@ -11,6 +11,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtVali
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.PostNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.DidInHeaderAndPayloadNotMatching
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
@@ -18,6 +19,7 @@ import kotlinx.serialization.json.Json
 internal class SendVerifiableCredentialIssuanceRequestNetworkOperation(
     url: String,
     serializedResponse: String,
+    private val expectedIssuerDid: String,
     private val apiProvider: HttpAgentApiProvider,
     private val jwtValidator: JwtValidator,
     private val serializer: Json
@@ -33,7 +35,15 @@ internal class SendVerifiableCredentialIssuanceRequestNetworkOperation(
         val jwsToken = JwsToken.deserialize(jwsTokenString)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not Valid on Issuance Response.")
+        if (!jwtValidator.validateDidInHeaderAndPayload(jwsToken, expectedIssuerDid))
+            throw DidInHeaderAndPayloadNotMatching(
+                "DID used to sign the issuance response doesn't match the issuer DID in the contract."
+            )
         val verifiableCredentialContent = serializer.decodeFromString(VerifiableCredentialContent.serializer(), jwsToken.content())
+        if (verifiableCredentialContent.iss != expectedIssuerDid)
+            throw DidInHeaderAndPayloadNotMatching(
+                "Issuer DID in the issuance response doesn't match the issuer DID in the contract."
+            )
         return Result.success(VerifiableCredential(verifiableCredentialContent.jti, jwsTokenString, verifiableCredentialContent))
     }
 }
