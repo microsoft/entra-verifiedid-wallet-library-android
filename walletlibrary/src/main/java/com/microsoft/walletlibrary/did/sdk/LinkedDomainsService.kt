@@ -107,7 +107,7 @@ internal class LinkedDomainsService @Inject constructor(
                         domainOrigin
                     )
                     return if (isDomainLinked)
-                        Result.success(LinkedDomainVerified(hostname))
+                        Result.success(LinkedDomainVerified(hostname, domainOrigin))
                     else
                         Result.success(LinkedDomainUnVerified(hostname))
                 }
