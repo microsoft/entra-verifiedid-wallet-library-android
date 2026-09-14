@@ -6,12 +6,18 @@ import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.util.http.URLFormEncoding
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
+import com.microsoft.walletlibrary.util.http.httpagent.PresentationResponseHttpAgent
+import com.microsoft.walletlibrary.util.http.httpagent.SecurePresentationResponseHttpAgent
 
 /**
  * Api class to perform presentation related network operations using the provided HttpAgent, utils
  * and json serializer to convert the network response to Presentation related model.
  */
-internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private val httpAgentUtils: HttpAgentUtils) {
+internal class HttpAgentPresentationApis(
+    private val agent: IHttpAgent,
+    private val httpAgentUtils: HttpAgentUtils,
+    private val responseAgent: PresentationResponseHttpAgent = SecurePresentationResponseHttpAgent()
+) {
 
     suspend fun getRequest(overrideUrl: String, preferHeaders: List<String>): Result<IResponse> {
         val mutablePreferHeaders = preferHeaders.toMutableList()
@@ -37,7 +43,7 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
                 "state" to state
             )
         )
-        return agent.post(
+        return responseAgent.post(
             overrideUrl,
             httpAgentUtils.combineMaps(
                 additionalHeaders,
@@ -59,7 +65,7 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
             "vp_token" to vpToken,
             "state" to state
         ))
-        return agent.post(
+        return responseAgent.post(
             overrideUrl,
             httpAgentUtils.combineMaps(
                 additionalHeaders,
