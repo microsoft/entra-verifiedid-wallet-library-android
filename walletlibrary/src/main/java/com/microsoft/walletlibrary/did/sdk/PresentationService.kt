@@ -56,7 +56,15 @@ internal class PresentationService @Inject constructor(
                 val linkedDomainResult = linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
                     presentationRequestContent.clientId
                 ).toSDK().abortOnError()
-                val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
+                val responseUrl = PresentationResponseEndpointValidator.validate(
+                    presentationRequestContent.redirectUrl,
+                    linkedDomainResult
+                )
+                val request = PresentationRequest(
+                    presentationRequestContent,
+                    linkedDomainResult,
+                    responseUrl
+                )
                 isRequestValid(request).abortOnError()
                 Result.Success(request)
             }
@@ -98,7 +106,7 @@ internal class PresentationService @Inject constructor(
     }
 
     private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(jwsTokenString: String): Result<PresentationRequestContent> {
-        return verifyAndUnwrapPresentationRequest(jwsTokenString, validateSignerDid = false)
+        return verifyAndUnwrapPresentationRequest(jwsTokenString, validateSignerDid = true)
     }
 
     private suspend fun verifyAndUnwrapPresentationRequest(
@@ -161,7 +169,7 @@ internal class PresentationService @Inject constructor(
                 expiryInSeconds = expiryInSeconds
             )
             return SendPresentationResponsesNetworkOperation(
-                presentationRequest.content.redirectUrl,
+                presentationRequest.responseUrl,
                 idToken,
                 vpToken,
                 presentationRequest.content.state,
@@ -176,7 +184,7 @@ internal class PresentationService @Inject constructor(
                 expiryInSeconds = expiryInSeconds
             )
             return SendPresentationResponseNetworkOperation(
-                presentationRequest.content.redirectUrl,
+                presentationRequest.responseUrl,
                 idToken,
                 vpToken,
                 presentationRequest.content.state,
