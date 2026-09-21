@@ -72,6 +72,11 @@ android {
             java.srcDirs 'src/main/java'
         }
     }
+    testOptions {
+        unitTests.all {
+            jvmArgs '--add-opens=java.base/java.util=ALL-UNNAMED'
+        }
+    }
 }
 
 dependencies {

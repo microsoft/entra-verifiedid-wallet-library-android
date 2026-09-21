@@ -6,18 +6,15 @@ import com.microsoft.walletlibrary.requests.handlers.RequestProcessor
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestInput
 import com.microsoft.walletlibrary.requests.input.VerifiedIdRequestURL
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdRawRequest
-import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
 import com.microsoft.walletlibrary.requests.requestProcessorExtensions.RequestProcessorExtension
 import com.microsoft.walletlibrary.util.Constants
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.UnSupportedVerifiedIdRequestInputException
-import com.microsoft.walletlibrary.wrapper.OpenIdResolver
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
-import io.mockk.mockkObject
 import io.mockk.spyk
 import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
@@ -112,7 +109,7 @@ class OpenIdURLRequestResolverTest {
     }
 
     @Test
-    fun resolve_validURL_ReturnsRawRequest() {
+    fun resolve_validURLWithCredentialOffer_ReturnsCredentialOffer() {
         // Arrange
         mockVerifiedIdRequestURL = mockk()
         every { mockVerifiedIdRequestURL.url.getQueryParameter(Constants.REQUEST_URI) } returns "microsoft.com"

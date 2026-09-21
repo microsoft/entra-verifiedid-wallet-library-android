@@ -63,6 +63,8 @@ class VerifiedIdOpenIdJwtRawRequestTest {
     private fun setupPresentationContent() {
         every { mockPresentationRequest.content.registration } returns mockRegistration
         every { mockPresentationRequest.content.idTokenHint } returns null
+        every { mockPresentationRequest.content.continuation } returns null
+        every { mockPresentationRequest.content.registration.scenario } returns null
     }
 
     private fun setupInputDescriptors(
