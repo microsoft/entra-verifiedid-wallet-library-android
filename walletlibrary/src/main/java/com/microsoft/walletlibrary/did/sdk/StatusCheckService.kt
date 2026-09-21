@@ -85,20 +85,23 @@ internal class StatusCheckService(
 
     private suspend fun fetchAndCheckStatusList(descriptor: CredentialStatusDescriptor, issuerDid: String): VerifiedIdStatus {
         val statusCredRaw = descriptor.effectiveStatusListCredential
-        // issuerDid, descriptor.id, statusListCredential, and statusPurpose are non-PII: they are
-        // issuer-side identifiers/URLs — not tied to the user or their identity.
         SdkLog.i(
-            "$TAG fetchAndCheckStatusList: id='${descriptor.id}'" +
-                " effectiveStatusListCredential='$statusCredRaw'" +
-                " statusPurpose='${descriptor.statusPurpose}' issuerDid='$issuerDid'"
+            "$TAG fetchAndCheckStatusList: descriptorType=${descriptor.type}" +
+                " statusListCredentialPresent=${statusCredRaw.isNotBlank()}" +
+                " statusPurposePresent=${descriptor.statusPurpose.isNotBlank()}" +
+                " issuerPresent=${issuerDid.isNotBlank()}"
         )
+        val resolutionPath = when {
+            statusCredRaw.startsWith("https://") -> "DirectUrl"
+            statusCredRaw.startsWith("did:web:") -> "DidWeb"
+            else -> "Alternate"
+        }
         val url = resolveStatusListUrl(statusCredRaw)
-        SdkLog.i("$TAG fetchAndCheckStatusList: resolveStatusListUrl returned '$url'")
+        SdkLog.i("$TAG path=$resolutionPath urlResolved=${url != null}")
         if (url == null) return resolveViaAlternatePath(descriptor, issuerDid)
 
-        SdkLog.i("$TAG path=DirectUrl url=$url")
         val response = apiProvider.statusListApi.getStatusListCredential(url).getOrElse {
-            SdkLog.w("$TAG result=Unknown (status list fetch failed)", it)
+            SdkLog.w("$TAG result=Unknown failureCategory=StatusListFetch exceptionType=${it.javaClass.simpleName}")
             return VerifiedIdStatus.Unknown
         }
         if (response.status !in HTTP_SUCCESS_RANGE) {
@@ -116,7 +119,11 @@ internal class StatusCheckService(
                 }
 
             if (!statusPurposeMatches(descriptor, statusPurpose)) {
-                SdkLog.w("$TAG result=Unknown (statusPurpose mismatch: credential=${descriptor.statusPurpose}, list=$statusPurpose)")
+                SdkLog.w(
+                    "$TAG result=Unknown failureCategory=StatusPurposeMismatch" +
+                        " credentialPurpose=${statusPurposeForLog(descriptor.statusPurpose)}" +
+                        " listPurpose=${statusPurposeForLog(statusPurpose)}"
+                )
                 return VerifiedIdStatus.Unknown
             }
 
@@ -138,10 +145,10 @@ internal class StatusCheckService(
                 STATUS_PURPOSE_SUSPENSION -> VerifiedIdStatus.Suspended
                 else -> VerifiedIdStatus.Revoked
             }
-            SdkLog.i("$TAG result=$result (path=DirectUrl, statusPurpose=$statusPurpose)")
+            SdkLog.i("$TAG result=$result path=$resolutionPath statusPurpose=${statusPurposeForLog(statusPurpose)}")
             result
         } catch (e: Exception) {
-            SdkLog.w("$TAG result=Unknown (exception while checking status list)", e)
+            SdkLog.w("$TAG result=Unknown failureCategory=StatusListCheck exceptionType=${e.javaClass.simpleName}")
             VerifiedIdStatus.Unknown
         }
     }
@@ -162,26 +169,29 @@ internal class StatusCheckService(
             val uri = java.net.URI(url)
             uri.scheme.equals("https", ignoreCase = true) && !uri.host.isNullOrBlank()
         } catch (e: Exception) {
-            SdkLog.w("$TAG isWellFormedHttpsUrl: URI parse failed for url='$url'", e)
+            SdkLog.w("$TAG failureCategory=UrlParse exceptionType=${e.javaClass.simpleName}")
             false
         }
     }
 
     private suspend fun resolveDidWebUrl(didUrl: String): String? {
-        SdkLog.i("$TAG resolveDidWebUrl: didUrl='$didUrl'")
         val did = didUrl.substringBefore('?')
-        val serviceName = didUrlQueryParameter(didUrl, "service") ?: "IdentityHub"
+        val requestedServiceName = didUrlQueryParameter(didUrl, "service")
+        val serviceName = requestedServiceName ?: "IdentityHub"
         val queries = didUrlQueryParameter(didUrl, "queries")
-        SdkLog.i("$TAG resolveDidWebUrl: did='$did' serviceName='$serviceName' queriesPresent=${queries != null}")
+        SdkLog.i(
+            "$TAG path=DidWeb serviceParameterPresent=${requestedServiceName != null}" +
+                " queriesPresent=${queries != null}"
+        )
 
         val didDocumentUrl = didWebToDocumentUrl(did) ?: run {
-            SdkLog.w("$TAG resolveDidWebUrl: didWebToDocumentUrl returned null for did='$did'")
+            SdkLog.w("$TAG failureCategory=DidWebDocumentUrlResolution")
             return null
         }
-        SdkLog.i("$TAG resolveDidWebUrl: fetching DID doc at '$didDocumentUrl'")
+        SdkLog.i("$TAG resolveDidWebUrl: DID document URL resolved")
 
         val response = apiProvider.statusListApi.getStatusListCredential(didDocumentUrl).getOrElse {
-            SdkLog.w("$TAG resolveDidWebUrl: DID doc fetch threw", it)
+            SdkLog.w("$TAG failureCategory=DidWebDocumentFetch exceptionType=${it.javaClass.simpleName}")
             return null
         }
         SdkLog.i("$TAG resolveDidWebUrl: DID doc HTTP ${response.status}")
@@ -208,10 +218,10 @@ internal class StatusCheckService(
                     try { endpoint.jsonArray.firstOrNull()?.jsonPrimitive?.content } catch (_: Exception) { null }
                 }
             } ?: run {
-                SdkLog.w("$TAG resolveDidWebUrl: no matching service endpoint for '$serviceName'")
+                SdkLog.w("$TAG failureCategory=DidWebServiceEndpointMissing")
                 return null
             }
-            SdkLog.i("$TAG resolveDidWebUrl: serviceEndpoint='$serviceEndpoint'")
+            SdkLog.i("$TAG resolveDidWebUrl: serviceEndpointPresent=true queriesForwarded=${queries != null}")
 
             if (queries != null) {
                 Uri.parse(serviceEndpoint).buildUpon()
@@ -222,7 +232,7 @@ internal class StatusCheckService(
                 serviceEndpoint
             }
         } catch (e: Exception) {
-            SdkLog.w("$TAG resolveDidWebUrl: parse threw", e)
+            SdkLog.w("$TAG failureCategory=DidWebDocumentParse exceptionType=${e.javaClass.simpleName}")
             null
         }
     }
@@ -283,7 +293,7 @@ internal class StatusCheckService(
             // Reject an expired (replayed) list; no exp = no constraint.
             val exp = root["exp"]?.jsonPrimitive?.longOrNull
             if (exp != null && exp + STATUS_LIST_CLOCK_SKEW_SECONDS < Date().time / 1000) {
-                SdkLog.w("$TAG extractStatusListInfo: status list JWT is expired (exp=$exp)")
+                SdkLog.w("$TAG extractStatusListInfo: status list JWT is expired")
                 return null
             }
             val subject = root["credentialSubject"]?.jsonObject
@@ -298,10 +308,13 @@ internal class StatusCheckService(
                     return null
                 }
             val statusPurpose = subject["statusPurpose"]?.jsonPrimitive?.content ?: STATUS_PURPOSE_REVOCATION
-            SdkLog.i("$TAG extractStatusListInfo: signed-JWT verified (encodedListLen=${encodedList.length} statusPurpose=$statusPurpose)")
+            SdkLog.i(
+                "$TAG extractStatusListInfo: signed-JWT verified" +
+                    " encodedListPresent=true statusPurpose=${statusPurposeForLog(statusPurpose)}"
+            )
             Pair(encodedList, statusPurpose)
         } catch (e: Exception) {
-            SdkLog.w("$TAG extractStatusListInfo: failed to verify/parse status list response", e)
+            SdkLog.w("$TAG failureCategory=StatusListVerificationOrParse exceptionType=${e.javaClass.simpleName}")
             null
         }
     }
@@ -321,7 +334,7 @@ internal class StatusCheckService(
             val decoded = Base64.decode(encodedList, Constants.BASE64_URL_SAFE)
             GZIPInputStream(ByteArrayInputStream(decoded)).readBytes()
         } catch (e: Exception) {
-            SdkLog.w("$TAG decodeAndDecompress: failed to base64-decode or GZIP-decompress status list", e)
+            SdkLog.w("$TAG failureCategory=StatusListDecodeOrDecompress exceptionType=${e.javaClass.simpleName}")
             null
         }
     }
@@ -330,6 +343,12 @@ internal class StatusCheckService(
     private fun statusPurposeMatches(descriptor: CredentialStatusDescriptor, listStatusPurpose: String): Boolean {
         val declared = descriptor.statusPurpose
         return declared.isEmpty() || declared == listStatusPurpose
+    }
+
+    private fun statusPurposeForLog(statusPurpose: String): String = when (statusPurpose) {
+        STATUS_PURPOSE_REVOCATION, STATUS_PURPOSE_SUSPENSION -> statusPurpose
+        "" -> "missing"
+        else -> "other"
     }
 
     /**
@@ -379,7 +398,7 @@ internal class StatusCheckService(
         // POST CollectionsQuery to IdentityHub
         val requestBody = buildCollectionsQueryBody(issuerDid, objectId)
         val queryResponse = apiProvider.statusListApi.postCollectionsQuery(hubUrl, requestBody).getOrElse {
-            SdkLog.w("$TAG result=Unknown (IdentityHub path: CollectionsQuery POST failed)", it)
+            SdkLog.w("$TAG result=Unknown path=IdentityHub failureCategory=CollectionsQueryPost exceptionType=${it.javaClass.simpleName}")
             return VerifiedIdStatus.Unknown
         }
         if (queryResponse.status !in HTTP_SUCCESS_RANGE) {
@@ -404,7 +423,11 @@ internal class StatusCheckService(
             val (encodedList, statusPurpose) = statusListInfo
 
             if (!statusPurposeMatches(descriptor, statusPurpose)) {
-                SdkLog.w("$TAG result=Unknown (IdentityHub path: statusPurpose mismatch: credential=${descriptor.statusPurpose}, list=$statusPurpose)")
+                SdkLog.w(
+                    "$TAG result=Unknown path=IdentityHub failureCategory=StatusPurposeMismatch" +
+                        " credentialPurpose=${statusPurposeForLog(descriptor.statusPurpose)}" +
+                        " listPurpose=${statusPurposeForLog(statusPurpose)}"
+                )
                 return VerifiedIdStatus.Unknown
             }
 
@@ -426,10 +449,10 @@ internal class StatusCheckService(
                 STATUS_PURPOSE_SUSPENSION -> VerifiedIdStatus.Suspended
                 else -> VerifiedIdStatus.Revoked
             }
-            SdkLog.i("$TAG result=$result (path=IdentityHub, statusPurpose=$statusPurpose)")
+            SdkLog.i("$TAG result=$result path=IdentityHub statusPurpose=${statusPurposeForLog(statusPurpose)}")
             result
         } catch (e: Exception) {
-            SdkLog.w("$TAG result=Unknown (IdentityHub path: exception while checking status list)", e)
+            SdkLog.w("$TAG result=Unknown path=IdentityHub failureCategory=StatusListCheck exceptionType=${e.javaClass.simpleName}")
             VerifiedIdStatus.Unknown
         }
     }
@@ -440,7 +463,7 @@ internal class StatusCheckService(
             .linkedDomainsService
             .resolveIdentifierDocument(issuerDid)
             .getOrElse {
-                SdkLog.w("$TAG result=Unknown (IdentityHub path: DID document resolution failed)", it)
+                SdkLog.w("$TAG result=Unknown path=IdentityHub failureCategory=DidDocumentResolution exceptionType=${it.javaClass.simpleName}")
                 return null
             }
         return identifierDoc.service
@@ -475,7 +498,7 @@ internal class StatusCheckService(
                 firstEntry["objectId"]?.jsonPrimitive?.content
                     ?: run { SdkLog.w("$TAG resolveIdentityHubObjectId: objectId not found in queries entry"); null }
             } catch (e: Exception) {
-                SdkLog.w("$TAG resolveIdentityHubObjectId: failed to decode/parse queries parameter", e)
+                SdkLog.w("$TAG failureCategory=IdentityHubQueriesDecodeOrParse exceptionType=${e.javaClass.simpleName}")
                 null
             }
         }
@@ -530,7 +553,7 @@ internal class StatusCheckService(
             SdkLog.w("$TAG IdentityHub envelope fallback: no signed status-list JWT found in replies[].entries[].data")
             null
         } catch (e: Exception) {
-            SdkLog.w("$TAG IdentityHub envelope fallback: parse threw", e)
+            SdkLog.w("$TAG failureCategory=IdentityHubEnvelopeParse exceptionType=${e.javaClass.simpleName}")
             null
         }
     }
@@ -561,7 +584,7 @@ internal class StatusCheckService(
             val text = Base64.decode(encoded, Constants.BASE64_URL_SAFE).decodeToString()
             if (text.startsWith("eyJ") || text.trimStart().startsWith("{")) text else null
         } catch (e: Exception) {
-            SdkLog.d("$TAG base64DecodeToString: failed to base64-decode data field", e)
+            SdkLog.d("$TAG base64DecodeToString: failureCategory=DataFieldDecode exceptionType=${e.javaClass.simpleName}")
             null
         }
     }
