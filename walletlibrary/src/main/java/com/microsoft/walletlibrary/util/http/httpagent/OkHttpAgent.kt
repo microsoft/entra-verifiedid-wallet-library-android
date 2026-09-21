@@ -22,7 +22,20 @@ class OkHttpAgent : IHttpAgent() {
             .headers(mapToHeaders(headers))
             .build()
 
-        return call(request)
+        return call(request, client)
+    }
+
+    override suspend fun getWithoutRedirects(url: String, headers: Map<String, String>): Result<IResponse> {
+        val request = Request.Builder()
+            .url(url)
+            .headers(mapToHeaders(headers))
+            .build()
+        val noRedirectClient = client.newBuilder()
+            .followRedirects(false)
+            .followSslRedirects(false)
+            .build()
+
+        return call(request, noRedirectClient)
     }
 
     override suspend fun post(
@@ -36,12 +49,12 @@ class OkHttpAgent : IHttpAgent() {
             .post(payload.toRequestBody())
             .build()
 
-        return call(request)
+        return call(request, client)
     }
 
-    private suspend fun call(request: Request): Result<IResponse> {
+    private suspend fun call(request: Request, requestClient: OkHttpClient): Result<IResponse> {
         return suspendCoroutine<Result<IResponse>> {
-            client.newCall(request).enqueue(object: Callback {
+            requestClient.newCall(request).enqueue(object: Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     it.resumeWithException(e)
                 }

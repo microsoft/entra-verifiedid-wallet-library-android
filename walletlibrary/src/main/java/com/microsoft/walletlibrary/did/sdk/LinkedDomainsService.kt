@@ -16,7 +16,8 @@ import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.mappings.toLinkedDomainResult
-import java.net.URL
+import java.net.URI
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -88,14 +89,22 @@ internal class LinkedDomainsService @Inject constructor(
         if (domainUrls.isEmpty())
             return Result.success(LinkedDomainMissing)
         val domainUrl = domainUrls.first()
-        val hostname = URL(domainUrl).host
-        getWellKnownConfigDocument(domainUrl)
+        val domainOrigin = runCatching {
+            canonicalizeLinkedDomainOrigin(domainUrl)
+        }.getOrElse { _ ->
+            val hostname = runCatching { URI(domainUrl).host }.getOrNull()
+                ?: return Result.success(LinkedDomainMissing)
+            SdkLog.w("Rejected invalid Linked Domains service endpoint")
+            return Result.success(LinkedDomainUnVerified(hostname))
+        }
+        val hostname = URI(domainOrigin).host
+        getWellKnownConfigDocument(domainOrigin)
             .onSuccess { wellKnownConfigDocument ->
                 wellKnownConfigDocument.linkedDids.firstNotNullOf { linkedDidJwt ->
                     val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(
                         linkedDidJwt,
                         relyingPartyDid,
-                        domainUrl
+                        domainOrigin
                     )
                     return if (isDomainLinked)
                         Result.success(LinkedDomainVerified(hostname))
@@ -104,10 +113,34 @@ internal class LinkedDomainsService @Inject constructor(
                 }
             }
             .onFailure {
-                SdkLog.w("Unable to fetch well-known config document from $domainUrl because of ${it.message}")
+                SdkLog.w("Unable to fetch well-known config document from $domainOrigin because of ${it.message}")
                 return Result.success(LinkedDomainUnVerified(hostname))
             }
         return Result.success(LinkedDomainMissing)
+    }
+
+    private fun canonicalizeLinkedDomainOrigin(domainUrl: String): String {
+        val endpoint = URI(domainUrl)
+        require(!endpoint.isOpaque)
+        require(endpoint.scheme.equals("https", ignoreCase = true))
+        require(endpoint.rawAuthority != null)
+        require(endpoint.rawUserInfo == null)
+        require(!endpoint.host.isNullOrBlank())
+        require(endpoint.rawPath.isNullOrEmpty() || endpoint.rawPath == "/")
+        require(endpoint.rawQuery == null)
+        require(endpoint.rawFragment == null)
+        require(endpoint.port == -1 || endpoint.port in 1..65535)
+
+        val port = endpoint.port.takeUnless { it == 443 } ?: -1
+        return URI(
+            "https",
+            null,
+            endpoint.host.lowercase(Locale.ROOT),
+            port,
+            null,
+            null,
+            null
+        ).toASCIIString()
     }
 
     private fun getLinkedDomainsFromDidDocument(identifierDocument: IdentifierDocument): List<String> {
