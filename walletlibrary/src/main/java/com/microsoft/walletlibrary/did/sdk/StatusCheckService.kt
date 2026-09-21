@@ -55,6 +55,13 @@ internal class StatusCheckService(
         // W3C StatusList2021 statusPurpose values.
         const val STATUS_PURPOSE_REVOCATION = "revocation"
         const val STATUS_PURPOSE_SUSPENSION = "suspension"
+
+        const val LOG_PATH_DIRECT_URL = "DirectUrl"
+        const val LOG_PATH_DID_WEB = "DidWeb"
+        const val LOG_PATH_ALTERNATE = "Alternate"
+        const val LOG_PATH_IDENTITY_HUB = "IdentityHub"
+        const val LOG_STATUS_PURPOSE_MISSING = "missing"
+        const val LOG_STATUS_PURPOSE_OTHER = "other"
     }
 
     suspend fun checkVerifiedIdStatus(verifiedId: VerifiedId): VerifiedIdStatus {
@@ -92,9 +99,9 @@ internal class StatusCheckService(
                 " issuerPresent=${issuerDid.isNotBlank()}"
         )
         val resolutionPath = when {
-            statusCredRaw.startsWith("https://") -> "DirectUrl"
-            statusCredRaw.startsWith("did:web:") -> "DidWeb"
-            else -> "Alternate"
+            statusCredRaw.startsWith("https://") -> LOG_PATH_DIRECT_URL
+            statusCredRaw.startsWith("did:web:") -> LOG_PATH_DID_WEB
+            else -> LOG_PATH_ALTERNATE
         }
         val url = resolveStatusListUrl(statusCredRaw)
         SdkLog.i("$TAG path=$resolutionPath urlResolved=${url != null}")
@@ -180,7 +187,7 @@ internal class StatusCheckService(
         val serviceName = requestedServiceName ?: "IdentityHub"
         val queries = didUrlQueryParameter(didUrl, "queries")
         SdkLog.i(
-            "$TAG path=DidWeb serviceParameterPresent=${requestedServiceName != null}" +
+            "$TAG path=$LOG_PATH_DID_WEB serviceParameterPresent=${requestedServiceName != null}" +
                 " queriesPresent=${queries != null}"
         )
 
@@ -347,8 +354,8 @@ internal class StatusCheckService(
 
     private fun statusPurposeForLog(statusPurpose: String): String = when (statusPurpose) {
         STATUS_PURPOSE_REVOCATION, STATUS_PURPOSE_SUSPENSION -> statusPurpose
-        "" -> "missing"
-        else -> "other"
+        "" -> LOG_STATUS_PURPOSE_MISSING
+        else -> LOG_STATUS_PURPOSE_OTHER
     }
 
     /**
@@ -373,7 +380,7 @@ internal class StatusCheckService(
     ): VerifiedIdStatus {
         val statusCred = descriptor.effectiveStatusListCredential
         if ((statusCred.startsWith("did:") || descriptor.id.startsWith("urn:uuid:")) && issuerDid.isNotEmpty()) {
-            SdkLog.i("$TAG path=IdentityHub")
+            SdkLog.i("$TAG path=$LOG_PATH_IDENTITY_HUB")
             return checkStatusViaIdentityHub(descriptor, issuerDid)
         }
         SdkLog.w("$TAG result=Unknown (status list credential is neither a fetchable URL, a did: relative URL, nor a urn:uuid)")
@@ -398,7 +405,7 @@ internal class StatusCheckService(
         // POST CollectionsQuery to IdentityHub
         val requestBody = buildCollectionsQueryBody(issuerDid, objectId)
         val queryResponse = apiProvider.statusListApi.postCollectionsQuery(hubUrl, requestBody).getOrElse {
-            SdkLog.w("$TAG result=Unknown path=IdentityHub failureCategory=CollectionsQueryPost exceptionType=${it.javaClass.simpleName}")
+            SdkLog.w("$TAG result=Unknown path=$LOG_PATH_IDENTITY_HUB failureCategory=CollectionsQueryPost exceptionType=${it.javaClass.simpleName}")
             return VerifiedIdStatus.Unknown
         }
         if (queryResponse.status !in HTTP_SUCCESS_RANGE) {
@@ -424,7 +431,7 @@ internal class StatusCheckService(
 
             if (!statusPurposeMatches(descriptor, statusPurpose)) {
                 SdkLog.w(
-                    "$TAG result=Unknown path=IdentityHub failureCategory=StatusPurposeMismatch" +
+                    "$TAG result=Unknown path=$LOG_PATH_IDENTITY_HUB failureCategory=StatusPurposeMismatch" +
                         " credentialPurpose=${statusPurposeForLog(descriptor.statusPurpose)}" +
                         " listPurpose=${statusPurposeForLog(statusPurpose)}"
                 )
@@ -449,10 +456,10 @@ internal class StatusCheckService(
                 STATUS_PURPOSE_SUSPENSION -> VerifiedIdStatus.Suspended
                 else -> VerifiedIdStatus.Revoked
             }
-            SdkLog.i("$TAG result=$result path=IdentityHub statusPurpose=${statusPurposeForLog(statusPurpose)}")
+            SdkLog.i("$TAG result=$result path=$LOG_PATH_IDENTITY_HUB statusPurpose=${statusPurposeForLog(statusPurpose)}")
             result
         } catch (e: Exception) {
-            SdkLog.w("$TAG result=Unknown path=IdentityHub failureCategory=StatusListCheck exceptionType=${e.javaClass.simpleName}")
+            SdkLog.w("$TAG result=Unknown path=$LOG_PATH_IDENTITY_HUB failureCategory=StatusListCheck exceptionType=${e.javaClass.simpleName}")
             VerifiedIdStatus.Unknown
         }
     }
@@ -463,7 +470,7 @@ internal class StatusCheckService(
             .linkedDomainsService
             .resolveIdentifierDocument(issuerDid)
             .getOrElse {
-                SdkLog.w("$TAG result=Unknown path=IdentityHub failureCategory=DidDocumentResolution exceptionType=${it.javaClass.simpleName}")
+                SdkLog.w("$TAG result=Unknown path=$LOG_PATH_IDENTITY_HUB failureCategory=DidDocumentResolution exceptionType=${it.javaClass.simpleName}")
                 return null
             }
         return identifierDoc.service
