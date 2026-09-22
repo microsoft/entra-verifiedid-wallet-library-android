@@ -432,8 +432,7 @@ class StatusCheckServiceTest {
     fun checkVerifiedIdStatus_identityHub_envelopeWithBase64JwtEntry_bitSet_returnsRevoked() {
         val descriptor = CredentialStatusDescriptor(
             id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=7",
-            type = "RevocationList2021Status",
-            revocationListIndex = 7
+            type = "RevocationList2021Status"
         )
         val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
         val identifierDoc = IdentifierDocument(id = "did:web:issuer.example").apply {
@@ -493,8 +492,7 @@ class StatusCheckServiceTest {
         // Some IdentityHub implementations return the status list JWT directly (not wrapped in envelope)
         val descriptor = CredentialStatusDescriptor(
             id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=7",
-            type = "RevocationList2021Status",
-            revocationListIndex = 7
+            type = "RevocationList2021Status"
         )
         val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
         val identifierDoc = IdentifierDocument(id = "did:web:issuer.example").apply {
@@ -565,25 +563,25 @@ class StatusCheckServiceTest {
     }
 
     @Test
-    fun didUrlQueryParameter_opaqueDidUrl_returnsNull() {
+    fun didUrlQueryParameter_didWebServiceAndQueries_returnsValues() {
         val url = "did:web:example.com?service=IdentityHub&queries=eyJhIjoxfQ"
-        assertNull(invokeDidUrlQueryParameter(url, "service"))
-        assertNull(invokeDidUrlQueryParameter(url, "queries"))
+        assertEquals("IdentityHub", invokeDidUrlQueryParameter(url, "service"))
+        assertEquals("eyJhIjoxfQ", invokeDidUrlQueryParameter(url, "queries"))
     }
 
     @Test
-    fun didUrlQueryParameter_opaqueUrnUuid_returnsNull() {
-        assertNull(invokeDidUrlQueryParameter("urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=42", "bit-index"))
+    fun didUrlQueryParameter_urnUuidBitIndex_returnsValue() {
+        assertEquals("42", invokeDidUrlQueryParameter("urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=42", "bit-index"))
     }
 
     @Test
-    fun didUrlQueryParameter_opaquePercentEncodedValue_returnsNull() {
-        assertNull(invokeDidUrlQueryParameter("did:web:example.com?x=a%2Fb%20c", "x"))
+    fun didUrlQueryParameter_percentEncodedValue_isUrlDecoded() {
+        assertEquals("a/b c", invokeDidUrlQueryParameter("did:web:example.com?x=a%2Fb%20c", "x"))
     }
 
     @Test
-    fun didUrlQueryParameter_opaqueUrlWithFragment_returnsNull() {
-        assertNull(invokeDidUrlQueryParameter("did:web:example.com?service=IdentityHub#frag", "service"))
+    fun didUrlQueryParameter_fragmentIsExcluded() {
+        assertEquals("IdentityHub", invokeDidUrlQueryParameter("did:web:example.com?service=IdentityHub#frag", "service"))
     }
 
     @Test
@@ -597,8 +595,8 @@ class StatusCheckServiceTest {
     }
 
     @Test
-    fun didUrlQueryParameter_opaqueUrlWithEmptyValue_returnsNull() {
-        assertNull(invokeDidUrlQueryParameter("did:web:example.com?service=", "service"))
+    fun didUrlQueryParameter_keyWithEmptyValue_returnsEmptyString() {
+        assertEquals("", invokeDidUrlQueryParameter("did:web:example.com?service=", "service"))
     }
 
     private companion object {
