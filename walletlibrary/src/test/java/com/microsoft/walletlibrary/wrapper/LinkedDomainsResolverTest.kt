@@ -19,8 +19,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.spyk
+import io.mockk.unmockkAll
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import kotlin.Result as KotlinResult
 
@@ -29,9 +33,16 @@ class LinkedDomainsResolverTest {
     private val mockIdentifierDocument: IdentifierDocument = mockk()
     private val expectedDomain = "testdomain"
 
-    init {
+    @Before
+    fun setUp() {
+        unmockkAll()
         mockkStatic(VerifiableCredentialSdk::class)
         every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinkedDomainsService
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic(VerifiableCredentialSdk::class)
     }
 
     @Test

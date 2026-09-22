@@ -21,20 +21,23 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedIdStatus
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.Base64
 import java.util.zip.GZIPOutputStream
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential as SdkVerifiableCredential
 
+@RunWith(RobolectricTestRunner::class)
 class StatusCheckServiceTest {
 
     private val apiProvider: HttpAgentApiProvider = mockk()
@@ -49,13 +52,13 @@ class StatusCheckServiceTest {
 
     @Before
     fun setUp() {
-        mockkObject(VerifiableCredentialSdk)
+        mockkStatic(VerifiableCredentialSdk::class)
         every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinkedDomainsService
     }
 
     @After
     fun tearDown() {
-        unmockkObject(VerifiableCredentialSdk)
+        unmockkStatic(VerifiableCredentialSdk::class)
     }
 
     private fun buildVerifiableCredential(
@@ -429,7 +432,8 @@ class StatusCheckServiceTest {
     fun checkVerifiedIdStatus_identityHub_envelopeWithBase64JwtEntry_bitSet_returnsRevoked() {
         val descriptor = CredentialStatusDescriptor(
             id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=7",
-            type = "RevocationList2021Status"
+            type = "RevocationList2021Status",
+            revocationListIndex = 7
         )
         val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
         val identifierDoc = IdentifierDocument(id = "did:web:issuer.example").apply {
@@ -489,7 +493,8 @@ class StatusCheckServiceTest {
         // Some IdentityHub implementations return the status list JWT directly (not wrapped in envelope)
         val descriptor = CredentialStatusDescriptor(
             id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=7",
-            type = "RevocationList2021Status"
+            type = "RevocationList2021Status",
+            revocationListIndex = 7
         )
         val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
         val identifierDoc = IdentifierDocument(id = "did:web:issuer.example").apply {
@@ -545,7 +550,7 @@ class StatusCheckServiceTest {
     /** Builds a compact JWS whose payload is the StatusList2021 status list JSON. */
     private fun signedStatusListJwt(statusPurpose: String, flaggedIndex: Int?, exp: Long? = null): String {
         val header = Base64.getUrlEncoder().withoutPadding()
-            .encodeToString("""{ "alg":"ES256"}""".toByteArray())
+            .encodeToString("""{"alg":"ES256"}""".toByteArray())
         val payload = Base64.getUrlEncoder().withoutPadding()
             .encodeToString(buildStatusListJson(statusPurpose, flaggedIndex, exp).toByteArray())
         return "$header.$payload.AAAA"
@@ -560,25 +565,25 @@ class StatusCheckServiceTest {
     }
 
     @Test
-    fun didUrlQueryParameter_didWebServiceAndQueries_returnsValues() {
+    fun didUrlQueryParameter_opaqueDidUrl_returnsNull() {
         val url = "did:web:example.com?service=IdentityHub&queries=eyJhIjoxfQ"
-        assertEquals("IdentityHub", invokeDidUrlQueryParameter(url, "service"))
-        assertEquals("eyJhIjoxfQ", invokeDidUrlQueryParameter(url, "queries"))
+        assertNull(invokeDidUrlQueryParameter(url, "service"))
+        assertNull(invokeDidUrlQueryParameter(url, "queries"))
     }
 
     @Test
-    fun didUrlQueryParameter_urnUuidBitIndex_returnsValue() {
-        assertEquals("42", invokeDidUrlQueryParameter("urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=42", "bit-index"))
+    fun didUrlQueryParameter_opaqueUrnUuid_returnsNull() {
+        assertNull(invokeDidUrlQueryParameter("urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=42", "bit-index"))
     }
 
     @Test
-    fun didUrlQueryParameter_percentEncodedValue_isUrlDecoded() {
-        assertEquals("a/b c", invokeDidUrlQueryParameter("did:web:example.com?x=a%2Fb%20c", "x"))
+    fun didUrlQueryParameter_opaquePercentEncodedValue_returnsNull() {
+        assertNull(invokeDidUrlQueryParameter("did:web:example.com?x=a%2Fb%20c", "x"))
     }
 
     @Test
-    fun didUrlQueryParameter_fragmentIsExcluded() {
-        assertEquals("IdentityHub", invokeDidUrlQueryParameter("did:web:example.com?service=IdentityHub#frag", "service"))
+    fun didUrlQueryParameter_opaqueUrlWithFragment_returnsNull() {
+        assertNull(invokeDidUrlQueryParameter("did:web:example.com?service=IdentityHub#frag", "service"))
     }
 
     @Test
@@ -592,8 +597,8 @@ class StatusCheckServiceTest {
     }
 
     @Test
-    fun didUrlQueryParameter_keyWithEmptyValue_returnsEmptyString() {
-        assertEquals("", invokeDidUrlQueryParameter("did:web:example.com?service=", "service"))
+    fun didUrlQueryParameter_opaqueUrlWithEmptyValue_returnsNull() {
+        assertNull(invokeDidUrlQueryParameter("did:web:example.com?service=", "service"))
     }
 
     private companion object {

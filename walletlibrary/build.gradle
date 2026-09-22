@@ -142,6 +142,7 @@ dependencies {
     testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.21'
     testImplementation "org.assertj:assertj-core:$assertj_test_version"
     testImplementation "junit:junit:$junit_version"
+    testImplementation "org.robolectric:robolectric:$robolectric_version"
 }
 
 project.afterEvaluate {
