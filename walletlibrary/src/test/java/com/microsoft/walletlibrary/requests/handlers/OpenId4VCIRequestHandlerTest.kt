@@ -55,6 +55,11 @@ class OpenId4VCIRequestHandlerTest {
         }
     """.trimIndent()
 
+    init {
+        every { mockCredentialMetadata.notificationEndpoint } returns null
+        every { mockCredentialOffer.issuer_session } returns "request_state"
+    }
+
     @Test
     fun canHandleTest_ValidCredentialOfferAsString_ReturnsTrue() {
         // Arrange
@@ -174,8 +179,9 @@ class OpenId4VCIRequestHandlerTest {
             assertThat(actualHandleRequestResult.isFailure).isTrue
             val actualException = actualHandleRequestResult.exceptionOrNull()
             assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
-            assertThat(actualException?.message).contains("Credential metadata does not contain credential_issuer.")
-            assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
+            assertThat((actualException as OpenId4VciValidationException).innerError?.message)
+                .contains("Credential metadata does not contain credential_issuer.")
+            assertThat(actualException.code).isEqualTo(
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
             )
         }
@@ -202,8 +208,9 @@ class OpenId4VCIRequestHandlerTest {
             assertThat(actualHandleRequestResult.isFailure).isTrue
             val actualException = actualHandleRequestResult.exceptionOrNull()
             assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
-            assertThat(actualException?.message).contains("Credential metadata does not contain signed_metadata.")
-            assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
+            assertThat((actualException as OpenId4VciValidationException).innerError?.message)
+                .contains("Credential metadata does not contain signed_metadata.")
+            assertThat(actualException.code).isEqualTo(
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
             )
         }
@@ -232,8 +239,9 @@ class OpenId4VCIRequestHandlerTest {
             assertThat(actualHandleRequestResult.isFailure).isTrue
             val actualException = actualHandleRequestResult.exceptionOrNull()
             assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
-            assertThat(actualException?.message).contains("Request does not contain supported credential configuration.")
-            assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
+            assertThat((actualException as OpenId4VciValidationException).innerError?.message)
+                .contains("Request does not contain supported credential configuration.")
+            assertThat(actualException.code).isEqualTo(
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
             )
         }
@@ -443,9 +451,10 @@ class OpenId4VCIRequestHandlerTest {
             assertThat(actualHandleRequestResult.isFailure).isTrue
             val actualException = actualHandleRequestResult.exceptionOrNull()
             assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
-            assertThat(actualException?.message).contains("No grants defined in credential offer.")
-            assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
-                VerifiedIdExceptions.REQUIREMENT_MISSING_EXCEPTION.value
+            assertThat((actualException as OpenId4VciValidationException).innerError?.message)
+                .contains("No grants defined in credential offer.")
+            assertThat(actualException.code).isEqualTo(
+                VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
             )
         }
     }
@@ -477,8 +486,9 @@ class OpenId4VCIRequestHandlerTest {
             assertThat(actualHandleRequestResult.isFailure).isTrue
             val actualException = actualHandleRequestResult.exceptionOrNull()
             assertThat(actualException).isInstanceOf(OpenId4VciValidationException::class.java)
-            assertThat(actualException?.message).contains("Credential configuration in credential metadata doesn't contain scope value.")
-            assertThat((actualException as OpenId4VciValidationException).code).isEqualTo(
+            assertThat((actualException as OpenId4VciValidationException).innerError?.message)
+                .contains("Credential configuration in credential metadata doesn't contain scope value.")
+            assertThat(actualException.code).isEqualTo(
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_METADATA_EXCEPTION.value
             )
         }

@@ -260,15 +260,24 @@ internal class StatusCheckService(
         return builder.build().toString()
     }
 
-    /**
-     * Reads a query parameter from a `did:` or `urn:` URL using [Uri.parse]. Android's Uri handles
-     * both opaque and hierarchical URI formats and URL-decodes the value automatically.
-     */
+    /** Reads and URL-decodes a query parameter from hierarchical and opaque URI schemes. */
     private fun didUrlQueryParameter(url: String, key: String): String? {
-        return try {
-            Uri.parse(url).getQueryParameter(key)
-        } catch (_: Exception) {
-            null
+        val queryStart = url.indexOf('?')
+        val fragmentStart = url.indexOf('#')
+        if (queryStart < 0 || fragmentStart in 0..<queryStart) {
+            return null
+        }
+
+        val queryEnd = fragmentStart.takeIf { it > queryStart } ?: url.length
+        val query = url.substring(queryStart + 1, queryEnd)
+        return query.split('&').firstNotNullOfOrNull { parameter ->
+            val separator = parameter.indexOf('=')
+            val encodedName = if (separator < 0) parameter else parameter.substring(0, separator)
+            if (Uri.decode(encodedName) != key) {
+                return@firstNotNullOfOrNull null
+            }
+
+            Uri.decode(if (separator < 0) "" else parameter.substring(separator + 1))
         }
     }
 

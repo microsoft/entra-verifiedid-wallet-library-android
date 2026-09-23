@@ -118,6 +118,7 @@ internal class PresentationExchangeResponseBuilderTest {
         every { libraryConfiguration.serializer } returns serializer
         every { libraryConfiguration.identifierFactory } returns mockIdentifierFactory
         every { mockIdentifierFactory.getIdentifier() } returns identifier
+        every { mockIdentifierFactory.getIdentifier(any()) } returns identifier
         assertTrue(firstRequirement.fulfill(firstVerifiedId).isSuccess)
         assertTrue(secondRequirement.fulfill(secondVerifiedId).isSuccess)
         assertTrue(otherRequirement.fulfill(otherVerifiedId).isSuccess)
@@ -259,7 +260,7 @@ internal class PresentationExchangeResponseBuilderTest {
         } returns signedPayload
         val requirement = GroupRequirement(
             true,
-            mutableListOf(unmetRequirement, firstRequirement),
+            mutableListOf(firstRequirement, unmetRequirement),
             GroupRequirementOperator.ANY
         )
         // Act

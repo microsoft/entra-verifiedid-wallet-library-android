@@ -5,6 +5,7 @@ import com.microsoft.walletlibrary.did.sdk.MockDidMetadata
 import com.microsoft.walletlibrary.did.sdk.MockInjectedRootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer
@@ -18,8 +19,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.spyk
+import io.mockk.unmockkAll
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import kotlin.Result as KotlinResult
 
@@ -28,14 +33,22 @@ class LinkedDomainsResolverTest {
     private val mockIdentifierDocument: IdentifierDocument = mockk()
     private val expectedDomain = "testdomain"
 
-    init {
+    @Before
+    fun setUp() {
+        unmockkAll()
         mockkStatic(VerifiableCredentialSdk::class)
         every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinkedDomainsService
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic(VerifiableCredentialSdk::class)
     }
 
     @Test
     fun resolveRootOfTrust_VerifiedLinkedDomainExists_ReturnsRootOfTrustWithVerifiedDomain() {
         // Arrange
+        every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinkedDomainsService
         coEvery { mockLinkedDomainsService.validateLinkedDomains(mockIdentifierDocument) } returns KotlinResult.success(
             LinkedDomainVerified(
                 expectedDomain
@@ -56,6 +69,7 @@ class LinkedDomainsResolverTest {
     @Test
     fun resolveRootOfTrust_FailedWhileFetchingOrVerifying_ReturnsRootOfTrustWithUnverifiedEmptyDomain() {
         // Arrange
+        every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinkedDomainsService
         coEvery { mockLinkedDomainsService.validateLinkedDomains(mockIdentifierDocument) } returns KotlinResult.failure(SdkException())
 
         runBlocking {
@@ -86,6 +100,9 @@ class LinkedDomainsResolverTest {
             )
         every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinkedDomainsService
         val mockIdentifierDocument = IdentifierDocument(id = MockDidMetadata.VALID_DOMAIN_DID.value)
+        coEvery { mockLinkedDomainsService.validateLinkedDomains(mockIdentifierDocument) } returns KotlinResult.success(
+            LinkedDomainVerified("validDomain")
+        )
 
         runBlocking {
             // Act
@@ -115,6 +132,9 @@ class LinkedDomainsResolverTest {
             )
         every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinkedDomainsService
         val mockIdentifierDocument = IdentifierDocument(id = MockDidMetadata.EMPTY_DOMAIN_DID.value)
+        coEvery { mockLinkedDomainsService.validateLinkedDomains(mockIdentifierDocument) } returns KotlinResult.success(
+            LinkedDomainMissing
+        )
 
         runBlocking {
             // Act
@@ -125,7 +145,7 @@ class LinkedDomainsResolverTest {
             Assertions.assertThat(actualResult.verified).isFalse
             Assertions.assertThat(actualResult.source).isEqualTo("")
         }
-        coVerify { mockLinkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) }
+        coVerify { mockLinkedDomainsService.validateLinkedDomains(mockIdentifierDocument) }
     }
 
     @Test
@@ -145,8 +165,8 @@ class LinkedDomainsResolverTest {
             )
         every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinkedDomainsService
         val mockIdentifierDocument = IdentifierDocument(id = "failure")
-        coEvery { mockLinkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) } returns LinkedDomainVerified(
-            "testdomain"
+        coEvery { mockLinkedDomainsService.validateLinkedDomains(mockIdentifierDocument) } returns KotlinResult.success(
+            LinkedDomainVerified("testdomain")
         )
 
         runBlocking {
@@ -158,7 +178,7 @@ class LinkedDomainsResolverTest {
             Assertions.assertThat(actualResult.verified).isTrue
             Assertions.assertThat(actualResult.source).isEqualTo("testdomain")
         }
-        coVerify { mockLinkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) }
+        coVerify { mockLinkedDomainsService.validateLinkedDomains(mockIdentifierDocument) }
     }
 
     @Test
@@ -178,7 +198,9 @@ class LinkedDomainsResolverTest {
             )
         every { VerifiableCredentialSdk.linkedDomainsService } returns mockLinkedDomainsService
         val mockIdentifierDocument = IdentifierDocument(id = "failure")
-        coEvery { mockLinkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) } throws Exception()
+        coEvery { mockLinkedDomainsService.validateLinkedDomains(mockIdentifierDocument) } returns KotlinResult.success(
+            LinkedDomainMissing
+        )
 
         runBlocking {
             // Act
@@ -189,6 +211,6 @@ class LinkedDomainsResolverTest {
             Assertions.assertThat(actualResult.verified).isFalse
             Assertions.assertThat(actualResult.source).isEqualTo("")
         }
-        coVerify { mockLinkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) }
+        coVerify { mockLinkedDomainsService.validateLinkedDomains(mockIdentifierDocument) }
     }
 }

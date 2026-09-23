@@ -19,12 +19,18 @@ import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.spyk
+import io.mockk.unmockkAll
 import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class OpenIdURLRequestResolverTest {
     private val mockLibraryConfiguration = mockk<LibraryConfiguration>()
     private val openIdURLRequestResolver = spyk(
@@ -34,8 +40,14 @@ class OpenIdURLRequestResolverTest {
     private var mockVerifiedIdRequestInput: VerifiedIdRequestInput = mockk()
     private var mockVerifiedIdRequestURL: VerifiedIdRequestURL = mockk()
 
-    init {
+    @Before
+    fun setUp() {
         mockkConstructor(FetchOpenID4VCIRequestNetworkOperation::class)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkAll()
     }
 
     @Test
@@ -112,24 +124,25 @@ class OpenIdURLRequestResolverTest {
     }
 
     @Test
-    fun resolve_validURL_ReturnsRawRequest() {
+    fun resolve_validURLWithCredentialOffer_ReturnsCredentialOffer() {
         // Arrange
         mockVerifiedIdRequestURL = mockk()
         every { mockVerifiedIdRequestURL.url.getQueryParameter(Constants.REQUEST_URI) } returns "microsoft.com"
-        val signedRequest = "signed-request"
+        val signedRequest = "header.payload.signature"
+        val processedRequest = mockk<OpenIdProcessedRequest>()
         coEvery { openIdURLRequestResolver["fetchOpenID4VCIRequest"]("microsoft.com") } returns
             Result.success(signedRequest.encodeToByteArray())
         every { mockLibraryConfiguration.isPreviewFeatureEnabled(any()) } returns false
         mockkObject(OpenIdResolver)
         try {
-            coEvery { OpenIdResolver.validateSignedRequest(signedRequest) } returns mockk()
+            coEvery { OpenIdResolver.validateSignedRequest(signedRequest) } returns processedRequest
 
             runBlocking {
                 // Act
                 val actualResult = openIdURLRequestResolver.resolve(mockVerifiedIdRequestURL)
 
                 // Assert
-                assertThat(actualResult).isInstanceOf(OpenIdProcessedRequest::class.java)
+                assertThat(actualResult).isSameAs(processedRequest)
                 coVerify(exactly = 1) { OpenIdResolver.validateSignedRequest(signedRequest) }
             }
         } finally {
