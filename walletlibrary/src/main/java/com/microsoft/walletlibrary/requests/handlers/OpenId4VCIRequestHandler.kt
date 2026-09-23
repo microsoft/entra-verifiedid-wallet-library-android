@@ -56,6 +56,7 @@ class OpenId4VCIRequestHandler internal constructor(
     // Handle and process the provided raw request and returns a VerifiedIdRequest.
     override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
         val credentialOffer = decodeCredentialOffer(rawRequest)
+        validateCredentialIssuer(credentialOffer.credential_issuer)
 
         // Fetch the credential metadata from the credential issuer in credential offer object.
         return fetchCredentialMetadata(credentialOffer.credential_issuer).fold(
@@ -82,6 +83,18 @@ class OpenId4VCIRequestHandler internal constructor(
         } catch (exception: Exception) {
             throw OpenId4VciValidationException(
                 "Failed to decode CredentialOffer ${exception.message}",
+                VerifiedIdExceptions.MALFORMED_CREDENTIAL_OFFER_EXCEPTION.value,
+                exception
+            )
+        }
+    }
+
+    private fun validateCredentialIssuer(credentialIssuer: String) {
+        try {
+            CredentialIssuerOrigin.fromCredentialIssuer(credentialIssuer)
+        } catch (exception: Exception) {
+            throw OpenId4VciValidationException(
+                "Credential issuer is not a valid HTTPS URL",
                 VerifiedIdExceptions.MALFORMED_CREDENTIAL_OFFER_EXCEPTION.value,
                 exception
             )

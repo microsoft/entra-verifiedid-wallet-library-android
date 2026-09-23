@@ -4,7 +4,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
 
 internal object JwaCryptoHelper {
     fun extractDidAndKeyId(keyId: String, validateDid: Boolean = true): Pair<String?, String> {
-        val match = matchDidAndKeyId(keyId)
+        val match = matchDidAndKeyId(keyId, validateDid)
         return match ?: throw ValidatorException("JWS contains no key id")
     }
 
@@ -34,7 +34,7 @@ internal object JwaCryptoHelper {
         }
     }
 
-    private fun matchDidAndKeyId(keyId: String): Pair<String?, String>? {
+    private fun matchDidAndKeyId(keyId: String, validateDid: Boolean = true): Pair<String?, String>? {
         val matches = Regex("^([^#]*)#(.+)$").matchEntire(keyId)
         return if (matches != null) {
             val did = matches.groupValues[1]
