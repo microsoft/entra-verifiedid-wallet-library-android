@@ -149,12 +149,14 @@ internal class IssuanceService @Inject constructor(
             responder = responder,
             expiryInSeconds = expiryInSeconds
         )
-        return sendResponse(formattedResponse, response.audience)
+        return sendResponse(formattedResponse, response.audience, response.request.contract.input.issuer)
     }
 
-    private suspend fun sendResponse(formattedResponse: String, url: String) = SendVerifiableCredentialIssuanceRequestNetworkOperation(
+    private suspend fun sendResponse(formattedResponse: String, url: String, expectedIssuerDid: String) =
+        SendVerifiableCredentialIssuanceRequestNetworkOperation(
         url,
         formattedResponse,
+        expectedIssuerDid,
         apiProvider,
         jwtValidator,
         serializer
