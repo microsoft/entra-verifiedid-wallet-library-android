@@ -24,7 +24,9 @@ import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.NonceProcessor
 import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequirementCastingException
+import com.microsoft.walletlibrary.util.RequestBodyLogFormatter
 import com.microsoft.walletlibrary.util.UnSupportedProtocolException
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.verifiedid.SuccessfulCompletionResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.wrapper.ManifestResolver
@@ -54,6 +56,10 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
     override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
         if (rawRequest !is VerifiedIdOpenIdJwtRawRequest)
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
+        WalletLibraryLogger.d(
+            RequestBodyLogFormatter.format(rawRequest.requestType, rawRequest.rawRequest),
+            tag = "OpenIdRequestProcessor.requestBody"
+        )
         val presentationRequestContent = rawRequest.mapToPresentationRequestContent()
         var request: VerifiedIdRequest<*> = if (rawRequest.requestType == RequestType.ISSUANCE)
             handleIssuanceRequest(presentationRequestContent)

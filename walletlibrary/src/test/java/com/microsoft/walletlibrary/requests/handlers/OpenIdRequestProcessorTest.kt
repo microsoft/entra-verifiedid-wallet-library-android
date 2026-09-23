@@ -125,6 +125,7 @@ class OpenIdRequestProcessorTest {
             spyk(OpenIdRequestProcessor(mockLibraryConfiguration), recordPrivateCalls = true)
 
         verifiedIdOpenIdJwtRawRequest = mockk()
+        every { verifiedIdOpenIdJwtRawRequest.rawRequest } returns emptyMap()
         if (requestType == RequestType.PRESENTATION) {
             every { verifiedIdOpenIdJwtRawRequest.requestType } returns RequestType.PRESENTATION
             every { verifiedIdOpenIdJwtRawRequest.mapToPresentationRequestContent() } returns presentationRequestContent

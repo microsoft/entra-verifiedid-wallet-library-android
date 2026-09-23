@@ -12,10 +12,12 @@ import com.microsoft.walletlibrary.requests.requirements.constraints.GroupConstr
 import com.microsoft.walletlibrary.requests.requirements.constraints.VcTypeConstraint
 import com.microsoft.walletlibrary.requests.requirements.constraints.VerifiedIdConstraint
 import com.microsoft.walletlibrary.util.MalformedInputException
+import com.microsoft.walletlibrary.util.PresentationMatchLogFormatter
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.RequirementValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdSerializer
 import okhttp3.internal.filterList
@@ -101,7 +103,14 @@ open class VerifiedIdRequirement(
 
     // Retrieves list of Verified IDs from the provided list that matches this requirement.
     fun getMatches(verifiedIds: List<VerifiedId>): List<VerifiedId> {
-        return verifiedIds.filter { constraint.doesMatch(it) }
+        val matches = verifiedIds.filter { constraint.doesMatch(it) }
+        if (matches.isEmpty()) {
+            WalletLibraryLogger.d(
+                PresentationMatchLogFormatter.format(constraint, verifiedIds),
+                tag = "VerifiedIdRequirement.getMatches"
+            )
+        }
+        return matches
     }
 
     @Throws
