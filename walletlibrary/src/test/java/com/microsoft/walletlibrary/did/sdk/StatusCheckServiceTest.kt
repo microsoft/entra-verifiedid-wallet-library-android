@@ -516,6 +516,56 @@ class StatusCheckServiceTest {
     }
 
     @Test
+    fun checkVerifiedIdStatus_identityHub_invalidQueryIndex_usesDescriptorIndex() {
+        val descriptor = CredentialStatusDescriptor(
+            id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=invalid",
+            type = "RevocationList2021Status",
+            revocationListIndex = 7
+        )
+        val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
+        val identifierDoc = IdentifierDocument(id = "did:web:issuer.example").apply {
+            service = listOf(
+                IdentifierDocumentService(id = "#hub", type = "IdentityHub", serviceEndpoint = listOf(IDENTITY_HUB_URL))
+            )
+        }
+        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any()) } returns
+            Result.success(identifierDoc)
+        coEvery { statusListApi.postCollectionsQuery(IDENTITY_HUB_URL, any()) } returns
+            okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 7))
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
+
+        val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
+
+        assertEquals(VerifiedIdStatus.Revoked, result)
+    }
+
+    @Test
+    fun checkVerifiedIdStatus_identityHub_missingQueryIndex_usesDescriptorIndex() {
+        val descriptor = CredentialStatusDescriptor(
+            id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000",
+            type = "RevocationList2021Status",
+            revocationListIndex = 7
+        )
+        val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
+        val identifierDoc = IdentifierDocument(id = "did:web:issuer.example").apply {
+            service = listOf(
+                IdentifierDocumentService(id = "#hub", type = "IdentityHub", serviceEndpoint = listOf(IDENTITY_HUB_URL))
+            )
+        }
+        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any()) } returns
+            Result.success(identifierDoc)
+        coEvery { statusListApi.postCollectionsQuery(IDENTITY_HUB_URL, any()) } returns
+            okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 7))
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
+
+        val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
+
+        assertEquals(VerifiedIdStatus.Revoked, result)
+    }
+
+    @Test
     fun checkVerifiedIdStatus_identityHub_envelopeWithInvalidSignature_returnsUnknown() {
         val descriptor = CredentialStatusDescriptor(
             id = "urn:uuid:550e8400-e29b-41d4-a716-446655440000?bit-index=7",
@@ -582,6 +632,16 @@ class StatusCheckServiceTest {
     @Test
     fun didUrlQueryParameter_fragmentIsExcluded() {
         assertEquals("IdentityHub", invokeDidUrlQueryParameter("did:web:example.com?service=IdentityHub#frag", "service"))
+    }
+
+    @Test
+    fun didUrlQueryParameter_queryMarkerInsideFragment_returnsNull() {
+        assertNull(invokeDidUrlQueryParameter("did:web:example.com#fragment?service=IdentityHub", "service"))
+    }
+
+    @Test
+    fun didUrlQueryParameter_encodedNameAndValue_areDecoded() {
+        assertEquals("a&b+c", invokeDidUrlQueryParameter("did:web:example.com?ser%76ice=a%26b%2Bc", "service"))
     }
 
     @Test
