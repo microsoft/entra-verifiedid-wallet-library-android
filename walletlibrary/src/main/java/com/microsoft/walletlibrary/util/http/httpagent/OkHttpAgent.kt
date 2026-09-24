@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.util.http.httpagent
 
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Headers
@@ -11,7 +12,6 @@ import okhttp3.ResponseBody
 import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 class OkHttpAgent : IHttpAgent() {
     var client: OkHttpClient = OkHttpClient()
@@ -40,14 +40,22 @@ class OkHttpAgent : IHttpAgent() {
     }
 
     private suspend fun call(request: Request): Result<IResponse> {
-        return suspendCoroutine<Result<IResponse>> {
-            client.newCall(request).enqueue(object: Callback {
+        return suspendCancellableCoroutine { continuation ->
+            val call = client.newCall(request)
+            continuation.invokeOnCancellation { call.cancel() }
+            call.enqueue(object: Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    it.resumeWithException(e)
+                    if (continuation.isActive) {
+                        continuation.resumeWithException(e)
+                    }
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    it.resume(toResponse(response))
+                    response.use {
+                        if (continuation.isActive) {
+                            continuation.resume(toResponse(response))
+                        }
+                    }
                 }
             })
         }

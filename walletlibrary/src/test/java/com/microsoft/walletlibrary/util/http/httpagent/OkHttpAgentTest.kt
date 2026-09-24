@@ -3,12 +3,17 @@ package com.microsoft.walletlibrary.util.http.httpagent
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
+import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.ResponseBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -108,5 +113,33 @@ class OkHttpAgentTest {
             assertThat(unwrapped.body).isEqualTo(expectedPayload)
             assertThat(unwrapped.headers).isEqualTo(expectedHeaders)
         }
+    }
+
+    @Test
+    fun cancelPendingRequest_cancelsOkHttpCallAndPropagatesCancellation() = runBlocking {
+        val callback = slot<Callback>()
+        val call = mockk<Call>(relaxed = true)
+        val responseBody = mockk<ResponseBody>(relaxed = true)
+        val response = mockk<Response>(relaxed = true) {
+            every { body } returns responseBody
+        }
+        every { clientMock.newCall(any()) } returns call
+        every { call.enqueue(capture(callback)) } returns Unit
+
+        val requestJob = launch {
+            client.post("https://test.local/", emptyMap(), ByteArray(0))
+        }
+        yield()
+
+        requestJob.cancel()
+        requestJob.join()
+
+        verify(exactly = 1) { call.cancel() }
+        assertThat(requestJob.isCancelled).isTrue
+
+        callback.captured.onResponse(call, response)
+
+        verify(exactly = 0) { responseBody.bytes() }
+        verify(exactly = 1) { response.close() }
     }
 }
