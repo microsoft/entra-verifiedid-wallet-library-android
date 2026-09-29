@@ -20,11 +20,19 @@ internal object PresentationResponseEndpointValidator {
             allowPathAndQuery = false
         )
 
-        if (canonicalOrigin(redirectUri) != canonicalOrigin(linkedDomainUri)) {
+        if (!hasMatchingDestination(redirectUri, linkedDomainUri)) {
             throw PresentationException("Presentation response destination does not match the verified domain.")
         }
         rejectNonPublicIpLiteral(redirectUri.host)
         return redirectUri.toASCIIString()
+    }
+
+    private fun hasMatchingDestination(redirectUri: URI, linkedDomainUri: URI): Boolean {
+        val redirectHost = canonicalHost(redirectUri)
+        val linkedDomainHost = canonicalHost(linkedDomainUri)
+        val hasMatchingHost = redirectHost == linkedDomainHost ||
+            (!isIpLiteral(linkedDomainHost) && redirectHost.endsWith(".$linkedDomainHost"))
+        return hasMatchingHost && effectivePort(redirectUri) == effectivePort(linkedDomainUri)
     }
 
     private fun parseHttpsUri(value: String, allowPathAndQuery: Boolean): URI {
@@ -50,18 +58,19 @@ internal object PresentationResponseEndpointValidator {
         return uri
     }
 
-    private fun canonicalOrigin(uri: URI): String {
-        val normalizedHost = uri.host
+    private fun canonicalHost(uri: URI): String =
+        uri.host
             .trimEnd('.')
             .lowercase(Locale.ROOT)
             .let { host -> if (host.contains(":")) host else IDN.toASCII(host) }
-        val formattedHost = if (normalizedHost.contains(":")) "[$normalizedHost]" else normalizedHost
-        val effectivePort = if (uri.port == -1) 443 else uri.port
-        return "https://$formattedHost:$effectivePort"
-    }
+
+    private fun effectivePort(uri: URI): Int = if (uri.port == -1) 443 else uri.port
+
+    private fun isIpLiteral(host: String): Boolean =
+        host.contains(":") || host.matches(Regex("^[0-9.]+$"))
 
     private fun rejectNonPublicIpLiteral(host: String) {
-        if (!host.contains(":") && !host.matches(Regex("^[0-9.]+$"))) {
+        if (!isIpLiteral(host)) {
             return
         }
         val address = try {
