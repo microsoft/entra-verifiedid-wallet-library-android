@@ -18,6 +18,7 @@ import com.microsoft.walletlibrary.verifiedid.VerifiedIdStatus
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.getResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
+import com.microsoft.walletlibrary.verifiedid.VerifiedIdStatusResult
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -74,5 +75,15 @@ class VerifiedIdClient internal constructor(
      */
     suspend fun checkVerifiedIdStatus(verifiedId: VerifiedId): VerifiedIdResult<VerifiedIdStatus> {
         return getResult { statusCheckService.checkVerifiedIdStatus(verifiedId) }
+    }
+
+    /**
+     * Returns the current status and a bounded diagnostic outcome. Status-list data is consumed only
+     * after its signature and issuer binding have been verified.
+     */
+    suspend fun checkVerifiedIdStatusWithDetails(
+        verifiedId: VerifiedId
+    ): VerifiedIdResult<VerifiedIdStatusResult> {
+        return getResult { statusCheckService.checkVerifiedIdStatusWithDetails(verifiedId) }
     }
 }

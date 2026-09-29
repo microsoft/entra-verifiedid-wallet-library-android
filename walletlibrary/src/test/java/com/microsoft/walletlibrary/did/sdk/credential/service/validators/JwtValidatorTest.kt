@@ -5,6 +5,7 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
+import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyType
 import io.mockk.coEvery
@@ -69,6 +70,25 @@ class JwtValidatorTest {
         runBlocking {
             val actualValidationResult = validator.verifySignature(mockedJwsToken)
             assertFalse(actualValidationResult)
+        }
+
+        @Test
+        fun `unsupported algorithm is classified without accepting the signature`() {
+            coEvery { mockedResolver.resolve(expectedDid) } returns Result.success(mockedIdentifierDocument)
+            every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } throws
+                JOSEException("Unsupported JWS algorithm ES256K, must be ES256")
+            every { mockedJwsToken.keyId } returns expectedKid
+            every { mockedIdentifierDocumentPublicKey.id } returns expectedKid
+
+            runBlocking {
+                try {
+                    validator.verifySignature(mockedJwsToken)
+                    fail()
+                } catch (exception: Exception) {
+                    assertThat(exception)
+                        .isInstanceOf(UnsupportedJwsAlgorithmException::class.java)
+                }
+            }
         }
     }
 

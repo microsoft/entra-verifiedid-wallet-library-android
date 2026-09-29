@@ -9,6 +9,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.models.CredentialStatusDes
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
+import com.microsoft.walletlibrary.did.sdk.credential.service.validators.UnsupportedJwsAlgorithmException
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentStatusListApi
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
@@ -18,7 +19,10 @@ import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdStatus
+import com.microsoft.walletlibrary.verifiedid.VerifiedIdStatusCheckOutcome
+import com.nimbusds.jose.JOSEException
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -31,6 +35,7 @@ import org.junit.Before
 import org.junit.Test
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.net.SocketTimeoutException
 import java.util.Base64
 import java.util.zip.GZIPOutputStream
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential as SdkVerifiableCredential
@@ -164,6 +169,20 @@ class StatusCheckServiceTest {
     }
 
     @Test
+    fun checkVerifiedIdStatusWithDetails_verifiedBitClear_returnsPassed() {
+        val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
+        coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
+            okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = null))
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
+
+        val result = runBlocking { statusCheckService.checkVerifiedIdStatusWithDetails(verifiedId) }
+
+        assertEquals(VerifiedIdStatus.Valid, result.status)
+        assertEquals(VerifiedIdStatusCheckOutcome.Passed, result.outcome)
+    }
+
+    @Test
     fun checkVerifiedIdStatus_statusListBitSetForRevocation_returnsRevoked() {
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
@@ -215,6 +234,30 @@ class StatusCheckServiceTest {
     }
 
     @Test
+    fun checkVerifiedIdStatusWithDetails_statusListFetchFails_returnsNetworkError() {
+        val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
+        coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
+            Result.failure(IOException("network down"))
+
+        val result = runBlocking { statusCheckService.checkVerifiedIdStatusWithDetails(verifiedId) }
+
+        assertEquals(VerifiedIdStatus.Unknown, result.status)
+        assertEquals(VerifiedIdStatusCheckOutcome.NetworkError, result.outcome)
+    }
+
+    @Test
+    fun checkVerifiedIdStatusWithDetails_statusListFetchTimesOut_returnsTimeout() {
+        val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
+        coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
+            Result.failure(SocketTimeoutException())
+
+        val result = runBlocking { statusCheckService.checkVerifiedIdStatusWithDetails(verifiedId) }
+
+        assertEquals(VerifiedIdStatus.Unknown, result.status)
+        assertEquals(VerifiedIdStatusCheckOutcome.Timeout, result.outcome)
+    }
+
+    @Test
     fun checkVerifiedIdStatus_statusListReturnsNon2xx_returnsUnknown() {
         // A host-provided HTTP agent may surface a non-2xx response as a success Result.
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
@@ -240,6 +283,33 @@ class StatusCheckServiceTest {
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
         assertEquals(VerifiedIdStatus.Unknown, result)
+    }
+
+    @Test
+    fun checkVerifiedIdStatusWithDetails_invalidSignature_returnsSignatureVerificationFailed() {
+        val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
+        coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
+            okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 5))
+        coEvery { jwtValidator.verifySignature(any()) } returns false
+
+        val result = runBlocking { statusCheckService.checkVerifiedIdStatusWithDetails(verifiedId) }
+
+        assertEquals(VerifiedIdStatus.Unknown, result.status)
+        assertEquals(VerifiedIdStatusCheckOutcome.SignatureVerificationFailed, result.outcome)
+    }
+
+    @Test
+    fun checkVerifiedIdStatusWithDetails_incompatibleEs256kIssuerKey_returnsUnsupportedAlgorithm() {
+        val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
+        coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
+            okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 5, algorithm = "ES256K"))
+        coEvery { jwtValidator.verifySignature(any()) } throws
+            UnsupportedJwsAlgorithmException(JOSEException("algorithm mismatch"))
+
+        val result = runBlocking { statusCheckService.checkVerifiedIdStatusWithDetails(verifiedId) }
+
+        assertEquals(VerifiedIdStatus.Unknown, result.status)
+        assertEquals(VerifiedIdStatusCheckOutcome.UnsupportedAlgorithm, result.outcome)
     }
 
     @Test
@@ -280,6 +350,20 @@ class StatusCheckServiceTest {
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
         assertEquals(VerifiedIdStatus.Unknown, result)
+        coVerify(exactly = 0) { jwtValidator.verifySignature(any()) }
+    }
+
+    @Test
+    fun checkVerifiedIdStatusWithDetails_unsignedJsonStatusList_returnsMalformedResponse() {
+        val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
+        coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
+            okResponse(buildStatusListJson(statusPurpose = "revocation", flaggedIndex = 5))
+
+        val result = runBlocking { statusCheckService.checkVerifiedIdStatusWithDetails(verifiedId) }
+
+        assertEquals(VerifiedIdStatus.Unknown, result.status)
+        assertEquals(VerifiedIdStatusCheckOutcome.MalformedResponse, result.outcome)
+        coVerify(exactly = 0) { jwtValidator.verifySignature(any()) }
     }
 
     @Test
@@ -543,9 +627,14 @@ class StatusCheckServiceTest {
     // ─── didUrlQueryParameter tests ────────────────────────────────────────────
 
     /** Builds a compact JWS whose payload is the StatusList2021 status list JSON. */
-    private fun signedStatusListJwt(statusPurpose: String, flaggedIndex: Int?, exp: Long? = null): String {
+    private fun signedStatusListJwt(
+        statusPurpose: String,
+        flaggedIndex: Int?,
+        exp: Long? = null,
+        algorithm: String = "ES256"
+    ): String {
         val header = Base64.getUrlEncoder().withoutPadding()
-            .encodeToString("""{ "alg":"ES256"}""".toByteArray())
+            .encodeToString("""{ "alg":"$algorithm"}""".toByteArray())
         val payload = Base64.getUrlEncoder().withoutPadding()
             .encodeToString(buildStatusListJson(statusPurpose, flaggedIndex, exp).toByteArray())
         return "$header.$payload.AAAA"

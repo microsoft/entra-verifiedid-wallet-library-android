@@ -11,6 +11,7 @@ import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
+import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.jwk.JWK
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,7 +35,14 @@ internal class JwtValidator @Inject constructor(
     }
 
     private fun verifySignatureUsingPublicKey(token: JwsToken, publicKeys: List<JWK>): Boolean {
-        return token.verify(publicKeys)
+        return try {
+            token.verify(publicKeys)
+        } catch (exception: JOSEException) {
+            if (exception.message?.startsWith("Unsupported JWS algorithm") == true) {
+                throw UnsupportedJwsAlgorithmException(exception)
+            }
+            throw exception
+        }
     }
 
     fun validateDidInHeaderAndPayload(jwsToken: JwsToken, didInPayload: String): Boolean {
@@ -58,4 +66,7 @@ internal class JwtValidator @Inject constructor(
             else -> throw ValidatorException("Unable to fetch public keys")
         }
     }
+
 }
+
+internal class UnsupportedJwsAlgorithmException(cause: JOSEException) : Exception(cause)
