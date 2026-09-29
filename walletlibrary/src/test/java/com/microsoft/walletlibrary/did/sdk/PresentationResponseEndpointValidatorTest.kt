@@ -40,11 +40,53 @@ class PresentationResponseEndpointValidatorTest {
     }
 
     @Test
-    fun validate_subdomainOfVerifiedOrigin_throwsPresentationException() {
+    fun validate_subdomainsOfVerifiedOrigin_returnEndpoint() {
+        listOf(
+            "https://api.verifier.example/callback",
+            "https://westus.api.verifier.example/callback",
+            "https://API.VERIFIER.EXAMPLE./callback"
+        ).forEach { endpoint ->
+            assertThat(
+                PresentationResponseEndpointValidator.validate(
+                    endpoint,
+                    LinkedDomainVerified("verifier.example", "https://VERIFIER.EXAMPLE.")
+                )
+            ).isEqualTo(endpoint)
+        }
+    }
+
+    @Test
+    fun validate_hostsOutsideVerifiedDomain_throwPresentationException() {
+        listOf(
+            "https://evil-verifier.example/callback",
+            "https://verifier.example.attacker.example/callback",
+            "https://attacker.example/callback"
+        ).forEach { endpoint ->
+            assertThatThrownBy {
+                PresentationResponseEndpointValidator.validate(
+                    endpoint,
+                    LinkedDomainVerified("verifier.example", "https://verifier.example")
+                )
+            }.isInstanceOf(PresentationException::class.java)
+        }
+    }
+
+    @Test
+    fun validate_subdomainWithDifferentPort_throwsPresentationException() {
         assertThatThrownBy {
             PresentationResponseEndpointValidator.validate(
-                "https://evil.verifier.example/callback",
+                "https://api.verifier.example:8443/callback",
                 LinkedDomainVerified("verifier.example", "https://verifier.example")
+            )
+        }.isInstanceOf(PresentationException::class.java)
+    }
+
+    @Test
+    fun validate_dnsNameEndingInVerifiedIp_throwsPresentationException() {
+        assertThatThrownBy {
+            PresentationResponseEndpointValidator.validate(
+                "https://api.8.8.8.8/callback",
+                LinkedDomainVerified("8.8.8.8", "https://8.8.8.8")
             )
         }.isInstanceOf(PresentationException::class.java)
     }
