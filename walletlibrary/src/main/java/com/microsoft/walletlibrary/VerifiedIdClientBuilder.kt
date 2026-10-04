@@ -132,8 +132,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
         val effectiveFlightProvider = flightProvider
             ?: WalletLibraryFlightProvider { flight ->
                 when (flight) {
-                    WalletLibraryFlight.DidResolverHardening ->
-                        !previewFeatureFlags.isPreviewFeatureSupported(
+                    WalletLibraryFlight.UseLegacyDidResolver ->
+                        previewFeatureFlags.isPreviewFeatureSupported(
                             PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
                         )
                 }

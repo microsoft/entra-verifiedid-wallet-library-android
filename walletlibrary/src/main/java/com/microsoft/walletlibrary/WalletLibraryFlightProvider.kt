@@ -6,7 +6,7 @@ package com.microsoft.walletlibrary
  * Features whose runtime state can be supplied by a Wallet Library consumer.
  */
 enum class WalletLibraryFlight {
-    DidResolverHardening
+    UseLegacyDidResolver
 }
 
 /**

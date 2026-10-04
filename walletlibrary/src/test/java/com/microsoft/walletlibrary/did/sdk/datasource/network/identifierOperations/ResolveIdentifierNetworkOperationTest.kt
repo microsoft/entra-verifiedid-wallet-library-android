@@ -23,7 +23,7 @@ class ResolveIdentifierNetworkOperationTest {
             apiProvider,
             "https://resolver.example",
             "did:web:example.com:..:evil",
-            WalletLibraryFlightProvider { true }
+            WalletLibraryFlightProvider { false }
         )
 
         val throwable = catchThrowable {
@@ -42,7 +42,7 @@ class ResolveIdentifierNetworkOperationTest {
             apiProvider,
             "https://resolver.example",
             "did:web:example.com:..:evil",
-            WalletLibraryFlightProvider { false }
+            WalletLibraryFlightProvider { true }
         )
 
         assertThat(operation.identifier).isEqualTo("did:web:example.com:..:evil")
@@ -63,7 +63,7 @@ class ResolveIdentifierNetworkOperationTest {
             apiProvider,
             "https://resolver.example",
             "did:example:123",
-            WalletLibraryFlightProvider { true }
+            WalletLibraryFlightProvider { false }
         )
 
         runBlocking {

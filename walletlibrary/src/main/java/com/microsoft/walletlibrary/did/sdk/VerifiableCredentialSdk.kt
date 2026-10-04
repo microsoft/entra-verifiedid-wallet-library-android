@@ -80,7 +80,7 @@ internal object VerifiableCredentialSdk {
         walletLibraryVersionInfo: String = "",
         httpAgent: IHttpAgent = OkHttpAgent(),
         rootOfTrustResolver: RootOfTrustResolver? = null,
-        flightProvider: WalletLibraryFlightProvider = WalletLibraryFlightProvider { true }
+        flightProvider: WalletLibraryFlightProvider = WalletLibraryFlightProvider { false }
     ) {
         correlationVectorService = CorrelationVectorService(PreferenceManager.getDefaultSharedPreferences(context))
         val sdkComponent = DaggerSdkComponent.builder()

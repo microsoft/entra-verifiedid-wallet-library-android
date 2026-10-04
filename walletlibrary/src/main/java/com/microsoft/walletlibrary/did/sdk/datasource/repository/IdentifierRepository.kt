@@ -15,7 +15,7 @@ import javax.inject.Inject
 internal class IdentifierRepository @Inject constructor(
     val database: SdkDatabase,
     val apiProvider: HttpAgentApiProvider,
-    private val flightProvider: WalletLibraryFlightProvider = WalletLibraryFlightProvider { true }
+    private val flightProvider: WalletLibraryFlightProvider = WalletLibraryFlightProvider { false }
 ) {
     private val identifierDao = database.identifierDao()
 

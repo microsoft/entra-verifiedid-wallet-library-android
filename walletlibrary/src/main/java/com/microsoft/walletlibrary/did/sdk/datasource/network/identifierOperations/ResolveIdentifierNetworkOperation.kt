@@ -25,10 +25,10 @@ internal class ResolveIdentifierNetworkOperation(
     override val call: suspend () -> Result<IResponse> = {
         // Reject identifiers containing characters that could redirect the request to an unintended path
         // (e.g. '/', '?', '#', whitespace, '..') before they are concatenated into the resolver URL.
-        if (flightProvider.isEnabled(WalletLibraryFlight.DidResolverHardening) &&
-            (identifier.isBlank() || !JwaCryptoHelper.isSyntacticallyValidDid(identifier))
-        ) {
-            throw ResolverException("Identifier '$identifier' is not a syntactically valid DID")
+        when {
+            flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver) -> Unit
+            identifier.isBlank() || !JwaCryptoHelper.isSyntacticallyValidDid(identifier) ->
+                throw ResolverException("Identifier '$identifier' is not a syntactically valid DID")
         }
         apiProvider.identifierApi.resolveIdentifier("$url/$identifier")
     }

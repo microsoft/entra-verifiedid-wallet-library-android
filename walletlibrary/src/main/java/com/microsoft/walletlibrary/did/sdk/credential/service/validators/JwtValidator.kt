@@ -50,10 +50,11 @@ internal class JwtValidator @Inject constructor(
 
     private fun getDidAndKeyIdFromHeader(token: JwsToken): Pair<String?, String> {
         token.keyId?.let { kid ->
-            return JwaCryptoHelper.extractDidAndKeyId(
-                kid,
-                flightProvider.isEnabled(WalletLibraryFlight.DidResolverHardening)
-            )
+            return if (flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)) {
+                JwaCryptoHelper.extractDidAndKeyId(kid, false)
+            } else {
+                JwaCryptoHelper.extractDidAndKeyId(kid, true)
+            }
         }
         throw ValidatorException("JWS contains no key id")
     }
@@ -63,7 +64,7 @@ internal class JwtValidator @Inject constructor(
             is Result.Success -> {
                 val publicKeys = requesterDidDocument.payload.verificationMethod
                 if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")
-                if (!flightProvider.isEnabled(WalletLibraryFlight.DidResolverHardening)) {
+                if (flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)) {
                     return publicKeys.filter { publicKey ->
                         JwaCryptoHelper.extractDidAndKeyId(publicKey.id, false).second == keyId
                     }.map { it.publicKeyJwk }

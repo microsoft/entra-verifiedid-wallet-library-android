@@ -20,7 +20,7 @@ internal class Resolver @Inject constructor(
 ) {
     suspend fun resolve(identifier: String): Result<IdentifierDocument> {
         val result = identifierRepository.resolveIdentifier(baseUrl, identifier)
-        if (!flightProvider.isEnabled(WalletLibraryFlight.DidResolverHardening)) {
+        if (flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)) {
             return result.map { it.didDocument }
                 .onFailure {
                     return Result.failure(ResolverException("Unable to resolve identifier $identifier", it))
