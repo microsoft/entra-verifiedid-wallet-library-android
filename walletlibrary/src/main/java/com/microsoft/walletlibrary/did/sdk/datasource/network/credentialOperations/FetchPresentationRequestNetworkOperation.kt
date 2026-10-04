@@ -21,7 +21,8 @@ internal class FetchPresentationRequestNetworkOperation(
     private val preferHeaders: List<String>,
     private val apiProvider: HttpAgentApiProvider,
     private val jwtValidator: JwtValidator,
-    private val serializer: Json
+    private val serializer: Json,
+    private val didResolverHardeningEnabled: Boolean
 ) : GetNetworkOperation<PresentationRequestContent>() {
     override val call: suspend () -> Result<IResponse> = { apiProvider.presentationApis.getRequest(url, preferHeaders) }
 
@@ -33,9 +34,14 @@ internal class FetchPresentationRequestNetworkOperation(
     private suspend fun verifyAndUnwrapPresentationRequest(jwsTokenString: String): Result<PresentationRequestContent> {
         val jwsToken = JwsToken.deserialize(jwsTokenString)
         val presentationRequestContent = serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
-        if (!jwtValidator.verifySignature(jwsToken))
+        if (!jwtValidator.verifySignature(jwsToken, didResolverHardeningEnabled))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
-        if (!jwtValidator.validateDidInHeaderAndPayload(jwsToken, presentationRequestContent.clientId))
+        if (!jwtValidator.validateDidInHeaderAndPayload(
+                jwsToken,
+                presentationRequestContent.clientId,
+                didResolverHardeningEnabled
+            )
+        )
             throw DidInHeaderAndPayloadNotMatching("DID used to sign the presentation request doesn't match the DID in presentation request.")
         return Result.success(presentationRequestContent)
     }

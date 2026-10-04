@@ -2,6 +2,7 @@
 
 package com.microsoft.walletlibrary.did.sdk.identifier.resolvers
 
+import com.microsoft.walletlibrary.BooleanProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.LocalNetworkException
@@ -27,8 +28,10 @@ class ResolverTest {
 
     @Test
     fun successfulResolutionTest() {
-        val resolver = Resolver("", identifierRepository, true)
-        coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(expectedIdentifierResponse)
+        val resolver = Resolver("", identifierRepository, BooleanProvider { true })
+        coEvery {
+            identifierRepository.resolveIdentifier("", expectedIdentifier, true)
+        } returns KotlinResult.success(expectedIdentifierResponse)
         runBlocking {
             val actualIdentifierDocument = resolver.resolve(expectedIdentifier)
             assertThat(actualIdentifierDocument.isSuccess).isEqualTo(true)
@@ -38,8 +41,8 @@ class ResolverTest {
 
     @Test
     fun failedResolutionInvalidIdTest() {
-        val resolver = Resolver("", identifierRepository, true)
-        coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier) } returns KotlinResult.failure(
+        val resolver = Resolver("", identifierRepository, BooleanProvider { true })
+        coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier, true) } returns KotlinResult.failure(
             NetworkingException(
                 "Not Found",
                 VerifiedIdExceptions.NETWORKING_EXCEPTION.value,
@@ -56,11 +59,12 @@ class ResolverTest {
 
     @Test
     fun failedResolutionNetworkConnectionTest() {
-        val resolver = Resolver("invalidUrl", identifierRepository, true)
+        val resolver = Resolver("invalidUrl", identifierRepository, BooleanProvider { true })
         coEvery {
             identifierRepository.resolveIdentifier(
                 "invalidUrl",
-                expectedIdentifier
+                expectedIdentifier,
+                true
             )
         } returns KotlinResult.failure(LocalNetworkException("Failed to send request."))
         runBlocking {
@@ -73,10 +77,12 @@ class ResolverTest {
 
     @Test
     fun failedResolutionMismatchedDocumentIdTest() {
-        val resolver = Resolver("", identifierRepository, true)
+        val resolver = Resolver("", identifierRepository, BooleanProvider { true })
         val mismatchedId = "did:ion:another-id"
         val mismatchedDocument = expectedIdentifierResponse.copy(didDocument = expectedIdentifierResponse.didDocument.copy(id = mismatchedId))
-        coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
+        coEvery {
+            identifierRepository.resolveIdentifier("", expectedIdentifier, true)
+        } returns KotlinResult.success(mismatchedDocument)
 
         runBlocking {
             val actualResult = resolver.resolve(expectedIdentifier)
@@ -84,33 +90,68 @@ class ResolverTest {
             assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
             assertThat(actualResult.exceptionOrNull()?.message).contains("does not match requested identifier")
         }
+    }
 
-        @Test
-        fun mismatchedDocumentIdReturnsFailureRatherThanThrowing() {
-            val resolver = Resolver("", identifierRepository, true)
-            val mismatchedDocument = expectedIdentifierResponse.copy(
-                didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
-            )
-            coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
+    @Test
+    fun mismatchedDocumentIdReturnsFailureRatherThanThrowing() {
+        val resolver = Resolver("", identifierRepository, BooleanProvider { true })
+        val mismatchedDocument = expectedIdentifierResponse.copy(
+            didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
+        )
+        coEvery {
+            identifierRepository.resolveIdentifier("", expectedIdentifier, true)
+        } returns KotlinResult.success(mismatchedDocument)
 
-            val actualResult = runBlocking { resolver.resolve(expectedIdentifier) }
+        val actualResult = runBlocking { resolver.resolve(expectedIdentifier) }
 
-            assertThat(actualResult.isFailure).isTrue()
-            assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
-        }
+        assertThat(actualResult.isFailure).isTrue()
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
+    }
 
-        @Test
-        fun mismatchedDocumentIdIsAllowedWhenHardeningDisabled() {
-            val resolver = Resolver("", identifierRepository, false)
-            val mismatchedDocument = expectedIdentifierResponse.copy(
-                didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
-            )
-            coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
+    @Test
+    fun mismatchedDocumentIdIsAllowedWhenHardeningDisabled() {
+        val resolver = Resolver("", identifierRepository, BooleanProvider { false })
+        val mismatchedDocument = expectedIdentifierResponse.copy(
+            didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
+        )
+        coEvery {
+            identifierRepository.resolveIdentifier("", expectedIdentifier, false)
+        } returns KotlinResult.success(mismatchedDocument)
 
-            val actualResult = runBlocking { resolver.resolve(expectedIdentifier) }
+        val actualResult = runBlocking { resolver.resolve(expectedIdentifier) }
 
-            assertThat(actualResult.isSuccess).isTrue()
-            assertThat(actualResult.getOrNull()?.id).isEqualTo("did:ion:another-id")
-        }
+        assertThat(actualResult.isSuccess).isTrue()
+        assertThat(actualResult.getOrNull()?.id).isEqualTo("did:ion:another-id")
+    }
+
+    @Test
+    fun hardeningProviderIsReadOncePerResolutionAndChangesTheNextResolution() {
+        var hardeningEnabled = true
+        var providerReads = 0
+        val resolver = Resolver(
+            "",
+            identifierRepository,
+            BooleanProvider {
+                providerReads++
+                hardeningEnabled
+            }
+        )
+        val mismatchedDocument = expectedIdentifierResponse.copy(
+            didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
+        )
+        coEvery {
+            identifierRepository.resolveIdentifier("", expectedIdentifier, true)
+        } returns KotlinResult.success(mismatchedDocument)
+        coEvery {
+            identifierRepository.resolveIdentifier("", expectedIdentifier, false)
+        } returns KotlinResult.success(mismatchedDocument)
+
+        val hardenedResult = runBlocking { resolver.resolve(expectedIdentifier) }
+        hardeningEnabled = false
+        val legacyResult = runBlocking { resolver.resolve(expectedIdentifier) }
+
+        assertThat(hardenedResult.isFailure).isTrue()
+        assertThat(legacyResult.getOrNull()?.id).isEqualTo("did:ion:another-id")
+        assertThat(providerReads).isEqualTo(2)
     }
 }

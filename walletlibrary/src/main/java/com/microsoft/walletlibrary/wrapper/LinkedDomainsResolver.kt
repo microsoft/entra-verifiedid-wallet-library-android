@@ -15,6 +15,18 @@ import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 internal object LinkedDomainsResolver : RootOfTrustResolver {
 
     override suspend fun resolve(didMetadata: DidMetadata): RootOfTrust {
+        return resolve(
+            didMetadata,
+            getLinkedDomainsService().let {
+                VerifiableCredentialSdk.jwtValidator.snapshotDidResolverHardeningEnabled()
+            }
+        )
+    }
+
+    internal suspend fun resolve(
+        didMetadata: DidMetadata,
+        didResolverHardeningEnabled: Boolean
+    ): RootOfTrust {
         if (didMetadata !is IdentifierDocument) {
             throw MalformedInputException(
                 "Expected Identifier Document to resolve Root of Trust",
@@ -22,7 +34,10 @@ internal object LinkedDomainsResolver : RootOfTrustResolver {
             )
         }
         val linkedDomainsService = getLinkedDomainsService()
-        linkedDomainsService.validateLinkedDomains(didMetadata)
+        linkedDomainsService.validateLinkedDomains(
+            didMetadata,
+            didResolverHardeningEnabled
+        )
             .map { it.toRootOfTrust() }
             .onSuccess { return it }
             .onFailure { return RootOfTrust("", false) }

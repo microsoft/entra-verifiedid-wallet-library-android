@@ -56,7 +56,10 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
             throw UnSupportedProtocolException("Received a raw request of unsupported protocol")
         val presentationRequestContent = rawRequest.mapToPresentationRequestContent()
         var request: VerifiedIdRequest<*> = if (rawRequest.requestType == RequestType.ISSUANCE)
-            handleIssuanceRequest(presentationRequestContent)
+            handleIssuanceRequest(
+                presentationRequestContent,
+                rawRequest.didResolverHardeningEnabled
+            )
         else
             handlePresentationRequest(presentationRequestContent, rawRequest)
         return request
@@ -90,14 +93,18 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
         )
     }
 
-    private suspend fun handleIssuanceRequest(presentationRequestContent: PresentationRequestContent): VerifiedIdRequest<VerifiedId> {
+    private suspend fun handleIssuanceRequest(
+        presentationRequestContent: PresentationRequestContent,
+        didResolverHardeningEnabled: Boolean
+    ): VerifiedIdRequest<VerifiedId> {
         validateRequirement(presentationRequestContent)
         val contractUrl =
             ((presentationRequestContent.requirement as VerifiedIdRequirement).issuanceOptions.first() as VerifiedIdRequestURL).url
         val rawManifest = getIssuanceRequest(
             contractUrl.toString(),
             presentationRequestContent.requestState,
-            presentationRequestContent.issuanceCallbackUrl
+            presentationRequestContent.issuanceCallbackUrl,
+            didResolverHardeningEnabled
         )
 
         val issuanceRequestContent = rawManifest.mapToIssuanceRequestContent()
@@ -133,8 +140,14 @@ class OpenIdRequestProcessor internal constructor(private val libraryConfigurati
     private suspend fun getIssuanceRequest(
         contractUrl: String,
         requestState: String?,
-        issuanceCallbackUrl: String?
+        issuanceCallbackUrl: String?,
+        didResolverHardeningEnabled: Boolean
     ): RawManifest {
-        return ManifestResolver.getIssuanceRequest(contractUrl, requestState, issuanceCallbackUrl)
+        return ManifestResolver.getIssuanceRequest(
+            contractUrl,
+            requestState,
+            issuanceCallbackUrl,
+            didResolverHardeningEnabled
+        )
     }
 }

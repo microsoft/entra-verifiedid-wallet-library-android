@@ -57,7 +57,11 @@ class VerifiedIdOpenIdJwtRawRequestTest {
         setupLogo(logoPresent)
         every { mockPresentationRequest.content.prompt } returns expectedPromptForIssuance
         verifiedIdOpenIdJwtRawRequest =
-            VerifiedIdOpenIdJwtRawRequest(mockPresentationRequest, rawRequest = emptyMap())
+            VerifiedIdOpenIdJwtRawRequest(
+                mockPresentationRequest,
+                rawRequest = emptyMap(),
+                didResolverHardeningEnabled = true
+            )
     }
 
     private fun setupPresentationContent() {

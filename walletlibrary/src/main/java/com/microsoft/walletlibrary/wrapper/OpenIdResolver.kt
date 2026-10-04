@@ -23,16 +23,45 @@ object OpenIdResolver {
 
     // Fetches the presentation request from VC SDK using the url and converts it to raw request.
     internal suspend fun getRequest(uri: String, preferHeaders: List<String>): OpenIdProcessedRequest {
-        val presentationRequestResult = VerifiableCredentialSdk.presentationService.getRequest(uri, preferHeaders)
-        return handleRequestResult(presentationRequestResult, emptyMap())
+        val didResolverHardeningEnabled =
+            VerifiableCredentialSdk.jwtValidator.snapshotDidResolverHardeningEnabled()
+        val presentationRequestResult = VerifiableCredentialSdk.presentationService.getRequest(
+            uri,
+            preferHeaders,
+            didResolverHardeningEnabled
+        )
+        return handleRequestResult(
+            presentationRequestResult,
+            emptyMap(),
+            didResolverHardeningEnabled
+        )
     }
 
     internal suspend fun validateRequest(requestContent: PresentationRequestContent, rawRequest: Map<String, Any>): OpenIdProcessedRequest {
-        val presentationRequestResult = VerifiableCredentialSdk.presentationService.validateRequest(requestContent)
-        return handleRequestResult(presentationRequestResult, rawRequest)
+        val didResolverHardeningEnabled =
+            VerifiableCredentialSdk.jwtValidator.snapshotDidResolverHardeningEnabled()
+        val presentationRequestResult = VerifiableCredentialSdk.presentationService.validateRequest(
+            requestContent,
+            didResolverHardeningEnabled
+        )
+        return handleRequestResult(
+            presentationRequestResult,
+            rawRequest,
+            didResolverHardeningEnabled
+        )
     }
 
     internal suspend fun validateSignedRequest(jwsTokenString: String): OpenIdProcessedRequest {
+        return validateSignedRequest(
+            jwsTokenString,
+            VerifiableCredentialSdk.jwtValidator.snapshotDidResolverHardeningEnabled()
+        )
+    }
+
+    internal suspend fun validateSignedRequest(
+        jwsTokenString: String,
+        didResolverHardeningEnabled: Boolean
+    ): OpenIdProcessedRequest {
         val rawRequest = try {
             JWSObject.parse(jwsTokenString).payload.toJSONObject()
         } catch (exception: ParseException) {
@@ -41,16 +70,33 @@ object OpenIdResolver {
                 exception
             )
         } ?: throw VerifiedIdRequestFetchException("Signed presentation request payload is not a JSON object")
-        val presentationRequestResult = VerifiableCredentialSdk.presentationService.validateSignedRequest(jwsTokenString)
-        return handleRequestResult(presentationRequestResult, rawRequest)
+        val presentationRequestResult =
+            VerifiableCredentialSdk.presentationService.validateSignedRequest(
+                jwsTokenString,
+                didResolverHardeningEnabled
+            )
+        return handleRequestResult(
+            presentationRequestResult,
+            rawRequest,
+            didResolverHardeningEnabled
+        )
     }
 
-    private fun handleRequestResult(presentationRequestResult: Result<PresentationRequest>, rawRequest: Map<String, Any>): OpenIdProcessedRequest {
+    private fun handleRequestResult(
+        presentationRequestResult: Result<PresentationRequest>,
+        rawRequest: Map<String, Any>,
+        didResolverHardeningEnabled: Boolean
+    ): OpenIdProcessedRequest {
         when (presentationRequestResult) {
             is Result.Success -> {
                 val request = presentationRequestResult.payload
                 val requestType = getRequestType(request)
-                return VerifiedIdOpenIdJwtRawRequest(request, requestType, rawRequest)
+                return VerifiedIdOpenIdJwtRawRequest(
+                    request,
+                    requestType,
+                    rawRequest,
+                    didResolverHardeningEnabled
+                )
             }
             is Result.Failure -> {
                 throw VerifiedIdRequestFetchException(

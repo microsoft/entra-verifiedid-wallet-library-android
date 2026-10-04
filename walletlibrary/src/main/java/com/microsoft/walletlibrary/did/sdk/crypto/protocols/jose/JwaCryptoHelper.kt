@@ -3,7 +3,7 @@ package com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
 
 internal object JwaCryptoHelper {
-    fun extractDidAndKeyId(keyId: String, validateDid: Boolean = true): Pair<String?, String> {
+    fun extractDidAndKeyId(keyId: String, validateDid: Boolean): Pair<String?, String> {
         val match = matchDidAndKeyId(keyId, validateDid)
         return match ?: throw ValidatorException("JWS contains no key id")
     }

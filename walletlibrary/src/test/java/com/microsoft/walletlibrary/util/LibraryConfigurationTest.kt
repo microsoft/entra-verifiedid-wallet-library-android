@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.util
 
+import com.microsoft.walletlibrary.BooleanProvider
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -53,5 +54,42 @@ internal class LibraryConfigurationTest {
                 PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
             )
         ).isFalse()
+        assertThat(libraryConfiguration.isDidResolverHardeningEnabled).isTrue()
+    }
+
+    @Test
+    fun testLegacyResolverDisablesDidResolverHardening() {
+        val libraryConfiguration = LibraryConfiguration(
+            PreviewFeatureFlags(
+                listOf(PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER)
+            ),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk()
+        )
+
+        assertThat(libraryConfiguration.isDidResolverHardeningEnabled).isFalse()
+    }
+
+    @Test
+    fun testDynamicProviderChangesAfterConfigurationConstruction() {
+        var hardeningEnabled = true
+        val libraryConfiguration = LibraryConfiguration(
+            PreviewFeatureFlags(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            BooleanProvider { hardeningEnabled }
+        )
+
+        assertThat(libraryConfiguration.isDidResolverHardeningEnabled).isTrue()
+
+        hardeningEnabled = false
+
+        assertThat(libraryConfiguration.isDidResolverHardeningEnabled).isFalse()
     }
 }

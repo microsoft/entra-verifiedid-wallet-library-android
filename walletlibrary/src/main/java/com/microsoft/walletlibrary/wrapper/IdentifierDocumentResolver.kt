@@ -15,6 +15,18 @@ internal object IdentifierDocumentResolver {
         return handleResolutionResult(identifierDocumentResult)
     }
 
+    internal suspend fun resolveIdentifierDocument(
+        did: String,
+        didResolverHardeningEnabled: Boolean
+    ): IdentifierDocument {
+        val identifierDocumentResult =
+            VerifiableCredentialSdk.linkedDomainsService.resolveIdentifierDocument(
+                did,
+                didResolverHardeningEnabled
+            )
+        return handleResolutionResult(identifierDocumentResult)
+    }
+
     private fun handleResolutionResult(identifierDocumentResult: Result<IdentifierDocument>): IdentifierDocument {
         identifierDocumentResult
             .onSuccess {

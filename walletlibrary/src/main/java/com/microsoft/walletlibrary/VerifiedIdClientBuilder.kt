@@ -72,6 +72,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
     }
     private var rootOfTrustResolver: RootOfTrustResolver? = null
     private val identifiers = ArrayList<HolderIdentifier>()
+    private var didResolverHardeningEnabledProvider: BooleanProvider? = null
 
     // An optional custom log consumer can be passed to be used by VerifiedIdClient.
     fun with(logConsumer: WalletLibraryLogger.Consumer) {
@@ -110,12 +111,32 @@ class VerifiedIdClientBuilder(private val context: Context) {
         return this
     }
 
+    /**
+     * Provides the current DID resolver hardening state for each operation.
+     *
+     * An explicit provider takes precedence over
+     * [PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER]. When no provider is supplied,
+     * hardening is enabled unless that legacy preview flag is enabled.
+     */
+    fun withDidResolverHardeningEnabledProvider(
+        provider: BooleanProvider
+    ): VerifiedIdClientBuilder {
+        didResolverHardeningEnabledProvider = provider
+        return this
+    }
+
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
     fun build(): VerifiedIdClient {
         WalletLibraryVCSDKLogConsumer.logger = logger
         val userAgentInfo = getUserAgent(context)
         val walletLibraryVersionInfo = getWalletLibraryVersionInfo()
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
+        val hardeningEnabledProvider = didResolverHardeningEnabledProvider
+            ?: BooleanProvider {
+                !previewFeatureFlags.isPreviewFeatureSupported(
+                    PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
+                )
+            }
         VerifiableCredentialSdk.init(
             context,
             logConsumer = WalletLibraryVCSDKLogConsumer,
@@ -123,9 +144,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
             walletLibraryVersionInfo = walletLibraryVersionInfo,
             httpAgent = httpAgent,
             rootOfTrustResolver = rootOfTrustResolver,
-            didResolverHardeningEnabled = !previewFeatureFlags.isPreviewFeatureSupported(
-                PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
-            )
+            didResolverHardeningEnabledProvider = hardeningEnabledProvider
         )
 
         val apiProvider = HttpAgentApiProvider(
@@ -145,7 +164,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
                 jsonSerializer,
                 rootOfTrustResolver,
                 logger,
-                identifierFactory
+                identifierFactory,
+                hardeningEnabledProvider
             )
         runBlocking {
             fetchAllHolderIdentifiers(libraryConfiguration)
@@ -166,7 +186,12 @@ class VerifiedIdClientBuilder(private val context: Context) {
         registerRequestHandler(OpenId4VCIRequestHandler(libraryConfiguration), extensions)
         requestProcessorFactory.requestProcessors.addAll(requestProcessors)
 
-        val statusCheckService = StatusCheckService(apiProvider, jsonSerializer, VerifiableCredentialSdk.jwtValidator)
+        val statusCheckService = StatusCheckService(
+            apiProvider,
+            jsonSerializer,
+            VerifiableCredentialSdk.jwtValidator,
+            VerifiableCredentialSdk.linkedDomainsService
+        )
 
         return VerifiedIdClient(
             requestResolverFactory,

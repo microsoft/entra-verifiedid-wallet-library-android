@@ -153,7 +153,14 @@ class FetchPresentationRequestNetworkOperationTest {
                 every { content() } returns expectedPresentationRequestWithTwoVPTokens
             }
         }
-        val operation = FetchPresentationRequestNetworkOperation("", emptyList(), apiProvider, jwtValidator, defaultTestSerializer)
+        val operation = FetchPresentationRequestNetworkOperation(
+            "",
+            emptyList(),
+            apiProvider,
+            jwtValidator,
+            defaultTestSerializer,
+            true
+        )
 
         runBlocking {
             // Act

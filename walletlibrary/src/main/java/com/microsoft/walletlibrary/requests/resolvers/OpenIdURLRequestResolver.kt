@@ -54,7 +54,10 @@ internal class OpenIdURLRequestResolver(val libraryConfiguration: LibraryConfigu
                     JSONObject(requestPayloadString)
                     requestPayloadString
                 } catch (exception: JSONException) {
-                    OpenIdResolver.validateSignedRequest(requestPayloadString)
+                    OpenIdResolver.validateSignedRequest(
+                        requestPayloadString,
+                        libraryConfiguration.isDidResolverHardeningEnabled
+                    )
                 }
             }
             .onFailure {

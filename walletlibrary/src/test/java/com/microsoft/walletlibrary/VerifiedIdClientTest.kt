@@ -48,7 +48,11 @@ class VerifiedIdClientTest {
     private val openIdURLRequestResolver: OpenIdURLRequestResolver = mockk()
     private val presentationRequest: PresentationRequest = mockk()
     private val openIdPresentationRequest: OpenIdPresentationRequest = mockk()
-    private val verifiedIdOpenIdJwtRawRequest = VerifiedIdOpenIdJwtRawRequest(presentationRequest, rawRequest = emptyMap())
+    private val verifiedIdOpenIdJwtRawRequest = VerifiedIdOpenIdJwtRawRequest(
+        presentationRequest,
+        rawRequest = emptyMap(),
+        didResolverHardeningEnabled = true
+    )
     private val mockStatusCheckService: StatusCheckService = mockk()
     private lateinit var requestProcessorFactory: RequestProcessorFactory
     private lateinit var requestResolverFactory: RequestResolverFactory

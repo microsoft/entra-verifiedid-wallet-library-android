@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary.mappings
 
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
 import com.nimbusds.jose.jwk.JWK
 import io.mockk.every
 import io.mockk.mockk
@@ -9,6 +10,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class IdentifierDocumentMappingTest {
+    private val expectedDid = "did:test:123"
     private val mockIdentifierDocumentPublicKey: IdentifierDocumentPublicKey = mockk()
     private val mockPublicKeyJwk: JWK = mockk()
     private val mockIdentifierDocument: IdentifierDocument = mockk()
@@ -22,7 +24,7 @@ class IdentifierDocumentMappingTest {
         every { mockIdentifierDocumentPublicKey.publicKeyJwk } returns mockPublicKeyJwk
 
         // Act
-        val actualResult = mockIdentifierDocument.getJwk(kid)
+        val actualResult = mockIdentifierDocument.getJwk(kid, expectedDid, true)
 
         //Assert
         assertThat(actualResult).isNotNull
@@ -38,7 +40,7 @@ class IdentifierDocumentMappingTest {
         every { mockIdentifierDocumentPublicKey.publicKeyJwk } returns mockPublicKeyJwk
 
         // Act
-        val actualResult = mockIdentifierDocument.getJwk(kid)
+        val actualResult = mockIdentifierDocument.getJwk(kid, expectedDid, true)
 
         //Assert
         assertThat(actualResult).isNull()
@@ -51,7 +53,7 @@ class IdentifierDocumentMappingTest {
         every { mockIdentifierDocument.verificationMethod } returns emptyList()
 
         // Act
-        val actualResult = mockIdentifierDocument.getJwk(kid)
+        val actualResult = mockIdentifierDocument.getJwk(kid, expectedDid, true)
 
         //Assert
         assertThat(actualResult).isNull()
@@ -64,9 +66,61 @@ class IdentifierDocumentMappingTest {
         every { mockIdentifierDocument.verificationMethod } returns null
 
         // Act
-        val actualResult = mockIdentifierDocument.getJwk(kid)
+        val actualResult = mockIdentifierDocument.getJwk(kid, expectedDid, true)
 
         //Assert
         assertThat(actualResult).isNull()
+    }
+
+    @Test
+    fun getJwkFromIdentifierDocument_LegacyResolverAllowsMalformedDid() {
+        val kid = "signingKey-1"
+        every { mockIdentifierDocument.verificationMethod } returns
+            listOf(mockIdentifierDocumentPublicKey)
+        every { mockIdentifierDocumentPublicKey.id } returns
+            "did:web:example.com:..:evil#$kid"
+        every { mockIdentifierDocumentPublicKey.publicKeyJwk } returns mockPublicKeyJwk
+
+        val actualResult = mockIdentifierDocument.getJwk(kid, expectedDid, false)
+
+        assertThat(actualResult).isEqualTo(mockPublicKeyJwk)
+    }
+
+    @Test(expected = ValidatorException::class)
+    fun getJwkFromIdentifierDocument_HardenedResolverRejectsMalformedDid() {
+        val kid = "signingKey-1"
+        every { mockIdentifierDocument.verificationMethod } returns
+            listOf(mockIdentifierDocumentPublicKey)
+        every { mockIdentifierDocumentPublicKey.id } returns
+            "did:web:example.com:..:evil#$kid"
+
+        mockIdentifierDocument.getJwk(kid, expectedDid, true)
+    }
+
+    @Test
+    fun getJwkFromIdentifierDocument_HardenedResolverRejectsDifferentDid() {
+        val kid = "signingKey-1"
+        every { mockIdentifierDocument.verificationMethod } returns
+            listOf(mockIdentifierDocumentPublicKey)
+        every { mockIdentifierDocumentPublicKey.id } returns
+            "did:test:attacker#$kid"
+
+        val actualResult = mockIdentifierDocument.getJwk(kid, expectedDid, true)
+
+        assertThat(actualResult).isNull()
+    }
+
+    @Test
+    fun getJwkFromIdentifierDocument_LegacyResolverAllowsDifferentDid() {
+        val kid = "signingKey-1"
+        every { mockIdentifierDocument.verificationMethod } returns
+            listOf(mockIdentifierDocumentPublicKey)
+        every { mockIdentifierDocumentPublicKey.id } returns
+            "did:test:attacker#$kid"
+        every { mockIdentifierDocumentPublicKey.publicKeyJwk } returns mockPublicKeyJwk
+
+        val actualResult = mockIdentifierDocument.getJwk(kid, expectedDid, false)
+
+        assertThat(actualResult).isEqualTo(mockPublicKeyJwk)
     }
 }

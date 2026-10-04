@@ -174,6 +174,18 @@ class OpenId4VciIssuanceRequestTest {
     }
 
     @Test
+    fun getDidAndKeyIdFromHeader_LegacyResolverAllowsMalformedDid() {
+        val malformedDid = "did:web:example.com:..:evil"
+
+        val actualResult = openId4VciIssuanceRequest.getDidAndKeyIdFromHeader(
+            "$malformedDid#signingKey-1",
+            false
+        )
+
+        assertThat(actualResult).isEqualTo(Pair(malformedDid, "signingKey-1"))
+    }
+
+    @Test
     fun cancel_WithMessage_ThrowsExceptionWithProvidedMessage() {
         runBlocking {
             // Act

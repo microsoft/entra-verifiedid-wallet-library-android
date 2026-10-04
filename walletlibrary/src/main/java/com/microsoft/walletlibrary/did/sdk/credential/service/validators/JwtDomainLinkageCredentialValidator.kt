@@ -14,10 +14,35 @@ internal class JwtDomainLinkageCredentialValidator @Inject constructor(
     private val serializer: Json
 ) : DomainLinkageCredentialValidator {
 
-    override suspend fun validate(domainLinkageCredential: String, rpDid: String, rpDomain: String): Boolean {
+    suspend fun validate(
+        domainLinkageCredential: String,
+        rpDid: String,
+        rpDomain: String
+    ): Boolean {
+        return validate(
+            domainLinkageCredential,
+            rpDid,
+            rpDomain,
+            jwtValidator.snapshotDidResolverHardeningEnabled()
+        )
+    }
+
+    override suspend fun validate(
+        domainLinkageCredential: String,
+        rpDid: String,
+        rpDomain: String,
+        didResolverHardeningEnabled: Boolean
+    ): Boolean {
         val jwt = JwsToken.deserialize(domainLinkageCredential)
         val domainLinkageCredentialParsed = serializer.decodeFromString(DomainLinkageCredential.serializer(), jwt.content())
-        if (!(jwtValidator.verifySignature(jwt) && jwtValidator.validateDidInHeaderAndPayload(jwt, domainLinkageCredentialParsed.issuer)))
+        if (!(jwtValidator.verifySignature(jwt, didResolverHardeningEnabled) &&
+                jwtValidator.validateDidInHeaderAndPayload(
+                    jwt,
+                    domainLinkageCredentialParsed.issuer,
+                    didResolverHardeningEnabled
+                )
+            )
+        )
             return false
         return verifyDidConfigResource(domainLinkageCredentialParsed, rpDid, rpDomain)
     }
