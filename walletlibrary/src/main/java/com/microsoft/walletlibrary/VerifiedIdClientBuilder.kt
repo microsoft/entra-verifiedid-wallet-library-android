@@ -116,7 +116,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
      *
      * When no provider is supplied, Wallet Library defaults are used.
      */
-    fun withWalletLibraryFlightProvider(
+    fun setFlightProvider(
         provider: WalletLibraryFlightProvider
     ): VerifiedIdClientBuilder {
         flightProvider = provider

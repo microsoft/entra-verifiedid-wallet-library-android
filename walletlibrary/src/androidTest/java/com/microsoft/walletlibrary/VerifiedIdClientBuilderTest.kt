@@ -137,7 +137,7 @@ class VerifiedIdClientBuilderTest {
     @Test
     fun builder6_WithExplicitProvider_ReturnsVerifiedIdClient() {
         setupInput(1)
-        verifiedIdClientBuilder.withWalletLibraryFlightProvider { false }
+        verifiedIdClientBuilder.setFlightProvider { false }
 
         val actualResult = verifiedIdClientBuilder.build()
 
