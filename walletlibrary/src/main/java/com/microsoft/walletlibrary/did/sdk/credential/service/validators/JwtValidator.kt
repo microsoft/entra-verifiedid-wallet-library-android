@@ -30,8 +30,7 @@ internal class JwtValidator @Inject constructor(
      * Verify the signature on the JwsToken.
      */
     suspend fun verifySignature(token: JwsToken): Boolean {
-        val (didInHeader: String?, keyIdInHeader: String) =
-            getDidAndKeyIdFromHeader(token)
+        val (didInHeader: String?, keyIdInHeader: String) = getDidAndKeyIdFromHeader(token)
         if (didInHeader == null) throw ValidatorException("JWS contains no DID")
         val publicKeyJwks = resolvePublicKeyJwks(didInHeader, keyIdInHeader)
         return verifySignatureUsingPublicKey(token, publicKeyJwks)
@@ -42,9 +41,7 @@ internal class JwtValidator @Inject constructor(
     }
 
     fun validateDidInHeaderAndPayload(jwsToken: JwsToken, didInPayload: String): Boolean {
-        val didInHeader =
-            getDidAndKeyIdFromHeader(jwsToken).first
-                ?: throw ValidatorException("JWS contains no DID")
+        val didInHeader = getDidAndKeyIdFromHeader(jwsToken).first ?: throw ValidatorException("JWS contains no DID")
         return didInHeader == didInPayload
     }
 
