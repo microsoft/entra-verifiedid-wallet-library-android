@@ -19,15 +19,14 @@ class ResolveIdentifierNetworkOperationTest {
     @Test
     fun `rejects malformed did before making request`() {
         val apiProvider: HttpAgentApiProvider = mockk(relaxed = true)
-        val operation = ResolveIdentifierNetworkOperation(
-            apiProvider,
-            "https://resolver.example",
-            "did:web:example.com:..:evil",
-            WalletLibraryFlightProvider { false }
-        )
 
         val throwable = catchThrowable {
-            runBlocking { operation.fire() }
+            ResolveIdentifierNetworkOperation(
+                apiProvider,
+                "https://resolver.example",
+                "did:web:example.com:..:evil",
+                WalletLibraryFlightProvider { false }
+            )
         }
 
         assertThat(throwable).isInstanceOf(ResolverException::class.java)

@@ -23,17 +23,17 @@ internal class ResolveIdentifierNetworkOperation @Inject constructor(
 ) :
     GetNetworkOperation<IdentifierResponse>() {
 
-    override val call: suspend () -> Result<IResponse> = {
-        // Reject identifiers containing characters that could redirect the request to an unintended path
-        // (e.g. '/', '?', '#', whitespace, '..') before they are concatenated into the resolver URL.
-        when {
-            flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver) -> Unit
-            identifier.isBlank() || !JwaCryptoHelper.isSyntacticallyValidDid(identifier) ->
-                throw ResolverException("Identifier '$identifier' is not a syntactically valid DID")
+    // Reject identifiers containing characters that could redirect the request to an unintended path
+    // (e.g. '/', '?', '#', whitespace, '..') before they are concatenated into the resolver URL.
+    private val sanitizedIdentifier: String = identifier.also {
+        val didResolverHardeningEnabled =
+            !flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)
+        if (didResolverHardeningEnabled && (it.isBlank() || !JwaCryptoHelper.isSyntacticallyValidDid(it))) {
+            throw ResolverException("Identifier '$it' is not a syntactically valid DID")
         }
-        apiProvider.identifierApi.resolveIdentifier("$url/$identifier")
     }
 
+    override val call: suspend () -> Result<IResponse> = { apiProvider.identifierApi.resolveIdentifier("$url/$sanitizedIdentifier") }
     override suspend fun toResult(response: IResponse): Result<IdentifierResponse> {
         return Result.success(apiProvider.identifierApi.toIdentifierResponse(response))
     }

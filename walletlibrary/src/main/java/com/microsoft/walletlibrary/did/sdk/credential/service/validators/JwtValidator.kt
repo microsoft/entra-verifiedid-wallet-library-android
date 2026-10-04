@@ -46,11 +46,7 @@ internal class JwtValidator @Inject constructor(
     }
 
     private fun getDidAndKeyIdFromHeader(token: JwsToken): Pair<String?, String> {
-        token.keyId?.let { kid ->
-            val didResolverHardeningEnabled =
-                !flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)
-            return JwaCryptoHelper.extractDidAndKeyId(kid, didResolverHardeningEnabled)
-        }
+        token.keyId?.let { kid -> return JwaCryptoHelper.extractDidAndKeyId(kid) }
         throw ValidatorException("JWS contains no key id")
     }
 

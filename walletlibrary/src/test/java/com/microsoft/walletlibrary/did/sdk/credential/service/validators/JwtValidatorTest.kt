@@ -12,7 +12,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -127,37 +126,17 @@ class JwtValidatorTest {
     }
 
     @Test
-    fun `legacy resolver allows malformed DID in header and verification method`() {
+    fun `legacy resolver still rejects malformed DID in header`() {
         val malformedDid = "did:web:example.com:..:evil"
         val malformedKid = "$malformedDid#kidTest2353"
         val legacyValidator = JwtValidator(mockedResolver, WalletLibraryFlightProvider { true })
-        coEvery { mockedResolver.resolve(malformedDid) } returns Result.success(mockedIdentifierDocument)
-        every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns true
         every { mockedJwsToken.keyId } returns malformedKid
-        every { mockedIdentifierDocumentPublicKey.id } returns malformedKid
-        every { mockedPublicKeyJwk.keyType } returns KeyType.EC
 
-        val actualValidationResult = runBlocking {
-            legacyValidator.verifySignature(mockedJwsToken)
+        val result = runBlocking {
+            runCatching { legacyValidator.verifySignature(mockedJwsToken) }
         }
 
-        assertTrue(actualValidationResult)
-    }
-
-    @Test
-    fun `legacy resolver preserves false result when no key id matches`() {
-        val legacyValidator = JwtValidator(mockedResolver, WalletLibraryFlightProvider { true })
-        coEvery { mockedResolver.resolve(expectedDid) } returns Result.success(mockedIdentifierDocument)
-        every { mockedJwsToken.keyId } returns expectedKid
-        every { mockedIdentifierDocumentPublicKey.id } returns "$expectedDid#different-key"
-        every { mockedJwsToken.verify(emptyList()) } returns false
-
-        val actualValidationResult = runBlocking {
-            legacyValidator.verifySignature(mockedJwsToken)
-        }
-
-        assertFalse(actualValidationResult)
-        verify { mockedJwsToken.verify(emptyList()) }
+        assertThat(result.exceptionOrNull()).isInstanceOf(ValidatorException::class.java)
     }
 
     @Test
@@ -167,18 +146,16 @@ class JwtValidatorTest {
             mockedResolver,
             WalletLibraryFlightProvider { useLegacyDidResolver }
         )
-        val malformedDid = "did:web:example.com:..:evil"
-        val malformedKid = "$malformedDid#kidTest2353"
-        every { mockedJwsToken.keyId } returns malformedKid
-        every { mockedIdentifierDocumentPublicKey.id } returns malformedKid
+        coEvery { mockedResolver.resolve(expectedDid) } returns Result.success(mockedIdentifierDocument)
+        every { mockedJwsToken.keyId } returns expectedKid
+        every { mockedIdentifierDocumentPublicKey.id } returns "did:attacker:123#kidTest2353"
+        every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns true
 
         val hardenedResult = runBlocking {
             runCatching { dynamicValidator.verifySignature(mockedJwsToken) }
         }
 
         useLegacyDidResolver = true
-        coEvery { mockedResolver.resolve(malformedDid) } returns Result.success(mockedIdentifierDocument)
-        every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns true
         val legacyResult = runBlocking {
             dynamicValidator.verifySignature(mockedJwsToken)
         }
