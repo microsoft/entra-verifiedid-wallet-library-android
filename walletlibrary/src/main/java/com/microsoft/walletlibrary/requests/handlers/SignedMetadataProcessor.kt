@@ -31,10 +31,7 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
             "JWS contains no key id",
             VerifiedIdExceptions.MALFORMED_SIGNED_METADATA_EXCEPTION.value
         )
-        val didKeyIdPair = JwaCryptoHelper.extractDidAndKeyId(
-            kid,
-            libraryConfiguration.isDidResolverHardeningEnabled
-        )
+        val didKeyIdPair = JwaCryptoHelper.extractDidAndKeyId(kid)
         val did = didKeyIdPair.first ?: throw OpenId4VciValidationException(
             "JWS contains no DID",
             VerifiedIdExceptions.MALFORMED_SIGNED_METADATA_EXCEPTION.value
@@ -43,11 +40,7 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
 
         // Resolve the identifier document for the DID in the token and verify the integrity of the signed metadata.
         val identifierDocument = IdentifierDocumentResolver.resolveIdentifierDocument(did)
-        val jwk = identifierDocument.getJwk(
-            keyId,
-            did,
-            libraryConfiguration.isDidResolverHardeningEnabled
-        )
+        val jwk = identifierDocument.getJwk(keyId)
             ?: throw OpenId4VciValidationException(
                 "JWK with key id $keyId not found in identifier document",
                 VerifiedIdExceptions.MALFORMED_SIGNED_METADATA_EXCEPTION.value

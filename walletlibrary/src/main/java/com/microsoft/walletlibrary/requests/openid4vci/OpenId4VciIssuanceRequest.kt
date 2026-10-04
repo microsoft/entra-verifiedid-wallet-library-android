@@ -188,32 +188,19 @@ internal class OpenId4VciIssuanceRequest(
 
     private suspend fun verifySignature(jwsToken: JwsToken): Boolean {
         val kid = jwsToken.keyId ?: throw ValidatorException("JWS contains no key id")
-        val (didInHeader: String?, keyIdInHeader: String) =
-            getDidAndKeyIdFromHeader(kid)
+        val (didInHeader: String?, keyIdInHeader: String) = getDidAndKeyIdFromHeader(kid)
         if (didInHeader == null) throw ValidatorException("JWS contains no DID")
-        val identifierDocument =
-            IdentifierDocumentResolver.resolveIdentifierDocument(didInHeader)
+        val identifierDocument = IdentifierDocumentResolver.resolveIdentifierDocument(didInHeader)
         val publicKeys = identifierDocument.verificationMethod
         if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")
         val publicKeysJwk =
-            publicKeys.filter { publicKey ->
-                val (verificationMethodDid, verificationMethodKeyId) = getDidAndKeyIdFromHeader(
-                    publicKey.id
-                )
-                verificationMethodKeyId == keyIdInHeader &&
-                    (!libraryConfiguration.isDidResolverHardeningEnabled ||
-                        verificationMethodDid == null ||
-                        verificationMethodDid == didInHeader)
-            }
+            publicKeys.filter { publicKey -> getDidAndKeyIdFromHeader(publicKey.id).second == keyIdInHeader }
                 .map { it.publicKeyJwk }
         return jwsToken.verify(publicKeysJwk)
     }
 
-    internal fun getDidAndKeyIdFromHeader(kid: String): Pair<String?, String> {
-        return JwaCryptoHelper.extractDidAndKeyId(
-            kid,
-            libraryConfiguration.isDidResolverHardeningEnabled
-        )
+    private fun getDidAndKeyIdFromHeader(kid: String): Pair<String?, String> {
+        return JwaCryptoHelper.extractDidAndKeyId(kid)
     }
 
     private suspend fun sendIssuanceCallbackIfRequestStateAndCallbackExist(result: VerifiedIdResult<VerifiedId>) {

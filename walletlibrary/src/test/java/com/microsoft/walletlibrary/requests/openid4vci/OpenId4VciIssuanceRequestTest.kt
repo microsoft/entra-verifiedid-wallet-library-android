@@ -1,6 +1,5 @@
 package com.microsoft.walletlibrary.requests.openid4vci
 
-import com.microsoft.walletlibrary.BooleanProvider
 import com.microsoft.walletlibrary.did.sdk.IdentifierService
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
@@ -40,7 +39,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class OpenId4VciIssuanceRequestTest {
-    private var didResolverHardeningEnabled = true
     private val mockRequesterStyle: RequesterStyle = mockk()
     private val mockRootOfTrust: RootOfTrust = mockk()
     private val mockVerifiedIdStyle: VerifiedIdStyle = mockk()
@@ -58,8 +56,7 @@ class OpenId4VciIssuanceRequestTest {
         defaultTestSerializer,
         rootOfTrustResolver = null,
         mockWalletLibraryLogger,
-        mockIdentifierFactory,
-        BooleanProvider { didResolverHardeningEnabled }
+        mockIdentifierFactory
     )
     private val slot = slot<ByteArray>()
     private val mockedIdentifier: EncryptedSharedPreferencesIdentifier = mockk()
@@ -174,17 +171,6 @@ class OpenId4VciIssuanceRequestTest {
 
         // Assert
         assertThat(actualResult).isFalse
-    }
-
-    @Test
-    fun getDidAndKeyIdFromHeader_LegacyResolverAllowsMalformedDid() {
-        val malformedDid = "did:web:example.com:..:evil"
-        didResolverHardeningEnabled = false
-
-        val actualResult =
-            openId4VciIssuanceRequest.getDidAndKeyIdFromHeader("$malformedDid#signingKey-1")
-
-        assertThat(actualResult).isEqualTo(Pair(malformedDid, "signingKey-1"))
     }
 
     @Test

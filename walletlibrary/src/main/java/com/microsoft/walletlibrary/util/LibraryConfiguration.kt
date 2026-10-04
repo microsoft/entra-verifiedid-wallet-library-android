@@ -1,6 +1,5 @@
 package com.microsoft.walletlibrary.util
 
-import com.microsoft.walletlibrary.BooleanProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.walletlibrary.identifier.IdentifierFactory
@@ -15,15 +14,8 @@ internal class LibraryConfiguration(
     val serializer: Json,
     val rootOfTrustResolver: RootOfTrustResolver? = null,
     val logger: WalletLibraryLogger,
-    val identifierFactory: IdentifierFactory,
-    private val didResolverHardeningEnabledProvider: BooleanProvider = BooleanProvider {
-        !previewFeatureFlags.isPreviewFeatureSupported(
-            PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
-        )
-    }
+    val identifierFactory: IdentifierFactory
 ) {
-    val isDidResolverHardeningEnabled: Boolean
-        get() = didResolverHardeningEnabledProvider.get()
 
     // Determine if a preview feature is enabled.
     fun isPreviewFeatureEnabled(previewFeatureFlag: String): Boolean {

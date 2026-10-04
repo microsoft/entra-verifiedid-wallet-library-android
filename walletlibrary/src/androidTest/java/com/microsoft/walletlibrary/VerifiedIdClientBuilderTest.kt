@@ -132,59 +132,15 @@ class VerifiedIdClientBuilderTest {
                 PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
             )
         ).isTrue()
-        assertThat(
-            (actualResult.requestResolverFactory.requestResolvers.first() as OpenIdURLRequestResolver)
-                .libraryConfiguration.isDidResolverHardeningEnabled
-        ).isFalse()
     }
 
     @Test
-    fun builder6_ExplicitProviderOverridesLegacyResolverFlagAndRemainsDynamic() {
+    fun builder6_WithExplicitProvider_ReturnsVerifiedIdClient() {
         setupInput(1)
-        var hardeningEnabled = true
-        verifiedIdClientBuilder.with(
-            listOf(PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER)
-        )
-        verifiedIdClientBuilder.withDidResolverHardeningEnabledProvider {
-            hardeningEnabled
-        }
+        verifiedIdClientBuilder.withDidResolverHardeningEnabledProvider { false }
 
         val actualResult = verifiedIdClientBuilder.build()
-        val configuration =
-            (actualResult.requestResolverFactory.requestResolvers.first() as OpenIdURLRequestResolver)
-                .libraryConfiguration
 
-        assertThat(configuration.isDidResolverHardeningEnabled).isTrue()
-
-        hardeningEnabled = false
-
-        assertThat(configuration.isDidResolverHardeningEnabled).isFalse()
-    }
-
-    @Test
-    fun builder7_ProvidersRemainClientScopedAfterAnotherClientIsBuilt() {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        var firstClientHardeningEnabled = true
-        val firstClient = VerifiedIdClientBuilder(context)
-            .withDidResolverHardeningEnabledProvider {
-                firstClientHardeningEnabled
-            }
-            .build()
-        val secondClient = VerifiedIdClientBuilder(context)
-            .withDidResolverHardeningEnabledProvider { false }
-            .build()
-        val firstConfiguration =
-            (firstClient.requestResolverFactory.requestResolvers.first() as OpenIdURLRequestResolver)
-                .libraryConfiguration
-        val secondConfiguration =
-            (secondClient.requestResolverFactory.requestResolvers.first() as OpenIdURLRequestResolver)
-                .libraryConfiguration
-
-        assertThat(firstConfiguration.isDidResolverHardeningEnabled).isTrue()
-        assertThat(secondConfiguration.isDidResolverHardeningEnabled).isFalse()
-
-        firstClientHardeningEnabled = false
-
-        assertThat(firstConfiguration.isDidResolverHardeningEnabled).isFalse()
+        assertThat(actualResult).isNotNull
     }
 }

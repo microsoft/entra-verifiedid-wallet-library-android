@@ -164,8 +164,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
                 jsonSerializer,
                 rootOfTrustResolver,
                 logger,
-                identifierFactory,
-                hardeningEnabledProvider
+                identifierFactory
             )
         runBlocking {
             fetchAllHolderIdentifiers(libraryConfiguration)
