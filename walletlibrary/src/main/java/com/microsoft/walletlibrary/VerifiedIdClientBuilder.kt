@@ -186,11 +186,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         registerRequestHandler(OpenId4VCIRequestHandler(libraryConfiguration), extensions)
         requestProcessorFactory.requestProcessors.addAll(requestProcessors)
 
-        val statusCheckService = StatusCheckService(
-            apiProvider,
-            jsonSerializer,
-            VerifiableCredentialSdk.jwtValidator
-        )
+        val statusCheckService = StatusCheckService(apiProvider, jsonSerializer, VerifiableCredentialSdk.jwtValidator)
 
         return VerifiedIdClient(
             requestResolverFactory,

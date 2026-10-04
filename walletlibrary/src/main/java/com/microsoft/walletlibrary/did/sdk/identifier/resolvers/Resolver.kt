@@ -19,17 +19,13 @@ internal class Resolver @Inject constructor(
     private val flightProvider: WalletLibraryFlightProvider
 ) {
     suspend fun resolve(identifier: String): Result<IdentifierDocument> {
-        val result = identifierRepository.resolveIdentifier(baseUrl, identifier)
-        if (flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)) {
-            return result.map { it.didDocument }
-                .onFailure {
-                    return Result.failure(ResolverException("Unable to resolve identifier $identifier", it))
-                }
-        }
-        return result.mapCatching {
+        return identifierRepository.resolveIdentifier(baseUrl, identifier)
+            .mapCatching {
                 val resolvedDidDocument = it.didDocument
                 val resolvedId = resolvedDidDocument.id
-                if (resolvedId.isNullOrBlank() || resolvedId != identifier) {
+                val didResolverHardeningEnabled =
+                    !flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)
+                if (didResolverHardeningEnabled && (resolvedId.isNullOrBlank() || resolvedId != identifier)) {
                     throw ResolverException(
                         "Resolved DID document id '$resolvedId' does not match requested identifier '$identifier'"
                     )

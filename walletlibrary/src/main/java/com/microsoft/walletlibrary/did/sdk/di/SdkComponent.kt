@@ -74,6 +74,8 @@ internal interface SdkComponent {
         fun rootOfTrustResolver(@Named("rootOfTrustResolver") rootOfTrustResolver: RootOfTrustResolver? = null): Builder
 
         @BindsInstance
-        fun flightProvider(provider: WalletLibraryFlightProvider): Builder
+        fun flightProvider(
+            provider: WalletLibraryFlightProvider
+        ): Builder
     }
 }

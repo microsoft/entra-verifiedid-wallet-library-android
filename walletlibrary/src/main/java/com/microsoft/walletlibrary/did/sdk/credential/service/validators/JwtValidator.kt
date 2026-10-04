@@ -47,11 +47,9 @@ internal class JwtValidator @Inject constructor(
 
     private fun getDidAndKeyIdFromHeader(token: JwsToken): Pair<String?, String> {
         token.keyId?.let { kid ->
-            return if (flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)) {
-                JwaCryptoHelper.extractDidAndKeyId(kid, false)
-            } else {
-                JwaCryptoHelper.extractDidAndKeyId(kid, true)
-            }
+            val didResolverHardeningEnabled =
+                !flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)
+            return JwaCryptoHelper.extractDidAndKeyId(kid, didResolverHardeningEnabled)
         }
         throw ValidatorException("JWS contains no key id")
     }
@@ -61,18 +59,15 @@ internal class JwtValidator @Inject constructor(
             is Result.Success -> {
                 val publicKeys = requesterDidDocument.payload.verificationMethod
                 if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")
-                if (flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)) {
-                    return publicKeys.filter { publicKey ->
-                        JwaCryptoHelper.extractDidAndKeyId(publicKey.id, false).second == keyId
-                    }.map { it.publicKeyJwk }
-                }
+                val didResolverHardeningEnabled =
+                    !flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)
                 // Require both the DID and the key fragment of each verificationMethod.id to match the
                 // requested DID, not just the fragment.
                 val matchingKeys = publicKeys.filter { publicKey ->
                     val (verificationMethodDid, verificationMethodKeyId) =
-                        JwaCryptoHelper.extractDidAndKeyId(publicKey.id, true)
+                        JwaCryptoHelper.extractDidAndKeyId(publicKey.id, didResolverHardeningEnabled)
                     verificationMethodKeyId == keyId &&
-                        (verificationMethodDid == null || verificationMethodDid == did)
+                        (!didResolverHardeningEnabled || verificationMethodDid == null || verificationMethodDid == did)
                 }
                 if (matchingKeys.isEmpty()) throw ValidatorException("No public key found in identifier document matching DID '$did' and key id '$keyId'")
                 matchingKeys.map { it.publicKeyJwk }

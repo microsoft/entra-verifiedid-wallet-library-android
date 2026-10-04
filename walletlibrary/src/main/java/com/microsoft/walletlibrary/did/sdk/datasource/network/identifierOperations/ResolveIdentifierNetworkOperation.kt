@@ -13,8 +13,9 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiP
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
+import javax.inject.Inject
 
-internal class ResolveIdentifierNetworkOperation(
+internal class ResolveIdentifierNetworkOperation @Inject constructor(
     private val apiProvider: HttpAgentApiProvider,
     url: String,
     val identifier: String,

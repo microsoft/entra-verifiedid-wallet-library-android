@@ -29,9 +29,7 @@ class ResolverTest {
     @Test
     fun successfulResolutionTest() {
         val resolver = Resolver("", identifierRepository, WalletLibraryFlightProvider { false })
-        coEvery {
-            identifierRepository.resolveIdentifier("", expectedIdentifier)
-        } returns KotlinResult.success(expectedIdentifierResponse)
+        coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(expectedIdentifierResponse)
         runBlocking {
             val actualIdentifierDocument = resolver.resolve(expectedIdentifier)
             assertThat(actualIdentifierDocument.isSuccess).isEqualTo(true)
@@ -79,9 +77,7 @@ class ResolverTest {
         val resolver = Resolver("", identifierRepository, WalletLibraryFlightProvider { false })
         val mismatchedId = "did:ion:another-id"
         val mismatchedDocument = expectedIdentifierResponse.copy(didDocument = expectedIdentifierResponse.didDocument.copy(id = mismatchedId))
-        coEvery {
-            identifierRepository.resolveIdentifier("", expectedIdentifier)
-        } returns KotlinResult.success(mismatchedDocument)
+        coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
 
         runBlocking {
             val actualResult = resolver.resolve(expectedIdentifier)
@@ -97,9 +93,7 @@ class ResolverTest {
         val mismatchedDocument = expectedIdentifierResponse.copy(
             didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
         )
-        coEvery {
-            identifierRepository.resolveIdentifier("", expectedIdentifier)
-        } returns KotlinResult.success(mismatchedDocument)
+        coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
 
         val actualResult = runBlocking { resolver.resolve(expectedIdentifier) }
 
@@ -113,9 +107,7 @@ class ResolverTest {
         val mismatchedDocument = expectedIdentifierResponse.copy(
             didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
         )
-        coEvery {
-            identifierRepository.resolveIdentifier("", expectedIdentifier)
-        } returns KotlinResult.success(mismatchedDocument)
+        coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
 
         val actualResult = runBlocking { resolver.resolve(expectedIdentifier) }
 
