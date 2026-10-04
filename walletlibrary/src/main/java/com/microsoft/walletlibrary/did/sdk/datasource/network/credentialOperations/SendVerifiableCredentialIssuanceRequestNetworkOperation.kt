@@ -20,8 +20,7 @@ internal class SendVerifiableCredentialIssuanceRequestNetworkOperation(
     serializedResponse: String,
     private val apiProvider: HttpAgentApiProvider,
     private val jwtValidator: JwtValidator,
-    private val serializer: Json,
-    private val didResolverHardeningEnabled: Boolean
+    private val serializer: Json
 ) : PostNetworkOperation<VerifiableCredential>() {
     override val call: suspend () -> Result<IResponse> = { apiProvider.issuanceApis.sendResponse(url, serializedResponse) }
     override suspend fun toResult(response: IResponse): Result<VerifiableCredential> {
@@ -32,7 +31,7 @@ internal class SendVerifiableCredentialIssuanceRequestNetworkOperation(
 
     private suspend fun verifyAndUnWrapIssuanceResponse(jwsTokenString: String): Result<VerifiableCredential> {
         val jwsToken = JwsToken.deserialize(jwsTokenString)
-        if (!jwtValidator.verifySignature(jwsToken, didResolverHardeningEnabled))
+        if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not Valid on Issuance Response.")
         val verifiableCredentialContent = serializer.decodeFromString(VerifiableCredentialContent.serializer(), jwsToken.content())
         return Result.success(VerifiableCredential(verifiableCredentialContent.jti, jwsTokenString, verifiableCredentialContent))

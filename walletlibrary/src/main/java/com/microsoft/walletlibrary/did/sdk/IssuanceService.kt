@@ -52,27 +52,11 @@ internal class IssuanceService @Inject constructor(
     suspend fun getRequest(
         contractUrl: String
     ): Result<IssuanceRequest> {
-        return getRequest(
-            contractUrl,
-            jwtValidator.snapshotDidResolverHardeningEnabled()
-        )
-    }
-
-    internal suspend fun getRequest(
-        contractUrl: String,
-        didResolverHardeningEnabled: Boolean
-    ): Result<IssuanceRequest> {
         return runResultTry {
             logTime("Issuance getRequest") {
-                val contract = fetchContract(
-                    contractUrl,
-                    didResolverHardeningEnabled
-                ).toSDK().abortOnError()
+                val contract = fetchContract(contractUrl).toSDK().abortOnError()
                 val linkedDomainResult =
-                    linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
-                        contract.input.issuer,
-                        didResolverHardeningEnabled
-                    )
+                    linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(contract.input.issuer)
                         .toSDK().abortOnError()
                 val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
                 Result.Success(request)
@@ -80,15 +64,11 @@ internal class IssuanceService @Inject constructor(
         }
     }
 
-    private suspend fun fetchContract(
-        url: String,
-        didResolverHardeningEnabled: Boolean
-    ) = FetchContractNetworkOperation(
+    private suspend fun fetchContract(url: String) = FetchContractNetworkOperation(
         url,
         apiProvider,
         jwtValidator,
-        serializer,
-        didResolverHardeningEnabled
+        serializer
     ).fire()
 
     /**
@@ -137,16 +117,9 @@ internal class IssuanceService @Inject constructor(
     ): Result<VerifiableCredential> {
         return runResultTry {
             logTime("Issuance sendResponse") {
-                val didResolverHardeningEnabled =
-                    libraryConfiguration.isDidResolverHardeningEnabled
                 val identifier = libraryConfiguration.identifierFactory.getIdentifier()
                 val requestedVcMap = response.requestedVcMap
-                val verifiableCredential = formAndSendResponse(
-                    response,
-                    identifier,
-                    requestedVcMap,
-                    didResolverHardeningEnabled = didResolverHardeningEnabled
-                ).abortOnError()
+                val verifiableCredential = formAndSendResponse(response, identifier, requestedVcMap).abortOnError()
                 Result.Success(verifiableCredential)
             }
         }
@@ -168,8 +141,7 @@ internal class IssuanceService @Inject constructor(
         response: IssuanceResponse,
         responder: HolderIdentifier,
         requestedVcMap: RequestedVcMap,
-        expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS,
-        didResolverHardeningEnabled: Boolean
+        expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<VerifiableCredential> {
         val formattedResponse = issuanceResponseFormatter.formatResponse(
             requestedVcMap = requestedVcMap,
@@ -177,23 +149,14 @@ internal class IssuanceService @Inject constructor(
             responder = responder,
             expiryInSeconds = expiryInSeconds
         )
-        return sendResponse(
-            formattedResponse,
-            response.audience,
-            didResolverHardeningEnabled
-        )
+        return sendResponse(formattedResponse, response.audience)
     }
 
-    private suspend fun sendResponse(
-        formattedResponse: String,
-        url: String,
-        didResolverHardeningEnabled: Boolean
-    ) = SendVerifiableCredentialIssuanceRequestNetworkOperation(
+    private suspend fun sendResponse(formattedResponse: String, url: String) = SendVerifiableCredentialIssuanceRequestNetworkOperation(
         url,
         formattedResponse,
         apiProvider,
         jwtValidator,
-        serializer,
-        didResolverHardeningEnabled
+        serializer
     ).fire().toSDK()
 }

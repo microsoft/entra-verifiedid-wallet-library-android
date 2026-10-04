@@ -22,25 +22,8 @@ internal object ManifestResolver {
         requestState: String? = null,
         issuanceCallbackUrl: String? = null
     ): RawManifest {
-        return getIssuanceRequest(
-            uri,
-            requestState,
-            issuanceCallbackUrl,
-            VerifiableCredentialSdk.jwtValidator.snapshotDidResolverHardeningEnabled()
-        )
-    }
-
-    internal suspend fun getIssuanceRequest(
-        uri: String,
-        requestState: String?,
-        issuanceCallbackUrl: String?,
-        didResolverHardeningEnabled: Boolean
-    ): RawManifest {
         return when (val issuanceRequestResult =
-            VerifiableCredentialSdk.issuanceService.getRequest(
-                uri,
-                didResolverHardeningEnabled
-            )) {
+            VerifiableCredentialSdk.issuanceService.getRequest(uri)) {
             is Result.Success -> {
                 val request = issuanceRequestResult.payload
                 RawManifest(request)

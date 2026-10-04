@@ -19,22 +19,8 @@ internal class Resolver @Inject constructor(
     private val didResolverHardeningEnabledProvider: BooleanProvider
 ) {
     suspend fun resolve(identifier: String): Result<IdentifierDocument> {
-        return resolve(identifier, snapshotDidResolverHardeningEnabled())
-    }
-
-    internal fun snapshotDidResolverHardeningEnabled(): Boolean =
-        didResolverHardeningEnabledProvider.get()
-
-    internal suspend fun resolve(
-        identifier: String,
-        didResolverHardeningEnabled: Boolean
-    ): Result<IdentifierDocument> {
-        val result = identifierRepository.resolveIdentifier(
-            baseUrl,
-            identifier,
-            didResolverHardeningEnabled
-        )
-        if (!didResolverHardeningEnabled) {
+        val result = identifierRepository.resolveIdentifier(baseUrl, identifier)
+        if (!didResolverHardeningEnabledProvider.get()) {
             return result.map { it.didDocument }
                 .onFailure {
                     return Result.failure(ResolverException("Unable to resolve identifier $identifier", it))

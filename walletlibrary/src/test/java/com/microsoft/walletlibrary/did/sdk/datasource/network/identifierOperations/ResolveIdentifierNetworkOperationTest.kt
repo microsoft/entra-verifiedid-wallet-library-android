@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations
 
+import com.microsoft.walletlibrary.BooleanProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentIdentifierApi
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
@@ -18,9 +19,15 @@ class ResolveIdentifierNetworkOperationTest {
     @Test
     fun `rejects malformed did before making request`() {
         val apiProvider: HttpAgentApiProvider = mockk(relaxed = true)
+        val operation = ResolveIdentifierNetworkOperation(
+            apiProvider,
+            "https://resolver.example",
+            "did:web:example.com:..:evil",
+            BooleanProvider { true }
+        )
 
         val throwable = catchThrowable {
-            ResolveIdentifierNetworkOperation(apiProvider, "https://resolver.example", "did:web:example.com:..:evil", true)
+            runBlocking { operation.fire() }
         }
 
         assertThat(throwable).isInstanceOf(ResolverException::class.java)
@@ -35,7 +42,7 @@ class ResolveIdentifierNetworkOperationTest {
             apiProvider,
             "https://resolver.example",
             "did:web:example.com:..:evil",
-            false
+            BooleanProvider { false }
         )
 
         assertThat(operation.identifier).isEqualTo("did:web:example.com:..:evil")
@@ -52,7 +59,12 @@ class ResolveIdentifierNetworkOperationTest {
         coEvery { identifierApi.resolveIdentifier("https://resolver.example/did:example:123") } returns Result.success(response)
         every { identifierApi.toIdentifierResponse(response) } returns identifierResponse
 
-        val operation = ResolveIdentifierNetworkOperation(apiProvider, "https://resolver.example", "did:example:123", true)
+        val operation = ResolveIdentifierNetworkOperation(
+            apiProvider,
+            "https://resolver.example",
+            "did:example:123",
+            BooleanProvider { true }
+        )
 
         runBlocking {
             val result = operation.fire()

@@ -40,17 +40,11 @@ class StatusCheckServiceTest {
     private val apiProvider: HttpAgentApiProvider = mockk()
     private val statusListApi: HttpAgentStatusListApi = mockk()
     private val jwtValidator: JwtValidator = mockk()
+    private val statusCheckService = StatusCheckService(apiProvider, defaultTestSerializer, jwtValidator)
     private val mockLinkedDomainsService: LinkedDomainsService = mockk()
-    private val statusCheckService = StatusCheckService(
-        apiProvider,
-        defaultTestSerializer,
-        jwtValidator,
-        mockLinkedDomainsService
-    )
 
     init {
         every { apiProvider.statusListApi } returns statusListApi
-        every { jwtValidator.snapshotDidResolverHardeningEnabled() } returns true
     }
 
     @Before
@@ -161,8 +155,8 @@ class StatusCheckServiceTest {
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
             okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = null))
-        coEvery { jwtValidator.verifySignature(any(), true) } returns true
-        every { jwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -174,8 +168,8 @@ class StatusCheckServiceTest {
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
             okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 5))
-        coEvery { jwtValidator.verifySignature(any(), true) } returns true
-        every { jwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -187,8 +181,8 @@ class StatusCheckServiceTest {
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
             okResponse(signedStatusListJwt(statusPurpose = "suspension", flaggedIndex = 5))
-        coEvery { jwtValidator.verifySignature(any(), true) } returns true
-        every { jwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -201,8 +195,8 @@ class StatusCheckServiceTest {
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 100_000))
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
             okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = null))
-        coEvery { jwtValidator.verifySignature(any(), true) } returns true
-        every { jwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -241,7 +235,7 @@ class StatusCheckServiceTest {
             .encodeToString(buildStatusListJson(statusPurpose = "revocation", flaggedIndex = 5).toByteArray())
         val signedStatusList = "$header.$payload.AAAA"
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns okResponse(signedStatusList)
-        coEvery { jwtValidator.verifySignature(any(), true) } returns false
+        coEvery { jwtValidator.verifySignature(any()) } returns false
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -254,8 +248,8 @@ class StatusCheckServiceTest {
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
             okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 5))
         // Signature is valid, but the signer DID is not the credential's issuer.
-        coEvery { jwtValidator.verifySignature(any(), true) } returns true
-        every { jwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns false
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns false
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -267,8 +261,8 @@ class StatusCheckServiceTest {
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
             okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 5))
-        coEvery { jwtValidator.verifySignature(any(), true) } returns true
-        every { jwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -297,8 +291,8 @@ class StatusCheckServiceTest {
         )
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
             okResponse(signedStatusListJwt(statusPurpose = "suspension", flaggedIndex = 5))
-        coEvery { jwtValidator.verifySignature(any(), true) } returns true
-        every { jwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -312,8 +306,8 @@ class StatusCheckServiceTest {
         )
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
             okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 5))
-        coEvery { jwtValidator.verifySignature(any(), true) } returns true
-        every { jwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -328,8 +322,8 @@ class StatusCheckServiceTest {
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
             okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 5, exp = pastEpochSeconds))
-        coEvery { jwtValidator.verifySignature(any(), true) } returns true
-        every { jwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -342,8 +336,8 @@ class StatusCheckServiceTest {
         val verifiedId = buildVerifiableCredential(credentialStatus = directUrlStatus(index = 5))
         coEvery { statusListApi.getStatusListCredential(STATUS_LIST_URL) } returns
             okResponse(signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 5, exp = futureEpochSeconds))
-        coEvery { jwtValidator.verifySignature(any(), true) } returns true
-        every { jwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -359,7 +353,7 @@ class StatusCheckServiceTest {
             type = "RevocationList2021Status"
         )
         val verifiedId = buildVerifiableCredential(credentialStatus = descriptor)
-        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any(), true) } returns
+        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any()) } returns
             Result.failure(IOException("resolution failed"))
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
@@ -379,7 +373,7 @@ class StatusCheckServiceTest {
                 IdentifierDocumentService(id = "#linked-domains", type = "LinkedDomains", serviceEndpoint = listOf("https://issuer.example"))
             )
         }
-        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any(), true) } returns
+        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any()) } returns
             Result.success(identifierDoc)
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
@@ -399,7 +393,7 @@ class StatusCheckServiceTest {
                 IdentifierDocumentService(id = "#hub", type = "IdentityHub", serviceEndpoint = listOf(IDENTITY_HUB_URL))
             )
         }
-        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any(), true) } returns
+        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any()) } returns
             Result.success(identifierDoc)
         coEvery { statusListApi.postCollectionsQuery(IDENTITY_HUB_URL, any()) } returns
             Result.failure(IOException("network error"))
@@ -421,7 +415,7 @@ class StatusCheckServiceTest {
                 IdentifierDocumentService(id = "#hub", type = "IdentityHub", serviceEndpoint = listOf(IDENTITY_HUB_URL))
             )
         }
-        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any(), true) } returns
+        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any()) } returns
             Result.success(identifierDoc)
         coEvery { statusListApi.postCollectionsQuery(IDENTITY_HUB_URL, any()) } returns
             Result.success(IResponse(500, emptyMap(), ByteArray(0)))
@@ -443,7 +437,7 @@ class StatusCheckServiceTest {
                 IdentifierDocumentService(id = "#hub", type = "IdentityHub", serviceEndpoint = listOf(IDENTITY_HUB_URL))
             )
         }
-        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any(), true) } returns
+        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any()) } returns
             Result.success(identifierDoc)
 
         // Build a CollectionsQuery response envelope with base64url-encoded status list JWT in entries[].data
@@ -453,8 +447,8 @@ class StatusCheckServiceTest {
 
         coEvery { statusListApi.postCollectionsQuery(IDENTITY_HUB_URL, any()) } returns
             okResponse(envelopeBody)
-        coEvery { jwtValidator.verifySignature(any(), true) } returns true
-        every { jwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -473,7 +467,7 @@ class StatusCheckServiceTest {
                 IdentifierDocumentService(id = "#hub", type = "IdentityHub", serviceEndpoint = listOf(IDENTITY_HUB_URL))
             )
         }
-        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any(), true) } returns
+        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any()) } returns
             Result.success(identifierDoc)
 
         // entries[].data is the raw JWT (not base64-wrapped)
@@ -482,8 +476,8 @@ class StatusCheckServiceTest {
 
         coEvery { statusListApi.postCollectionsQuery(IDENTITY_HUB_URL, any()) } returns
             okResponse(envelopeBody)
-        coEvery { jwtValidator.verifySignature(any(), true) } returns true
-        every { jwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -503,15 +497,15 @@ class StatusCheckServiceTest {
                 IdentifierDocumentService(id = "#hub", type = "IdentityHub", serviceEndpoint = listOf(IDENTITY_HUB_URL))
             )
         }
-        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any(), true) } returns
+        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any()) } returns
             Result.success(identifierDoc)
 
         // Response body IS the signed JWT directly
         val statusListJwt = signedStatusListJwt(statusPurpose = "suspension", flaggedIndex = 7)
         coEvery { statusListApi.postCollectionsQuery(IDENTITY_HUB_URL, any()) } returns
             okResponse(statusListJwt)
-        coEvery { jwtValidator.verifySignature(any(), true) } returns true
-        every { jwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { jwtValidator.verifySignature(any()) } returns true
+        every { jwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 
@@ -530,7 +524,7 @@ class StatusCheckServiceTest {
                 IdentifierDocumentService(id = "#hub", type = "IdentityHub", serviceEndpoint = listOf(IDENTITY_HUB_URL))
             )
         }
-        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any(), true) } returns
+        coEvery { mockLinkedDomainsService.resolveIdentifierDocument(any()) } returns
             Result.success(identifierDoc)
 
         val statusListJwt = signedStatusListJwt(statusPurpose = "revocation", flaggedIndex = 7)
@@ -539,7 +533,7 @@ class StatusCheckServiceTest {
 
         coEvery { statusListApi.postCollectionsQuery(IDENTITY_HUB_URL, any()) } returns
             okResponse(envelopeBody)
-        coEvery { jwtValidator.verifySignature(any(), true) } returns false
+        coEvery { jwtValidator.verifySignature(any()) } returns false
 
         val result = runBlocking { statusCheckService.checkVerifiedIdStatus(verifiedId) }
 

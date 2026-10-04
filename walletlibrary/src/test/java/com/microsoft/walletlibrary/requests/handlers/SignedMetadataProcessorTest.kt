@@ -103,7 +103,7 @@ class SignedMetadataProcessorTest {
     }
 
     @Test
-    fun process_LegacyResolverAllowsMalformedDid() {
+    fun process_UsesLiveHardeningStateAtEachBehaviorSite() {
         val malformedDid = "did:web:example.com:..:evil"
         every {
             mockLibraryConfiguration.isDidResolverHardeningEnabled
@@ -111,7 +111,7 @@ class SignedMetadataProcessorTest {
         mockIdentifierDocument(null, false)
         mockJwsToken("$malformedDid#signingKey-1")
         coEvery {
-            IdentifierDocumentResolver.resolveIdentifierDocument(malformedDid, false)
+            IdentifierDocumentResolver.resolveIdentifierDocument(malformedDid)
         } returns mockIdentifierDocument
 
         val actualResult = runBlocking {
@@ -124,15 +124,15 @@ class SignedMetadataProcessorTest {
             .isInstanceOf(OpenId4VciValidationException::class.java)
         assertThat(actualResult.exceptionOrNull()?.message)
             .isEqualTo("JWK with key id signingKey-1 not found in identifier document")
-        verify(exactly = 1) { mockLibraryConfiguration.isDidResolverHardeningEnabled }
-        verify { mockIdentifierDocument.getJwk("signingKey-1", malformedDid, false) }
+        verify(exactly = 2) { mockLibraryConfiguration.isDidResolverHardeningEnabled }
+        verify { mockIdentifierDocument.getJwk("signingKey-1", malformedDid, true) }
     }
 
     @Test
     fun process_FailResolvingDocument_ThrowsException() {
         // Arrange
         mockJwsToken("did:web:test#signingKey-1")
-        coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test", true) } throws IdentifierDocumentResolutionException(
+        coEvery { IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test") } throws IdentifierDocumentResolutionException(
             "Unable to fetch identifier document"
         )
 
@@ -156,7 +156,7 @@ class SignedMetadataProcessorTest {
         mockIdentifierDocument(null)
         mockJwsToken("did:web:test#signingKey-1")
         coEvery {
-            IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test", true)
+            IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test")
         } returns mockIdentifierDocument
 
         runBlocking {
@@ -182,7 +182,7 @@ class SignedMetadataProcessorTest {
         mockIdentifierDocument()
         mockJwsToken("did:web:test#signingKey-1", passSignatureVerification = false)
         coEvery {
-            IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test", true)
+            IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test")
         } returns mockIdentifierDocument
 
         runBlocking {
@@ -215,7 +215,7 @@ class SignedMetadataProcessorTest {
         val mockJwsTokenContent = "testContent"
         mockJwsToken("did:web:test#signingKey-1", mockJwsTokenContent)
         coEvery {
-            IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test", true)
+            IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test")
         } returns mockIdentifierDocument
         every {
             mockLibraryConfiguration.serializer.decodeFromString(
@@ -252,7 +252,7 @@ class SignedMetadataProcessorTest {
             """{"sub":"","iss": "did:web:testissuer","iat": 1707859806}""".trimIndent()
         mockJwsToken("did:web:test#signingKey-1", signedMetadataTokenClaimsString)
         coEvery {
-            IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test", true)
+            IdentifierDocumentResolver.resolveIdentifierDocument("did:web:test")
         } returns mockIdentifierDocument
 
         runBlocking {
@@ -298,8 +298,7 @@ class SignedMetadataProcessorTest {
         mockJwsToken("${MockDidMetadata.VALID_DOMAIN_DID.value}#signingKey-1", signedMetadataTokenClaimsString)
         coEvery {
             IdentifierDocumentResolver.resolveIdentifierDocument(
-                MockDidMetadata.VALID_DOMAIN_DID.value,
-                true
+                MockDidMetadata.VALID_DOMAIN_DID.value
             )
         } returns mockIdentifierDocument
         every { (mockIdentifierDocument as DidMetadata).id } returns MockDidMetadata.VALID_DOMAIN_DID.value
@@ -342,12 +341,11 @@ class SignedMetadataProcessorTest {
         mockJwsToken("${MockDidMetadata.VALID_DOMAIN_DID.value}#signingKey-1", signedMetadataTokenClaimsString)
         coEvery {
             IdentifierDocumentResolver.resolveIdentifierDocument(
-                MockDidMetadata.VALID_DOMAIN_DID.value,
-                true
+                MockDidMetadata.VALID_DOMAIN_DID.value
             )
         } returns mockIdentifierDocument
         every { (mockIdentifierDocument as DidMetadata).id } returns MockDidMetadata.EMPTY_DOMAIN_DID.value
-        coEvery { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument, true) } returns LinkedDomainVerified(
+        coEvery { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) } returns LinkedDomainVerified(
             "testdomain"
         )
 
@@ -360,7 +358,7 @@ class SignedMetadataProcessorTest {
             assertThat(actualResult.source).isEqualTo("testdomain")
             assertThat(actualResult.verified).isTrue
             coVerify { mockRootOfTrustResolver.resolve(any<DidMetadata>()) }
-            verify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](any<IdentifierDocument>(), true) }
+            verify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](any<IdentifierDocument>()) }
         }
     }
 
@@ -390,8 +388,7 @@ class SignedMetadataProcessorTest {
         mockJwsToken("${MockDidMetadata.VALID_DOMAIN_DID.value}#signingKey-1", signedMetadataTokenClaimsString)
         coEvery {
             IdentifierDocumentResolver.resolveIdentifierDocument(
-                MockDidMetadata.VALID_DOMAIN_DID.value,
-                true
+                MockDidMetadata.VALID_DOMAIN_DID.value
             )
         } returns mockIdentifierDocument
         every { (mockIdentifierDocument as DidMetadata).id } returns MockDidMetadata.EMPTY_DOMAIN_DID.value
@@ -405,7 +402,7 @@ class SignedMetadataProcessorTest {
             assertThat(actualResult.source).isEqualTo("")
             assertThat(actualResult.verified).isFalse
             coVerify { mockRootOfTrustResolver.resolve(any<DidMetadata>()) }
-            verify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](any<IdentifierDocument>(), true) }
+            verify { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](any<IdentifierDocument>()) }
         }
     }
 

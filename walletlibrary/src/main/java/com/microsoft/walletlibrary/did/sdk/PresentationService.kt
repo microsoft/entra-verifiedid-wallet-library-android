@@ -41,50 +41,20 @@ internal class PresentationService @Inject constructor(
 ) {
 
     suspend fun getRequest(stringUri: String, preferHeaders: List<String>): Result<PresentationRequest> {
-        return getRequest(
-            stringUri,
-            preferHeaders,
-            jwtValidator.snapshotDidResolverHardeningEnabled()
-        )
-    }
-
-    internal suspend fun getRequest(
-        stringUri: String,
-        preferHeaders: List<String>,
-        didResolverHardeningEnabled: Boolean
-    ): Result<PresentationRequest> {
         return runResultTry {
             logTime("Presentation getRequest") {
                 val uri = verifyUri(stringUri)
-                val presentationRequestContent = getPresentationRequestContent(
-                    uri,
-                    preferHeaders,
-                    didResolverHardeningEnabled
-                ).abortOnError()
-                return@logTime validateRequest(
-                    presentationRequestContent,
-                    didResolverHardeningEnabled
-                )
+                val presentationRequestContent = getPresentationRequestContent(uri, preferHeaders).abortOnError()
+                return@logTime validateRequest(presentationRequestContent)
             }
         }
     }
 
     internal suspend fun validateRequest(presentationRequestContent: PresentationRequestContent): Result<PresentationRequest> {
-        return validateRequest(
-            presentationRequestContent,
-            jwtValidator.snapshotDidResolverHardeningEnabled()
-        )
-    }
-
-    internal suspend fun validateRequest(
-        presentationRequestContent: PresentationRequestContent,
-        didResolverHardeningEnabled: Boolean
-    ): Result<PresentationRequest> {
         return runResultTry {
             logTime("Presentation validateRequest") {
                 val linkedDomainResult = linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
-                    presentationRequestContent.clientId,
-                    didResolverHardeningEnabled
+                    presentationRequestContent.clientId
                 ).toSDK().abortOnError()
                 val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
                 isRequestValid(request).abortOnError()
@@ -94,27 +64,10 @@ internal class PresentationService @Inject constructor(
     }
 
     internal suspend fun validateSignedRequest(jwsTokenString: String): Result<PresentationRequest> {
-        return validateSignedRequest(
-            jwsTokenString,
-            jwtValidator.snapshotDidResolverHardeningEnabled()
-        )
-    }
-
-    internal suspend fun validateSignedRequest(
-        jwsTokenString: String,
-        didResolverHardeningEnabled: Boolean
-    ): Result<PresentationRequest> {
         return runResultTry {
             val presentationRequestContent =
-                verifyAndUnwrapPresentationRequest(
-                    jwsTokenString,
-                    validateSignerDid = true,
-                    didResolverHardeningEnabled = didResolverHardeningEnabled
-                ).abortOnError()
-            val presentationRequest = validateRequest(
-                presentationRequestContent,
-                didResolverHardeningEnabled
-            ).abortOnError()
+                verifyAndUnwrapPresentationRequest(jwsTokenString, validateSignerDid = true).abortOnError()
+            val presentationRequest = validateRequest(presentationRequestContent).abortOnError()
             Result.Success(presentationRequest)
         }
     }
@@ -127,24 +80,13 @@ internal class PresentationService @Inject constructor(
         return url
     }
 
-    private suspend fun getPresentationRequestContent(
-        uri: Uri,
-        preferHeaders: List<String>,
-        didResolverHardeningEnabled: Boolean
-    ): Result<PresentationRequestContent> {
+    private suspend fun getPresentationRequestContent(uri: Uri, preferHeaders: List<String>): Result<PresentationRequestContent> {
         val requestParameter = uri.getQueryParameter("request")
         if (requestParameter != null)
-            return verifyAndUnwrapPresentationRequestFromQueryParam(
-                requestParameter,
-                didResolverHardeningEnabled
-            )
+            return verifyAndUnwrapPresentationRequestFromQueryParam(requestParameter)
         val requestUriParameter = uri.getQueryParameter("request_uri")
         if (requestUriParameter != null)
-            return fetchRequest(
-                requestUriParameter,
-                preferHeaders,
-                didResolverHardeningEnabled
-            ).toSDK()
+            return fetchRequest(requestUriParameter, preferHeaders).toSDK()
         return Result.Failure(PresentationException("No query parameter 'request' nor 'request_uri' is passed."))
     }
 
@@ -155,33 +97,21 @@ internal class PresentationService @Inject constructor(
         }
     }
 
-    private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(
-        jwsTokenString: String,
-        didResolverHardeningEnabled: Boolean
-    ): Result<PresentationRequestContent> {
-        return verifyAndUnwrapPresentationRequest(
-            jwsTokenString,
-            validateSignerDid = false,
-            didResolverHardeningEnabled = didResolverHardeningEnabled
-        )
+    private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(jwsTokenString: String): Result<PresentationRequestContent> {
+        return verifyAndUnwrapPresentationRequest(jwsTokenString, validateSignerDid = false)
     }
 
     private suspend fun verifyAndUnwrapPresentationRequest(
         jwsTokenString: String,
-        validateSignerDid: Boolean,
-        didResolverHardeningEnabled: Boolean
+        validateSignerDid: Boolean
     ): Result<PresentationRequestContent> {
         val jwsToken = JwsToken.deserialize(jwsTokenString)
-        if (!jwtValidator.verifySignature(jwsToken, didResolverHardeningEnabled))
+        if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
         val presentationRequestContent =
             serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
         if (validateSignerDid &&
-            !jwtValidator.validateDidInHeaderAndPayload(
-                jwsToken,
-                presentationRequestContent.clientId,
-                didResolverHardeningEnabled
-            )
+            !jwtValidator.validateDidInHeaderAndPayload(jwsToken, presentationRequestContent.clientId)
         )
             throw DidInHeaderAndPayloadNotMatching(
                 "DID used to sign the presentation request doesn't match the DID in presentation request."
@@ -189,18 +119,8 @@ internal class PresentationService @Inject constructor(
         return Result.Success(presentationRequestContent)
     }
 
-    private suspend fun fetchRequest(
-        url: String,
-        preferHeaders: List<String>,
-        didResolverHardeningEnabled: Boolean
-    ) = FetchPresentationRequestNetworkOperation(
-        url,
-        preferHeaders,
-        apiProvider,
-        jwtValidator,
-        serializer,
-        didResolverHardeningEnabled
-    ).fire()
+    private suspend fun fetchRequest(url: String, preferHeaders: List<String>) =
+        FetchPresentationRequestNetworkOperation(url, preferHeaders, apiProvider, jwtValidator, serializer).fire()
 
     /**
      * Send a Presentation Response.

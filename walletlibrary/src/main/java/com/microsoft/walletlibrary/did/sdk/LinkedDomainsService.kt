@@ -30,30 +30,10 @@ internal class LinkedDomainsService @Inject constructor(
     @Named("rootOfTrustResolver") private val rootOfTrustResolver: RootOfTrustResolver? = null
 ) {
     internal suspend fun resolveIdentifierDocument(relyingPartyDid: String): Result<IdentifierDocument> {
-        return resolveIdentifierDocument(
-            relyingPartyDid,
-            resolver.snapshotDidResolverHardeningEnabled()
-        )
-    }
-
-    internal suspend fun resolveIdentifierDocument(
-        relyingPartyDid: String,
-        didResolverHardeningEnabled: Boolean
-    ): Result<IdentifierDocument> {
-        return resolver.resolve(relyingPartyDid, didResolverHardeningEnabled)
+        return resolver.resolve(relyingPartyDid)
     }
 
     suspend fun validateLinkedDomains(identifierDocument: IdentifierDocument): Result<LinkedDomainResult> {
-        return validateLinkedDomains(
-            identifierDocument,
-            resolver.snapshotDidResolverHardeningEnabled()
-        )
-    }
-
-    internal suspend fun validateLinkedDomains(
-        identifierDocument: IdentifierDocument,
-        didResolverHardeningEnabled: Boolean
-    ): Result<LinkedDomainResult> {
         return try {
             rootOfTrustResolver?.resolve(identifierDocument)
                 ?.let { Result.success(it.toLinkedDomainResult()) }
@@ -68,10 +48,7 @@ internal class LinkedDomainsService @Inject constructor(
                 ex
             )
             try {
-                val linkedDomains = verifyLinkedDomainsUsingWellKnownDocument(
-                    identifierDocument,
-                    didResolverHardeningEnabled
-                )
+                val linkedDomains = verifyLinkedDomainsUsingWellKnownDocument(identifierDocument)
                 Result.success(linkedDomains)
             } catch (ex: Exception) {
                 SdkLog.w("Linked Domains verification failed with exception $ex", ex)
@@ -81,22 +58,9 @@ internal class LinkedDomainsService @Inject constructor(
     }
 
     suspend fun fetchDocumentAndVerifyLinkedDomains(relyingPartyDid: String): Result<LinkedDomainResult> {
-        return fetchDocumentAndVerifyLinkedDomains(
-            relyingPartyDid,
-            resolver.snapshotDidResolverHardeningEnabled()
-        )
-    }
-
-    internal suspend fun fetchDocumentAndVerifyLinkedDomains(
-        relyingPartyDid: String,
-        didResolverHardeningEnabled: Boolean
-    ): Result<LinkedDomainResult> {
-        resolveIdentifierDocument(relyingPartyDid, didResolverHardeningEnabled)
+        resolveIdentifierDocument(relyingPartyDid)
             .onSuccess {
-                val linkedDomainsValidationResult = validateLinkedDomains(
-                    it,
-                    didResolverHardeningEnabled
-                )
+                val linkedDomainsValidationResult = validateLinkedDomains(it)
                 if (linkedDomainsValidationResult.isFailure)
                     SdkLog.w("Linked Domains validation failed")
                 return linkedDomainsValidationResult
@@ -109,16 +73,9 @@ internal class LinkedDomainsService @Inject constructor(
         return Result.failure(SdkException("Failed to fetch identifier document"))
     }
 
-    private suspend fun verifyLinkedDomainsUsingWellKnownDocument(
-        identifierDocument: IdentifierDocument,
-        didResolverHardeningEnabled: Boolean
-    ): LinkedDomainResult {
+    private suspend fun verifyLinkedDomainsUsingWellKnownDocument(identifierDocument: IdentifierDocument): LinkedDomainResult {
         val linkedDomains = getLinkedDomainsFromDidDocument(identifierDocument)
-        verifyLinkedDomains(
-            linkedDomains,
-            identifierDocument.id,
-            didResolverHardeningEnabled
-        )
+        verifyLinkedDomains(linkedDomains, identifierDocument.id)
             .onSuccess { return it }
             .onFailure { throw it }
         return LinkedDomainMissing
@@ -126,8 +83,7 @@ internal class LinkedDomainsService @Inject constructor(
 
     private suspend fun verifyLinkedDomains(
         domainUrls: List<String>,
-        relyingPartyDid: String,
-        didResolverHardeningEnabled: Boolean
+        relyingPartyDid: String
     ): Result<LinkedDomainResult> {
         if (domainUrls.isEmpty())
             return Result.success(LinkedDomainMissing)
@@ -139,8 +95,7 @@ internal class LinkedDomainsService @Inject constructor(
                     val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(
                         linkedDidJwt,
                         relyingPartyDid,
-                        domainUrl,
-                        didResolverHardeningEnabled
+                        domainUrl
                     )
                     return if (isDomainLinked)
                         Result.success(LinkedDomainVerified(hostname))

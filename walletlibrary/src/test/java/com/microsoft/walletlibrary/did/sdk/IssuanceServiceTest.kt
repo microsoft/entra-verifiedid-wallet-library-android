@@ -96,7 +96,6 @@ class IssuanceServiceTest {
 
     init {
         coEvery { mockLibraryConfiguration.identifierFactory.getIdentifier() } returns masterIdentifier
-        every { mockedJwtValidator.snapshotDidResolverHardeningEnabled() } returns true
         mockkConstructor(FetchContractNetworkOperation::class)
         expectedContract = setUpTestContract(expectedContractString)
         mockkConstructor(SendVerifiableCredentialIssuanceRequestNetworkOperation::class)
@@ -113,9 +112,9 @@ class IssuanceServiceTest {
         val expectedEntityIdentifier =
             "did:ion:EiCfeOciEjwupwRQsJC3wMZzz3_M3XIo6bhy7aJkCG6CAQ?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlEMDQwY2lQakUxR0xqLXEyWmRyLVJaXzVlcU8yNFlDMFI5bTlEd2ZHMkdGQSIsInJlY292ZXJ5X2NvbW1pdG1lbnQiOiJFaUMyRmQ5UE90emFNcUtMaDNRTFp0Wk43V0RDRHJjdkN4eTNvdlNERDhKRGVRIn0.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpQ2gtaTFDMW1fM2N4SGJNM3pXemRRdExxMnBvRldaX25FVEJTb0NhT2JZTWciLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljX2tleXMiOlt7ImlkIjoic2lnXzBmOTdlZWZjIiwidHlwZSI6IkVjZHNhU2VjcDI1NmsxVmVyaWZpY2F0aW9uS2V5MjAxOSIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJoQ0xsb3JJbGx2M2FWSkRiYkNxM0VHbzU2bWV6Q3RLWkZGcUtvS3RVc3BzIiwieSI6Imh1VG5iTEc3MWU0NDNEeVJkeU5DX3dfc3paR0hVYUcxUHdsMHpXb0h2LUEifSwicHVycG9zZSI6WyJhdXRoIiwiZ2VuZXJhbCJdfV19fV19"
 
-        coEvery { issuanceService["fetchContract"](suppliedContractUrl, true) } returns unwrapContract(expectedContractJwt)
-        coEvery { mockedJwtValidator.verifySignature(any(), true) } returns true
-        coEvery { linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any(), true) } returns KotlinResult.success(
+        coEvery { issuanceService["fetchContract"](suppliedContractUrl) } returns unwrapContract(expectedContractJwt)
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coEvery { linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any()) } returns KotlinResult.success(
             LinkedDomainUnVerified(mockedIdentifierDocumentServiceEndpoint)
         )
         coEvery { mockedResolver.resolve(expectedContract.input.issuer) } returns KotlinResult.success(mockedIdentifierDocument)
@@ -137,9 +136,9 @@ class IssuanceServiceTest {
         val expectedEntityIdentifier =
             "did:ion:EiCfeOciEjwupwRQsJC3wMZzz3_M3XIo6bhy7aJkCG6CAQ?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlEMDQwY2lQakUxR0xqLXEyWmRyLVJaXzVlcU8yNFlDMFI5bTlEd2ZHMkdGQSIsInJlY292ZXJ5X2NvbW1pdG1lbnQiOiJFaUMyRmQ5UE90emFNcUtMaDNRTFp0Wk43V0RDRHJjdkN4eTNvdlNERDhKRGVRIn0.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpQ2gtaTFDMW1fM2N4SGJNM3pXemRRdExxMnBvRldaX25FVEJTb0NhT2JZTWciLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljX2tleXMiOlt7ImlkIjoic2lnXzBmOTdlZWZjIiwidHlwZSI6IkVjZHNhU2VjcDI1NmsxVmVyaWZpY2F0aW9uS2V5MjAxOSIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJoQ0xsb3JJbGx2M2FWSkRiYkNxM0VHbzU2bWV6Q3RLWkZGcUtvS3RVc3BzIiwieSI6Imh1VG5iTEc3MWU0NDNEeVJkeU5DX3dfc3paR0hVYUcxUHdsMHpXb0h2LUEifSwicHVycG9zZSI6WyJhdXRoIiwiZ2VuZXJhbCJdfV19fV19"
 
-        coEvery { issuanceService["fetchContract"](suppliedContractUrl, true) } returns unwrapContract(expectedContractJwt)
-        coEvery { mockedJwtValidator.verifySignature(any(), true) } returns true
-        coEvery { linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any(), true) } returns KotlinResult.success(
+        coEvery { issuanceService["fetchContract"](suppliedContractUrl) } returns unwrapContract(expectedContractJwt)
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coEvery { linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any()) } returns KotlinResult.success(
             LinkedDomainVerified(mockedIdentifierDocumentServiceEndpoint)
         )
         coEvery { mockedResolver.resolve(expectedContract.input.issuer) } returns KotlinResult.success(mockedIdentifierDocument)

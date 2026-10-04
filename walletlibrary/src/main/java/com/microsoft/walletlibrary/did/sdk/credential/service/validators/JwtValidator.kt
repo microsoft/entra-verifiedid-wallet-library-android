@@ -31,21 +31,10 @@ internal class JwtValidator @Inject constructor(
      * Verify the signature on the JwsToken.
      */
     suspend fun verifySignature(token: JwsToken): Boolean {
-        return verifySignature(token, snapshotDidResolverHardeningEnabled())
-    }
-
-    internal suspend fun verifySignature(
-        token: JwsToken,
-        didResolverHardeningEnabled: Boolean
-    ): Boolean {
         val (didInHeader: String?, keyIdInHeader: String) =
-            getDidAndKeyIdFromHeader(token, didResolverHardeningEnabled)
+            getDidAndKeyIdFromHeader(token)
         if (didInHeader == null) throw ValidatorException("JWS contains no DID")
-        val publicKeyJwks = resolvePublicKeyJwks(
-            didInHeader,
-            keyIdInHeader,
-            didResolverHardeningEnabled
-        )
+        val publicKeyJwks = resolvePublicKeyJwks(didInHeader, keyIdInHeader)
         return verifySignatureUsingPublicKey(token, publicKeyJwks)
     }
 
@@ -54,51 +43,28 @@ internal class JwtValidator @Inject constructor(
     }
 
     fun validateDidInHeaderAndPayload(jwsToken: JwsToken, didInPayload: String): Boolean {
-        return validateDidInHeaderAndPayload(
-            jwsToken,
-            didInPayload,
-            snapshotDidResolverHardeningEnabled()
-        )
-    }
-
-    internal fun validateDidInHeaderAndPayload(
-        jwsToken: JwsToken,
-        didInPayload: String,
-        didResolverHardeningEnabled: Boolean
-    ): Boolean {
-        val didInHeader = getDidAndKeyIdFromHeader(
-            jwsToken,
-            didResolverHardeningEnabled
-        ).first ?: throw ValidatorException("JWS contains no DID")
+        val didInHeader =
+            getDidAndKeyIdFromHeader(jwsToken).first
+                ?: throw ValidatorException("JWS contains no DID")
         return didInHeader == didInPayload
     }
 
-    internal fun snapshotDidResolverHardeningEnabled(): Boolean =
-        didResolverHardeningEnabledProvider.get()
-
-    private fun getDidAndKeyIdFromHeader(
-        token: JwsToken,
-        didResolverHardeningEnabled: Boolean
-    ): Pair<String?, String> {
+    private fun getDidAndKeyIdFromHeader(token: JwsToken): Pair<String?, String> {
         token.keyId?.let { kid ->
-            return JwaCryptoHelper.extractDidAndKeyId(kid, didResolverHardeningEnabled)
+            return JwaCryptoHelper.extractDidAndKeyId(
+                kid,
+                didResolverHardeningEnabledProvider.get()
+            )
         }
         throw ValidatorException("JWS contains no key id")
     }
 
-    private suspend fun resolvePublicKeyJwks(
-        did: String,
-        keyId: String,
-        didResolverHardeningEnabled: Boolean
-    ): List<JWK> {
-        return when (
-            val requesterDidDocument =
-                resolver.resolve(did, didResolverHardeningEnabled).toSDK()
-        ) {
+    private suspend fun resolvePublicKeyJwks(did: String, keyId: String): List<JWK> {
+        return when (val requesterDidDocument = resolver.resolve(did).toSDK()) {
             is Result.Success -> {
                 val publicKeys = requesterDidDocument.payload.verificationMethod
                 if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")
-                if (!didResolverHardeningEnabled) {
+                if (!didResolverHardeningEnabledProvider.get()) {
                     return publicKeys.filter { publicKey ->
                         JwaCryptoHelper.extractDidAndKeyId(publicKey.id, false).second == keyId
                     }.map { it.publicKeyJwk }

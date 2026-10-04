@@ -183,7 +183,6 @@ class PresentationServiceTest {
 
     init {
         coEvery { mockLibraryConfiguration.identifierFactory.getIdentifier() } returns masterIdentifier
-        every { mockedJwtValidator.snapshotDidResolverHardeningEnabled() } returns true
         mockkConstructor(FetchPresentationRequestNetworkOperation::class)
     }
 
@@ -205,13 +204,12 @@ class PresentationServiceTest {
         coEvery {
             presentationService["fetchRequest"](
                 requestUriParam,
-                emptyList<String>(),
-                true
+                emptyList<String>()
             )
         } returns KotlinResult.success(
             expectedPresentationRequest
         )
-        coEvery { mockedJwtValidator.verifySignature(any(), true) } returns true
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         coJustRun { presentationRequestValidator.validate(any()) }
 
         runBlocking {
@@ -301,7 +299,7 @@ class PresentationServiceTest {
                 InvalidSignatureException::class.java
             )
             coVerify(exactly = 0) {
-                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any(), true)
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any())
             }
         }
     }
@@ -312,7 +310,7 @@ class PresentationServiceTest {
         mockIdentifierAndLinkedDomains()
         every { presentationService["verifyUri"](suppliedOpenIdUrl) } returns mockUri
         every { mockUri.getQueryParameter("request") } returns expectedPresentationRequestJwt
-        coEvery { mockedJwtValidator.verifySignature(any(), true) } returns true
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         coJustRun { presentationRequestValidator.validate(any()) }
 
         runBlocking {
@@ -320,10 +318,10 @@ class PresentationServiceTest {
 
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
             verify(exactly = 0) {
-                mockedJwtValidator.validateDidInHeaderAndPayload(any(), any(), true)
+                mockedJwtValidator.validateDidInHeaderAndPayload(any(), any())
             }
             coVerify(exactly = 1) {
-                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(expectedEntityIdentifier, true)
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(expectedEntityIdentifier)
             }
         }
     }
@@ -335,8 +333,8 @@ class PresentationServiceTest {
             expectedPresentationRequestString
         )
         mockIdentifierAndLinkedDomains()
-        coEvery { mockedJwtValidator.verifySignature(any(), true) } returns true
-        every { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        every { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
         coJustRun { presentationRequestValidator.validate(any()) }
 
         runBlocking {
@@ -353,7 +351,7 @@ class PresentationServiceTest {
                 mockedIdentifierDocumentServiceEndpoint
             )
             coVerify(exactly = 1) {
-                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(expectedEntityIdentifier, true)
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(expectedEntityIdentifier)
             }
             coVerify(exactly = 1) {
                 presentationRequestValidator.validate(actualPresentationRequest)
@@ -363,7 +361,7 @@ class PresentationServiceTest {
 
     @Test
     fun `test validating signed request fails with invalid signature`() {
-        coEvery { mockedJwtValidator.verifySignature(any(), true) } returns false
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns false
 
         runBlocking {
             val actualRequest = presentationService.validateSignedRequest(expectedPresentationRequestJwt)
@@ -373,15 +371,15 @@ class PresentationServiceTest {
                 InvalidSignatureException::class.java
             )
             coVerify(exactly = 0) {
-                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any(), true)
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any())
             }
         }
     }
 
     @Test
     fun `test validating signed request fails when signer does not match client id`() {
-        coEvery { mockedJwtValidator.verifySignature(any(), true) } returns true
-        every { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns false
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        every { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns false
 
         runBlocking {
             val actualRequest = presentationService.validateSignedRequest(expectedPresentationRequestJwt)
@@ -391,7 +389,7 @@ class PresentationServiceTest {
                 DidInHeaderAndPayloadNotMatching::class.java
             )
             coVerify(exactly = 0) {
-                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any(), true)
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any())
             }
         }
     }
@@ -485,7 +483,7 @@ class PresentationServiceTest {
     }
 
     private fun mockIdentifierAndLinkedDomains() {
-        coEvery { linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any(), true) } returns KotlinResult.success(
+        coEvery { linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any()) } returns KotlinResult.success(
             LinkedDomainVerified(mockedIdentifierDocumentServiceEndpoint)
         )
         coEvery { mockedResolver.resolve(expectedEntityIdentifier) } returns KotlinResult.success(
@@ -503,14 +501,13 @@ class PresentationServiceTest {
         coEvery {
             presentationService["fetchRequest"](
                 "suppliedOpenIdUrl",
-                emptyList<String>(),
-                true
+                emptyList<String>()
             )
         } returns KotlinResult.success(
             expectedPresentationRequest
         )
-        coEvery { mockedJwtValidator.verifySignature(any(), true) } returns true
-        every { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any(), true) } returns true
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        every { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
     }
 
     private fun mockPresentationRequestWithInvalidSignatureFromNetwork() {
@@ -518,13 +515,12 @@ class PresentationServiceTest {
         coEvery {
             presentationService["fetchRequest"](
                 "suppliedOpenIdUrl",
-                emptyList<String>(),
-                true
+                emptyList<String>()
             )
         } returns KotlinResult.success(
             expectedPresentationRequest
         )
-        coEvery { mockedJwtValidator.verifySignature(any(), true) } returns false
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns false
     }
 
     private fun assertPresentationRequestContent(

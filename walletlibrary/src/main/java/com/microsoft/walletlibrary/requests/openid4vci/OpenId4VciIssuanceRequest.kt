@@ -173,10 +173,8 @@ internal class OpenId4VciIssuanceRequest(
     }
 
     private suspend fun verifyAndUnWrapIssuanceResponse(jwsTokenString: String): VerifiableCredential {
-        val didResolverHardeningEnabled =
-            libraryConfiguration.isDidResolverHardeningEnabled
         val jwsToken = JwsToken.deserialize(jwsTokenString)
-        if (!verifySignature(jwsToken, didResolverHardeningEnabled))
+        if (!verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not Valid on Issuance Response.")
         val verifiableCredentialContent = libraryConfiguration.serializer.decodeFromString(
             VerifiableCredentialContent.serializer(), jwsToken.content()
@@ -188,28 +186,22 @@ internal class OpenId4VciIssuanceRequest(
         )
     }
 
-    private suspend fun verifySignature(
-        jwsToken: JwsToken,
-        didResolverHardeningEnabled: Boolean
-    ): Boolean {
+    private suspend fun verifySignature(jwsToken: JwsToken): Boolean {
         val kid = jwsToken.keyId ?: throw ValidatorException("JWS contains no key id")
         val (didInHeader: String?, keyIdInHeader: String) =
-            getDidAndKeyIdFromHeader(kid, didResolverHardeningEnabled)
+            getDidAndKeyIdFromHeader(kid)
         if (didInHeader == null) throw ValidatorException("JWS contains no DID")
-        val identifierDocument = IdentifierDocumentResolver.resolveIdentifierDocument(
-            didInHeader,
-            didResolverHardeningEnabled
-        )
+        val identifierDocument =
+            IdentifierDocumentResolver.resolveIdentifierDocument(didInHeader)
         val publicKeys = identifierDocument.verificationMethod
         if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")
         val publicKeysJwk =
             publicKeys.filter { publicKey ->
                 val (verificationMethodDid, verificationMethodKeyId) = getDidAndKeyIdFromHeader(
-                    publicKey.id,
-                    didResolverHardeningEnabled
+                    publicKey.id
                 )
                 verificationMethodKeyId == keyIdInHeader &&
-                    (!didResolverHardeningEnabled ||
+                    (!libraryConfiguration.isDidResolverHardeningEnabled ||
                         verificationMethodDid == null ||
                         verificationMethodDid == didInHeader)
             }
@@ -217,11 +209,11 @@ internal class OpenId4VciIssuanceRequest(
         return jwsToken.verify(publicKeysJwk)
     }
 
-    internal fun getDidAndKeyIdFromHeader(
-        kid: String,
-        didResolverHardeningEnabled: Boolean
-    ): Pair<String?, String> {
-        return JwaCryptoHelper.extractDidAndKeyId(kid, didResolverHardeningEnabled)
+    internal fun getDidAndKeyIdFromHeader(kid: String): Pair<String?, String> {
+        return JwaCryptoHelper.extractDidAndKeyId(
+            kid,
+            libraryConfiguration.isDidResolverHardeningEnabled
+        )
     }
 
     private suspend fun sendIssuanceCallbackIfRequestStateAndCallbackExist(result: VerifiedIdResult<VerifiedId>) {

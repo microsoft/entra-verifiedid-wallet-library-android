@@ -189,8 +189,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
         val statusCheckService = StatusCheckService(
             apiProvider,
             jsonSerializer,
-            VerifiableCredentialSdk.jwtValidator,
-            VerifiableCredentialSdk.linkedDomainsService
+            VerifiableCredentialSdk.jwtValidator
         )
 
         return VerifiedIdClient(

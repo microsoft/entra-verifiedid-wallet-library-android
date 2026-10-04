@@ -19,8 +19,7 @@ internal class FetchContractNetworkOperation(
     val url: String,
     private val apiProvider: HttpAgentApiProvider,
     private val jwtValidator: JwtValidator,
-    private val serializer: Json,
-    private val didResolverHardeningEnabled: Boolean
+    private val serializer: Json
 ) : GetNetworkOperation<VerifiableCredentialContract>() {
     override val call: suspend () -> Result<IResponse> = { apiProvider.issuanceApis.getContract(url) }
 
@@ -33,14 +32,9 @@ internal class FetchContractNetworkOperation(
     private suspend fun verifyAndUnwrapContract(jwsTokenString: String): Result<VerifiableCredentialContract> {
         val jwsToken = JwsToken.deserialize(jwsTokenString)
         val verifiableCredentialContract = serializer.decodeFromString(VerifiableCredentialContract.serializer(), jwsToken.content())
-        if (!jwtValidator.verifySignature(jwsToken, didResolverHardeningEnabled))
+        if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Issuance Request.")
-        if (!jwtValidator.validateDidInHeaderAndPayload(
-                jwsToken,
-                verifiableCredentialContract.input.issuer,
-                didResolverHardeningEnabled
-            )
-        )
+        if (!jwtValidator.validateDidInHeaderAndPayload(jwsToken, verifiableCredentialContract.input.issuer))
             throw DidInHeaderAndPayloadNotMatching("DID used to sign the contract doesn't match the DID in the contract.")
         return Result.success(verifiableCredentialContract)
     }

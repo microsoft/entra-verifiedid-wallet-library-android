@@ -24,8 +24,6 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         signedMetadata: String,
         credentialIssuer: String
     ): RootOfTrust {
-        val didResolverHardeningEnabled =
-            libraryConfiguration.isDidResolverHardeningEnabled
         val jwsToken = deserializeSignedMetadata(signedMetadata)
 
         // Extract the DID and Key ID from the signed metadata token header.
@@ -35,7 +33,7 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         )
         val didKeyIdPair = JwaCryptoHelper.extractDidAndKeyId(
             kid,
-            didResolverHardeningEnabled
+            libraryConfiguration.isDidResolverHardeningEnabled
         )
         val did = didKeyIdPair.first ?: throw OpenId4VciValidationException(
             "JWS contains no DID",
@@ -44,14 +42,11 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         val keyId = didKeyIdPair.second
 
         // Resolve the identifier document for the DID in the token and verify the integrity of the signed metadata.
-        val identifierDocument = IdentifierDocumentResolver.resolveIdentifierDocument(
-            did,
-            didResolverHardeningEnabled
-        )
+        val identifierDocument = IdentifierDocumentResolver.resolveIdentifierDocument(did)
         val jwk = identifierDocument.getJwk(
             keyId,
             did,
-            didResolverHardeningEnabled
+            libraryConfiguration.isDidResolverHardeningEnabled
         )
             ?: throw OpenId4VciValidationException(
                 "JWK with key id $keyId not found in identifier document",
@@ -60,10 +55,7 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         validateSignedMetadata(jwsToken, jwk, credentialIssuer, did)
 
         // Return the root of trust from the identifier document along with its verification status.
-        return LinkedDomainsResolver.resolve(
-            identifierDocument,
-            didResolverHardeningEnabled
-        )
+        return LinkedDomainsResolver.resolve(identifierDocument)
     }
 
     private fun deserializeSignedMetadata(signedMetadata: String): JwsToken {
