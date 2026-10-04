@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations
 
-import com.microsoft.walletlibrary.BooleanProvider
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentIdentifierApi
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
@@ -23,7 +23,7 @@ class ResolveIdentifierNetworkOperationTest {
             apiProvider,
             "https://resolver.example",
             "did:web:example.com:..:evil",
-            BooleanProvider { true }
+            WalletLibraryFlightProvider { true }
         )
 
         val throwable = catchThrowable {
@@ -42,7 +42,7 @@ class ResolveIdentifierNetworkOperationTest {
             apiProvider,
             "https://resolver.example",
             "did:web:example.com:..:evil",
-            BooleanProvider { false }
+            WalletLibraryFlightProvider { false }
         )
 
         assertThat(operation.identifier).isEqualTo("did:web:example.com:..:evil")
@@ -63,7 +63,7 @@ class ResolveIdentifierNetworkOperationTest {
             apiProvider,
             "https://resolver.example",
             "did:example:123",
-            BooleanProvider { true }
+            WalletLibraryFlightProvider { true }
         )
 
         runBlocking {

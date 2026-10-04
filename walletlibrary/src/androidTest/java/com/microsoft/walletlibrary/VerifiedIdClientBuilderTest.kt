@@ -137,7 +137,7 @@ class VerifiedIdClientBuilderTest {
     @Test
     fun builder6_WithExplicitProvider_ReturnsVerifiedIdClient() {
         setupInput(1)
-        verifiedIdClientBuilder.withDidResolverHardeningEnabledProvider { false }
+        verifiedIdClientBuilder.withFlightProvider { false }
 
         val actualResult = verifiedIdClientBuilder.build()
 

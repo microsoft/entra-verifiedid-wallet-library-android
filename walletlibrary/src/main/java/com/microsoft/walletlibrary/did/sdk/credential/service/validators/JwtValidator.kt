@@ -5,7 +5,8 @@
 
 package com.microsoft.walletlibrary.did.sdk.credential.service.validators
 
-import com.microsoft.walletlibrary.BooleanProvider
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
@@ -14,7 +15,6 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.nimbusds.jose.jwk.JWK
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -23,8 +23,7 @@ import javax.inject.Singleton
 @Singleton
 internal class JwtValidator @Inject constructor(
     private val resolver: Resolver,
-    @Named("didResolverHardeningEnabledProvider")
-    private val didResolverHardeningEnabledProvider: BooleanProvider
+    private val flightProvider: WalletLibraryFlightProvider
 ) {
 
     /**
@@ -53,7 +52,7 @@ internal class JwtValidator @Inject constructor(
         token.keyId?.let { kid ->
             return JwaCryptoHelper.extractDidAndKeyId(
                 kid,
-                didResolverHardeningEnabledProvider.get()
+                flightProvider.isEnabled(WalletLibraryFlight.DidResolverHardening)
             )
         }
         throw ValidatorException("JWS contains no key id")
@@ -64,7 +63,7 @@ internal class JwtValidator @Inject constructor(
             is Result.Success -> {
                 val publicKeys = requesterDidDocument.payload.verificationMethod
                 if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")
-                if (!didResolverHardeningEnabledProvider.get()) {
+                if (!flightProvider.isEnabled(WalletLibraryFlight.DidResolverHardening)) {
                     return publicKeys.filter { publicKey ->
                         JwaCryptoHelper.extractDidAndKeyId(publicKey.id, false).second == keyId
                     }.map { it.publicKeyJwk }

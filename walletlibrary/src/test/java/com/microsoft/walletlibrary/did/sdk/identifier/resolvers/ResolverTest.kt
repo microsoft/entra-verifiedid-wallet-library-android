@@ -2,7 +2,7 @@
 
 package com.microsoft.walletlibrary.did.sdk.identifier.resolvers
 
-import com.microsoft.walletlibrary.BooleanProvider
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.LocalNetworkException
@@ -28,7 +28,7 @@ class ResolverTest {
 
     @Test
     fun successfulResolutionTest() {
-        val resolver = Resolver("", identifierRepository, BooleanProvider { true })
+        val resolver = Resolver("", identifierRepository, WalletLibraryFlightProvider { true })
         coEvery {
             identifierRepository.resolveIdentifier("", expectedIdentifier)
         } returns KotlinResult.success(expectedIdentifierResponse)
@@ -41,7 +41,7 @@ class ResolverTest {
 
     @Test
     fun failedResolutionInvalidIdTest() {
-        val resolver = Resolver("", identifierRepository, BooleanProvider { true })
+        val resolver = Resolver("", identifierRepository, WalletLibraryFlightProvider { true })
         coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier) } returns KotlinResult.failure(
             NetworkingException(
                 "Not Found",
@@ -59,7 +59,7 @@ class ResolverTest {
 
     @Test
     fun failedResolutionNetworkConnectionTest() {
-        val resolver = Resolver("invalidUrl", identifierRepository, BooleanProvider { true })
+        val resolver = Resolver("invalidUrl", identifierRepository, WalletLibraryFlightProvider { true })
         coEvery {
             identifierRepository.resolveIdentifier(
                 "invalidUrl",
@@ -76,7 +76,7 @@ class ResolverTest {
 
     @Test
     fun failedResolutionMismatchedDocumentIdTest() {
-        val resolver = Resolver("", identifierRepository, BooleanProvider { true })
+        val resolver = Resolver("", identifierRepository, WalletLibraryFlightProvider { true })
         val mismatchedId = "did:ion:another-id"
         val mismatchedDocument = expectedIdentifierResponse.copy(didDocument = expectedIdentifierResponse.didDocument.copy(id = mismatchedId))
         coEvery {
@@ -93,7 +93,7 @@ class ResolverTest {
 
     @Test
     fun mismatchedDocumentIdReturnsFailureRatherThanThrowing() {
-        val resolver = Resolver("", identifierRepository, BooleanProvider { true })
+        val resolver = Resolver("", identifierRepository, WalletLibraryFlightProvider { true })
         val mismatchedDocument = expectedIdentifierResponse.copy(
             didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
         )
@@ -109,7 +109,7 @@ class ResolverTest {
 
     @Test
     fun mismatchedDocumentIdIsAllowedWhenHardeningDisabled() {
-        val resolver = Resolver("", identifierRepository, BooleanProvider { false })
+        val resolver = Resolver("", identifierRepository, WalletLibraryFlightProvider { false })
         val mismatchedDocument = expectedIdentifierResponse.copy(
             didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
         )
@@ -130,7 +130,7 @@ class ResolverTest {
         val resolver = Resolver(
             "",
             identifierRepository,
-            BooleanProvider {
+            WalletLibraryFlightProvider {
                 providerReads++
                 hardeningEnabled
             }

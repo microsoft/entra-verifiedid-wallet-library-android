@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.did.sdk.credential.service.validators
 
-import com.microsoft.walletlibrary.BooleanProvider
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
@@ -38,7 +38,7 @@ class JwtValidatorTest {
     private val expectedKid: String = "$expectedDid#kidTest2353"
 
     init {
-        validator = JwtValidator(mockedResolver, BooleanProvider { true })
+        validator = JwtValidator(mockedResolver, WalletLibraryFlightProvider { true })
         setUpResolver()
         mockkObject(JwsToken)
     }
@@ -130,7 +130,7 @@ class JwtValidatorTest {
     fun `legacy resolver allows malformed DID in header and verification method`() {
         val malformedDid = "did:web:example.com:..:evil"
         val malformedKid = "$malformedDid#kidTest2353"
-        val legacyValidator = JwtValidator(mockedResolver, BooleanProvider { false })
+        val legacyValidator = JwtValidator(mockedResolver, WalletLibraryFlightProvider { false })
         coEvery { mockedResolver.resolve(malformedDid) } returns Result.success(mockedIdentifierDocument)
         every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns true
         every { mockedJwsToken.keyId } returns malformedKid
@@ -146,7 +146,7 @@ class JwtValidatorTest {
 
     @Test
     fun `legacy resolver preserves false result when no key id matches`() {
-        val legacyValidator = JwtValidator(mockedResolver, BooleanProvider { false })
+        val legacyValidator = JwtValidator(mockedResolver, WalletLibraryFlightProvider { false })
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.success(mockedIdentifierDocument)
         every { mockedJwsToken.keyId } returns expectedKid
         every { mockedIdentifierDocumentPublicKey.id } returns "$expectedDid#different-key"
@@ -165,7 +165,7 @@ class JwtValidatorTest {
         var hardeningEnabled = true
         val dynamicValidator = JwtValidator(
             mockedResolver,
-            BooleanProvider { hardeningEnabled }
+            WalletLibraryFlightProvider { hardeningEnabled }
         )
         val malformedDid = "did:web:example.com:..:evil"
         val malformedKid = "$malformedDid#kidTest2353"

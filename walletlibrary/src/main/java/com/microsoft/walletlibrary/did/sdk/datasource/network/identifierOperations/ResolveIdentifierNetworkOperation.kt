@@ -5,28 +5,27 @@
 
 package com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations
 
-import com.microsoft.walletlibrary.BooleanProvider
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
-import javax.inject.Named
 
 internal class ResolveIdentifierNetworkOperation(
     private val apiProvider: HttpAgentApiProvider,
     url: String,
     val identifier: String,
-    @Named("didResolverHardeningEnabledProvider")
-    private val didResolverHardeningEnabledProvider: BooleanProvider
+    private val flightProvider: WalletLibraryFlightProvider
 ) :
     GetNetworkOperation<IdentifierResponse>() {
 
     override val call: suspend () -> Result<IResponse> = {
         // Reject identifiers containing characters that could redirect the request to an unintended path
         // (e.g. '/', '?', '#', whitespace, '..') before they are concatenated into the resolver URL.
-        if (didResolverHardeningEnabledProvider.get() &&
+        if (flightProvider.isEnabled(WalletLibraryFlight.DidResolverHardening) &&
             (identifier.isBlank() || !JwaCryptoHelper.isSyntacticallyValidDid(identifier))
         ) {
             throw ResolverException("Identifier '$identifier' is not a syntactically valid DID")

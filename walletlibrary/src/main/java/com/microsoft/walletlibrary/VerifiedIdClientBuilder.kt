@@ -72,7 +72,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
     }
     private var rootOfTrustResolver: RootOfTrustResolver? = null
     private val identifiers = ArrayList<HolderIdentifier>()
-    private var didResolverHardeningEnabledProvider: BooleanProvider? = null
+    private var flightProvider: WalletLibraryFlightProvider? = null
 
     // An optional custom log consumer can be passed to be used by VerifiedIdClient.
     fun with(logConsumer: WalletLibraryLogger.Consumer) {
@@ -112,16 +112,12 @@ class VerifiedIdClientBuilder(private val context: Context) {
     }
 
     /**
-     * Provides the current DID resolver hardening state for each operation.
+     * Provides current Wallet Library flight states.
      *
-     * An explicit provider takes precedence over
-     * [PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER]. When no provider is supplied,
-     * hardening is enabled unless that legacy preview flag is enabled.
+     * When no provider is supplied, Wallet Library defaults are used.
      */
-    fun withDidResolverHardeningEnabledProvider(
-        provider: BooleanProvider
-    ): VerifiedIdClientBuilder {
-        didResolverHardeningEnabledProvider = provider
+    fun withFlightProvider(provider: WalletLibraryFlightProvider): VerifiedIdClientBuilder {
+        flightProvider = provider
         return this
     }
 
@@ -131,11 +127,14 @@ class VerifiedIdClientBuilder(private val context: Context) {
         val userAgentInfo = getUserAgent(context)
         val walletLibraryVersionInfo = getWalletLibraryVersionInfo()
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
-        val hardeningEnabledProvider = didResolverHardeningEnabledProvider
-            ?: BooleanProvider {
-                !previewFeatureFlags.isPreviewFeatureSupported(
-                    PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
-                )
+        val effectiveFlightProvider = flightProvider
+            ?: WalletLibraryFlightProvider { flight ->
+                when (flight) {
+                    WalletLibraryFlight.DidResolverHardening ->
+                        !previewFeatureFlags.isPreviewFeatureSupported(
+                            PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
+                        )
+                }
             }
         VerifiableCredentialSdk.init(
             context,
@@ -144,7 +143,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
             walletLibraryVersionInfo = walletLibraryVersionInfo,
             httpAgent = httpAgent,
             rootOfTrustResolver = rootOfTrustResolver,
-            didResolverHardeningEnabledProvider = hardeningEnabledProvider
+            flightProvider = effectiveFlightProvider
         )
 
         val apiProvider = HttpAgentApiProvider(

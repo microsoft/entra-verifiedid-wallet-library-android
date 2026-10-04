@@ -7,7 +7,7 @@ package com.microsoft.walletlibrary.did.sdk
 
 import android.content.Context
 import androidx.preference.PreferenceManager
-import com.microsoft.walletlibrary.BooleanProvider
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.di.DaggerSdkComponent
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
@@ -80,7 +80,7 @@ internal object VerifiableCredentialSdk {
         walletLibraryVersionInfo: String = "",
         httpAgent: IHttpAgent = OkHttpAgent(),
         rootOfTrustResolver: RootOfTrustResolver? = null,
-        didResolverHardeningEnabledProvider: BooleanProvider = BooleanProvider { true }
+        flightProvider: WalletLibraryFlightProvider = WalletLibraryFlightProvider { true }
     ) {
         correlationVectorService = CorrelationVectorService(PreferenceManager.getDefaultSharedPreferences(context))
         val sdkComponent = DaggerSdkComponent.builder()
@@ -92,7 +92,7 @@ internal object VerifiableCredentialSdk {
             .resolverUrl(resolverUrl)
             .polymorphicJsonSerializer(polymorphicJsonSerializers)
             .rootOfTrustResolver(rootOfTrustResolver)
-            .didResolverHardeningEnabledProvider(didResolverHardeningEnabledProvider)
+            .flightProvider(flightProvider)
             .build()
 
         issuanceService = sdkComponent.issuanceService()
