@@ -11,6 +11,7 @@ import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
+import com.microsoft.walletlibrary.did.sdk.util.DidResolverHardeningTelemetry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import javax.inject.Inject
@@ -28,7 +29,20 @@ internal class ResolveIdentifierNetworkOperation @Inject constructor(
     private val sanitizedIdentifier: String = identifier.also {
         val didResolverHardeningEnabled =
             !flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)
-        if (didResolverHardeningEnabled && (it.isBlank() || !JwaCryptoHelper.isSyntacticallyValidDid(it))) {
+        val outcome = if (
+            didResolverHardeningEnabled &&
+            (it.isBlank() || !JwaCryptoHelper.isSyntacticallyValidDid(it))
+        ) {
+            DidResolverHardeningTelemetry.Outcome.Rejected
+        } else {
+            DidResolverHardeningTelemetry.Outcome.Accepted
+        }
+        DidResolverHardeningTelemetry.record(
+            DidResolverHardeningTelemetry.Check.IdentifierSyntax,
+            didResolverHardeningEnabled,
+            outcome
+        )
+        if (outcome == DidResolverHardeningTelemetry.Outcome.Rejected) {
             throw ResolverException("Identifier '$it' is not a syntactically valid DID")
         }
     }

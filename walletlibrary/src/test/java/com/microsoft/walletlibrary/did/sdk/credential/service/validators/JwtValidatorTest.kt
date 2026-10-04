@@ -6,6 +6,8 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
+import com.microsoft.walletlibrary.util.CapturingWalletLibraryLogConsumer
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyType
 import io.mockk.coEvery
@@ -113,15 +115,31 @@ class JwtValidatorTest {
         every { mockedIdentifierDocumentPublicKey.id } returns "did:attacker:123#kidTest2353"
         every { mockedIdentifierDocumentPublicKey.publicKeyJwk } returns mockedPublicKeyJwk
         every { mockedPublicKeyJwk.keyType } returns KeyType.EC
+        val logConsumer = CapturingWalletLibraryLogConsumer()
+        WalletLibraryLogger.addConsumer(logConsumer)
 
-        runBlocking {
-            try {
-                validator.verifySignature(mockedJwsToken)
-                fail("Expected mismatched DID verification method to be rejected")
-            } catch (exception: Exception) {
-                assertThat(exception).isInstanceOf(ValidatorException::class.java)
-                assertThat(exception.message).contains("No public key found in identifier document matching DID")
+        try {
+            runBlocking {
+                try {
+                    validator.verifySignature(mockedJwsToken)
+                    fail("Expected mismatched DID verification method to be rejected")
+                } catch (exception: Exception) {
+                    assertThat(exception).isInstanceOf(ValidatorException::class.java)
+                    assertThat(exception.message).contains("No public key found in identifier document matching DID")
+                }
             }
+            assertThat(logConsumer.events).containsExactly(
+                CapturingWalletLibraryLogConsumer.Event(
+                    "DIDResolverHardeningCheck",
+                    mapOf(
+                        "check" to "verification_method_id",
+                        "hardening_enabled" to "true",
+                        "outcome" to "rejected"
+                    )
+                )
+            )
+        } finally {
+            WalletLibraryLogger.CONSUMERS.remove(logConsumer)
         }
     }
 
@@ -150,17 +168,41 @@ class JwtValidatorTest {
         every { mockedJwsToken.keyId } returns expectedKid
         every { mockedIdentifierDocumentPublicKey.id } returns "did:attacker:123#kidTest2353"
         every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns true
+        val logConsumer = CapturingWalletLibraryLogConsumer()
+        WalletLibraryLogger.addConsumer(logConsumer)
 
-        val hardenedResult = runBlocking {
-            runCatching { dynamicValidator.verifySignature(mockedJwsToken) }
+        try {
+            val hardenedResult = runBlocking {
+                runCatching { dynamicValidator.verifySignature(mockedJwsToken) }
+            }
+
+            useLegacyDidResolver = true
+            val legacyResult = runBlocking {
+                dynamicValidator.verifySignature(mockedJwsToken)
+            }
+
+            assertThat(hardenedResult.exceptionOrNull()).isInstanceOf(ValidatorException::class.java)
+            assertTrue(legacyResult)
+            assertThat(logConsumer.events).containsExactly(
+                CapturingWalletLibraryLogConsumer.Event(
+                    "DIDResolverHardeningCheck",
+                    mapOf(
+                        "check" to "verification_method_id",
+                        "hardening_enabled" to "true",
+                        "outcome" to "rejected"
+                    )
+                ),
+                CapturingWalletLibraryLogConsumer.Event(
+                    "DIDResolverHardeningCheck",
+                    mapOf(
+                        "check" to "verification_method_id",
+                        "hardening_enabled" to "false",
+                        "outcome" to "accepted"
+                    )
+                )
+            )
+        } finally {
+            WalletLibraryLogger.CONSUMERS.remove(logConsumer)
         }
-
-        useLegacyDidResolver = true
-        val legacyResult = runBlocking {
-            dynamicValidator.verifySignature(mockedJwsToken)
-        }
-
-        assertThat(hardenedResult.exceptionOrNull()).isInstanceOf(ValidatorException::class.java)
-        assertTrue(legacyResult)
     }
 }

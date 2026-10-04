@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
+import com.microsoft.walletlibrary.did.sdk.util.DidResolverHardeningTelemetry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
@@ -65,6 +66,15 @@ internal class JwtValidator @Inject constructor(
                     verificationMethodKeyId == keyId &&
                         (!didResolverHardeningEnabled || verificationMethodDid == null || verificationMethodDid == did)
                 }
+                DidResolverHardeningTelemetry.record(
+                    DidResolverHardeningTelemetry.Check.VerificationMethodId,
+                    didResolverHardeningEnabled,
+                    if (matchingKeys.isEmpty()) {
+                        DidResolverHardeningTelemetry.Outcome.Rejected
+                    } else {
+                        DidResolverHardeningTelemetry.Outcome.Accepted
+                    }
+                )
                 if (matchingKeys.isEmpty()) throw ValidatorException("No public key found in identifier document matching DID '$did' and key id '$keyId'")
                 matchingKeys.map { it.publicKeyJwk }
             }

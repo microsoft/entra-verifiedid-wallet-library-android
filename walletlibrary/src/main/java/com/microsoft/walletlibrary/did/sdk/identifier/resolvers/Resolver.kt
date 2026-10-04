@@ -9,6 +9,7 @@ import com.microsoft.walletlibrary.WalletLibraryFlight
 import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
+import com.microsoft.walletlibrary.did.sdk.util.DidResolverHardeningTelemetry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
 import javax.inject.Inject
 import javax.inject.Named
@@ -25,7 +26,20 @@ internal class Resolver @Inject constructor(
                 val resolvedId = resolvedDidDocument.id
                 val didResolverHardeningEnabled =
                     !flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)
-                if (didResolverHardeningEnabled && (resolvedId.isNullOrBlank() || resolvedId != identifier)) {
+                val outcome = if (
+                    didResolverHardeningEnabled &&
+                    (resolvedId.isNullOrBlank() || resolvedId != identifier)
+                ) {
+                    DidResolverHardeningTelemetry.Outcome.Rejected
+                } else {
+                    DidResolverHardeningTelemetry.Outcome.Accepted
+                }
+                DidResolverHardeningTelemetry.record(
+                    DidResolverHardeningTelemetry.Check.ResolvedDocumentId,
+                    didResolverHardeningEnabled,
+                    outcome
+                )
+                if (outcome == DidResolverHardeningTelemetry.Outcome.Rejected) {
                     throw ResolverException(
                         "Resolved DID document id '$resolvedId' does not match requested identifier '$identifier'"
                     )

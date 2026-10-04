@@ -10,6 +10,8 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
 import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
 import com.microsoft.walletlibrary.util.NetworkingException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
+import com.microsoft.walletlibrary.util.CapturingWalletLibraryLogConsumer
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -78,12 +80,28 @@ class ResolverTest {
         val mismatchedId = "did:ion:another-id"
         val mismatchedDocument = expectedIdentifierResponse.copy(didDocument = expectedIdentifierResponse.didDocument.copy(id = mismatchedId))
         coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
+        val logConsumer = CapturingWalletLibraryLogConsumer()
+        WalletLibraryLogger.addConsumer(logConsumer)
 
-        runBlocking {
-            val actualResult = resolver.resolve(expectedIdentifier)
-            assertThat(actualResult.isFailure).isEqualTo(true)
-            assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
-            assertThat(actualResult.exceptionOrNull()?.message).contains("does not match requested identifier")
+        try {
+            runBlocking {
+                val actualResult = resolver.resolve(expectedIdentifier)
+                assertThat(actualResult.isFailure).isEqualTo(true)
+                assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
+                assertThat(actualResult.exceptionOrNull()?.cause?.message).contains("does not match requested identifier")
+            }
+            assertThat(logConsumer.events).containsExactly(
+                CapturingWalletLibraryLogConsumer.Event(
+                    "DIDResolverHardeningCheck",
+                    mapOf(
+                        "check" to "resolved_document_id",
+                        "hardening_enabled" to "true",
+                        "outcome" to "rejected"
+                    )
+                )
+            )
+        } finally {
+            WalletLibraryLogger.CONSUMERS.remove(logConsumer)
         }
     }
 
@@ -108,11 +126,27 @@ class ResolverTest {
             didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
         )
         coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
+        val logConsumer = CapturingWalletLibraryLogConsumer()
+        WalletLibraryLogger.addConsumer(logConsumer)
 
-        val actualResult = runBlocking { resolver.resolve(expectedIdentifier) }
+        try {
+            val actualResult = runBlocking { resolver.resolve(expectedIdentifier) }
 
-        assertThat(actualResult.isSuccess).isTrue()
-        assertThat(actualResult.getOrNull()?.id).isEqualTo("did:ion:another-id")
+            assertThat(actualResult.isSuccess).isTrue()
+            assertThat(actualResult.getOrNull()?.id).isEqualTo("did:ion:another-id")
+            assertThat(logConsumer.events).containsExactly(
+                CapturingWalletLibraryLogConsumer.Event(
+                    "DIDResolverHardeningCheck",
+                    mapOf(
+                        "check" to "resolved_document_id",
+                        "hardening_enabled" to "false",
+                        "outcome" to "accepted"
+                    )
+                )
+            )
+        } finally {
+            WalletLibraryLogger.CONSUMERS.remove(logConsumer)
+        }
     }
 
     @Test
