@@ -10,7 +10,10 @@ internal open class LinkedDomainResult
 
 @Serializable
 @SerialName("LinkedDomainVerified")
-internal class LinkedDomainVerified(val domainUrl: String) : LinkedDomainResult()
+internal class LinkedDomainVerified(
+    val domainUrl: String,
+    val origin: String? = null
+) : LinkedDomainResult()
 
 @Serializable
 @SerialName("LinkedDomainUnVerified")

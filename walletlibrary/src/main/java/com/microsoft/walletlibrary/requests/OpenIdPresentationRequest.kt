@@ -94,7 +94,7 @@ internal class OpenIdPresentationRequest(
         )
 
         PostVerifiablePresentationNetworkOperation(
-            request.presentationRequest.content.redirectUrl,
+            request.presentationRequest.responseUrl,
             idToken,
             vpTokens,
             request.presentationRequest.content.state,
