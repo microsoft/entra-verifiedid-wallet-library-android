@@ -529,7 +529,8 @@ class LinkedDomainsServiceTest {
             val actualLinkedDomainsResultResponse =
                 linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(suppliedDidWithSingleServiceEndpoint)
             assertThat(actualLinkedDomainsResultResponse).isInstanceOf(KotlinResult.success(LinkedDomainVerified)::class.java)
-            assertThat((actualLinkedDomainsResultResponse.getOrNull() as? LinkedDomainVerified)?.domainUrl).isEqualTo(expectedDomainUrl)
+            assertThat((actualLinkedDomainsResultResponse.getOrNull() as? LinkedDomainVerified)?.domainUrl)
+                .isEqualTo("discover.did.microsoft.com")
         }
 
         coVerify(exactly = 1) { mockRootOfTrustResolver.resolve(any()) }
