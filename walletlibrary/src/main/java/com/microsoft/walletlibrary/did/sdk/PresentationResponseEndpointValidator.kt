@@ -17,7 +17,7 @@ internal object PresentationResponseEndpointValidator {
         val linkedDomainValue = verifiedLinkedDomain.origin ?: verifiedLinkedDomain.domainUrl
         val linkedDomainUri = parseHttpsUri(
             if (linkedDomainValue.contains("://")) linkedDomainValue else "https://$linkedDomainValue",
-            allowPathAndQuery = false
+            allowPathAndQuery = true
         )
 
         if (!hasMatchingDestination(redirectUri, linkedDomainUri)) {

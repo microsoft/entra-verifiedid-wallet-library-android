@@ -4,6 +4,8 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomai
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
+import com.microsoft.walletlibrary.mappings.toLinkedDomainResult
+import com.microsoft.walletlibrary.requests.RootOfTrust
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
@@ -27,6 +29,21 @@ class PresentationResponseEndpointValidatorTest {
         )
 
         assertThat(endpoint).isEqualTo("https://verifier.example:8443/callback")
+    }
+
+    @Test
+    fun validate_customResolverEndpointWithPath_returnsEndpoint() {
+        val linkedDomain = RootOfTrust(
+            "https://verifier.example/.well-known/did-configuration.json",
+            true
+        ).toLinkedDomainResult()
+
+        val endpoint = PresentationResponseEndpointValidator.validate(
+            "https://verifier.example/presentation/callback",
+            linkedDomain
+        )
+
+        assertThat(endpoint).isEqualTo("https://verifier.example/presentation/callback")
     }
 
     @Test
