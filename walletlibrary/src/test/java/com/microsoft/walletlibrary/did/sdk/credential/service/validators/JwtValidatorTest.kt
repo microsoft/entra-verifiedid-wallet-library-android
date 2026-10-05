@@ -6,7 +6,7 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
-import com.microsoft.walletlibrary.util.CapturingWalletLibraryLogConsumer
+import com.microsoft.walletlibrary.util.WalletLibraryEventRecorder
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyType
@@ -115,7 +115,7 @@ class JwtValidatorTest {
         every { mockedIdentifierDocumentPublicKey.id } returns "did:attacker:123#kidTest2353"
         every { mockedIdentifierDocumentPublicKey.publicKeyJwk } returns mockedPublicKeyJwk
         every { mockedPublicKeyJwk.keyType } returns KeyType.EC
-        val logConsumer = CapturingWalletLibraryLogConsumer()
+        val logConsumer = WalletLibraryEventRecorder()
         WalletLibraryLogger.addConsumer(logConsumer)
 
         try {
@@ -129,7 +129,7 @@ class JwtValidatorTest {
                 }
             }
             assertThat(logConsumer.events).containsExactly(
-                CapturingWalletLibraryLogConsumer.Event(
+                WalletLibraryEventRecorder.Event(
                     "DIDResolverHardeningCheck",
                     mapOf(
                         "check" to "verification_method_id",
@@ -168,7 +168,7 @@ class JwtValidatorTest {
         every { mockedJwsToken.keyId } returns expectedKid
         every { mockedIdentifierDocumentPublicKey.id } returns "did:attacker:123#kidTest2353"
         every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns true
-        val logConsumer = CapturingWalletLibraryLogConsumer()
+        val logConsumer = WalletLibraryEventRecorder()
         WalletLibraryLogger.addConsumer(logConsumer)
 
         try {
@@ -184,7 +184,7 @@ class JwtValidatorTest {
             assertThat(hardenedResult.exceptionOrNull()).isInstanceOf(ValidatorException::class.java)
             assertTrue(legacyResult)
             assertThat(logConsumer.events).containsExactly(
-                CapturingWalletLibraryLogConsumer.Event(
+                WalletLibraryEventRecorder.Event(
                     "DIDResolverHardeningCheck",
                     mapOf(
                         "check" to "verification_method_id",
@@ -192,7 +192,7 @@ class JwtValidatorTest {
                         "outcome" to "rejected"
                     )
                 ),
-                CapturingWalletLibraryLogConsumer.Event(
+                WalletLibraryEventRecorder.Event(
                     "DIDResolverHardeningCheck",
                     mapOf(
                         "check" to "verification_method_id",

@@ -10,7 +10,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
 import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
 import com.microsoft.walletlibrary.util.NetworkingException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
-import com.microsoft.walletlibrary.util.CapturingWalletLibraryLogConsumer
+import com.microsoft.walletlibrary.util.WalletLibraryEventRecorder
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -80,7 +80,7 @@ class ResolverTest {
         val mismatchedId = "did:ion:another-id"
         val mismatchedDocument = expectedIdentifierResponse.copy(didDocument = expectedIdentifierResponse.didDocument.copy(id = mismatchedId))
         coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
-        val logConsumer = CapturingWalletLibraryLogConsumer()
+        val logConsumer = WalletLibraryEventRecorder()
         WalletLibraryLogger.addConsumer(logConsumer)
 
         try {
@@ -91,7 +91,7 @@ class ResolverTest {
                 assertThat(actualResult.exceptionOrNull()?.cause?.message).contains("does not match requested identifier")
             }
             assertThat(logConsumer.events).containsExactly(
-                CapturingWalletLibraryLogConsumer.Event(
+                WalletLibraryEventRecorder.Event(
                     "DIDResolverHardeningCheck",
                     mapOf(
                         "check" to "resolved_document_id",
@@ -126,7 +126,7 @@ class ResolverTest {
             didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
         )
         coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
-        val logConsumer = CapturingWalletLibraryLogConsumer()
+        val logConsumer = WalletLibraryEventRecorder()
         WalletLibraryLogger.addConsumer(logConsumer)
 
         try {
@@ -135,7 +135,7 @@ class ResolverTest {
             assertThat(actualResult.isSuccess).isTrue()
             assertThat(actualResult.getOrNull()?.id).isEqualTo("did:ion:another-id")
             assertThat(logConsumer.events).containsExactly(
-                CapturingWalletLibraryLogConsumer.Event(
+                WalletLibraryEventRecorder.Event(
                     "DIDResolverHardeningCheck",
                     mapOf(
                         "check" to "resolved_document_id",

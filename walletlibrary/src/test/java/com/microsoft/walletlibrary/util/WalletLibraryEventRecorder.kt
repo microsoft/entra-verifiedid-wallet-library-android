@@ -1,6 +1,6 @@
 package com.microsoft.walletlibrary.util
 
-class CapturingWalletLibraryLogConsumer : WalletLibraryLogger.Consumer {
+class WalletLibraryEventRecorder : WalletLibraryLogger.Consumer {
     val events = mutableListOf<Event>()
 
     override fun log(

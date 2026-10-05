@@ -5,7 +5,7 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiP
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentIdentifierApi
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
-import com.microsoft.walletlibrary.util.CapturingWalletLibraryLogConsumer
+import com.microsoft.walletlibrary.util.WalletLibraryEventRecorder
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import io.mockk.coEvery
@@ -21,7 +21,7 @@ class ResolveIdentifierNetworkOperationTest {
     @Test
     fun `rejects malformed did before making request`() {
         val apiProvider: HttpAgentApiProvider = mockk(relaxed = true)
-        val logConsumer = CapturingWalletLibraryLogConsumer()
+        val logConsumer = WalletLibraryEventRecorder()
         WalletLibraryLogger.addConsumer(logConsumer)
 
         try {
@@ -37,7 +37,7 @@ class ResolveIdentifierNetworkOperationTest {
             assertThat(throwable).isInstanceOf(ResolverException::class.java)
             assertThat(throwable.message).contains("is not a syntactically valid DID")
             assertThat(logConsumer.events).containsExactly(
-                CapturingWalletLibraryLogConsumer.Event(
+                WalletLibraryEventRecorder.Event(
                     "DIDResolverHardeningCheck",
                     mapOf(
                         "check" to "identifier_syntax",
@@ -54,7 +54,7 @@ class ResolveIdentifierNetworkOperationTest {
     @Test
     fun `allows malformed did when hardening is disabled`() {
         val apiProvider: HttpAgentApiProvider = mockk(relaxed = true)
-        val logConsumer = CapturingWalletLibraryLogConsumer()
+        val logConsumer = WalletLibraryEventRecorder()
         WalletLibraryLogger.addConsumer(logConsumer)
 
         try {
@@ -67,7 +67,7 @@ class ResolveIdentifierNetworkOperationTest {
 
             assertThat(operation.identifier).isEqualTo("did:web:example.com:..:evil")
             assertThat(logConsumer.events).containsExactly(
-                CapturingWalletLibraryLogConsumer.Event(
+                WalletLibraryEventRecorder.Event(
                     "DIDResolverHardeningCheck",
                     mapOf(
                         "check" to "identifier_syntax",
