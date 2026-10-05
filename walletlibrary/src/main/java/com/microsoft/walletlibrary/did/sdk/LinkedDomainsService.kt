@@ -131,11 +131,15 @@ internal class LinkedDomainsService @Inject constructor(
         require(endpoint.rawFragment == null)
         require(endpoint.port == -1 || endpoint.port in 1..65535)
 
+        val canonicalHost = endpoint.host
+            .lowercase(Locale.ROOT)
+            .removeSuffix(".")
+        require(canonicalHost.isNotBlank())
         val port = endpoint.port.takeUnless { it == 443 } ?: -1
         return URI(
             "https",
             null,
-            endpoint.host.lowercase(Locale.ROOT),
+            canonicalHost,
             port,
             null,
             null,

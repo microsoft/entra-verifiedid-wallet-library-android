@@ -314,6 +314,48 @@ class LinkedDomainsServiceTest {
     }
 
     @Test
+    fun `linked domains trailing dot is removed from canonical origin`() {
+        val validator: DomainLinkageCredentialValidator = mockk()
+        val service = spyk(
+            LinkedDomainsService(mockk(relaxed = true), mockedResolver, validator),
+            recordPrivateCalls = true
+        )
+        val identifierDocument = IdentifierDocument(id = "did:example:issuer").also {
+            it.service = listOf(
+                IdentifierDocumentService(
+                    id = "#linked-domains",
+                    type = "LinkedDomains",
+                    serviceEndpoint = listOf("https://Example.COM.:8443")
+                )
+            )
+        }
+        val response = LinkedDomainsResponse("", listOf("linked-domain-jwt"))
+        val expectedOrigin = "https://example.com:8443"
+
+        coEvery {
+            service["getWellKnownConfigDocument"](expectedOrigin)
+        } returns KotlinResult.success(response)
+        coEvery {
+            validator.validate("linked-domain-jwt", "did:example:issuer", expectedOrigin)
+        } returns true
+
+        runBlocking {
+            val result = service.validateLinkedDomains(identifierDocument)
+
+            val linkedDomainResult = result.getOrNull()
+            assertThat(linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((linkedDomainResult as LinkedDomainVerified).domainUrl)
+                .isEqualTo(expectedOrigin)
+        }
+        coVerify(exactly = 1) {
+            service["getWellKnownConfigDocument"](expectedOrigin)
+        }
+        coVerify(exactly = 1) {
+            validator.validate("linked-domain-jwt", "did:example:issuer", expectedOrigin)
+        }
+    }
+
+    @Test
     fun `linked domains HTTPS endpoint with subpath is rejected without network request`() {
         val validator: DomainLinkageCredentialValidator = mockk(relaxed = true)
         val service = spyk(
