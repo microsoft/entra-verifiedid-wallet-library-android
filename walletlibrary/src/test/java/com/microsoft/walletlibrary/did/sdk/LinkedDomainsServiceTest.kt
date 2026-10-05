@@ -23,7 +23,6 @@ import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import java.net.URI
 import kotlin.Result as KotlinResult
 
 class LinkedDomainsServiceTest {
@@ -180,7 +179,6 @@ class LinkedDomainsServiceTest {
         val expectedWellKnownConfigDocument =
             defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), expectedWellKnownConfigDocumentResponse)
         val expectedDomainUrl = "https://issuertestng.com"
-        val hostnameOfUrl = URI(expectedDomainUrl).host
         coEvery { linkedDomainsService.resolveIdentifierDocument(suppliedDidWithSingleServiceEndpoint) } returns KotlinResult.success(
             expectedResponse.didDocument
         )
@@ -195,7 +193,7 @@ class LinkedDomainsServiceTest {
             val actualLinkedDomainsResultResponse =
                 linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(suppliedDidWithSingleServiceEndpoint)
             assertThat(actualLinkedDomainsResultResponse).isInstanceOf(KotlinResult.success(LinkedDomainVerified)::class.java)
-            assertThat((actualLinkedDomainsResultResponse.getOrNull() as? LinkedDomainVerified)?.domainUrl).isEqualTo(hostnameOfUrl)
+            assertThat((actualLinkedDomainsResultResponse.getOrNull() as? LinkedDomainVerified)?.domainUrl).isEqualTo(expectedDomainUrl)
         }
     }
 
@@ -212,7 +210,6 @@ class LinkedDomainsServiceTest {
         val expectedWellKnownConfigDocument =
             defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), expectedWellKnownConfigDocumentResponse)
         val expectedDomainUrl = "https://issuertestng.com"
-        val hostnameOfUrl = URI(expectedDomainUrl).host
         coEvery { linkedDomainsService.resolveIdentifierDocument(suppliedDidWithMultipleServiceEndpoints) } returns KotlinResult.success(
             expectedResponse.didDocument
         )
@@ -227,7 +224,7 @@ class LinkedDomainsServiceTest {
             val actualLinkedDomainsResultResponse =
                 linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(suppliedDidWithMultipleServiceEndpoints)
             assertThat(actualLinkedDomainsResultResponse).isInstanceOf(KotlinResult.success(LinkedDomainVerified)::class.java)
-            assertThat((actualLinkedDomainsResultResponse.getOrNull() as? LinkedDomainVerified)?.domainUrl).isEqualTo(hostnameOfUrl)
+            assertThat((actualLinkedDomainsResultResponse.getOrNull() as? LinkedDomainVerified)?.domainUrl).isEqualTo(expectedDomainUrl)
         }
     }
 
@@ -259,11 +256,60 @@ class LinkedDomainsServiceTest {
 
             val linkedDomainResult = result.getOrNull()
             assertThat(linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
-            assertThat((linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo("example.com")
+            assertThat((linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo("https://example.com")
         }
         coVerify(exactly = 1) { service["getWellKnownConfigDocument"]("https://example.com") }
         coVerify(exactly = 1) {
             validator.validate("linked-domain-jwt", "did:example:issuer", "https://example.com")
+        }
+    }
+
+    @Test
+    fun `linked domains non-default HTTPS port is retained in verified origin`() {
+        val validator: DomainLinkageCredentialValidator = mockk()
+        val service = spyk(
+            LinkedDomainsService(mockk(relaxed = true), mockedResolver, validator),
+            recordPrivateCalls = true
+        )
+        val identifierDocument = IdentifierDocument(id = "did:example:issuer").also {
+            it.service = listOf(
+                IdentifierDocumentService(
+                    id = "#linked-domains",
+                    type = "LinkedDomains",
+                    serviceEndpoint = listOf("https://example.com:8443")
+                )
+            )
+        }
+        val response = LinkedDomainsResponse("", listOf("linked-domain-jwt"))
+
+        coEvery {
+            service["getWellKnownConfigDocument"]("https://example.com:8443")
+        } returns KotlinResult.success(response)
+        coEvery {
+            validator.validate(
+                "linked-domain-jwt",
+                "did:example:issuer",
+                "https://example.com:8443"
+            )
+        } returns true
+
+        runBlocking {
+            val result = service.validateLinkedDomains(identifierDocument)
+
+            val linkedDomainResult = result.getOrNull()
+            assertThat(linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((linkedDomainResult as LinkedDomainVerified).domainUrl)
+                .isEqualTo("https://example.com:8443")
+        }
+        coVerify(exactly = 1) {
+            service["getWellKnownConfigDocument"]("https://example.com:8443")
+        }
+        coVerify(exactly = 1) {
+            validator.validate(
+                "linked-domain-jwt",
+                "did:example:issuer",
+                "https://example.com:8443"
+            )
         }
     }
 
@@ -427,7 +473,6 @@ class LinkedDomainsServiceTest {
         val expectedWellKnownConfigDocument =
             defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), expectedWellKnownConfigDocumentResponse)
         val expectedDomainUrl = "https://discover.did.microsoft.com"
-        val hostnameOfUrl = URI(expectedDomainUrl).host
         coEvery { linkedDomainsService.resolveIdentifierDocument(suppliedDidWithSingleServiceEndpoint) } returns KotlinResult.success(
             expectedResponse.didDocument
         )
@@ -442,7 +487,7 @@ class LinkedDomainsServiceTest {
             val actualLinkedDomainsResultResponse =
                 linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(suppliedDidWithSingleServiceEndpoint)
             assertThat(actualLinkedDomainsResultResponse).isInstanceOf(KotlinResult.success(LinkedDomainVerified)::class.java)
-            assertThat((actualLinkedDomainsResultResponse.getOrNull() as? LinkedDomainVerified)?.domainUrl).isEqualTo(hostnameOfUrl)
+            assertThat((actualLinkedDomainsResultResponse.getOrNull() as? LinkedDomainVerified)?.domainUrl).isEqualTo(expectedDomainUrl)
         }
 
         coVerify(exactly = 1) { mockRootOfTrustResolver.resolve(any()) }
