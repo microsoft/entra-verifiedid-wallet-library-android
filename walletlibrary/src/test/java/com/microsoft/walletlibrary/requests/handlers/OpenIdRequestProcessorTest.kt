@@ -48,7 +48,7 @@ class OpenIdRequestProcessorTest {
     private lateinit var openIdRequestProcessor: RequestProcessor<OpenIdRawRequest>
     private lateinit var mockRawRequest: RawRequest
     private lateinit var verifiedIdOpenIdJwtRawRequest: VerifiedIdOpenIdJwtRawRequest
-    private val mockLibraryConfiguration: LibraryConfiguration = mockk()
+    private val mockLibraryConfiguration: LibraryConfiguration = mockk(relaxed = true)
     private val expectedRootOfTrustSource = "test.com"
     private val expectedRequesterName = "Test"
     private val expectedRequirementClaimName = "name"
@@ -159,6 +159,8 @@ class OpenIdRequestProcessorTest {
         every { presentationRequestContent.injectedIdToken } returns null
         every { presentationRequestContent.requestState } returns null
         every { presentationRequestContent.issuanceCallbackUrl } returns null
+        every { presentationRequestContent.scenario } returns null
+        every { presentationRequestContent.continuation } returns null
     }
 
     private fun mockRequestInput() {

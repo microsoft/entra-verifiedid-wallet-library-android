@@ -47,6 +47,7 @@ class ClaimFormatterTest {
     @Test
     fun `test formatting date and time successfully`() {
         val actualFormattedClaim = ClaimFormatter.formatDateAndTimeInMillis(suppliedClaimValueForDateInMills)
+            .replace('\u202f', ' ')
         assertThat(actualFormattedClaim).isIn(expectedFormattedDateTimeInDifferentTimeZone)
     }
 }

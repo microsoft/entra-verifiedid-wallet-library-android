@@ -10,6 +10,8 @@ import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import java.math.BigInteger
@@ -36,6 +38,12 @@ class IdentifierCreatorTest {
     fun init() {
         mockKeyGen()
         mockRandom()
+    }
+
+    @After
+    fun cleanUp() {
+        unmockkStatic(UUID::class)
+        unmockkStatic(KeyPairGenerator::class)
     }
 
     @Test

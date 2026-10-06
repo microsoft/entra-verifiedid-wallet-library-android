@@ -136,6 +136,7 @@ class OpenId4VciIssuanceRequestTest {
     private fun mockCredentialOfferAndMetadata() {
         every { mockCredentialOffer.credential_configuration_ids } returns listOf(mockCredentialId)
         every { mockCredentialMetadata.credentialEndpoint } returns mockCredentialEndpoint
+        every { mockCredentialMetadata.notificationEndpoint } returns null
         every { mockCredentialOffer.issuer_session } returns mockIssuerSession
     }
 

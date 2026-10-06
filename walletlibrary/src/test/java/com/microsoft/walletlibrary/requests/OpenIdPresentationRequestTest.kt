@@ -57,6 +57,7 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             requirement,
             rootOfTrust,
+            null,
             rawRequest,
             mockLibraryConfiguration
         )
@@ -85,6 +86,7 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             requirement,
             rootOfTrust,
+            null,
             rawRequest,
             mockLibraryConfiguration
         )
@@ -148,6 +150,7 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             requirement,
             rootOfTrust,
+            null,
             rawRequest,
             mockLibraryConfiguration
         )
@@ -184,6 +187,7 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             requirement,
             rootOfTrust,
+            null,
             rawRequest,
             mockLibraryConfiguration
         )
@@ -225,6 +229,7 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             requirement,
             rootOfTrust,
+            null,
             rawRequest,
             mockLibraryConfiguration
         )
@@ -265,6 +270,7 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             requirement,
             rootOfTrust,
+            null,
             rawRequest,
             mockLibraryConfiguration
         )
@@ -305,6 +311,7 @@ class OpenIdPresentationRequestTest {
             requesterStyle,
             groupRequirement,
             rootOfTrust,
+            null,
             rawRequest,
             mockLibraryConfiguration
         )
