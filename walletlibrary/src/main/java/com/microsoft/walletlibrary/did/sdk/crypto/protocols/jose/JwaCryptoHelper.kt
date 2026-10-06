@@ -9,7 +9,7 @@ internal object JwaCryptoHelper {
     }
 
     fun extractDidAndKeyRef(keyId: String): Pair<String?, String> {
-        val match = matchDidAndKeyId(keyId)
+        val match = matchDidAndKeyId(keyId, false)
         return match ?: Pair(null, keyId)
     }
 
@@ -34,7 +34,7 @@ internal object JwaCryptoHelper {
         }
     }
 
-    private fun matchDidAndKeyId(keyId: String, validateDid: Boolean = true): Pair<String?, String>? {
+    private fun matchDidAndKeyId(keyId: String, validateDid: Boolean): Pair<String?, String>? {
         val matches = Regex("^([^#]*)#(.+)$").matchEntire(keyId)
         return if (matches != null) {
             val did = matches.groupValues[1]

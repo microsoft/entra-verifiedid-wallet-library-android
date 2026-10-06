@@ -5,27 +5,44 @@
 
 package com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations
 
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
+import com.microsoft.walletlibrary.did.sdk.util.DidResolverHardeningTelemetry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import javax.inject.Inject
-import javax.inject.Named
 
 internal class ResolveIdentifierNetworkOperation @Inject constructor(
     private val apiProvider: HttpAgentApiProvider,
     url: String,
     val identifier: String,
-    @Named("didResolverHardeningEnabled") private val didResolverHardeningEnabled: Boolean
+    private val flightProvider: WalletLibraryFlightProvider
 ) :
     GetNetworkOperation<IdentifierResponse>() {
 
     // Reject identifiers containing characters that could redirect the request to an unintended path
     // (e.g. '/', '?', '#', whitespace, '..') before they are concatenated into the resolver URL.
     private val sanitizedIdentifier: String = identifier.also {
-        if (didResolverHardeningEnabled && (it.isBlank() || !JwaCryptoHelper.isSyntacticallyValidDid(it))) {
+        val didResolverHardeningEnabled =
+            !flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)
+        val outcome = if (
+            didResolverHardeningEnabled &&
+            (it.isBlank() || !JwaCryptoHelper.isSyntacticallyValidDid(it))
+        ) {
+            DidResolverHardeningTelemetry.Outcome.Rejected
+        } else {
+            DidResolverHardeningTelemetry.Outcome.Accepted
+        }
+        DidResolverHardeningTelemetry.record(
+            DidResolverHardeningTelemetry.Check.IdentifierSyntax,
+            didResolverHardeningEnabled,
+            outcome
+        )
+        if (outcome == DidResolverHardeningTelemetry.Outcome.Rejected) {
             throw ResolverException("Identifier '$it' is not a syntactically valid DID")
         }
     }

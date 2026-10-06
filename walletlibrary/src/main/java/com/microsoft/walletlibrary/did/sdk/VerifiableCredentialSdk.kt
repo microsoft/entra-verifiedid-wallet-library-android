@@ -7,6 +7,7 @@ package com.microsoft.walletlibrary.did.sdk
 
 import android.content.Context
 import androidx.preference.PreferenceManager
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.di.DaggerSdkComponent
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
@@ -65,6 +66,7 @@ internal object VerifiableCredentialSdk {
      * @param walletLibraryVersionInfo version of the library in use
      * @param httpAgent http agent implementation to be used for network requests
      * @param rootOfTrustResolver root of trust resolver implementation to be used for verifying the domains.
+     * @param flightProvider supplies current Wallet Library flight states; defaults to all flights disabled.
      */
     // TODO(Change how version numbers are passed for headers when HTTP client layer is refactored)
     @JvmOverloads
@@ -79,7 +81,7 @@ internal object VerifiableCredentialSdk {
         walletLibraryVersionInfo: String = "",
         httpAgent: IHttpAgent = OkHttpAgent(),
         rootOfTrustResolver: RootOfTrustResolver? = null,
-        didResolverHardeningEnabled: Boolean = true,
+        flightProvider: WalletLibraryFlightProvider = WalletLibraryFlightProvider { false },
         linkedDomainValidationHardeningEnabled: Boolean = false
     ) {
         correlationVectorService = CorrelationVectorService(PreferenceManager.getDefaultSharedPreferences(context))
@@ -92,7 +94,7 @@ internal object VerifiableCredentialSdk {
             .resolverUrl(resolverUrl)
             .polymorphicJsonSerializer(polymorphicJsonSerializers)
             .rootOfTrustResolver(rootOfTrustResolver)
-            .didResolverHardeningEnabled(didResolverHardeningEnabled)
+            .flightProvider(flightProvider)
             .linkedDomainValidationHardeningEnabled(linkedDomainValidationHardeningEnabled)
             .build()
 

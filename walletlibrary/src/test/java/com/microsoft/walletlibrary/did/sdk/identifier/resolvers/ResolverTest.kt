@@ -2,6 +2,7 @@
 
 package com.microsoft.walletlibrary.did.sdk.identifier.resolvers
 
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.LocalNetworkException
@@ -9,6 +10,8 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
 import com.microsoft.walletlibrary.did.sdk.util.defaultTestSerializer
 import com.microsoft.walletlibrary.util.NetworkingException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
+import com.microsoft.walletlibrary.util.WalletLibraryEventRecorder
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -27,7 +30,7 @@ class ResolverTest {
 
     @Test
     fun successfulResolutionTest() {
-        val resolver = Resolver("", identifierRepository, true)
+        val resolver = Resolver("", identifierRepository, WalletLibraryFlightProvider { false })
         coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(expectedIdentifierResponse)
         runBlocking {
             val actualIdentifierDocument = resolver.resolve(expectedIdentifier)
@@ -38,7 +41,7 @@ class ResolverTest {
 
     @Test
     fun failedResolutionInvalidIdTest() {
-        val resolver = Resolver("", identifierRepository, true)
+        val resolver = Resolver("", identifierRepository, WalletLibraryFlightProvider { false })
         coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier) } returns KotlinResult.failure(
             NetworkingException(
                 "Not Found",
@@ -56,7 +59,7 @@ class ResolverTest {
 
     @Test
     fun failedResolutionNetworkConnectionTest() {
-        val resolver = Resolver("invalidUrl", identifierRepository, true)
+        val resolver = Resolver("invalidUrl", identifierRepository, WalletLibraryFlightProvider { false })
         coEvery {
             identifierRepository.resolveIdentifier(
                 "invalidUrl",
@@ -73,44 +76,104 @@ class ResolverTest {
 
     @Test
     fun failedResolutionMismatchedDocumentIdTest() {
-        val resolver = Resolver("", identifierRepository, true)
+        val resolver = Resolver("", identifierRepository, WalletLibraryFlightProvider { false })
         val mismatchedId = "did:ion:another-id"
         val mismatchedDocument = expectedIdentifierResponse.copy(didDocument = expectedIdentifierResponse.didDocument.copy(id = mismatchedId))
         coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
+        val logConsumer = WalletLibraryEventRecorder()
+        WalletLibraryLogger.addConsumer(logConsumer)
 
-        runBlocking {
-            val actualResult = resolver.resolve(expectedIdentifier)
-            assertThat(actualResult.isFailure).isEqualTo(true)
-            assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
-            assertThat(actualResult.exceptionOrNull()?.message).contains("does not match requested identifier")
-        }
-
-        @Test
-        fun mismatchedDocumentIdReturnsFailureRatherThanThrowing() {
-            val resolver = Resolver("", identifierRepository, true)
-            val mismatchedDocument = expectedIdentifierResponse.copy(
-                didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
+        try {
+            runBlocking {
+                val actualResult = resolver.resolve(expectedIdentifier)
+                assertThat(actualResult.isFailure).isEqualTo(true)
+                assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
+                assertThat(actualResult.exceptionOrNull()?.cause?.message).contains("does not match requested identifier")
+            }
+            assertThat(logConsumer.events).containsExactly(
+                WalletLibraryEventRecorder.Event(
+                    "DIDResolverHardeningCheck",
+                    mapOf(
+                        "check" to "resolved_document_id",
+                        "hardening_enabled" to "true",
+                        "outcome" to "rejected"
+                    )
+                )
             )
-            coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
-
-            val actualResult = runBlocking { resolver.resolve(expectedIdentifier) }
-
-            assertThat(actualResult.isFailure).isTrue()
-            assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
+        } finally {
+            WalletLibraryLogger.CONSUMERS.remove(logConsumer)
         }
+    }
 
-        @Test
-        fun mismatchedDocumentIdIsAllowedWhenHardeningDisabled() {
-            val resolver = Resolver("", identifierRepository, false)
-            val mismatchedDocument = expectedIdentifierResponse.copy(
-                didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
-            )
-            coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
+    @Test
+    fun mismatchedDocumentIdReturnsFailureRatherThanThrowing() {
+        val resolver = Resolver("", identifierRepository, WalletLibraryFlightProvider { false })
+        val mismatchedDocument = expectedIdentifierResponse.copy(
+            didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
+        )
+        coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
 
+        val actualResult = runBlocking { resolver.resolve(expectedIdentifier) }
+
+        assertThat(actualResult.isFailure).isTrue()
+        assertThat(actualResult.exceptionOrNull()).isInstanceOf(ResolverException::class.java)
+    }
+
+    @Test
+    fun mismatchedDocumentIdIsAllowedWhenHardeningDisabled() {
+        val resolver = Resolver("", identifierRepository, WalletLibraryFlightProvider { true })
+        val mismatchedDocument = expectedIdentifierResponse.copy(
+            didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
+        )
+        coEvery { identifierRepository.resolveIdentifier("", expectedIdentifier) } returns KotlinResult.success(mismatchedDocument)
+        val logConsumer = WalletLibraryEventRecorder()
+        WalletLibraryLogger.addConsumer(logConsumer)
+
+        try {
             val actualResult = runBlocking { resolver.resolve(expectedIdentifier) }
 
             assertThat(actualResult.isSuccess).isTrue()
             assertThat(actualResult.getOrNull()?.id).isEqualTo("did:ion:another-id")
+            assertThat(logConsumer.events).containsExactly(
+                WalletLibraryEventRecorder.Event(
+                    "DIDResolverHardeningCheck",
+                    mapOf(
+                        "check" to "resolved_document_id",
+                        "hardening_enabled" to "false",
+                        "outcome" to "accepted"
+                    )
+                )
+            )
+        } finally {
+            WalletLibraryLogger.CONSUMERS.remove(logConsumer)
         }
+    }
+
+    @Test
+    fun legacyResolverProviderChangeAffectsNextResolution() {
+        var useLegacyDidResolver = false
+        var providerReads = 0
+        val resolver = Resolver(
+            "",
+            identifierRepository,
+            WalletLibraryFlightProvider {
+                providerReads++
+                useLegacyDidResolver
+            }
+        )
+        val mismatchedDocument = expectedIdentifierResponse.copy(
+            didDocument = expectedIdentifierResponse.didDocument.copy(id = "did:ion:another-id")
+        )
+        coEvery {
+            identifierRepository.resolveIdentifier("", expectedIdentifier)
+        } returns KotlinResult.success(mismatchedDocument)
+
+        val hardenedResult = runBlocking { resolver.resolve(expectedIdentifier) }
+        useLegacyDidResolver = true
+        val legacyResult = runBlocking { resolver.resolve(expectedIdentifier) }
+
+        assertThat(hardenedResult.isFailure).isTrue()
+        assertThat(legacyResult.getOrNull()?.id).isEqualTo("did:ion:another-id")
+        assertThat(providerReads).isEqualTo(2)
     }
 }

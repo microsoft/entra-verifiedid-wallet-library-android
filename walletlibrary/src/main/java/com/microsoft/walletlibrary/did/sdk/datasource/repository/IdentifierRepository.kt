@@ -5,22 +5,22 @@
 
 package com.microsoft.walletlibrary.did.sdk.datasource.repository
 
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations.ResolveIdentifierNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import javax.inject.Inject
-import javax.inject.Named
 
 internal class IdentifierRepository @Inject constructor(
     val database: SdkDatabase,
     val apiProvider: HttpAgentApiProvider,
-    @Named("didResolverHardeningEnabled") private val didResolverHardeningEnabled: Boolean
+    private val flightProvider: WalletLibraryFlightProvider = WalletLibraryFlightProvider { false }
 ) {
     private val identifierDao = database.identifierDao()
 
     suspend fun resolveIdentifier(url: String, identifier: String) = ResolveIdentifierNetworkOperation(
-        apiProvider, url, identifier, didResolverHardeningEnabled
+        apiProvider, url, identifier, flightProvider
     ).fire()
 
     suspend fun insert(identifier: Identifier) = identifierDao.insert(identifier)

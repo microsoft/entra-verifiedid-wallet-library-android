@@ -133,4 +133,14 @@ class VerifiedIdClientBuilderTest {
             )
         ).isTrue()
     }
+
+    @Test
+    fun builder6_WithExplicitProvider_ReturnsVerifiedIdClient() {
+        setupInput(1)
+        verifiedIdClientBuilder.setFlightProvider { false }
+
+        val actualResult = verifiedIdClientBuilder.build()
+
+        assertThat(actualResult).isNotNull
+    }
 }
