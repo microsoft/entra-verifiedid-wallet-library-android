@@ -5,8 +5,11 @@
 
 package com.microsoft.walletlibrary.did.sdk.identifier.resolvers
 
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
+import com.microsoft.walletlibrary.did.sdk.util.DidResolverHardeningTelemetry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
 import javax.inject.Inject
 import javax.inject.Named
@@ -14,14 +17,29 @@ import javax.inject.Named
 internal class Resolver @Inject constructor(
     @Named("resolverUrl") private val baseUrl: String,
     private val identifierRepository: IdentifierRepository,
-    @Named("didResolverHardeningEnabled") private val didResolverHardeningEnabled: Boolean
+    private val flightProvider: WalletLibraryFlightProvider
 ) {
     suspend fun resolve(identifier: String): Result<IdentifierDocument> {
         return identifierRepository.resolveIdentifier(baseUrl, identifier)
             .mapCatching {
                 val resolvedDidDocument = it.didDocument
                 val resolvedId = resolvedDidDocument.id
-                if (didResolverHardeningEnabled && (resolvedId.isNullOrBlank() || resolvedId != identifier)) {
+                val didResolverHardeningEnabled =
+                    !flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)
+                val outcome = if (
+                    didResolverHardeningEnabled &&
+                    (resolvedId.isNullOrBlank() || resolvedId != identifier)
+                ) {
+                    DidResolverHardeningTelemetry.Outcome.Rejected
+                } else {
+                    DidResolverHardeningTelemetry.Outcome.Accepted
+                }
+                DidResolverHardeningTelemetry.record(
+                    DidResolverHardeningTelemetry.Check.ResolvedDocumentId,
+                    didResolverHardeningEnabled,
+                    outcome
+                )
+                if (outcome == DidResolverHardeningTelemetry.Outcome.Rejected) {
                     throw ResolverException(
                         "Resolved DID document id '$resolvedId' does not match requested identifier '$identifier'"
                     )

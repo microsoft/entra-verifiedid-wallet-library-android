@@ -6,6 +6,7 @@
 package com.microsoft.walletlibrary.did.sdk.di
 
 import android.content.Context
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.CorrelationVectorService
 import com.microsoft.walletlibrary.did.sdk.IdentifierService
 import com.microsoft.walletlibrary.did.sdk.IssuanceService
@@ -73,8 +74,8 @@ internal interface SdkComponent {
         fun rootOfTrustResolver(@Named("rootOfTrustResolver") rootOfTrustResolver: RootOfTrustResolver? = null): Builder
 
         @BindsInstance
-        fun didResolverHardeningEnabled(
-            @Named("didResolverHardeningEnabled") enabled: Boolean
+        fun flightProvider(
+            provider: WalletLibraryFlightProvider
         ): Builder
     }
 }

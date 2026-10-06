@@ -1,9 +1,12 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.network.identifierOperations
 
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentIdentifierApi
 import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ResolverException
+import com.microsoft.walletlibrary.util.WalletLibraryEventRecorder
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import io.mockk.coEvery
 import io.mockk.every
@@ -18,27 +21,64 @@ class ResolveIdentifierNetworkOperationTest {
     @Test
     fun `rejects malformed did before making request`() {
         val apiProvider: HttpAgentApiProvider = mockk(relaxed = true)
+        val logConsumer = WalletLibraryEventRecorder()
+        WalletLibraryLogger.addConsumer(logConsumer)
 
-        val throwable = catchThrowable {
-            ResolveIdentifierNetworkOperation(apiProvider, "https://resolver.example", "did:web:example.com:..:evil", true)
+        try {
+            val throwable = catchThrowable {
+                ResolveIdentifierNetworkOperation(
+                    apiProvider,
+                    "https://resolver.example",
+                    "did:web:example.com:..:evil",
+                    WalletLibraryFlightProvider { false }
+                )
+            }
+
+            assertThat(throwable).isInstanceOf(ResolverException::class.java)
+            assertThat(throwable.message).contains("is not a syntactically valid DID")
+            assertThat(logConsumer.events).containsExactly(
+                WalletLibraryEventRecorder.Event(
+                    "DIDResolverHardeningCheck",
+                    mapOf(
+                        "check" to "identifier_syntax",
+                        "hardening_enabled" to "true",
+                        "outcome" to "rejected"
+                    )
+                )
+            )
+        } finally {
+            WalletLibraryLogger.CONSUMERS.remove(logConsumer)
         }
-
-        assertThat(throwable).isInstanceOf(ResolverException::class.java)
-        assertThat(throwable.message).contains("is not a syntactically valid DID")
     }
 
     @Test
     fun `allows malformed did when hardening is disabled`() {
         val apiProvider: HttpAgentApiProvider = mockk(relaxed = true)
+        val logConsumer = WalletLibraryEventRecorder()
+        WalletLibraryLogger.addConsumer(logConsumer)
 
-        val operation = ResolveIdentifierNetworkOperation(
-            apiProvider,
-            "https://resolver.example",
-            "did:web:example.com:..:evil",
-            false
-        )
+        try {
+            val operation = ResolveIdentifierNetworkOperation(
+                apiProvider,
+                "https://resolver.example",
+                "did:web:example.com:..:evil",
+                WalletLibraryFlightProvider { true }
+            )
 
-        assertThat(operation.identifier).isEqualTo("did:web:example.com:..:evil")
+            assertThat(operation.identifier).isEqualTo("did:web:example.com:..:evil")
+            assertThat(logConsumer.events).containsExactly(
+                WalletLibraryEventRecorder.Event(
+                    "DIDResolverHardeningCheck",
+                    mapOf(
+                        "check" to "identifier_syntax",
+                        "hardening_enabled" to "false",
+                        "outcome" to "accepted"
+                    )
+                )
+            )
+        } finally {
+            WalletLibraryLogger.CONSUMERS.remove(logConsumer)
+        }
     }
 
     @Test
@@ -51,8 +91,15 @@ class ResolveIdentifierNetworkOperationTest {
         every { apiProvider.identifierApi } returns identifierApi
         coEvery { identifierApi.resolveIdentifier("https://resolver.example/did:example:123") } returns Result.success(response)
         every { identifierApi.toIdentifierResponse(response) } returns identifierResponse
+        every { response.headers } returns emptyMap()
+        every { response.status } returns 200
 
-        val operation = ResolveIdentifierNetworkOperation(apiProvider, "https://resolver.example", "did:example:123", true)
+        val operation = ResolveIdentifierNetworkOperation(
+            apiProvider,
+            "https://resolver.example",
+            "did:example:123",
+            WalletLibraryFlightProvider { false }
+        )
 
         runBlocking {
             val result = operation.fire()
