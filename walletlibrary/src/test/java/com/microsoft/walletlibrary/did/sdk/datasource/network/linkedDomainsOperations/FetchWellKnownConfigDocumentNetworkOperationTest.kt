@@ -23,7 +23,10 @@ class FetchWellKnownConfigDocumentNetworkOperationTest {
         val expected = LinkedDomainsResponse("", emptyList())
         val api = mockk<HttpAgentLinkedDomainsApi> {
             coEvery {
-                fetchWellKnownConfigDocument("https://example.com/.well-known/did-configuration.json")
+                fetchWellKnownConfigDocument(
+                    "https://example.com/.well-known/did-configuration.json",
+                    false
+                )
             } returns Result.success(response)
             every { toLinkedDomainsResponse(response) } returns expected
         }
@@ -37,7 +40,10 @@ class FetchWellKnownConfigDocumentNetworkOperationTest {
 
         assertThat(result.getOrNull()).isEqualTo(expected)
         coVerify(exactly = 1) {
-            api.fetchWellKnownConfigDocument("https://example.com/.well-known/did-configuration.json")
+            api.fetchWellKnownConfigDocument(
+                "https://example.com/.well-known/did-configuration.json",
+                false
+            )
         }
     }
 
@@ -49,18 +55,22 @@ class FetchWellKnownConfigDocumentNetworkOperationTest {
             ByteArray(0)
         ).toNetworkingException()
         val api = mockk<HttpAgentLinkedDomainsApi> {
-            coEvery { fetchWellKnownConfigDocument(any()) } returns Result.failure(redirect)
+            coEvery { fetchWellKnownConfigDocument(any(), true) } returns Result.failure(redirect)
         }
         val apiProvider = mockk<HttpAgentApiProvider> {
             every { linkedDomainsApis } returns api
         }
 
         val result = runBlocking {
-            FetchWellKnownConfigDocumentNetworkOperation("https://example.com", apiProvider).fire()
+            FetchWellKnownConfigDocumentNetworkOperation(
+                "https://example.com",
+                apiProvider,
+                true
+            ).fire()
         }
 
         assertThat(result.exceptionOrNull()).isInstanceOf(NetworkingException::class.java)
         assertThat((result.exceptionOrNull() as NetworkingException).statusCode).isEqualTo("302")
-        coVerify(exactly = 1) { api.fetchWellKnownConfigDocument(any()) }
+        coVerify(exactly = 1) { api.fetchWellKnownConfigDocument(any(), true) }
     }
 }

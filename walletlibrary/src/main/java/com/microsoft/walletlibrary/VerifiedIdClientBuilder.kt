@@ -125,7 +125,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
             rootOfTrustResolver = rootOfTrustResolver,
             didResolverHardeningEnabled = !previewFeatureFlags.isPreviewFeatureSupported(
                 PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
-            )
+            ),
+            linkedDomainValidationHardeningEnabled = false
         )
 
         val apiProvider = HttpAgentApiProvider(

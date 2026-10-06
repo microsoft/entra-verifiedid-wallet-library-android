@@ -9,12 +9,15 @@ import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import kotlinx.serialization.json.Json
 import java.net.URI
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 internal class JwtDomainLinkageCredentialValidator @Inject constructor(
     private val jwtValidator: JwtValidator,
-    private val serializer: Json
+    private val serializer: Json,
+    @Named("linkedDomainValidationHardeningEnabled")
+    private val linkedDomainValidationHardeningEnabled: Boolean = false
 ) : DomainLinkageCredentialValidator {
 
     override suspend fun validate(
@@ -61,6 +64,9 @@ internal class JwtDomainLinkageCredentialValidator @Inject constructor(
     }
 
     private fun isCredentialSubjectOriginValid(domainLinkageCredential: DomainLinkageCredential, rpDomain: String): Boolean {
+        if (!linkedDomainValidationHardeningEnabled) {
+            return domainLinkageCredential.vc.credentialSubject.domainUrl.equals(rpDomain, true)
+        }
         val expectedOrigin = runCatching { canonicalizeLinkedDomainOrigin(rpDomain) }.getOrNull()
             ?: return false
         val observedOrigin = runCatching {

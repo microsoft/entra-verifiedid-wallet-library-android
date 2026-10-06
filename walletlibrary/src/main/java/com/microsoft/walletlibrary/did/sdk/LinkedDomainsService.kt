@@ -18,6 +18,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.mappings.toLinkedDomainResult
 import java.net.URI
+import java.net.URL
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -28,7 +29,9 @@ internal class LinkedDomainsService @Inject constructor(
     private val apiProvider: HttpAgentApiProvider,
     private val resolver: Resolver,
     private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator,
-    @Named("rootOfTrustResolver") private val rootOfTrustResolver: RootOfTrustResolver? = null
+    @Named("rootOfTrustResolver") private val rootOfTrustResolver: RootOfTrustResolver? = null,
+    @Named("linkedDomainValidationHardeningEnabled")
+    private val linkedDomainValidationHardeningEnabled: Boolean = false
 ) {
     internal suspend fun resolveIdentifierDocument(relyingPartyDid: String): Result<IdentifierDocument> {
         return resolver.resolve(relyingPartyDid)
@@ -74,8 +77,15 @@ internal class LinkedDomainsService @Inject constructor(
                 )
             }
         }
-        validationAttempt.emit()
-        return Result.success(validationAttempt.result)
+        val attributedAttempt = validationAttempt.copy(
+            validationMode = if (linkedDomainValidationHardeningEnabled) {
+                LinkedDomainValidationMode.HARDENED
+            } else {
+                LinkedDomainValidationMode.LEGACY
+            }
+        )
+        attributedAttempt.emit()
+        return Result.success(attributedAttempt.result)
     }
 
     suspend fun fetchDocumentAndVerifyLinkedDomains(
@@ -127,22 +137,30 @@ internal class LinkedDomainsService @Inject constructor(
             )
         }
         val domainUrl = domainUrls.first()
-        val domainOrigin = runCatching {
-            canonicalizeLinkedDomainOrigin(domainUrl)
-        }.getOrElse { throwable ->
-            val hostname = runCatching { URI(domainUrl).host }.getOrNull()
-            val result = if (hostname == null) LinkedDomainMissing else LinkedDomainUnVerified(hostname)
-            SdkLog.w("Rejected invalid Linked Domains service endpoint", throwable)
-            return Result.success(
-                LinkedDomainValidationAttempt(
-                    result = result,
-                    source = LinkedDomainValidationSource.WELL_KNOWN,
-                    failureStage = LinkedDomainValidationFailureStage.ENDPOINT_INVALID,
-                    endpointCountBucket = endpointCountBucket
+        val domainOrigin = if (linkedDomainValidationHardeningEnabled) {
+            runCatching {
+                canonicalizeLinkedDomainOrigin(domainUrl)
+            }.getOrElse { throwable ->
+                val hostname = runCatching { URI(domainUrl).host }.getOrNull()
+                val result = if (hostname == null) LinkedDomainMissing else LinkedDomainUnVerified(hostname)
+                SdkLog.w("Rejected invalid Linked Domains service endpoint", throwable)
+                return Result.success(
+                    LinkedDomainValidationAttempt(
+                        result = result,
+                        source = LinkedDomainValidationSource.WELL_KNOWN,
+                        failureStage = LinkedDomainValidationFailureStage.ENDPOINT_INVALID,
+                        endpointCountBucket = endpointCountBucket
+                    )
                 )
-            )
+            }
+        } else {
+            domainUrl
         }
-        val hostname = URI(domainOrigin).host
+        val hostname = if (linkedDomainValidationHardeningEnabled) {
+            URI(domainOrigin).host
+        } else {
+            URL(domainOrigin).host
+        }
         getWellKnownConfigDocument(domainOrigin)
             .onSuccess { wellKnownConfigDocument ->
                 val credentialCountBucket =
@@ -168,7 +186,9 @@ internal class LinkedDomainsService @Inject constructor(
                     return Result.success(
                         LinkedDomainValidationAttempt(
                             result = if (credentialValidationResult == DomainLinkageCredentialValidationResult.VALID) {
-                                LinkedDomainVerified(domainOrigin)
+                                LinkedDomainVerified(
+                                    if (linkedDomainValidationHardeningEnabled) domainOrigin else hostname
+                                )
                             } else {
                                 LinkedDomainUnVerified(hostname)
                             },
@@ -222,7 +242,8 @@ internal class LinkedDomainsService @Inject constructor(
     private suspend fun getWellKnownConfigDocument(domainUrl: String) =
         FetchWellKnownConfigDocumentNetworkOperation(
             domainUrl,
-            apiProvider
+            apiProvider,
+            linkedDomainValidationHardeningEnabled
         ).fire()
 }
 

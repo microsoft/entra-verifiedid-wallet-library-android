@@ -29,7 +29,11 @@ class JwtDomainLinkageCredentialValidatorTest {
     private val validDomainUrl = "https://issuertestng.com"
 
     init {
-        jwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
+        jwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(
+            mockedJwtValidator,
+            defaultTestSerializer,
+            true
+        )
     }
 
     @Test
@@ -68,6 +72,29 @@ class JwtDomainLinkageCredentialValidatorTest {
                 Assertions.assertThat(result)
                     .describedAs("origin %s", origin)
                     .isEqualTo(DomainLinkageCredentialValidationResult.VALID)
+            }
+
+            @Test
+            fun `default legacy validation does not canonicalize equivalent origins`() {
+                val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
+                val domainLinkageCredentialJwt = response.linkedDids.first()
+                coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+                coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
+                val legacyValidator = JwtDomainLinkageCredentialValidator(
+                    mockedJwtValidator,
+                    defaultTestSerializer
+                )
+
+                runBlocking {
+                    val result = legacyValidator.validate(
+                        domainLinkageCredentialJwt,
+                        validRpDid,
+                        "$validDomainUrl/"
+                    )
+
+                    Assertions.assertThat(result)
+                        .isEqualTo(DomainLinkageCredentialValidationResult.ORIGIN_MISMATCH)
+                }
             }
         }
     }

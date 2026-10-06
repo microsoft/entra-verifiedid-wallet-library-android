@@ -17,7 +17,29 @@ import org.junit.Test
 class HttpAgentLinkedDomainsApiTest {
 
     @Test
-    fun fetchWellKnownConfigDocument_disablesRedirectsForLinkedDomainRequest() {
+    fun fetchWellKnownConfigDocument_defaultsToLegacyRedirectBehavior() {
+        val url = "https://example.com/.well-known/did-configuration.json"
+        val headers = mutableMapOf("header" to "value")
+        val response = IResponse(200, emptyMap(), ByteArray(0))
+        val agent = mockk<IHttpAgent> {
+            coEvery { get(url, headers) } returns Result.success(response)
+        }
+        val httpAgentUtils = mockk<HttpAgentUtils> {
+            every { defaultHeaders() } returns headers
+        }
+        val api = HttpAgentLinkedDomainsApi(agent, httpAgentUtils, Json)
+
+        val result = runBlocking {
+            api.fetchWellKnownConfigDocument(url)
+        }
+
+        assertThat(result.getOrNull()).isSameAs(response)
+        coVerify(exactly = 1) { agent.get(url, headers) }
+        coVerify(exactly = 0) { agent.getWithoutRedirects(any(), any()) }
+    }
+
+    @Test
+    fun fetchWellKnownConfigDocument_disablesRedirectsWhenHardeningEnabled() {
         val url = "https://example.com/.well-known/did-configuration.json"
         val headers = mutableMapOf("header" to "value")
         val response = IResponse(200, emptyMap(), ByteArray(0))
@@ -30,7 +52,7 @@ class HttpAgentLinkedDomainsApiTest {
         val api = HttpAgentLinkedDomainsApi(agent, httpAgentUtils, Json)
 
         val result = runBlocking {
-            api.fetchWellKnownConfigDocument(url)
+            api.fetchWellKnownConfigDocument(url, true)
         }
 
         assertThat(result.getOrNull()).isSameAs(response)

@@ -76,5 +76,10 @@ internal interface SdkComponent {
         fun didResolverHardeningEnabled(
             @Named("didResolverHardeningEnabled") enabled: Boolean
         ): Builder
+
+        @BindsInstance
+        fun linkedDomainValidationHardeningEnabled(
+            @Named("linkedDomainValidationHardeningEnabled") enabled: Boolean
+        ): Builder
     }
 }

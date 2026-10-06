@@ -12,7 +12,11 @@ import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import javax.inject.Inject
 
-internal class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(val url: String, private val apiProvider: HttpAgentApiProvider) :
+internal class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(
+    val url: String,
+    private val apiProvider: HttpAgentApiProvider,
+    private val linkedDomainValidationHardeningEnabled: Boolean = false
+) :
     GetNetworkOperation<LinkedDomainsResponse>() {
 
     override suspend fun toResult(response: IResponse): Result<LinkedDomainsResponse> {
@@ -22,7 +26,8 @@ internal class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(
     override val call: suspend () -> Result<IResponse> =
         {
             apiProvider.linkedDomainsApis.fetchWellKnownConfigDocument(
-                url + Constants.WELL_KNOWN_CONFIG_DOCUMENT_LOCATION
+                url + Constants.WELL_KNOWN_CONFIG_DOCUMENT_LOCATION,
+                linkedDomainValidationHardeningEnabled
             )
         }
 }

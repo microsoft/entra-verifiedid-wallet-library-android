@@ -79,7 +79,8 @@ internal object VerifiableCredentialSdk {
         walletLibraryVersionInfo: String = "",
         httpAgent: IHttpAgent = OkHttpAgent(),
         rootOfTrustResolver: RootOfTrustResolver? = null,
-        didResolverHardeningEnabled: Boolean = true
+        didResolverHardeningEnabled: Boolean = true,
+        linkedDomainValidationHardeningEnabled: Boolean = false
     ) {
         correlationVectorService = CorrelationVectorService(PreferenceManager.getDefaultSharedPreferences(context))
         val sdkComponent = DaggerSdkComponent.builder()
@@ -92,6 +93,7 @@ internal object VerifiableCredentialSdk {
             .polymorphicJsonSerializer(polymorphicJsonSerializers)
             .rootOfTrustResolver(rootOfTrustResolver)
             .didResolverHardeningEnabled(didResolverHardeningEnabled)
+            .linkedDomainValidationHardeningEnabled(linkedDomainValidationHardeningEnabled)
             .build()
 
         issuanceService = sdkComponent.issuanceService()
