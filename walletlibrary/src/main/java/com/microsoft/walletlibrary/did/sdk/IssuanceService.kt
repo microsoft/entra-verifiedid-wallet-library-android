@@ -56,7 +56,10 @@ internal class IssuanceService @Inject constructor(
             logTime("Issuance getRequest") {
                 val contract = fetchContract(contractUrl).toSDK().abortOnError()
                 val linkedDomainResult =
-                    linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(contract.input.issuer)
+                    linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                        contract.input.issuer,
+                        LinkedDomainValidationFlow.ISSUANCE
+                    )
                         .toSDK().abortOnError()
                 val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
                 Result.Success(request)

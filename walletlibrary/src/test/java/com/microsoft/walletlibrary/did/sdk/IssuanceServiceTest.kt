@@ -114,7 +114,12 @@ class IssuanceServiceTest {
 
         coEvery { issuanceService["fetchContract"](suppliedContractUrl) } returns unwrapContract(expectedContractJwt)
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
-        coEvery { linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any()) } returns KotlinResult.success(
+        coEvery {
+            linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                any(),
+                LinkedDomainValidationFlow.ISSUANCE
+            )
+        } returns KotlinResult.success(
             LinkedDomainUnVerified(mockedIdentifierDocumentServiceEndpoint)
         )
         coEvery { mockedResolver.resolve(expectedContract.input.issuer) } returns KotlinResult.success(mockedIdentifierDocument)
@@ -138,7 +143,12 @@ class IssuanceServiceTest {
 
         coEvery { issuanceService["fetchContract"](suppliedContractUrl) } returns unwrapContract(expectedContractJwt)
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
-        coEvery { linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any()) } returns KotlinResult.success(
+        coEvery {
+            linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                any(),
+                LinkedDomainValidationFlow.ISSUANCE
+            )
+        } returns KotlinResult.success(
             LinkedDomainVerified(mockedIdentifierDocumentServiceEndpoint)
         )
         coEvery { mockedResolver.resolve(expectedContract.input.issuer) } returns KotlinResult.success(mockedIdentifierDocument)

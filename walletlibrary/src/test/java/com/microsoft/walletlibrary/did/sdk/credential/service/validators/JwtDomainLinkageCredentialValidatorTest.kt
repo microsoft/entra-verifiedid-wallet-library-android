@@ -4,8 +4,15 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.validators
 
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResponses.LinkedDomainsResponse
 import com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer
+import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.runs
+import io.mockk.unmockkObject
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.Test
@@ -20,7 +27,6 @@ class JwtDomainLinkageCredentialValidatorTest {
         "did:ion:EiA8HR28m5KUig9elPRXkmKvvBGXcOoxpUrCscTdGJcIXQ?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlDVDV5MG5nNTJCNzVjYWFqWU9qVjBRMmpxSng0NDZSajhRTjFpaHdteUpJZyIsInJlY292ZXJ5X2NvbW1pdG1lbnQiOiJFaURsOER4eXZLa3lvRmJsUWp0OXllU2J3TXkwR083MFM1R2FUU1F0UlF0aFJRIn0.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpRGFXS2sycjJiSWJsRWFpRUhtRU5Kc2h6czhtY1hJd2hTV0Z1YmtWQlJ3WWciLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljX2tleXMiOlt7ImlkIjoic2lnX2VkMmM1ZWRmIiwidHlwZSI6IkVjZHNhU2VjcDI1NmsxVmVyaWZpY2F0aW9uS2V5MjAxOSIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJoTzhYaXhtWUxNOVVVMmFWOW9kc2VsSDNobDJtbVFPLS1GTzNKa2JrekVrIiwieSI6InBDWEpxbXpUbzVQQkdRTERibnRtdUFaSElZQnFZOG1DZVdkaWhpb0tGUmMifSwicHVycG9zZSI6WyJhdXRoIiwiZ2VuZXJhbCJdfV19fV19"
     private val invalidRpDid = "did:test:incorrect"
     private val validDomainUrl = "https://issuertestng.com"
-    private val invalidDomainUrl = "test.com"
 
     init {
         jwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
@@ -34,7 +40,7 @@ class JwtDomainLinkageCredentialValidatorTest {
         coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
         runBlocking {
             val validated = jwtDomainLinkageCredentialValidator.validate(domainLinkageCredentialJwt, validRpDid, validDomainUrl)
-            Assertions.assertThat(validated).isTrue
+            Assertions.assertThat(validated).isEqualTo(DomainLinkageCredentialValidationResult.VALID)
         }
     }
 
@@ -46,7 +52,7 @@ class JwtDomainLinkageCredentialValidatorTest {
         coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
         runBlocking {
             val validated = jwtDomainLinkageCredentialValidator.validate(domainLinkageCredentialJwt, invalidRpDid, validDomainUrl)
-            Assertions.assertThat(validated).isFalse
+            Assertions.assertThat(validated).isEqualTo(DomainLinkageCredentialValidationResult.DID_MISMATCH)
         }
     }
 
@@ -56,9 +62,33 @@ class JwtDomainLinkageCredentialValidatorTest {
         val domainLinkageCredentialJwt = response.linkedDids.first()
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
-        runBlocking {
-            val validated = jwtDomainLinkageCredentialValidator.validate(domainLinkageCredentialJwt, validRpDid, invalidDomainUrl)
-            Assertions.assertThat(validated).isFalse
+        mockkObject(SdkLog)
+        try {
+            every { SdkLog.w(any(), any(), any()) } just runs
+
+            runBlocking {
+                val validated = jwtDomainLinkageCredentialValidator.validate(
+                    domainLinkageCredentialJwt,
+                    validRpDid,
+                    "https://issuertestng.com/path?secret=not-logged"
+                )
+                Assertions.assertThat(validated).isEqualTo(DomainLinkageCredentialValidationResult.ORIGIN_MISMATCH)
+            }
+
+            verify(exactly = 1) {
+                SdkLog.w(
+                    match {
+                        it.contains("Expected origin='https://issuertestng.com'") &&
+                            it.contains("observed origin='https://issuertestng.com'") &&
+                            it.contains("mismatch components='non_origin_components_or_format'") &&
+                            !it.contains("not-logged")
+                    },
+                    null,
+                    any()
+                )
+            }
+        } finally {
+            unmockkObject(SdkLog)
         }
     }
 
@@ -69,7 +99,40 @@ class JwtDomainLinkageCredentialValidatorTest {
         coEvery { mockedJwtValidator.verifySignature(any()) } returns false
         runBlocking {
             val validated = jwtDomainLinkageCredentialValidator.validate(domainLinkageCredentialJwt, validRpDid, validDomainUrl)
-            Assertions.assertThat(validated).isFalse
+            Assertions.assertThat(validated).isEqualTo(DomainLinkageCredentialValidationResult.SIGNATURE_INVALID)
+        }
+    }
+
+    @Test
+    fun `failing validation of malformed credential returns claims invalid`() {
+        runBlocking {
+            val validated = jwtDomainLinkageCredentialValidator.validate(
+                "not-a-jwt",
+                validRpDid,
+                validDomainUrl
+            )
+
+            Assertions.assertThat(validated)
+                .isEqualTo(DomainLinkageCredentialValidationResult.CLAIMS_INVALID)
+        }
+    }
+
+    @Test
+    fun `failing header and payload DID validation returns DID mismatch`() {
+        val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
+        val domainLinkageCredentialJwt = response.linkedDids.first()
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns false
+
+        runBlocking {
+            val validated = jwtDomainLinkageCredentialValidator.validate(
+                domainLinkageCredentialJwt,
+                validRpDid,
+                validDomainUrl
+            )
+
+            Assertions.assertThat(validated)
+                .isEqualTo(DomainLinkageCredentialValidationResult.DID_MISMATCH)
         }
     }
 }
