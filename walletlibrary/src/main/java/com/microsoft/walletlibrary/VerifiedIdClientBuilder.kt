@@ -72,6 +72,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
     }
     private var rootOfTrustResolver: RootOfTrustResolver? = null
     private val identifiers = ArrayList<HolderIdentifier>()
+    private var flightProvider: WalletLibraryFlightProvider? = null
 
     // An optional custom log consumer can be passed to be used by VerifiedIdClient.
     fun with(logConsumer: WalletLibraryLogger.Consumer) {
@@ -110,12 +111,34 @@ class VerifiedIdClientBuilder(private val context: Context) {
         return this
     }
 
+    /**
+     * Provides current Wallet Library flight states.
+     *
+     * When no provider is supplied, Wallet Library defaults are used.
+     */
+    fun setFlightProvider(
+        provider: WalletLibraryFlightProvider
+    ): VerifiedIdClientBuilder {
+        flightProvider = provider
+        return this
+    }
+
     // Configures and returns VerifiedIdClient with the configurations provided in builder class.
     fun build(): VerifiedIdClient {
         WalletLibraryVCSDKLogConsumer.logger = logger
         val userAgentInfo = getUserAgent(context)
         val walletLibraryVersionInfo = getWalletLibraryVersionInfo()
         val previewFeatureFlags = PreviewFeatureFlags(previewFeatureFlagsSupported)
+        val effectiveFlightProvider = flightProvider
+            ?: WalletLibraryFlightProvider { flight ->
+                when (flight) {
+                    WalletLibraryFlight.UseLegacyDidResolver ->
+                        previewFeatureFlags.isPreviewFeatureSupported(
+                            PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
+                        )
+                    WalletLibraryFlight.LinkedDomainValidationHardening -> false
+                }
+            }
         VerifiableCredentialSdk.init(
             context,
             logConsumer = WalletLibraryVCSDKLogConsumer,
@@ -123,10 +146,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
             walletLibraryVersionInfo = walletLibraryVersionInfo,
             httpAgent = httpAgent,
             rootOfTrustResolver = rootOfTrustResolver,
-            didResolverHardeningEnabled = !previewFeatureFlags.isPreviewFeatureSupported(
-                PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
-            ),
-            linkedDomainValidationHardeningEnabled = false
+            flightProvider = effectiveFlightProvider
         )
 
         val apiProvider = HttpAgentApiProvider(

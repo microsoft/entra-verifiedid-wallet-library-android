@@ -5,15 +5,17 @@
 
 package com.microsoft.walletlibrary.did.sdk.credential.service.validators
 
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
+import com.microsoft.walletlibrary.did.sdk.util.DidResolverHardeningTelemetry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.ValidatorException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.nimbusds.jose.jwk.JWK
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -22,7 +24,7 @@ import javax.inject.Singleton
 @Singleton
 internal class JwtValidator @Inject constructor(
     private val resolver: Resolver,
-    @Named("didResolverHardeningEnabled") private val didResolverHardeningEnabled: Boolean
+    private val flightProvider: WalletLibraryFlightProvider
 ) {
 
     /**
@@ -54,6 +56,8 @@ internal class JwtValidator @Inject constructor(
             is Result.Success -> {
                 val publicKeys = requesterDidDocument.payload.verificationMethod
                 if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")
+                val didResolverHardeningEnabled =
+                    !flightProvider.isEnabled(WalletLibraryFlight.UseLegacyDidResolver)
                 // Require both the DID and the key fragment of each verificationMethod.id to match the
                 // requested DID, not just the fragment.
                 val matchingKeys = publicKeys.filter { publicKey ->
@@ -62,6 +66,15 @@ internal class JwtValidator @Inject constructor(
                     verificationMethodKeyId == keyId &&
                         (!didResolverHardeningEnabled || verificationMethodDid == null || verificationMethodDid == did)
                 }
+                DidResolverHardeningTelemetry.record(
+                    DidResolverHardeningTelemetry.Check.VerificationMethodId,
+                    didResolverHardeningEnabled,
+                    if (matchingKeys.isEmpty()) {
+                        DidResolverHardeningTelemetry.Outcome.Rejected
+                    } else {
+                        DidResolverHardeningTelemetry.Outcome.Accepted
+                    }
+                )
                 if (matchingKeys.isEmpty()) throw ValidatorException("No public key found in identifier document matching DID '$did' and key id '$keyId'")
                 matchingKeys.map { it.publicKeyJwk }
             }

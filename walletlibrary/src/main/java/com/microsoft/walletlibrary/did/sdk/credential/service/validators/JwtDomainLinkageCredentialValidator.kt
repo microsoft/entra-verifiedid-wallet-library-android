@@ -2,6 +2,8 @@
 
 package com.microsoft.walletlibrary.did.sdk.credential.service.validators
 
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.canonicalizeLinkedDomainOrigin
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.DomainLinkageCredential
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
@@ -9,15 +11,13 @@ import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import kotlinx.serialization.json.Json
 import java.net.URI
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 internal class JwtDomainLinkageCredentialValidator @Inject constructor(
     private val jwtValidator: JwtValidator,
     private val serializer: Json,
-    @Named("linkedDomainValidationHardeningEnabled")
-    private val linkedDomainValidationHardeningEnabled: Boolean = false
+    private val flightProvider: WalletLibraryFlightProvider = WalletLibraryFlightProvider { false }
 ) : DomainLinkageCredentialValidator {
 
     override suspend fun validate(
@@ -34,7 +34,7 @@ internal class JwtDomainLinkageCredentialValidator @Inject constructor(
                 jwt.content()
             )
         } catch (ex: Exception) {
-            if (!linkedDomainValidationHardeningEnabled) {
+            if (!isLinkedDomainValidationHardeningEnabled()) {
                 throw ex
             }
             SdkLog.w("Unable to parse linked-domain credential.", ex)
@@ -67,7 +67,7 @@ internal class JwtDomainLinkageCredentialValidator @Inject constructor(
     }
 
     private fun isCredentialSubjectOriginValid(domainLinkageCredential: DomainLinkageCredential, rpDomain: String): Boolean {
-        if (!linkedDomainValidationHardeningEnabled) {
+        if (!isLinkedDomainValidationHardeningEnabled()) {
             return domainLinkageCredential.vc.credentialSubject.domainUrl.equals(rpDomain, true)
         }
         val expectedOrigin = runCatching { canonicalizeLinkedDomainOrigin(rpDomain) }.getOrNull()
@@ -77,6 +77,9 @@ internal class JwtDomainLinkageCredentialValidator @Inject constructor(
         }.getOrNull() ?: return false
         return expectedOrigin == observedOrigin
     }
+
+    private fun isLinkedDomainValidationHardeningEnabled(): Boolean =
+        flightProvider.isEnabled(WalletLibraryFlight.LinkedDomainValidationHardening)
 
     private fun originForLogging(origin: String): String {
         val parsedOrigin = parseOrigin(origin) ?: return INVALID_ORIGIN
