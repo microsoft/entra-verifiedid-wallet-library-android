@@ -18,7 +18,6 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.mappings.toLinkedDomainResult
 import java.net.URI
-import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -207,34 +206,6 @@ internal class LinkedDomainsService @Inject constructor(
                 endpointCountBucket = endpointCountBucket
             )
         )
-    }
-
-    private fun canonicalizeLinkedDomainOrigin(domainUrl: String): String {
-        val endpoint = URI(domainUrl)
-        require(!endpoint.isOpaque)
-        require(endpoint.scheme.equals("https", ignoreCase = true))
-        require(endpoint.rawAuthority != null)
-        require(endpoint.rawUserInfo == null)
-        require(!endpoint.host.isNullOrBlank())
-        require(endpoint.rawPath.isNullOrEmpty() || endpoint.rawPath == "/")
-        require(endpoint.rawQuery == null)
-        require(endpoint.rawFragment == null)
-        require(endpoint.port == -1 || endpoint.port in 1..65535)
-
-        val canonicalHost = endpoint.host
-            .lowercase(Locale.ROOT)
-            .removeSuffix(".")
-        require(canonicalHost.isNotBlank())
-        val port = endpoint.port.takeUnless { it == 443 } ?: -1
-        return URI(
-            "https",
-            null,
-            canonicalHost,
-            port,
-            null,
-            null,
-            null
-        ).toASCIIString()
     }
 
     private fun getLinkedDomainsFromDidDocument(identifierDocument: IdentifierDocument): List<String> {

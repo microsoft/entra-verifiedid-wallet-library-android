@@ -45,6 +45,34 @@ class JwtDomainLinkageCredentialValidatorTest {
     }
 
     @Test
+    fun `equivalent relying party origins match signed credential origin`() {
+        val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
+        val domainLinkageCredentialJwt = response.linkedDids.first()
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
+        val equivalentOrigins = listOf(
+            "https://issuertestng.com/",
+            "HTTPS://ISSUERTESTNG.COM",
+            "https://issuertestng.com:443",
+            "https://issuertestng.com."
+        )
+
+        runBlocking {
+            equivalentOrigins.forEach { origin ->
+                val result = jwtDomainLinkageCredentialValidator.validate(
+                    domainLinkageCredentialJwt,
+                    validRpDid,
+                    origin
+                )
+
+                Assertions.assertThat(result)
+                    .describedAs("origin %s", origin)
+                    .isEqualTo(DomainLinkageCredentialValidationResult.VALID)
+            }
+        }
+    }
+
+    @Test
     fun `failing validation of well known config document with incorrect issuer DID`() {
         val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
         val domainLinkageCredentialJwt = response.linkedDids.first()

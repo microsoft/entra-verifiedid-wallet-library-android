@@ -2,6 +2,7 @@
 
 package com.microsoft.walletlibrary.did.sdk.credential.service.validators
 
+import com.microsoft.walletlibrary.did.sdk.canonicalizeLinkedDomainOrigin
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.DomainLinkageCredential
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
@@ -60,7 +61,12 @@ internal class JwtDomainLinkageCredentialValidator @Inject constructor(
     }
 
     private fun isCredentialSubjectOriginValid(domainLinkageCredential: DomainLinkageCredential, rpDomain: String): Boolean {
-        return domainLinkageCredential.vc.credentialSubject.domainUrl.equals(rpDomain, true)
+        val expectedOrigin = runCatching { canonicalizeLinkedDomainOrigin(rpDomain) }.getOrNull()
+            ?: return false
+        val observedOrigin = runCatching {
+            canonicalizeLinkedDomainOrigin(domainLinkageCredential.vc.credentialSubject.domainUrl)
+        }.getOrNull() ?: return false
+        return expectedOrigin == observedOrigin
     }
 
     private fun originForLogging(origin: String): String {
