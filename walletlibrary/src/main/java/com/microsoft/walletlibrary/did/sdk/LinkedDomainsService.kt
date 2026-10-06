@@ -126,85 +126,100 @@ internal class LinkedDomainsService @Inject constructor(
                 )
             )
         }
-        val domainUrl = domainUrls.first()
+        var firstFailure: LinkedDomainValidationAttempt? = null
+        for (domainUrl in domainUrls) {
+            val validationAttempt = verifyLinkedDomain(
+                domainUrl,
+                relyingPartyDid,
+                endpointCountBucket
+            )
+            if (validationAttempt.result is LinkedDomainVerified) {
+                return Result.success(validationAttempt)
+            }
+            if (firstFailure == null) {
+                firstFailure = validationAttempt
+            }
+        }
+        return Result.success(checkNotNull(firstFailure))
+    }
+
+    private suspend fun verifyLinkedDomain(
+        domainUrl: String,
+        relyingPartyDid: String,
+        endpointCountBucket: LinkedDomainValidationCountBucket
+    ): LinkedDomainValidationAttempt {
         val domainOrigin = runCatching {
             canonicalizeLinkedDomainOrigin(domainUrl)
         }.getOrElse { throwable ->
             val hostname = runCatching { URI(domainUrl).host }.getOrNull()
             val result = if (hostname == null) LinkedDomainMissing else LinkedDomainUnVerified(hostname)
             SdkLog.w("Rejected invalid Linked Domains service endpoint", throwable)
-            return Result.success(
-                LinkedDomainValidationAttempt(
-                    result = result,
-                    source = LinkedDomainValidationSource.WELL_KNOWN,
-                    failureStage = LinkedDomainValidationFailureStage.ENDPOINT_INVALID,
-                    endpointCountBucket = endpointCountBucket
-                )
+            return LinkedDomainValidationAttempt(
+                result = result,
+                source = LinkedDomainValidationSource.WELL_KNOWN,
+                failureStage = LinkedDomainValidationFailureStage.ENDPOINT_INVALID,
+                endpointCountBucket = endpointCountBucket
             )
         }
         val hostname = URI(domainOrigin).host
-        getWellKnownConfigDocument(domainOrigin)
-            .onSuccess { wellKnownConfigDocument ->
-                val credentialCountBucket =
-                    LinkedDomainValidationCountBucket.from(wellKnownConfigDocument.linkedDids.size)
-                if (wellKnownConfigDocument.linkedDids.isEmpty()) {
-                    return Result.success(
-                        LinkedDomainValidationAttempt(
-                            result = LinkedDomainMissing,
-                            source = LinkedDomainValidationSource.WELL_KNOWN,
-                            failureStage = LinkedDomainValidationFailureStage.NO_CREDENTIALS,
-                            endpointCountBucket = endpointCountBucket,
-                            credentialCountBucket = credentialCountBucket,
-                            httpStatusClass = LinkedDomainValidationHttpStatusClass.SUCCESS
-                        )
-                    )
-                }
-                wellKnownConfigDocument.linkedDids.firstNotNullOf { linkedDidJwt ->
-                    val credentialValidationResult = jwtDomainLinkageCredentialValidator.validate(
-                        linkedDidJwt,
-                        relyingPartyDid,
-                        domainOrigin
-                    )
-                    return Result.success(
-                        LinkedDomainValidationAttempt(
-                            result = if (credentialValidationResult == DomainLinkageCredentialValidationResult.VALID) {
-                                LinkedDomainVerified(domainOrigin)
-                            } else {
-                                LinkedDomainUnVerified(hostname)
-                            },
-                            source = LinkedDomainValidationSource.WELL_KNOWN,
-                            failureStage = credentialValidationResult.toFailureStage(),
-                            endpointCountBucket = endpointCountBucket,
-                            credentialCountBucket = credentialCountBucket,
-                            httpStatusClass = LinkedDomainValidationHttpStatusClass.SUCCESS
-                        )
-                    )
-                }
-            }
-            .onFailure { throwable ->
+        val wellKnownConfigDocument = getWellKnownConfigDocument(domainOrigin)
+            .getOrElse { throwable ->
                 SdkLog.w("Unable to fetch well-known config document.", throwable)
                 val httpStatusClass = LinkedDomainValidationHttpStatusClass.from(throwable)
-                return Result.success(
-                    LinkedDomainValidationAttempt(
-                        result = LinkedDomainUnVerified(hostname),
-                        source = LinkedDomainValidationSource.WELL_KNOWN,
-                        failureStage = if (httpStatusClass == LinkedDomainValidationHttpStatusClass.REDIRECTION) {
-                            LinkedDomainValidationFailureStage.REDIRECT_RESPONSE
-                        } else {
-                            LinkedDomainValidationFailureStage.FETCH_FAILED
-                        },
-                        endpointCountBucket = endpointCountBucket,
-                        httpStatusClass = httpStatusClass
-                    )
+                return LinkedDomainValidationAttempt(
+                    result = LinkedDomainUnVerified(hostname),
+                    source = LinkedDomainValidationSource.WELL_KNOWN,
+                    failureStage = if (httpStatusClass == LinkedDomainValidationHttpStatusClass.REDIRECTION) {
+                        LinkedDomainValidationFailureStage.REDIRECT_RESPONSE
+                    } else {
+                        LinkedDomainValidationFailureStage.FETCH_FAILED
+                    },
+                    endpointCountBucket = endpointCountBucket,
+                    httpStatusClass = httpStatusClass
                 )
             }
-        return Result.success(
-            LinkedDomainValidationAttempt(
+
+        val credentialCountBucket =
+            LinkedDomainValidationCountBucket.from(wellKnownConfigDocument.linkedDids.size)
+        if (wellKnownConfigDocument.linkedDids.isEmpty()) {
+            return LinkedDomainValidationAttempt(
                 result = LinkedDomainMissing,
                 source = LinkedDomainValidationSource.WELL_KNOWN,
-                failureStage = LinkedDomainValidationFailureStage.DOCUMENT_INVALID,
-                endpointCountBucket = endpointCountBucket
+                failureStage = LinkedDomainValidationFailureStage.NO_CREDENTIALS,
+                endpointCountBucket = endpointCountBucket,
+                credentialCountBucket = credentialCountBucket,
+                httpStatusClass = LinkedDomainValidationHttpStatusClass.SUCCESS
             )
+        }
+
+        var firstFailure: DomainLinkageCredentialValidationResult? = null
+        for (linkedDidJwt in wellKnownConfigDocument.linkedDids) {
+            val credentialValidationResult = jwtDomainLinkageCredentialValidator.validate(
+                linkedDidJwt,
+                relyingPartyDid,
+                domainOrigin
+            )
+            if (credentialValidationResult == DomainLinkageCredentialValidationResult.VALID) {
+                return LinkedDomainValidationAttempt(
+                    result = LinkedDomainVerified(domainOrigin),
+                    source = LinkedDomainValidationSource.WELL_KNOWN,
+                    failureStage = LinkedDomainValidationFailureStage.NONE,
+                    endpointCountBucket = endpointCountBucket,
+                    credentialCountBucket = credentialCountBucket,
+                    httpStatusClass = LinkedDomainValidationHttpStatusClass.SUCCESS
+                )
+            }
+            if (firstFailure == null) {
+                firstFailure = credentialValidationResult
+            }
+        }
+        return LinkedDomainValidationAttempt(
+            result = LinkedDomainUnVerified(hostname),
+            source = LinkedDomainValidationSource.WELL_KNOWN,
+            failureStage = checkNotNull(firstFailure).toFailureStage(),
+            endpointCountBucket = endpointCountBucket,
+            credentialCountBucket = credentialCountBucket,
+            httpStatusClass = LinkedDomainValidationHttpStatusClass.SUCCESS
         )
     }
 
