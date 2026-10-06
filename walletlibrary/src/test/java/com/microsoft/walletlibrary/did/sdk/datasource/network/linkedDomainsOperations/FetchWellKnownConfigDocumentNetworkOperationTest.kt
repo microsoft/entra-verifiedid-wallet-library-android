@@ -48,6 +48,39 @@ class FetchWellKnownConfigDocumentNetworkOperationTest {
     }
 
     @Test
+    fun legacyMode_resolvesWellKnownLocationRelativeToRawEndpoint() {
+        val response = IResponse(200, emptyMap(), ByteArray(0))
+        val expected = LinkedDomainsResponse("", emptyList())
+        val api = mockk<HttpAgentLinkedDomainsApi> {
+            coEvery {
+                fetchWellKnownConfigDocument(
+                    "https://example.com/tenant/.well-known/did-configuration.json",
+                    false
+                )
+            } returns Result.success(response)
+            every { toLinkedDomainsResponse(response) } returns expected
+        }
+        val apiProvider = mockk<HttpAgentApiProvider> {
+            every { linkedDomainsApis } returns api
+        }
+
+        val result = runBlocking {
+            FetchWellKnownConfigDocumentNetworkOperation(
+                "https://example.com/tenant/",
+                apiProvider
+            ).fire()
+        }
+
+        assertThat(result.getOrNull()).isEqualTo(expected)
+        coVerify(exactly = 1) {
+            api.fetchWellKnownConfigDocument(
+                "https://example.com/tenant/.well-known/did-configuration.json",
+                false
+            )
+        }
+    }
+
+    @Test
     fun redirectResponse_isRejectedWithoutFollowingLocation() {
         val redirect = IResponse(
             302,

@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.did.sdk.datasource.network.GetNetworkOperatio
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
+import java.net.URL
 import javax.inject.Inject
 
 internal class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(
@@ -25,8 +26,16 @@ internal class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(
 
     override val call: suspend () -> Result<IResponse> =
         {
+            val wellKnownUrl = if (linkedDomainValidationHardeningEnabled) {
+                url + Constants.WELL_KNOWN_CONFIG_DOCUMENT_LOCATION
+            } else {
+                URL(
+                    URL(url),
+                    Constants.WELL_KNOWN_CONFIG_DOCUMENT_LOCATION.removePrefix("/")
+                ).toString()
+            }
             apiProvider.linkedDomainsApis.fetchWellKnownConfigDocument(
-                url + Constants.WELL_KNOWN_CONFIG_DOCUMENT_LOCATION,
+                wellKnownUrl,
                 linkedDomainValidationHardeningEnabled
             )
         }

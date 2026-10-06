@@ -34,6 +34,9 @@ internal class JwtDomainLinkageCredentialValidator @Inject constructor(
                 jwt.content()
             )
         } catch (ex: Exception) {
+            if (!linkedDomainValidationHardeningEnabled) {
+                throw ex
+            }
             SdkLog.w("Unable to parse linked-domain credential.", ex)
             return DomainLinkageCredentialValidationResult.CLAIMS_INVALID
         }
