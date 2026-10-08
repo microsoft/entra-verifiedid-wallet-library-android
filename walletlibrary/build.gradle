@@ -29,7 +29,9 @@ android {
         targetSdkVersion target_sdk_version as Integer
         versionCode 1
         versionName _version
+        def walletLibraryApiKey = project.findProperty('wallet_library_api_key') ?: System.getenv('WALLET_LIBRARY_API_KEY') ?: ''
         buildConfigField 'String', 'WalletLibraryVersion', "\"$_version\""
+        buildConfigField 'String', 'WalletLibraryApiKey', "\"${walletLibraryApiKey}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         
