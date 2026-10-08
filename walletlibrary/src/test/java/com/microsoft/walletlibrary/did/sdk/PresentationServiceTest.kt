@@ -299,7 +299,10 @@ class PresentationServiceTest {
                 InvalidSignatureException::class.java
             )
             coVerify(exactly = 0) {
-                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any())
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                    any(),
+                    LinkedDomainValidationFlow.PRESENTATION
+                )
             }
         }
     }
@@ -321,7 +324,10 @@ class PresentationServiceTest {
                 mockedJwtValidator.validateDidInHeaderAndPayload(any(), any())
             }
             coVerify(exactly = 1) {
-                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(expectedEntityIdentifier)
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                    expectedEntityIdentifier,
+                    LinkedDomainValidationFlow.PRESENTATION
+                )
             }
         }
     }
@@ -351,7 +357,10 @@ class PresentationServiceTest {
                 mockedIdentifierDocumentServiceEndpoint
             )
             coVerify(exactly = 1) {
-                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(expectedEntityIdentifier)
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                    expectedEntityIdentifier,
+                    LinkedDomainValidationFlow.PRESENTATION
+                )
             }
             coVerify(exactly = 1) {
                 presentationRequestValidator.validate(actualPresentationRequest)
@@ -371,7 +380,10 @@ class PresentationServiceTest {
                 InvalidSignatureException::class.java
             )
             coVerify(exactly = 0) {
-                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any())
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                    any(),
+                    LinkedDomainValidationFlow.PRESENTATION
+                )
             }
         }
     }
@@ -389,7 +401,10 @@ class PresentationServiceTest {
                 DidInHeaderAndPayloadNotMatching::class.java
             )
             coVerify(exactly = 0) {
-                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any())
+                linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                    any(),
+                    LinkedDomainValidationFlow.PRESENTATION
+                )
             }
         }
     }
@@ -483,7 +498,12 @@ class PresentationServiceTest {
     }
 
     private fun mockIdentifierAndLinkedDomains() {
-        coEvery { linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(any()) } returns KotlinResult.success(
+        coEvery {
+            linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                any(),
+                LinkedDomainValidationFlow.PRESENTATION
+            )
+        } returns KotlinResult.success(
             LinkedDomainVerified(mockedIdentifierDocumentServiceEndpoint)
         )
         coEvery { mockedResolver.resolve(expectedEntityIdentifier) } returns KotlinResult.success(

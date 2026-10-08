@@ -32,7 +32,7 @@ internal object Constants {
     const val VERIFIABLE_CREDENTIAL_DEFAULT_TYPE = "VerifiableCredential"
 
     //Well-Known Config Document Constants
-    const val WELL_KNOWN_CONFIG_DOCUMENT_LOCATION = ".well-known/did-configuration.json"
+    const val WELL_KNOWN_CONFIG_DOCUMENT_LOCATION = "/.well-known/did-configuration.json"
     const val LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE = "LinkedDomains"
 
     // General Constants

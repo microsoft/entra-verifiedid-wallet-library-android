@@ -18,7 +18,14 @@ internal class HttpAgentLinkedDomainsApi(private val agent: IHttpAgent,
     fun toLinkedDomainsResponse(response: IResponse): LinkedDomainsResponse {
         return json.decodeFromString(LinkedDomainsResponse.serializer(), response.body.decodeToString())
     }
-    suspend fun fetchWellKnownConfigDocument (overrideUrl: String): Result<IResponse> {
-        return agent.get(overrideUrl, httpAgentUtils.defaultHeaders())
+    suspend fun fetchWellKnownConfigDocument(
+        overrideUrl: String,
+        linkedDomainValidationHardeningEnabled: Boolean = false
+    ): Result<IResponse> {
+        return if (linkedDomainValidationHardeningEnabled) {
+            agent.getWithoutRedirects(overrideUrl, httpAgentUtils.defaultHeaders())
+        } else {
+            agent.get(overrideUrl, httpAgentUtils.defaultHeaders())
+        }
     }
 }

@@ -54,7 +54,8 @@ internal class PresentationService @Inject constructor(
         return runResultTry {
             logTime("Presentation validateRequest") {
                 val linkedDomainResult = linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
-                    presentationRequestContent.clientId
+                    presentationRequestContent.clientId,
+                    LinkedDomainValidationFlow.PRESENTATION
                 ).toSDK().abortOnError()
                 val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
                 isRequestValid(request).abortOnError()

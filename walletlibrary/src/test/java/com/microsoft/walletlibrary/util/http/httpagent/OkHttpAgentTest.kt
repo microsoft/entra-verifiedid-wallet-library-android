@@ -66,6 +66,14 @@ class OkHttpAgentTest {
     }
 
     @Test
+    fun defaultClient_preservesRedirectBehaviorForUnrelatedRequests() {
+        val defaultClient = OkHttpAgent().client
+
+        assertThat(defaultClient.followRedirects).isTrue
+        assertThat(defaultClient.followSslRedirects).isTrue
+    }
+
+    @Test
     fun testPost_withUrlAndHeaders_shouldCallClientWithRequest() {
         // Arrange
         val request = slot<Request>()

@@ -145,7 +145,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
             walletLibraryVersionInfo = walletLibraryVersionInfo,
             httpAgent = httpAgent,
             rootOfTrustResolver = rootOfTrustResolver,
-            flightProvider = effectiveFlightProvider
+            flightProvider = effectiveFlightProvider,
+            linkedDomainValidationHardeningEnabled = false
         )
 
         val apiProvider = HttpAgentApiProvider(
