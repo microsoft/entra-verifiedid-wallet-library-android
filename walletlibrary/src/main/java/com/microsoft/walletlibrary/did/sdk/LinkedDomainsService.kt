@@ -2,6 +2,8 @@
 
 package com.microsoft.walletlibrary.did.sdk
 
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
@@ -30,8 +32,7 @@ internal class LinkedDomainsService @Inject constructor(
     private val resolver: Resolver,
     private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator,
     @Named("rootOfTrustResolver") private val rootOfTrustResolver: RootOfTrustResolver? = null,
-    @Named("linkedDomainValidationHardeningEnabled")
-    private val linkedDomainValidationHardeningEnabled: Boolean = false
+    private val flightProvider: WalletLibraryFlightProvider = WalletLibraryFlightProvider { false }
 ) {
     internal suspend fun resolveIdentifierDocument(relyingPartyDid: String): Result<IdentifierDocument> {
         return resolver.resolve(relyingPartyDid)
@@ -41,6 +42,8 @@ internal class LinkedDomainsService @Inject constructor(
         identifierDocument: IdentifierDocument,
         flow: LinkedDomainValidationFlow = LinkedDomainValidationFlow.UNKNOWN
     ): Result<LinkedDomainResult> {
+        val linkedDomainValidationHardeningEnabled =
+            flightProvider.isEnabled(WalletLibraryFlight.LinkedDomainValidationHardening)
         val validationAttempt = try {
             rootOfTrustResolver?.resolve(identifierDocument)?.let {
                 val result = it.toLinkedDomainResult()
@@ -125,6 +128,8 @@ internal class LinkedDomainsService @Inject constructor(
         domainUrls: List<String>,
         relyingPartyDid: String
     ): Result<LinkedDomainValidationAttempt> {
+        val linkedDomainValidationHardeningEnabled =
+            flightProvider.isEnabled(WalletLibraryFlight.LinkedDomainValidationHardening)
         val endpointCountBucket = LinkedDomainValidationCountBucket.from(domainUrls.size)
         if (domainUrls.isEmpty()) {
             return Result.success(
@@ -243,7 +248,7 @@ internal class LinkedDomainsService @Inject constructor(
         FetchWellKnownConfigDocumentNetworkOperation(
             domainUrl,
             apiProvider,
-            linkedDomainValidationHardeningEnabled
+            flightProvider.isEnabled(WalletLibraryFlight.LinkedDomainValidationHardening)
         ).fire()
 }
 

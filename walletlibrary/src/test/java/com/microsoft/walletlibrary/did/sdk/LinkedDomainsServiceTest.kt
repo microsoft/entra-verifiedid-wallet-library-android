@@ -2,6 +2,8 @@
 
 package com.microsoft.walletlibrary.did.sdk
 
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
@@ -32,6 +34,9 @@ import org.junit.Test
 import kotlin.Result as KotlinResult
 
 class LinkedDomainsServiceTest {
+    private val linkedDomainHardeningFlightProvider = WalletLibraryFlightProvider { flight ->
+        flight == WalletLibraryFlight.LinkedDomainValidationHardening
+    }
     private val mockedResolver: Resolver = mockk()
     private val mockedJwtValidator: JwtValidator = mockk()
     private val mockedJwtDomainLinkageCredentialValidator: JwtDomainLinkageCredentialValidator =
@@ -235,7 +240,7 @@ class LinkedDomainsServiceTest {
             mockk(relaxed = true),
             mockedResolver,
             mockedJwtDomainLinkageCredentialValidator,
-            linkedDomainValidationHardeningEnabled = true
+            flightProvider = linkedDomainHardeningFlightProvider
         )
         val identifierDocument = IdentifierDocument(id = "did:example:123").apply {
             this.service = listOf(
@@ -287,7 +292,7 @@ class LinkedDomainsServiceTest {
                 mockk(relaxed = true),
                 mockedResolver,
                 validator,
-                linkedDomainValidationHardeningEnabled = true
+                flightProvider = linkedDomainHardeningFlightProvider
             ),
             recordPrivateCalls = true
         )
@@ -411,7 +416,7 @@ class LinkedDomainsServiceTest {
                 mockk(relaxed = true),
                 mockedResolver,
                 validator,
-                linkedDomainValidationHardeningEnabled = true
+                flightProvider = linkedDomainHardeningFlightProvider
             ),
             recordPrivateCalls = true
         )
@@ -492,7 +497,7 @@ class LinkedDomainsServiceTest {
                 mockk(relaxed = true),
                 mockedResolver,
                 validator,
-                linkedDomainValidationHardeningEnabled = true
+                flightProvider = linkedDomainHardeningFlightProvider
             ),
             recordPrivateCalls = true
         )
@@ -546,7 +551,7 @@ class LinkedDomainsServiceTest {
                 mockk(relaxed = true),
                 mockedResolver,
                 validator,
-                linkedDomainValidationHardeningEnabled = true
+                flightProvider = linkedDomainHardeningFlightProvider
             ),
             recordPrivateCalls = true
         )
@@ -593,7 +598,7 @@ class LinkedDomainsServiceTest {
                 mockk(relaxed = true),
                 mockedResolver,
                 validator,
-                linkedDomainValidationHardeningEnabled = true
+                flightProvider = linkedDomainHardeningFlightProvider
             ),
             recordPrivateCalls = true
         )

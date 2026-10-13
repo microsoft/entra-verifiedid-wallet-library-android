@@ -77,10 +77,5 @@ internal interface SdkComponent {
         fun flightProvider(
             provider: WalletLibraryFlightProvider
         ): Builder
-
-        @BindsInstance
-        fun linkedDomainValidationHardeningEnabled(
-            @Named("linkedDomainValidationHardeningEnabled") enabled: Boolean
-        ): Builder
     }
 }

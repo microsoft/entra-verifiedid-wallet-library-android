@@ -136,6 +136,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
                         previewFeatureFlags.isPreviewFeatureSupported(
                             PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
                         )
+                    WalletLibraryFlight.LinkedDomainValidationHardening -> false
                 }
             }
         VerifiableCredentialSdk.init(
@@ -145,8 +146,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
             walletLibraryVersionInfo = walletLibraryVersionInfo,
             httpAgent = httpAgent,
             rootOfTrustResolver = rootOfTrustResolver,
-            flightProvider = effectiveFlightProvider,
-            linkedDomainValidationHardeningEnabled = false
+            flightProvider = effectiveFlightProvider
         )
 
         val apiProvider = HttpAgentApiProvider(

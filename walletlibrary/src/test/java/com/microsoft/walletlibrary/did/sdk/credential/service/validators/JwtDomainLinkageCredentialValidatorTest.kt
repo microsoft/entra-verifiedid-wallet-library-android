@@ -2,6 +2,8 @@
 
 package com.microsoft.walletlibrary.did.sdk.credential.service.validators
 
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.serviceResponses.LinkedDomainsResponse
 import com.microsoft.walletlibrary.did.sdk.di.defaultTestSerializer
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
@@ -15,6 +17,7 @@ import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 
@@ -33,7 +36,9 @@ class JwtDomainLinkageCredentialValidatorTest {
         jwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(
             mockedJwtValidator,
             defaultTestSerializer,
-            true
+            WalletLibraryFlightProvider { flight ->
+                flight == WalletLibraryFlight.LinkedDomainValidationHardening
+            }
         )
     }
 
@@ -97,6 +102,42 @@ class JwtDomainLinkageCredentialValidatorTest {
 
             Assertions.assertThat(result)
                 .isEqualTo(DomainLinkageCredentialValidationResult.ORIGIN_MISMATCH)
+        }
+    }
+
+    @Test
+    fun `validation reads linked domain flight state dynamically`() {
+        val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
+        val domainLinkageCredentialJwt = response.linkedDids.first()
+        var hardeningEnabled = false
+        val validator = JwtDomainLinkageCredentialValidator(
+            mockedJwtValidator,
+            defaultTestSerializer,
+            WalletLibraryFlightProvider { flight ->
+                flight == WalletLibraryFlight.LinkedDomainValidationHardening && hardeningEnabled
+            }
+        )
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
+
+        runBlocking {
+            assertThat(
+                validator.validate(
+                    domainLinkageCredentialJwt,
+                    validRpDid,
+                    "$validDomainUrl/"
+                )
+            ).isEqualTo(DomainLinkageCredentialValidationResult.ORIGIN_MISMATCH)
+
+            hardeningEnabled = true
+
+            assertThat(
+                validator.validate(
+                    domainLinkageCredentialJwt,
+                    validRpDid,
+                    "$validDomainUrl/"
+                )
+            ).isEqualTo(DomainLinkageCredentialValidationResult.VALID)
         }
     }
 
