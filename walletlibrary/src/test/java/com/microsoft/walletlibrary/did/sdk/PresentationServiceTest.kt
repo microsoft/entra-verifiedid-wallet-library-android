@@ -3,10 +3,13 @@
 package com.microsoft.walletlibrary.did.sdk
 
 import android.net.Uri
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.PresentationResponseFormatter
@@ -41,6 +44,11 @@ import kotlin.Result as KotlinResult
 
 class PresentationServiceTest {
 
+    private var presentationResponseValidationEnabled = true
+    private val flightProvider = WalletLibraryFlightProvider { flight ->
+        flight == WalletLibraryFlight.PresentationResponseDestinationValidation &&
+            presentationResponseValidationEnabled
+    }
     private val identifierService: IdentifierService = mockk()
     private val masterIdentifier: HolderIdentifier = mockk()
 
@@ -69,7 +77,8 @@ class PresentationServiceTest {
                 mockedJwtValidator,
                 presentationRequestValidator,
                 mockk(relaxed = true),
-                presentationResponseFormatter
+                presentationResponseFormatter,
+                flightProvider
             ),
             recordPrivateCalls = true
         )
@@ -330,6 +339,76 @@ class PresentationServiceTest {
                     LinkedDomainValidationFlow.PRESENTATION
                 )
             }
+        }
+    }
+
+    @Test
+    fun `test request param preserves signer behavior when response validation is disabled`() {
+        presentationResponseValidationEnabled = false
+        val mockUri = mockk<Uri>()
+        mockIdentifierAndLinkedDomains()
+        every { presentationService["verifyUri"](suppliedOpenIdUrl) } returns mockUri
+        every { mockUri.getQueryParameter("request") } returns expectedPresentationRequestJwt
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coJustRun { presentationRequestValidator.validate(any()) }
+
+        runBlocking {
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl, emptyList())
+
+            assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
+            assertThat((actualRequest as Result.Success).payload.responseUrl)
+                .isEqualTo(actualRequest.payload.content.redirectUrl)
+            verify(exactly = 0) {
+                mockedJwtValidator.validateDidInHeaderAndPayload(any(), any())
+            }
+        }
+    }
+
+    @Test
+    fun `test request validation preserves unverified destination when response validation is disabled`() {
+        presentationResponseValidationEnabled = false
+        val requestContent = defaultTestSerializer.decodeFromString(
+            PresentationRequestContent.serializer(),
+            expectedPresentationRequestString.replace(
+                "https://4820-192-182-155-160.ngrok.io",
+                "http://10.0.0.5"
+            )
+        )
+        coEvery {
+            linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                requestContent.clientId,
+                LinkedDomainValidationFlow.PRESENTATION
+            )
+        } returns KotlinResult.success<LinkedDomainResult>(LinkedDomainMissing)
+        coJustRun { presentationRequestValidator.validate(any()) }
+
+        runBlocking {
+            val actualRequest = presentationService.validateRequest(requestContent)
+
+            assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
+            assertThat((actualRequest as Result.Success).payload.responseUrl)
+                .isEqualTo(requestContent.redirectUrl)
+        }
+    }
+
+    @Test
+    fun `test request validation rejects unverified destination when response validation is enabled`() {
+        val requestContent = defaultTestSerializer.decodeFromString(
+            PresentationRequestContent.serializer(),
+            expectedPresentationRequestString
+        )
+        coEvery {
+            linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                requestContent.clientId,
+                LinkedDomainValidationFlow.PRESENTATION
+            )
+        } returns KotlinResult.success<LinkedDomainResult>(LinkedDomainMissing)
+
+        runBlocking {
+            val actualRequest = presentationService.validateRequest(requestContent)
+
+            assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
+            coVerify(exactly = 0) { presentationRequestValidator.validate(any()) }
         }
     }
 

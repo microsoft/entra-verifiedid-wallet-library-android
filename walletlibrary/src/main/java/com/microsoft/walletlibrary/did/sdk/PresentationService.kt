@@ -3,8 +3,11 @@
 package com.microsoft.walletlibrary.did.sdk
 
 import android.net.Uri
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.PresentationResponseFormatter
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
@@ -37,7 +40,8 @@ internal class PresentationService @Inject constructor(
     private val jwtValidator: JwtValidator,
     private val presentationRequestValidator: PresentationRequestValidator,
     private val apiProvider: HttpAgentApiProvider,
-    private val presentationResponseFormatter: PresentationResponseFormatter
+    private val presentationResponseFormatter: PresentationResponseFormatter,
+    private val flightProvider: WalletLibraryFlightProvider
 ) {
 
     suspend fun getRequest(stringUri: String, preferHeaders: List<String>): Result<PresentationRequest> {
@@ -57,10 +61,7 @@ internal class PresentationService @Inject constructor(
                     presentationRequestContent.clientId,
                     LinkedDomainValidationFlow.PRESENTATION
                 ).toSDK().abortOnError()
-                val responseUrl = PresentationResponseEndpointValidator.validate(
-                    presentationRequestContent.redirectUrl,
-                    linkedDomainResult
-                )
+                val responseUrl = responseUrl(presentationRequestContent.redirectUrl, linkedDomainResult)
                 val request = PresentationRequest(
                     presentationRequestContent,
                     linkedDomainResult,
@@ -107,7 +108,10 @@ internal class PresentationService @Inject constructor(
     }
 
     private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(jwsTokenString: String): Result<PresentationRequestContent> {
-        return verifyAndUnwrapPresentationRequest(jwsTokenString, validateSignerDid = true)
+        return verifyAndUnwrapPresentationRequest(
+            jwsTokenString,
+            validateSignerDid = isPresentationResponseValidationEnabled()
+        )
     }
 
     private suspend fun verifyAndUnwrapPresentationRequest(
@@ -170,7 +174,7 @@ internal class PresentationService @Inject constructor(
                 expiryInSeconds = expiryInSeconds
             )
             return SendPresentationResponsesNetworkOperation(
-                presentationRequest.responseUrl,
+                responseUrl(presentationRequest),
                 idToken,
                 vpToken,
                 presentationRequest.content.state,
@@ -185,7 +189,7 @@ internal class PresentationService @Inject constructor(
                 expiryInSeconds = expiryInSeconds
             )
             return SendPresentationResponseNetworkOperation(
-                presentationRequest.responseUrl,
+                responseUrl(presentationRequest),
                 idToken,
                 vpToken,
                 presentationRequest.content.state,
@@ -194,4 +198,20 @@ internal class PresentationService @Inject constructor(
             ).fire().toSDK()
         }
     }
+
+    private fun responseUrl(presentationRequest: PresentationRequest): String =
+        responseUrl(presentationRequest.content.redirectUrl, presentationRequest.linkedDomainResult)
+
+    private fun responseUrl(
+        redirectUrl: String,
+        linkedDomainResult: LinkedDomainResult
+    ): String =
+        if (isPresentationResponseValidationEnabled()) {
+            PresentationResponseEndpointValidator.validate(redirectUrl, linkedDomainResult)
+        } else {
+            redirectUrl
+        }
+
+    private fun isPresentationResponseValidationEnabled(): Boolean =
+        flightProvider.isEnabled(WalletLibraryFlight.PresentationResponseDestinationValidation)
 }

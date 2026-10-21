@@ -5,6 +5,8 @@
 
 package com.microsoft.walletlibrary.requests
 
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.did.sdk.PresentationResponseEndpointValidator
 import com.microsoft.walletlibrary.networking.entities.EmptyResponse
 import com.microsoft.walletlibrary.networking.operations.PostVerifiablePresentationNetworkOperation
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
@@ -94,7 +96,7 @@ internal class OpenIdPresentationRequest(
         )
 
         PostVerifiablePresentationNetworkOperation(
-            request.presentationRequest.responseUrl,
+            responseUrl(),
             idToken,
             vpTokens,
             request.presentationRequest.content.state,
@@ -116,6 +118,19 @@ internal class OpenIdPresentationRequest(
             VerifiedIdExceptions.UNSPECIFIED_EXCEPTION.value
         )
     }
+
+    private fun responseUrl(): String =
+        if (libraryConfiguration.isFlightEnabled(
+                WalletLibraryFlight.PresentationResponseDestinationValidation
+            )
+        ) {
+            PresentationResponseEndpointValidator.validate(
+                request.presentationRequest.content.redirectUrl,
+                request.presentationRequest.linkedDomainResult
+            )
+        } else {
+            request.presentationRequest.content.redirectUrl
+        }
 
     private suspend fun sendPresentationRequestDeprecated(): SuccessfulCompletionResult {
         return runBlocking {

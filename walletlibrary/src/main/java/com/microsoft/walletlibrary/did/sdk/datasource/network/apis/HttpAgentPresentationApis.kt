@@ -1,5 +1,7 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.network.apis
 
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.util.Constants as WalletConstants
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
@@ -16,6 +18,7 @@ import com.microsoft.walletlibrary.util.http.httpagent.SecurePresentationRespons
 internal class HttpAgentPresentationApis(
     private val agent: IHttpAgent,
     private val httpAgentUtils: HttpAgentUtils,
+    private val flightProvider: WalletLibraryFlightProvider,
     private val responseAgent: PresentationResponseHttpAgent = SecurePresentationResponseHttpAgent()
 ) {
 
@@ -43,7 +46,7 @@ internal class HttpAgentPresentationApis(
                 "state" to state
             )
         )
-        return responseAgent.post(
+        return postResponse(
             overrideUrl,
             httpAgentUtils.combineMaps(
                 additionalHeaders,
@@ -65,7 +68,7 @@ internal class HttpAgentPresentationApis(
             "vp_token" to vpToken,
             "state" to state
         ))
-        return responseAgent.post(
+        return postResponse(
             overrideUrl,
             httpAgentUtils.combineMaps(
                 additionalHeaders,
@@ -74,4 +77,15 @@ internal class HttpAgentPresentationApis(
             body
         )
     }
+
+    private suspend fun postResponse(
+        url: String,
+        headers: Map<String, String>,
+        body: ByteArray
+    ): Result<IResponse> =
+        if (flightProvider.isEnabled(WalletLibraryFlight.PresentationResponseDestinationValidation)) {
+            responseAgent.post(url, headers, body)
+        } else {
+            agent.post(url, headers, body)
+        }
 }

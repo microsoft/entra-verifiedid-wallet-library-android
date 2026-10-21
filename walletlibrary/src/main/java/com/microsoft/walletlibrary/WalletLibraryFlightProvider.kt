@@ -7,7 +7,8 @@ package com.microsoft.walletlibrary
  */
 enum class WalletLibraryFlight {
     UseLegacyDidResolver,
-    LinkedDomainValidationHardening
+    LinkedDomainValidationHardening,
+    PresentationResponseDestinationValidation
 }
 
 /**
