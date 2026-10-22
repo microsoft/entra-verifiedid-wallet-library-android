@@ -38,11 +38,12 @@ internal object PresentationResponseEndpointValidator {
     }
 
     private fun parseHttpsUri(value: String, allowPathAndQuery: Boolean): URI {
-        val uri = try {
+        val parsedUri = try {
             URI(value)
         } catch (exception: Exception) {
             throw PresentationException("Presentation response destination is invalid.", exception)
         }
+        val uri = normalizeInternationalizedHost(parsedUri)
         if (!uri.isAbsolute ||
             !uri.scheme.equals("https", ignoreCase = true) ||
             uri.rawAuthority.isNullOrBlank() ||
@@ -58,6 +59,47 @@ internal object PresentationResponseEndpointValidator {
             throw PresentationException("Presentation response destination must be an absolute HTTPS URL.")
         }
         return uri
+    }
+
+    private fun normalizeInternationalizedHost(uri: URI): URI {
+        if (!uri.host.isNullOrBlank() || uri.rawAuthority.isNullOrBlank()) {
+            return uri
+        }
+        val authority = uri.rawAuthority
+        if (authority.contains("@") || authority.startsWith("[")) {
+            return uri
+        }
+        val portSeparator = authority.lastIndexOf(':')
+        val host = if (portSeparator == -1) authority else authority.substring(0, portSeparator)
+        val port = if (portSeparator == -1) "" else authority.substring(portSeparator)
+        if (host.isBlank() || port.isNotEmpty() && port.drop(1).toIntOrNull() == null) {
+            return uri
+        }
+        val asciiHost = try {
+            IDN.toASCII(host)
+        } catch (exception: IllegalArgumentException) {
+            return uri
+        }
+        val normalizedValue = buildString {
+            append(uri.scheme)
+            append("://")
+            append(asciiHost)
+            append(port)
+            append(uri.rawPath.orEmpty())
+            uri.rawQuery?.let {
+                append('?')
+                append(it)
+            }
+            uri.rawFragment?.let {
+                append('#')
+                append(it)
+            }
+        }
+        return try {
+            URI(normalizedValue)
+        } catch (exception: Exception) {
+            uri
+        }
     }
 
     private fun canonicalHost(uri: URI): String =

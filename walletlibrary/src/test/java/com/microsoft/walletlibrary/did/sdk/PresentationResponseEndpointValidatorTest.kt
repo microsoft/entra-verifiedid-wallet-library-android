@@ -32,6 +32,42 @@ class PresentationResponseEndpointValidatorTest {
     }
 
     @Test
+    fun validate_matchingInternationalizedDomain_returnsAsciiEndpoint() {
+        val endpoint = PresentationResponseEndpointValidator.validate(
+            "https://bücher.example/callback",
+            LinkedDomainVerified("bücher.example", "https://bücher.example")
+        )
+
+        assertThat(endpoint).isEqualTo("https://xn--bcher-kva.example/callback")
+    }
+
+    @Test
+    fun validate_matchingPublicIpv6_returnsEndpoint() {
+        val endpoint = PresentationResponseEndpointValidator.validate(
+            "https://[2606:4700:4700::1111]/callback",
+            LinkedDomainVerified(
+                "2606:4700:4700::1111",
+                "https://[2606:4700:4700::1111]"
+            )
+        )
+
+        assertThat(endpoint).isEqualTo("https://[2606:4700:4700::1111]/callback")
+    }
+
+    @Test
+    fun validate_publicIpv4EmbeddedInNat64Address_returnsEndpoint() {
+        val endpoint = PresentationResponseEndpointValidator.validate(
+            "https://[64:ff9b::808:808]/callback",
+            LinkedDomainVerified(
+                "64:ff9b::808:808",
+                "https://[64:ff9b::808:808]"
+            )
+        )
+
+        assertThat(endpoint).isEqualTo("https://[64:ff9b::808:808]/callback")
+    }
+
+    @Test
     fun validate_customResolverEndpointWithPath_returnsEndpoint() {
         val linkedDomain = RootOfTrust(
             "https://verifier.example/.well-known/did-configuration.json",
