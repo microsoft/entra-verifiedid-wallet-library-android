@@ -61,10 +61,7 @@ internal class PresentationService @Inject constructor(
                     presentationRequestContent.clientId,
                     LinkedDomainValidationFlow.PRESENTATION
                 ).toSDK().abortOnError()
-                val request = PresentationRequest(
-                    presentationRequestContent,
-                    linkedDomainResult
-                )
+                val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
                 isRequestValid(request).abortOnError()
                 Result.Success(request)
             }
