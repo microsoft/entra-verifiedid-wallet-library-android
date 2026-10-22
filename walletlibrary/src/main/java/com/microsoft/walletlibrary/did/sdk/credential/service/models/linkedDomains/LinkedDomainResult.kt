@@ -14,6 +14,7 @@ internal open class LinkedDomainResult
 internal class LinkedDomainVerified(
     val domainUrl: String,
     val origin: String? = null,
+    /** Retains the verified origin, including its port, without changing the serialized model. */
     @Transient internal val validatedOrigin: String? = null
 ) : LinkedDomainResult()
 
