@@ -2,7 +2,6 @@ package com.microsoft.walletlibrary.util.http.httpagent
 
 import okhttp3.Call
 import okhttp3.Callback
-import okhttp3.Dns
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -10,9 +9,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.IOException
-import java.net.InetAddress
-import java.net.Proxy
-import java.net.UnknownHostException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -24,8 +20,6 @@ internal class SecurePresentationResponseHttpAgent(
     internal val client: OkHttpClient = OkHttpClient.Builder()
         .followRedirects(false)
         .followSslRedirects(false)
-        .proxy(Proxy.NO_PROXY)
-        .dns(PublicNetworkDns(Dns.SYSTEM))
         .build()
 ) : PresentationResponseHttpAgent {
     override suspend fun post(
@@ -83,15 +77,5 @@ internal class SecurePresentationResponseHttpAgent(
         } else {
             Result.failure(result.toNetworkingException())
         }
-    }
-}
-
-internal class PublicNetworkDns(private val delegate: Dns) : Dns {
-    override fun lookup(hostname: String): List<InetAddress> {
-        val addresses = delegate.lookup(hostname)
-        if (addresses.isEmpty() || addresses.any { !PublicNetworkAddressValidator.isPublic(it) }) {
-            throw UnknownHostException("Presentation response destination must resolve only to public addresses")
-        }
-        return addresses
     }
 }

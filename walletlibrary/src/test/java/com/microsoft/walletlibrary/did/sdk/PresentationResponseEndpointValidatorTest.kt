@@ -18,7 +18,7 @@ class PresentationResponseEndpointValidatorTest {
             LinkedDomainVerified("verifier.example", "https://verifier.example")
         )
 
-        assertThat(endpoint).isEqualTo("https://VERIFIER.example:443/presentation/callback?request=123")
+        assertThat(endpoint).isEqualTo("https://verifier.example/presentation/callback?request=123")
     }
 
     @Test
@@ -68,6 +68,16 @@ class PresentationResponseEndpointValidatorTest {
     }
 
     @Test
+    fun validate_matchingPrivateIpLiteral_returnsEndpoint() {
+        val endpoint = PresentationResponseEndpointValidator.validate(
+            "https://10.0.0.5/callback",
+            LinkedDomainVerified("10.0.0.5", "https://10.0.0.5")
+        )
+
+        assertThat(endpoint).isEqualTo("https://10.0.0.5/callback")
+    }
+
+    @Test
     fun validate_customResolverEndpointWithPath_returnsEndpoint() {
         val linkedDomain = RootOfTrust(
             "https://verifier.example/.well-known/did-configuration.json",
@@ -94,17 +104,20 @@ class PresentationResponseEndpointValidatorTest {
 
     @Test
     fun validate_subdomainsOfVerifiedOrigin_returnEndpoint() {
-        listOf(
-            "https://api.verifier.example/callback",
-            "https://westus.api.verifier.example/callback",
-            "https://API.VERIFIER.EXAMPLE./callback"
-        ).forEach { endpoint ->
+        mapOf(
+            "https://api.verifier.example/callback" to
+                "https://api.verifier.example/callback",
+            "https://westus.api.verifier.example/callback" to
+                "https://westus.api.verifier.example/callback",
+            "https://API.VERIFIER.EXAMPLE./callback" to
+                "https://api.verifier.example./callback"
+        ).forEach { (endpoint, expectedEndpoint) ->
             assertThat(
                 PresentationResponseEndpointValidator.validate(
                     endpoint,
                     LinkedDomainVerified("verifier.example", "https://VERIFIER.EXAMPLE.")
                 )
-            ).isEqualTo(endpoint)
+            ).isEqualTo(expectedEndpoint)
         }
     }
 
@@ -177,24 +190,4 @@ class PresentationResponseEndpointValidatorTest {
         }
     }
 
-    @Test
-    fun validate_privateAndLoopbackIpLiterals_throwPresentationException() {
-        listOf(
-            "10.0.0.5",
-            "127.0.0.1",
-            "169.254.169.254",
-            "192.168.1.1",
-            "::1",
-            "fc00::1",
-            "fe80::1"
-        ).forEach { host ->
-            val formattedHost = if (host.contains(":")) "[$host]" else host
-            assertThatThrownBy {
-                PresentationResponseEndpointValidator.validate(
-                    "https://$formattedHost/callback",
-                    LinkedDomainVerified(host, "https://$formattedHost")
-                )
-            }.isInstanceOf(PresentationException::class.java)
-        }
-    }
 }

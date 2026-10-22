@@ -33,8 +33,7 @@ internal class IssuanceRequest(
 @Serializable
 internal class PresentationRequest(
     val content: PresentationRequestContent,
-    override val linkedDomainResult: LinkedDomainResult,
-    val responseUrl: String = content.redirectUrl
+    override val linkedDomainResult: LinkedDomainResult
 ) : Request(content.registration.clientName, content.clientId) {
     fun getPresentationDefinitions(): List<PresentationDefinition> {
         return content.claims.vpTokensInRequest.map { it.presentationDefinition }

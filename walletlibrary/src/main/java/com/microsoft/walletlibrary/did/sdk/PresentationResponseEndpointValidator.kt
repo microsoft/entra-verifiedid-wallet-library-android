@@ -3,127 +3,51 @@ package com.microsoft.walletlibrary.did.sdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
-import com.microsoft.walletlibrary.util.http.httpagent.PublicNetworkAddressValidator
-import java.net.IDN
-import java.net.InetAddress
-import java.net.URI
-import java.util.Locale
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 internal object PresentationResponseEndpointValidator {
     fun validate(redirectUrl: String, linkedDomainResult: LinkedDomainResult): String {
         val verifiedLinkedDomain = linkedDomainResult as? LinkedDomainVerified
             ?: throw PresentationException("Presentation response destination is not linked to a verified domain.")
-        val redirectUri = parseHttpsUri(redirectUrl, allowPathAndQuery = true)
+        val redirectEndpoint = parseHttpsUrl(redirectUrl)
         val linkedDomainValue = verifiedLinkedDomain.origin
             ?: verifiedLinkedDomain.validatedOrigin
             ?: verifiedLinkedDomain.domainUrl
-        val linkedDomainUri = parseHttpsUri(
-            if (linkedDomainValue.contains("://")) linkedDomainValue else "https://$linkedDomainValue",
-            allowPathAndQuery = true
+        val linkedDomainEndpoint = parseHttpsUrl(
+            if (linkedDomainValue.contains("://")) linkedDomainValue else "https://$linkedDomainValue"
         )
 
-        if (!hasMatchingDestination(redirectUri, linkedDomainUri)) {
+        if (!hasMatchingDestination(redirectEndpoint, linkedDomainEndpoint)) {
             throw PresentationException("Presentation response destination does not match the verified domain.")
         }
-        rejectNonPublicIpLiteral(redirectUri.host)
-        return redirectUri.toASCIIString()
+        return redirectEndpoint.toString()
     }
 
-    private fun hasMatchingDestination(redirectUri: URI, linkedDomainUri: URI): Boolean {
-        val redirectHost = canonicalHost(redirectUri)
-        val linkedDomainHost = canonicalHost(linkedDomainUri)
+    private fun hasMatchingDestination(
+        redirectEndpoint: HttpUrl,
+        linkedDomainEndpoint: HttpUrl
+    ): Boolean {
+        val redirectHost = redirectEndpoint.host.trimEnd('.')
+        val linkedDomainHost = linkedDomainEndpoint.host.trimEnd('.')
         val hasMatchingHost = redirectHost == linkedDomainHost ||
             (!isIpLiteral(linkedDomainHost) && redirectHost.endsWith(".$linkedDomainHost"))
-        return hasMatchingHost && effectivePort(redirectUri) == effectivePort(linkedDomainUri)
+        return hasMatchingHost && redirectEndpoint.port == linkedDomainEndpoint.port
     }
 
-    private fun parseHttpsUri(value: String, allowPathAndQuery: Boolean): URI {
-        val parsedUri = try {
-            URI(value)
-        } catch (exception: Exception) {
-            throw PresentationException("Presentation response destination is invalid.", exception)
-        }
-        val uri = normalizeInternationalizedHost(parsedUri)
-        if (!uri.isAbsolute ||
-            !uri.scheme.equals("https", ignoreCase = true) ||
-            uri.rawAuthority.isNullOrBlank() ||
-            uri.rawUserInfo != null ||
-            uri.host.isNullOrBlank() ||
-            uri.rawFragment != null ||
-            uri.port < -1 ||
-            uri.port > 65535 ||
-            uri.port == 0 ||
-            (!allowPathAndQuery &&
-                (!uri.rawPath.isNullOrEmpty() && uri.rawPath != "/" || uri.rawQuery != null))
+    private fun parseHttpsUrl(value: String): HttpUrl {
+        val url = value.toHttpUrlOrNull()
+        if (url == null ||
+            !url.isHttps ||
+            url.username.isNotEmpty() ||
+            url.password.isNotEmpty() ||
+            url.fragment != null
         ) {
             throw PresentationException("Presentation response destination must be an absolute HTTPS URL.")
         }
-        return uri
+        return url
     }
-
-    private fun normalizeInternationalizedHost(uri: URI): URI {
-        if (!uri.host.isNullOrBlank() || uri.rawAuthority.isNullOrBlank()) {
-            return uri
-        }
-        val authority = uri.rawAuthority
-        if (authority.contains("@") || authority.startsWith("[")) {
-            return uri
-        }
-        val portSeparator = authority.lastIndexOf(':')
-        val host = if (portSeparator == -1) authority else authority.substring(0, portSeparator)
-        val port = if (portSeparator == -1) "" else authority.substring(portSeparator)
-        if (host.isBlank() || port.isNotEmpty() && port.drop(1).toIntOrNull() == null) {
-            return uri
-        }
-        val asciiHost = try {
-            IDN.toASCII(host)
-        } catch (exception: IllegalArgumentException) {
-            return uri
-        }
-        val normalizedValue = buildString {
-            append(uri.scheme)
-            append("://")
-            append(asciiHost)
-            append(port)
-            append(uri.rawPath.orEmpty())
-            uri.rawQuery?.let {
-                append('?')
-                append(it)
-            }
-            uri.rawFragment?.let {
-                append('#')
-                append(it)
-            }
-        }
-        return try {
-            URI(normalizedValue)
-        } catch (exception: Exception) {
-            uri
-        }
-    }
-
-    private fun canonicalHost(uri: URI): String =
-        uri.host
-            .trimEnd('.')
-            .lowercase(Locale.ROOT)
-            .let { host -> if (host.contains(":")) host else IDN.toASCII(host) }
-
-    private fun effectivePort(uri: URI): Int = if (uri.port == -1) 443 else uri.port
 
     private fun isIpLiteral(host: String): Boolean =
         host.contains(":") || host.matches(Regex("^[0-9.]+$"))
-
-    private fun rejectNonPublicIpLiteral(host: String) {
-        if (!isIpLiteral(host)) {
-            return
-        }
-        val address = try {
-            InetAddress.getByName(host)
-        } catch (exception: Exception) {
-            throw PresentationException("Presentation response destination contains an invalid IP address.", exception)
-        }
-        if (!PublicNetworkAddressValidator.isPublic(address)) {
-            throw PresentationException("Presentation response destination must use a public address.")
-        }
-    }
 }

@@ -357,8 +357,6 @@ class PresentationServiceTest {
             val actualRequest = presentationService.getRequest(suppliedOpenIdUrl, emptyList())
 
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
-            assertThat((actualRequest as Result.Success).payload.responseUrl)
-                .isEqualTo(actualRequest.payload.content.redirectUrl)
             verify(exactly = 0) {
                 mockedJwtValidator.validateDidInHeaderAndPayload(any(), any())
             }
@@ -387,8 +385,11 @@ class PresentationServiceTest {
             val actualRequest = presentationService.getRequest(suppliedOpenIdUrl, emptyList())
 
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
-            assertThat((actualRequest as Result.Success).payload.responseUrl)
-                .isEqualTo("https://issuance-callback.example/v1.0/e1f66f2e-c050-4308-81b3-3d7ea7ef3b1b/verifiablecredentials/present")
+            assertThat((actualRequest as Result.Success).payload.content.redirectUrl)
+                .isEqualTo(
+                    "https://issuance-callback.example/v1.0/" +
+                        "e1f66f2e-c050-4308-81b3-3d7ea7ef3b1b/verifiablecredentials/present"
+                )
             verify(exactly = 0) {
                 mockedJwtValidator.validateDidInHeaderAndPayload(any(), any())
             }
@@ -417,7 +418,7 @@ class PresentationServiceTest {
             val actualRequest = presentationService.validateRequest(requestContent)
 
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
-            assertThat((actualRequest as Result.Success).payload.responseUrl)
+            assertThat((actualRequest as Result.Success).payload.content.redirectUrl)
                 .isEqualTo(requestContent.redirectUrl)
         }
     }
@@ -468,7 +469,7 @@ class PresentationServiceTest {
             val actualRequest = presentationService.validateRequest(requestContent)
 
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
-            assertThat((actualRequest as Result.Success).payload.responseUrl)
+            assertThat((actualRequest as Result.Success).payload.content.redirectUrl)
                 .isEqualTo(requestContent.redirectUrl)
         }
     }
