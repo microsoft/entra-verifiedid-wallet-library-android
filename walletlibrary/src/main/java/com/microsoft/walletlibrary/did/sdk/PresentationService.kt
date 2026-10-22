@@ -61,11 +61,9 @@ internal class PresentationService @Inject constructor(
                     presentationRequestContent.clientId,
                     LinkedDomainValidationFlow.PRESENTATION
                 ).toSDK().abortOnError()
-                val responseUrl = responseUrl(presentationRequestContent, linkedDomainResult)
                 val request = PresentationRequest(
                     presentationRequestContent,
-                    linkedDomainResult,
-                    responseUrl
+                    linkedDomainResult
                 )
                 isRequestValid(request).abortOnError()
                 Result.Success(request)
@@ -152,12 +150,16 @@ internal class PresentationService @Inject constructor(
         presentationRequest: PresentationRequest,
         response: List<PresentationResponse>,
         additionalHeaders: Map<String, String>,
-        libraryConfiguration: LibraryConfiguration
+        libraryConfiguration: LibraryConfiguration,
+        linkedDomainResult: LinkedDomainResult? = null
     ): Result<Unit> {
         return runResultTry {
             logTime("Presentation sendResponse") {
                 val identifier = libraryConfiguration.identifierFactory.getIdentifier()
-                formAndSendResponse(presentationRequest, response, identifier, additionalHeaders).abortOnError()
+                val responseRequest = linkedDomainResult?.let {
+                    PresentationRequest(presentationRequest.content, it)
+                } ?: presentationRequest
+                formAndSendResponse(responseRequest, response, identifier, additionalHeaders).abortOnError()
             }
             Result.Success(Unit)
         }

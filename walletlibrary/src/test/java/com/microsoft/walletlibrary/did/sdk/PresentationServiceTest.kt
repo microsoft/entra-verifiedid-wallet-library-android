@@ -423,7 +423,7 @@ class PresentationServiceTest {
     }
 
     @Test
-    fun `test request validation rejects unverified destination when response validation is enabled`() {
+    fun `test request validation defers unverified destination check until completion`() {
         val requestContent = defaultTestSerializer.decodeFromString(
             PresentationRequestContent.serializer(),
             expectedPresentationRequestString
@@ -434,12 +434,13 @@ class PresentationServiceTest {
                 LinkedDomainValidationFlow.PRESENTATION
             )
         } returns KotlinResult.success<LinkedDomainResult>(LinkedDomainMissing)
+        coJustRun { presentationRequestValidator.validate(any()) }
 
         runBlocking {
             val actualRequest = presentationService.validateRequest(requestContent)
 
-            assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
-            coVerify(exactly = 0) { presentationRequestValidator.validate(any()) }
+            assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
+            coVerify(exactly = 1) { presentationRequestValidator.validate(any()) }
         }
     }
 

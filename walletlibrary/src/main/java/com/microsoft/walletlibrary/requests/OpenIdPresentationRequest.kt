@@ -7,6 +7,9 @@ package com.microsoft.walletlibrary.requests
 
 import com.microsoft.walletlibrary.WalletLibraryFlight
 import com.microsoft.walletlibrary.did.sdk.PresentationResponseEndpointValidator
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
+import com.microsoft.walletlibrary.mappings.toLinkedDomainResult
+import com.microsoft.walletlibrary.mappings.toRootOfTrust
 import com.microsoft.walletlibrary.networking.entities.EmptyResponse
 import com.microsoft.walletlibrary.networking.operations.PostVerifiablePresentationNetworkOperation
 import com.microsoft.walletlibrary.requests.rawrequests.OpenIdProcessedRequest
@@ -119,27 +122,49 @@ internal class OpenIdPresentationRequest(
         )
     }
 
-    private fun responseUrl(): String =
+    internal fun responseUrl(): String =
         if (libraryConfiguration.isFlightEnabled(
                 WalletLibraryFlight.PresentationResponseDestinationValidation
             )
         ) {
             PresentationResponseEndpointValidator.validate(
                 request.presentationRequest.content.redirectUrl,
-                request.presentationRequest.linkedDomainResult
+                responseLinkedDomainResult()
             )
         } else {
             request.presentationRequest.content.redirectUrl
         }
 
+    private fun responseLinkedDomainResult(): LinkedDomainResult {
+        val originalResult = request.presentationRequest.linkedDomainResult
+        return if (rootOfTrust == originalResult.toRootOfTrust()) {
+            originalResult
+        } else {
+            rootOfTrust.toLinkedDomainResult()
+        }
+    }
+
     private suspend fun sendPresentationRequestDeprecated(): SuccessfulCompletionResult {
         return runBlocking {
-            OpenIdResponder.sendPresentationResponse(
-                request.presentationRequest,
-                requirement,
-                additionalHeaders,
-                libraryConfiguration
-            )
+            if (libraryConfiguration.isFlightEnabled(
+                    WalletLibraryFlight.PresentationResponseDestinationValidation
+                )
+            ) {
+                OpenIdResponder.sendPresentationResponse(
+                    request.presentationRequest,
+                    requirement,
+                    additionalHeaders,
+                    libraryConfiguration,
+                    responseLinkedDomainResult()
+                )
+            } else {
+                OpenIdResponder.sendPresentationResponse(
+                    request.presentationRequest,
+                    requirement,
+                    additionalHeaders,
+                    libraryConfiguration
+                )
+            }
             EmptyResponse()
         }
     }
