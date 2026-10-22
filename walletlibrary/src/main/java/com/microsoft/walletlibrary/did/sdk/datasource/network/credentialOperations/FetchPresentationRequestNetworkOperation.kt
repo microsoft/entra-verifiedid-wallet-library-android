@@ -35,6 +35,7 @@ internal class FetchPresentationRequestNetworkOperation(
         val presentationRequestContent = serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
+        // Request-URI signer validation predates presentation response destination validation.
         if (!jwtValidator.validateDidInHeaderAndPayload(jwsToken, presentationRequestContent.clientId))
             throw DidInHeaderAndPayloadNotMatching("DID used to sign the presentation request doesn't match the DID in presentation request.")
         return Result.success(presentationRequestContent)

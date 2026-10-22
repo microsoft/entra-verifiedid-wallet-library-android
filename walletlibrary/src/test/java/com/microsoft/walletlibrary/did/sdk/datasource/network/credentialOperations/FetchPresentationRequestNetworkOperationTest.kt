@@ -3,14 +3,18 @@ package com.microsoft.walletlibrary.did.sdk.datasource.network.credentialOperati
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.DidInHeaderAndPayloadNotMatching
 import com.microsoft.walletlibrary.util.defaultTestSerializer
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.After
 import org.junit.Test
 
 class FetchPresentationRequestNetworkOperationTest {
@@ -131,6 +135,11 @@ class FetchPresentationRequestNetworkOperationTest {
   }
 }"""
 
+    @After
+    fun tearDown() {
+        unmockkObject(JwsToken.Companion)
+    }
+
     @Test
     fun fetchPresentationRequestNetworkOperation_withTwoVPTokens_SucceedsToResolvePresentationRequestContent() {
         // Arrange
@@ -166,5 +175,38 @@ class FetchPresentationRequestNetworkOperationTest {
             assertThat(unwrapped.clientId).isEqualTo(expectedClientId)
             assertThat(unwrapped.claims.vpTokensInRequest.size).isEqualTo(2)
         }
+    }
+
+    @Test
+    fun requestUri_pureIssuance_preservesExistingSignerValidation() {
+        val apiProvider: HttpAgentApiProvider = mockk {
+            every { presentationApis } returns mockk {
+                coEvery { getRequest(any(), any()) } returns Result.success(
+                    IResponse(200, emptyMap(), "token".toByteArray())
+                )
+            }
+        }
+        val jwtValidator: JwtValidator = mockk {
+            coEvery { this@mockk.verifySignature(any()) } returns true
+            every { this@mockk.validateDidInHeaderAndPayload(any(), any()) } returns false
+        }
+        mockkObject(JwsToken.Companion)
+        every { JwsToken.deserialize(any()) } returns mockk {
+            every { content() } returns expectedPresentationRequestWithTwoVPTokens.replace(
+                "\"scope\": \"openid\",",
+                "\"scope\": \"openid\", \"prompt\": \"create\","
+            )
+        }
+        val operation = FetchPresentationRequestNetworkOperation(
+            "",
+            emptyList(),
+            apiProvider,
+            jwtValidator,
+            defaultTestSerializer
+        )
+
+        assertThatThrownBy {
+            runBlocking { operation.fire() }
+        }.isInstanceOf(DidInHeaderAndPayloadNotMatching::class.java)
     }
 }

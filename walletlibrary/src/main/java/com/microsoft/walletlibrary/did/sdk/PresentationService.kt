@@ -75,6 +75,7 @@ internal class PresentationService @Inject constructor(
 
     internal suspend fun validateSignedRequest(jwsTokenString: String): Result<PresentationRequest> {
         return runResultTry {
+            // Signed-request signer validation predates destination validation and remains unconditional.
             val presentationRequestContent =
                 verifyAndUnwrapPresentationRequest(jwsTokenString, validateSignerDid = true).abortOnError()
             val presentationRequest = validateRequest(presentationRequestContent).abortOnError()
@@ -108,6 +109,7 @@ internal class PresentationService @Inject constructor(
     }
 
     private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(jwsTokenString: String): Result<PresentationRequestContent> {
+        // Inline request parameters did not validate the signer before this flight.
         return verifyAndUnwrapPresentationRequest(
             jwsTokenString,
             validateSignerDid = isPresentationResponseValidationEnabled(),

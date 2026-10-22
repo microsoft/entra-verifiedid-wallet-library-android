@@ -529,7 +529,8 @@ class PresentationServiceTest {
     }
 
     @Test
-    fun `test validating signed request fails when signer does not match client id`() {
+    fun `test signed request preserves signer validation when response validation is disabled`() {
+        presentationResponseValidationEnabled = false
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         every { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns false
 
