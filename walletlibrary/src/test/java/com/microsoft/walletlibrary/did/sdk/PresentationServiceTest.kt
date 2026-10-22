@@ -29,6 +29,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationExceptio
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.nimbusds.jose.util.Base64URL
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
@@ -365,6 +366,36 @@ class PresentationServiceTest {
     }
 
     @Test
+    fun `test request param does not apply presentation validation to pure issuance`() {
+        val requestJson = expectedPresentationRequestString.replace(
+            "\"scope\": \"openid\",",
+            "\"scope\": \"openid\", \"prompt\": \"create\","
+        ).replace(
+            "https://4820-192-182-155-160.ngrok.io",
+            "https://issuance-callback.example"
+        )
+        val tokenParts = expectedPresentationRequestJwt.split(".")
+        val issuanceRequestJwt = "${tokenParts[0]}.${Base64URL.encode(requestJson)}.${tokenParts[2]}"
+        val mockUri = mockk<Uri>()
+        mockIdentifierAndLinkedDomains()
+        every { presentationService["verifyUri"](suppliedOpenIdUrl) } returns mockUri
+        every { mockUri.getQueryParameter("request") } returns issuanceRequestJwt
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coJustRun { presentationRequestValidator.validate(any()) }
+
+        runBlocking {
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl, emptyList())
+
+            assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
+            assertThat((actualRequest as Result.Success).payload.responseUrl)
+                .isEqualTo("https://issuance-callback.example/v1.0/e1f66f2e-c050-4308-81b3-3d7ea7ef3b1b/verifiablecredentials/present")
+            verify(exactly = 0) {
+                mockedJwtValidator.validateDidInHeaderAndPayload(any(), any())
+            }
+        }
+    }
+
+    @Test
     fun `test request validation preserves unverified destination when response validation is disabled`() {
         presentationResponseValidationEnabled = false
         val requestContent = defaultTestSerializer.decodeFromString(
@@ -409,6 +440,35 @@ class PresentationServiceTest {
 
             assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
             coVerify(exactly = 0) { presentationRequestValidator.validate(any()) }
+        }
+    }
+
+    @Test
+    fun `test response validation does not reject pure issuance callback`() {
+        val requestContent = defaultTestSerializer.decodeFromString(
+            PresentationRequestContent.serializer(),
+            expectedPresentationRequestString.replace(
+                "\"scope\": \"openid\",",
+                "\"scope\": \"openid\", \"prompt\": \"create\","
+            ).replace(
+                "https://4820-192-182-155-160.ngrok.io",
+                "https://issuance-callback.example"
+            )
+        )
+        coEvery {
+            linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
+                requestContent.clientId,
+                LinkedDomainValidationFlow.PRESENTATION
+            )
+        } returns KotlinResult.success<LinkedDomainResult>(LinkedDomainMissing)
+        coJustRun { presentationRequestValidator.validate(any()) }
+
+        runBlocking {
+            val actualRequest = presentationService.validateRequest(requestContent)
+
+            assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
+            assertThat((actualRequest as Result.Success).payload.responseUrl)
+                .isEqualTo(requestContent.redirectUrl)
         }
     }
 

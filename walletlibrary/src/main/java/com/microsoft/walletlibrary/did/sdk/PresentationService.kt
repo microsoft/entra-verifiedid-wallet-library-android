@@ -61,7 +61,7 @@ internal class PresentationService @Inject constructor(
                     presentationRequestContent.clientId,
                     LinkedDomainValidationFlow.PRESENTATION
                 ).toSDK().abortOnError()
-                val responseUrl = responseUrl(presentationRequestContent.redirectUrl, linkedDomainResult)
+                val responseUrl = responseUrl(presentationRequestContent, linkedDomainResult)
                 val request = PresentationRequest(
                     presentationRequestContent,
                     linkedDomainResult,
@@ -110,13 +110,15 @@ internal class PresentationService @Inject constructor(
     private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(jwsTokenString: String): Result<PresentationRequestContent> {
         return verifyAndUnwrapPresentationRequest(
             jwsTokenString,
-            validateSignerDid = isPresentationResponseValidationEnabled()
+            validateSignerDid = isPresentationResponseValidationEnabled(),
+            skipSignerValidationForPureIssuance = true
         )
     }
 
     private suspend fun verifyAndUnwrapPresentationRequest(
         jwsTokenString: String,
-        validateSignerDid: Boolean
+        validateSignerDid: Boolean,
+        skipSignerValidationForPureIssuance: Boolean = false
     ): Result<PresentationRequestContent> {
         val jwsToken = JwsToken.deserialize(jwsTokenString)
         if (!jwtValidator.verifySignature(jwsToken))
@@ -124,6 +126,7 @@ internal class PresentationService @Inject constructor(
         val presentationRequestContent =
             serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
         if (validateSignerDid &&
+            !(skipSignerValidationForPureIssuance && isPureIssuanceRequest(presentationRequestContent)) &&
             !jwtValidator.validateDidInHeaderAndPayload(jwsToken, presentationRequestContent.clientId)
         )
             throw DidInHeaderAndPayloadNotMatching(
@@ -200,17 +203,20 @@ internal class PresentationService @Inject constructor(
     }
 
     private fun responseUrl(presentationRequest: PresentationRequest): String =
-        responseUrl(presentationRequest.content.redirectUrl, presentationRequest.linkedDomainResult)
+        responseUrl(presentationRequest.content, presentationRequest.linkedDomainResult)
 
     private fun responseUrl(
-        redirectUrl: String,
+        requestContent: PresentationRequestContent,
         linkedDomainResult: LinkedDomainResult
     ): String =
-        if (isPresentationResponseValidationEnabled()) {
-            PresentationResponseEndpointValidator.validate(redirectUrl, linkedDomainResult)
+        if (isPresentationResponseValidationEnabled() && !isPureIssuanceRequest(requestContent)) {
+            PresentationResponseEndpointValidator.validate(requestContent.redirectUrl, linkedDomainResult)
         } else {
-            redirectUrl
+            requestContent.redirectUrl
         }
+
+    private fun isPureIssuanceRequest(requestContent: PresentationRequestContent): Boolean =
+        requestContent.prompt == Constants.PURE_ISSUANCE_FLOW_VALUE
 
     private fun isPresentationResponseValidationEnabled(): Boolean =
         flightProvider.isEnabled(WalletLibraryFlight.PresentationResponseDestinationValidation)

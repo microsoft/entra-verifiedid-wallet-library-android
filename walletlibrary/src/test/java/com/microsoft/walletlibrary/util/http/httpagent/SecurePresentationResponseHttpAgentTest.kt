@@ -6,8 +6,13 @@ import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import okio.Buffer
 import okio.BufferedSource
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -54,6 +59,25 @@ class SecurePresentationResponseHttpAgentTest {
                 agent.post("https://verifier.example/callback", emptyMap(), ByteArray(0))
             }
         }.isInstanceOf(IOException::class.java)
+    }
+
+    @Test
+    fun post_cancelledCoroutine_cancelsHttpCall() {
+        val call = mockk<okhttp3.Call>(relaxed = true)
+        val client = mockk<OkHttpClient>()
+        every { client.newCall(any()) } returns call
+        val agent = SecurePresentationResponseHttpAgent(client)
+
+        runBlocking {
+            val job = launch(start = CoroutineStart.UNDISPATCHED) {
+                agent.post("https://verifier.example/callback", emptyMap(), ByteArray(0))
+            }
+
+            job.cancel()
+            job.join()
+        }
+
+        verify(exactly = 1) { call.cancel() }
     }
 
     @Test

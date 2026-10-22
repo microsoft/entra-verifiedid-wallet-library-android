@@ -8,13 +8,13 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.IOException
 import java.net.InetAddress
 import java.net.Proxy
 import java.net.UnknownHostException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 internal interface PresentationResponseHttpAgent {
     suspend fun post(url: String, headers: Map<String, String>, payload: ByteArray): Result<IResponse>
@@ -39,20 +39,28 @@ internal class SecurePresentationResponseHttpAgent(
             .post(payload.toRequestBody())
             .build()
 
-        return suspendCoroutine { continuation ->
-            client.newCall(request).enqueue(object : Callback {
+        return suspendCancellableCoroutine { continuation ->
+            val call = client.newCall(request)
+            continuation.invokeOnCancellation { call.cancel() }
+            call.enqueue(object : Callback {
                 override fun onFailure(call: Call, exception: IOException) {
-                    continuation.resumeWithException(exception)
+                    if (continuation.isActive) {
+                        continuation.resumeWithException(exception)
+                    }
                 }
 
                 override fun onResponse(call: Call, response: Response) {
                     val result = try {
                         response.use { it.toResult() }
                     } catch (exception: IOException) {
-                        continuation.resumeWithException(exception)
+                        if (continuation.isActive) {
+                            continuation.resumeWithException(exception)
+                        }
                         return
                     }
-                    continuation.resume(result)
+                    if (continuation.isActive) {
+                        continuation.resume(result)
+                    }
                 }
             })
         }
