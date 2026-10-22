@@ -4,6 +4,7 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDoma
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 internal open class LinkedDomainResult
@@ -12,7 +13,8 @@ internal open class LinkedDomainResult
 @SerialName("LinkedDomainVerified")
 internal class LinkedDomainVerified(
     val domainUrl: String,
-    val origin: String? = null
+    val origin: String? = null,
+    @Transient internal val validatedOrigin: String? = null
 ) : LinkedDomainResult()
 
 @Serializable

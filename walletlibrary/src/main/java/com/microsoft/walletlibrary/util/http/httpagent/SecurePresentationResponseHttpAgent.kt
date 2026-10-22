@@ -46,7 +46,13 @@ internal class SecurePresentationResponseHttpAgent(
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    continuation.resume(response.toResult())
+                    val result = try {
+                        response.use { it.toResult() }
+                    } catch (exception: IOException) {
+                        continuation.resumeWithException(exception)
+                        return
+                    }
+                    continuation.resume(result)
                 }
             })
         }

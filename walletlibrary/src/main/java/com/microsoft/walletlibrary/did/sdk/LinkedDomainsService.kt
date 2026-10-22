@@ -200,7 +200,8 @@ internal class LinkedDomainsService @Inject constructor(
                                         domainOrigin
                                     } else {
                                         null
-                                    }
+                                    },
+                                    domainOrigin
                                 )
                             } else {
                                 LinkedDomainUnVerified(hostname)
