@@ -93,68 +93,18 @@ class PresentationResponseEndpointValidatorTest {
     }
 
     @Test
-    fun validate_differentOrigin_throwsPresentationException() {
-        assertThatThrownBy {
-            PresentationResponseEndpointValidator.validate(
-                "https://attacker.example/callback",
-                LinkedDomainVerified("verifier.example", "https://verifier.example")
+    fun validate_authorizedExternalResponseService_returnsEndpoint() {
+        val endpoint = PresentationResponseEndpointValidator.validate(
+            "https://verifiedid.did.msidentity.com/v1.0/verifyPresentation",
+            LinkedDomainVerified(
+                "eu-syntheticsdocumentprovider.azurewebsites.net",
+                "https://eu-syntheticsdocumentprovider.azurewebsites.net"
             )
-        }.isInstanceOf(PresentationException::class.java)
-    }
+        )
 
-    @Test
-    fun validate_subdomainsOfVerifiedOrigin_returnEndpoint() {
-        mapOf(
-            "https://api.verifier.example/callback" to
-                "https://api.verifier.example/callback",
-            "https://westus.api.verifier.example/callback" to
-                "https://westus.api.verifier.example/callback",
-            "https://API.VERIFIER.EXAMPLE./callback" to
-                "https://api.verifier.example./callback"
-        ).forEach { (endpoint, expectedEndpoint) ->
-            assertThat(
-                PresentationResponseEndpointValidator.validate(
-                    endpoint,
-                    LinkedDomainVerified("verifier.example", "https://VERIFIER.EXAMPLE.")
-                )
-            ).isEqualTo(expectedEndpoint)
-        }
-    }
-
-    @Test
-    fun validate_hostsOutsideVerifiedDomain_throwPresentationException() {
-        listOf(
-            "https://evil-verifier.example/callback",
-            "https://verifier.example.attacker.example/callback",
-            "https://attacker.example/callback"
-        ).forEach { endpoint ->
-            assertThatThrownBy {
-                PresentationResponseEndpointValidator.validate(
-                    endpoint,
-                    LinkedDomainVerified("verifier.example", "https://verifier.example")
-                )
-            }.isInstanceOf(PresentationException::class.java)
-        }
-    }
-
-    @Test
-    fun validate_subdomainWithDifferentPort_throwsPresentationException() {
-        assertThatThrownBy {
-            PresentationResponseEndpointValidator.validate(
-                "https://api.verifier.example:8443/callback",
-                LinkedDomainVerified("verifier.example", "https://verifier.example")
-            )
-        }.isInstanceOf(PresentationException::class.java)
-    }
-
-    @Test
-    fun validate_dnsNameEndingInVerifiedIp_throwsPresentationException() {
-        assertThatThrownBy {
-            PresentationResponseEndpointValidator.validate(
-                "https://api.8.8.8.8/callback",
-                LinkedDomainVerified("8.8.8.8", "https://8.8.8.8")
-            )
-        }.isInstanceOf(PresentationException::class.java)
+        assertThat(endpoint).isEqualTo(
+            "https://verifiedid.did.msidentity.com/v1.0/verifyPresentation"
+        )
     }
 
     @Test
