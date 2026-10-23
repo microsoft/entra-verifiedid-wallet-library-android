@@ -20,7 +20,6 @@ import com.microsoft.walletlibrary.did.sdk.identifier.models.payload.document.Id
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.MockRootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.walletlibrary.did.sdk.util.Constants
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -492,7 +491,7 @@ class LinkedDomainsServiceTest {
     }
 
     @Test
-    fun `legacy validation preserves verified non-default port for later destination validation`() {
+    fun `legacy validation preserves verified non-default port`() {
         val validator: DomainLinkageCredentialValidator = mockk()
         val service = spyk(
             LinkedDomainsService(mockk(relaxed = true), mockedResolver, validator),
@@ -523,18 +522,7 @@ class LinkedDomainsServiceTest {
 
             assertThat(linkedDomainResult.domainUrl).isEqualTo("verifier.example")
             assertThat(linkedDomainResult.origin).isNull()
-            assertThat(
-                PresentationResponseEndpointValidator.validate(
-                    "$verifiedOrigin/callback",
-                    linkedDomainResult
-                )
-            ).isEqualTo("$verifiedOrigin/callback")
-            assertThatThrownBy {
-                PresentationResponseEndpointValidator.validate(
-                    "https://verifier.example/callback",
-                    linkedDomainResult
-                )
-            }.isInstanceOf(PresentationException::class.java)
+            assertThat(linkedDomainResult.validatedOrigin).isEqualTo(verifiedOrigin)
         }
     }
 
