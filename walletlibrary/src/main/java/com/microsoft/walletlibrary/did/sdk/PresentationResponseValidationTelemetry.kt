@@ -2,7 +2,10 @@
 
 package com.microsoft.walletlibrary.did.sdk
 
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
+import com.microsoft.walletlibrary.util.MalformedInputException
 import com.microsoft.walletlibrary.util.NetworkingException
+import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.WalletLibraryLogger
 
 internal object PresentationResponseValidationTelemetry {
@@ -33,10 +36,24 @@ internal object PresentationResponseValidationTelemetry {
         )
     }
 
+    fun completionFailureReason(throwable: Throwable): Reason {
+        val causes = generateSequence(throwable) { it.cause }
+        return when {
+            causes.any { it is NetworkingException } -> Reason.NETWORK_ERROR
+            causes.any {
+                it is PresentationException ||
+                    it is MalformedInputException ||
+                    it is RequirementNotMetException
+            } -> Reason.VALIDATION_ERROR
+            else -> Reason.OTHER_ERROR
+        }
+    }
+
     enum class Stage(val value: String) {
         SIGNER_BINDING("signer_binding"),
         DESTINATION_VALIDATION("destination_validation"),
-        RESPONSE_POST("response_post")
+        RESPONSE_POST("response_post"),
+        COMPLETION("completion")
     }
 
     enum class Outcome(val value: String) {
@@ -54,6 +71,7 @@ internal object PresentationResponseValidationTelemetry {
         NON_HTTPS_URL("non_https_url"),
         URL_CREDENTIALS("url_credentials"),
         URL_FRAGMENT("url_fragment"),
+        VALIDATION_ERROR("validation_error"),
         NETWORK_ERROR("network_error"),
         OTHER_ERROR("other_error")
     }
