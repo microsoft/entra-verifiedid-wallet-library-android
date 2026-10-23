@@ -192,7 +192,16 @@ internal class LinkedDomainsService @Inject constructor(
                         LinkedDomainValidationAttempt(
                             result = if (credentialValidationResult == DomainLinkageCredentialValidationResult.VALID) {
                                 LinkedDomainVerified(
-                                    if (linkedDomainValidationHardeningEnabled) domainOrigin else hostname
+                                    if (linkedDomainValidationHardeningEnabled) domainOrigin else hostname,
+                                    if (flightProvider.isEnabled(
+                                            WalletLibraryFlight.PresentationResponseDestinationValidation
+                                        )
+                                    ) {
+                                        domainOrigin
+                                    } else {
+                                        null
+                                    },
+                                    domainOrigin
                                 )
                             } else {
                                 LinkedDomainUnVerified(hostname)

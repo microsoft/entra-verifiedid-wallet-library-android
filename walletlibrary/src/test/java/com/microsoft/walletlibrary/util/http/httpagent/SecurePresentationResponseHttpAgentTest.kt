@@ -1,0 +1,78 @@
+package com.microsoft.walletlibrary.util.http.httpagent
+
+import okhttp3.MediaType
+import okhttp3.OkHttpClient
+import okhttp3.Protocol
+import okhttp3.Response
+import okhttp3.ResponseBody
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import okio.Buffer
+import okio.BufferedSource
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.Test
+import java.io.IOException
+
+class SecurePresentationResponseHttpAgentTest {
+    @Test
+    fun secureClient_disablesRedirects() {
+        val client = SecurePresentationResponseHttpAgent().client
+
+        assertThat(client.followRedirects).isFalse
+        assertThat(client.followSslRedirects).isFalse
+    }
+
+    @Test
+    fun post_truncatedResponseBody_resumesWithException() {
+        val truncatedBody = object : ResponseBody() {
+            override fun contentType(): MediaType? = null
+
+            override fun contentLength(): Long = 2
+
+            override fun source(): BufferedSource = Buffer().writeByte(1)
+        }
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                Response.Builder()
+                    .request(chain.request())
+                    .protocol(Protocol.HTTP_1_1)
+                    .code(200)
+                    .message("OK")
+                    .body(truncatedBody)
+                    .build()
+            }
+            .build()
+        val agent = SecurePresentationResponseHttpAgent(client)
+
+        assertThatThrownBy {
+            runBlocking {
+                agent.post("https://verifier.example/callback", emptyMap(), ByteArray(0))
+            }
+        }.isInstanceOf(IOException::class.java)
+    }
+
+    @Test
+    fun post_cancelledCoroutine_cancelsHttpCall() {
+        val call = mockk<okhttp3.Call>(relaxed = true)
+        val client = mockk<OkHttpClient>()
+        every { client.newCall(any()) } returns call
+        val agent = SecurePresentationResponseHttpAgent(client)
+
+        runBlocking {
+            val job = launch(start = CoroutineStart.UNDISPATCHED) {
+                agent.post("https://verifier.example/callback", emptyMap(), ByteArray(0))
+            }
+
+            job.cancel()
+            job.join()
+        }
+
+        verify(exactly = 1) { call.cancel() }
+    }
+
+}

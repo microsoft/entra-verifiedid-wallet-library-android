@@ -1,6 +1,9 @@
 package com.microsoft.walletlibrary.requests.handlers
 
 import com.microsoft.walletlibrary.did.sdk.LinkedDomainsService
+import com.microsoft.walletlibrary.did.sdk.LinkedDomainValidationAttempt
+import com.microsoft.walletlibrary.did.sdk.LinkedDomainValidationFailureStage
+import com.microsoft.walletlibrary.did.sdk.LinkedDomainValidationSource
 import com.microsoft.walletlibrary.did.sdk.MockDidMetadata
 import com.microsoft.walletlibrary.did.sdk.MockInjectedRootOfTrustResolver
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
@@ -302,8 +305,12 @@ class SignedMetadataProcessorTest {
         mockJwsToken("${MockDidMetadata.VALID_DOMAIN_DID.value}#signingKey-1", signedMetadataTokenClaimsString)
         coEvery { IdentifierDocumentResolver.resolveIdentifierDocument(MockDidMetadata.VALID_DOMAIN_DID.value) } returns mockIdentifierDocument
         every { (mockIdentifierDocument as DidMetadata).id } returns MockDidMetadata.EMPTY_DOMAIN_DID.value
-        coEvery { linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument) } returns LinkedDomainVerified(
-            "testdomain"
+        coEvery {
+            linkedDomainsService["verifyLinkedDomainsUsingWellKnownDocument"](mockIdentifierDocument)
+        } returns LinkedDomainValidationAttempt(
+            result = LinkedDomainVerified("testdomain"),
+            source = LinkedDomainValidationSource.WELL_KNOWN,
+            failureStage = LinkedDomainValidationFailureStage.NONE
         )
 
         runBlocking {

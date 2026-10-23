@@ -3,8 +3,11 @@
 package com.microsoft.walletlibrary.did.sdk
 
 import android.net.Uri
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.PresentationResponseFormatter
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
@@ -37,7 +40,8 @@ internal class PresentationService @Inject constructor(
     private val jwtValidator: JwtValidator,
     private val presentationRequestValidator: PresentationRequestValidator,
     private val apiProvider: HttpAgentApiProvider,
-    private val presentationResponseFormatter: PresentationResponseFormatter
+    private val presentationResponseFormatter: PresentationResponseFormatter,
+    private val flightProvider: WalletLibraryFlightProvider
 ) {
 
     suspend fun getRequest(stringUri: String, preferHeaders: List<String>): Result<PresentationRequest> {
@@ -66,6 +70,7 @@ internal class PresentationService @Inject constructor(
 
     internal suspend fun validateSignedRequest(jwsTokenString: String): Result<PresentationRequest> {
         return runResultTry {
+            // Signed-request signer validation predates destination validation and remains unconditional.
             val presentationRequestContent =
                 verifyAndUnwrapPresentationRequest(jwsTokenString, validateSignerDid = true).abortOnError()
             val presentationRequest = validateRequest(presentationRequestContent).abortOnError()
@@ -99,12 +104,18 @@ internal class PresentationService @Inject constructor(
     }
 
     private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(jwsTokenString: String): Result<PresentationRequestContent> {
-        return verifyAndUnwrapPresentationRequest(jwsTokenString, validateSignerDid = false)
+        // Inline request parameters did not validate the signer before this flight.
+        return verifyAndUnwrapPresentationRequest(
+            jwsTokenString,
+            validateSignerDid = isPresentationResponseValidationEnabled(),
+            skipSignerValidationForPureIssuance = true
+        )
     }
 
     private suspend fun verifyAndUnwrapPresentationRequest(
         jwsTokenString: String,
-        validateSignerDid: Boolean
+        validateSignerDid: Boolean,
+        skipSignerValidationForPureIssuance: Boolean = false
     ): Result<PresentationRequestContent> {
         val jwsToken = JwsToken.deserialize(jwsTokenString)
         if (!jwtValidator.verifySignature(jwsToken))
@@ -112,6 +123,7 @@ internal class PresentationService @Inject constructor(
         val presentationRequestContent =
             serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
         if (validateSignerDid &&
+            !(skipSignerValidationForPureIssuance && isPureIssuanceRequest(presentationRequestContent)) &&
             !jwtValidator.validateDidInHeaderAndPayload(jwsToken, presentationRequestContent.clientId)
         )
             throw DidInHeaderAndPayloadNotMatching(
@@ -135,12 +147,16 @@ internal class PresentationService @Inject constructor(
         presentationRequest: PresentationRequest,
         response: List<PresentationResponse>,
         additionalHeaders: Map<String, String>,
-        libraryConfiguration: LibraryConfiguration
+        libraryConfiguration: LibraryConfiguration,
+        linkedDomainResult: LinkedDomainResult? = null
     ): Result<Unit> {
         return runResultTry {
             logTime("Presentation sendResponse") {
                 val identifier = libraryConfiguration.identifierFactory.getIdentifier()
-                formAndSendResponse(presentationRequest, response, identifier, additionalHeaders).abortOnError()
+                val responseRequest = linkedDomainResult?.let {
+                    PresentationRequest(presentationRequest.content, it)
+                } ?: presentationRequest
+                formAndSendResponse(responseRequest, response, identifier, additionalHeaders).abortOnError()
             }
             Result.Success(Unit)
         }
@@ -162,7 +178,7 @@ internal class PresentationService @Inject constructor(
                 expiryInSeconds = expiryInSeconds
             )
             return SendPresentationResponsesNetworkOperation(
-                presentationRequest.content.redirectUrl,
+                responseUrl(presentationRequest),
                 idToken,
                 vpToken,
                 presentationRequest.content.state,
@@ -177,7 +193,7 @@ internal class PresentationService @Inject constructor(
                 expiryInSeconds = expiryInSeconds
             )
             return SendPresentationResponseNetworkOperation(
-                presentationRequest.content.redirectUrl,
+                responseUrl(presentationRequest),
                 idToken,
                 vpToken,
                 presentationRequest.content.state,
@@ -186,4 +202,23 @@ internal class PresentationService @Inject constructor(
             ).fire().toSDK()
         }
     }
+
+    private fun responseUrl(presentationRequest: PresentationRequest): String =
+        responseUrl(presentationRequest.content, presentationRequest.linkedDomainResult)
+
+    private fun responseUrl(
+        requestContent: PresentationRequestContent,
+        linkedDomainResult: LinkedDomainResult
+    ): String =
+        if (isPresentationResponseValidationEnabled() && !isPureIssuanceRequest(requestContent)) {
+            PresentationResponseEndpointValidator.validate(requestContent.redirectUrl, linkedDomainResult)
+        } else {
+            requestContent.redirectUrl
+        }
+
+    private fun isPureIssuanceRequest(requestContent: PresentationRequestContent): Boolean =
+        requestContent.prompt == Constants.PURE_ISSUANCE_FLOW_VALUE
+
+    private fun isPresentationResponseValidationEnabled(): Boolean =
+        flightProvider.isEnabled(WalletLibraryFlight.PresentationResponseDestinationValidation)
 }

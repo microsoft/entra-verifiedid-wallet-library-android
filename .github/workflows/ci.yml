@@ -33,4 +33,4 @@ jobs:
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Run unit tests
-        run: chmod +x ./gradlew && ./gradlew :walletlibrary:testDebugUnitTest --no-daemon --stacktrace 2>&1 | tail -100
+        run: chmod +x ./gradlew && ./gradlew :walletlibrary:testDebugUnitTest --no-daemon --stacktrace

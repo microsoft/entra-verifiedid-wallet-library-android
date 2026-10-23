@@ -1,17 +1,26 @@
 package com.microsoft.walletlibrary.did.sdk.datasource.network.apis
 
+import com.microsoft.walletlibrary.WalletLibraryFlight
+import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.util.Constants as WalletConstants
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
 import com.microsoft.walletlibrary.util.http.URLFormEncoding
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
+import com.microsoft.walletlibrary.util.http.httpagent.PresentationResponseHttpAgent
+import com.microsoft.walletlibrary.util.http.httpagent.SecurePresentationResponseHttpAgent
 
 /**
  * Api class to perform presentation related network operations using the provided HttpAgent, utils
  * and json serializer to convert the network response to Presentation related model.
  */
-internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private val httpAgentUtils: HttpAgentUtils) {
+internal class HttpAgentPresentationApis(
+    private val agent: IHttpAgent,
+    private val httpAgentUtils: HttpAgentUtils,
+    private val flightProvider: WalletLibraryFlightProvider,
+    private val responseAgent: PresentationResponseHttpAgent = SecurePresentationResponseHttpAgent()
+) {
 
     suspend fun getRequest(overrideUrl: String, preferHeaders: List<String>): Result<IResponse> {
         val mutablePreferHeaders = preferHeaders.toMutableList()
@@ -37,7 +46,7 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
                 "state" to state
             )
         )
-        return agent.post(
+        return postResponse(
             overrideUrl,
             httpAgentUtils.combineMaps(
                 additionalHeaders,
@@ -59,7 +68,7 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
             "vp_token" to vpToken,
             "state" to state
         ))
-        return agent.post(
+        return postResponse(
             overrideUrl,
             httpAgentUtils.combineMaps(
                 additionalHeaders,
@@ -68,4 +77,15 @@ internal class HttpAgentPresentationApis(private val agent: IHttpAgent, private 
             body
         )
     }
+
+    private suspend fun postResponse(
+        url: String,
+        headers: Map<String, String>,
+        body: ByteArray
+    ): Result<IResponse> =
+        if (flightProvider.isEnabled(WalletLibraryFlight.PresentationResponseDestinationValidation)) {
+            responseAgent.post(url, headers, body)
+        } else {
+            agent.post(url, headers, body)
+        }
 }

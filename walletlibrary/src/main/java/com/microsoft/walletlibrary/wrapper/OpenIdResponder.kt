@@ -8,6 +8,7 @@ package com.microsoft.walletlibrary.wrapper
 import com.microsoft.walletlibrary.did.sdk.VerifiableCredentialSdk
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationResponse
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.mappings.presentation.addRequirements
 import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
@@ -27,7 +28,8 @@ object OpenIdResponder {
         presentationRequest: PresentationRequest,
         requirement: Requirement,
         additionalHeaders: Map<String, String>,
-        libraryConfiguration: LibraryConfiguration
+        libraryConfiguration: LibraryConfiguration,
+        linkedDomainResult: LinkedDomainResult? = null
     ) {
         val presentationResponses = presentationRequest.getPresentationDefinitions().map { PresentationResponse(presentationRequest, it.id) }
         if (presentationResponses.size == 1) {
@@ -61,7 +63,13 @@ object OpenIdResponder {
             }
         }
         val presentationResponseResult =
-            VerifiableCredentialSdk.presentationService.sendResponse(presentationRequest, presentationResponses, additionalHeaders, libraryConfiguration)
+            VerifiableCredentialSdk.presentationService.sendResponse(
+                presentationRequest,
+                presentationResponses,
+                additionalHeaders,
+                libraryConfiguration,
+                linkedDomainResult
+            )
         if (presentationResponseResult is Result.Failure) {
             throw OpenIdResponseCompletionException(
                 "Unable to send presentation response",

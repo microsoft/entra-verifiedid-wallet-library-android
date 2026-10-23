@@ -137,6 +137,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
                             PreviewFeatureFlags.FEATURE_FLAG_ENABLE_LEGACY_RESOLVER
                         )
                     WalletLibraryFlight.LinkedDomainValidationHardening -> false
+                    WalletLibraryFlight.PresentationResponseDestinationValidation -> false
                 }
             }
         VerifiableCredentialSdk.init(
@@ -156,7 +157,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
                 walletLibraryVersionInfo,
                 VerifiableCredentialSdk.correlationVectorService
             ),
-            jsonSerializer
+            jsonSerializer,
+            effectiveFlightProvider
         )
         val identifierFactory = IdentifierFactory()
         val libraryConfiguration =
@@ -166,7 +168,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
                 jsonSerializer,
                 rootOfTrustResolver,
                 logger,
-                identifierFactory
+                identifierFactory,
+                effectiveFlightProvider
             )
         runBlocking {
             fetchAllHolderIdentifiers(libraryConfiguration)
