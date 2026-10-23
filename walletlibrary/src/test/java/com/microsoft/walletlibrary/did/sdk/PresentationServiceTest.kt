@@ -29,6 +29,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationExceptio
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.util.LibraryConfiguration
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.nimbusds.jose.util.Base64URL
 import io.mockk.coEvery
 import io.mockk.coJustRun
@@ -36,7 +37,9 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
+import io.mockk.mockkObject
 import io.mockk.spyk
+import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -319,6 +322,8 @@ class PresentationServiceTest {
 
     @Test
     fun `test request param requires signer to match client id`() {
+        mockkObject(WalletLibraryLogger)
+        every { WalletLibraryLogger.event(any(), any()) } returns Unit
         val mockUri = mockk<Uri>()
         mockIdentifierAndLinkedDomains()
         every { presentationService["verifyUri"](suppliedOpenIdUrl) } returns mockUri
@@ -334,6 +339,16 @@ class PresentationServiceTest {
             verify(exactly = 1) {
                 mockedJwtValidator.validateDidInHeaderAndPayload(any(), expectedEntityIdentifier)
             }
+            verify(exactly = 1) {
+                WalletLibraryLogger.event(
+                    "PresentationResponseValidation",
+                    match {
+                        it?.get("stage") == "signer_binding" &&
+                            it["outcome"] == "accepted" &&
+                            it["reason"] == "none"
+                    }
+                )
+            }
             coVerify(exactly = 1) {
                 linkedDomainsService.fetchDocumentAndVerifyLinkedDomains(
                     expectedEntityIdentifier,
@@ -341,6 +356,7 @@ class PresentationServiceTest {
                 )
             }
         }
+        unmockkObject(WalletLibraryLogger)
     }
 
     @Test
