@@ -162,7 +162,6 @@ internal class PresentationService @Inject constructor(
      * @param response PresentationResponse to be formed, signed, and sent.
      * @param additionalHeaders additional headers to be sent with the response
      * @param libraryConfiguration utilities needed for use in Wallet Library
-     * @param linkedDomainResult linked-domain validation result for the response destination
      */
     suspend fun sendResponse(
         presentationRequest: PresentationRequest,
