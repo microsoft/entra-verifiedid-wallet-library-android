@@ -7,6 +7,7 @@ package com.microsoft.walletlibrary.requests
 
 import com.microsoft.walletlibrary.WalletLibraryFlight
 import com.microsoft.walletlibrary.did.sdk.PresentationResponseEndpointValidator
+import com.microsoft.walletlibrary.did.sdk.PresentationResponseValidationTelemetry
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
 import com.microsoft.walletlibrary.mappings.toLinkedDomainResult
 import com.microsoft.walletlibrary.mappings.toRootOfTrust
@@ -64,13 +65,31 @@ internal class OpenIdPresentationRequest(
 
     // Completes the presentation request and returns Result with success status if successful.
     override suspend fun complete(): VerifiedIdResult<SuccessfulCompletionResult> {
-        return getResult {
+        val flightEnabled = libraryConfiguration.isFlightEnabled(
+            WalletLibraryFlight.PresentationResponseDestinationValidation
+        )
+        val result = getResult {
             if (libraryConfiguration.isPreviewFeatureEnabled(PreviewFeatureFlags.FEATURE_FLAG_PRESENTATION_EXCHANGE_SERIALIZATION_SUPPORT)) {
                 sendPresentationRequest()
             } else {
                 sendPresentationRequestDeprecated()
             }
         }
+        result.onSuccess {
+            PresentationResponseValidationTelemetry.record(
+                stage = PresentationResponseValidationTelemetry.Stage.COMPLETION,
+                flightEnabled = flightEnabled,
+                outcome = PresentationResponseValidationTelemetry.Outcome.SUCCEEDED
+            )
+        }.onFailure { throwable ->
+            PresentationResponseValidationTelemetry.record(
+                stage = PresentationResponseValidationTelemetry.Stage.COMPLETION,
+                flightEnabled = flightEnabled,
+                outcome = PresentationResponseValidationTelemetry.Outcome.FAILED,
+                reason = PresentationResponseValidationTelemetry.completionFailureReason(throwable)
+            )
+        }
+        return result
     }
 
     override suspend fun cancel(message: String?): VerifiedIdResult<Unit> {

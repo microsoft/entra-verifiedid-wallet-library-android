@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary.did.sdk.datasource.network.apis
 
 import com.microsoft.walletlibrary.WalletLibraryFlight
 import com.microsoft.walletlibrary.WalletLibraryFlightProvider
+import com.microsoft.walletlibrary.did.sdk.PresentationResponseValidationTelemetry
 import com.microsoft.walletlibrary.did.sdk.util.Constants
 import com.microsoft.walletlibrary.util.Constants as WalletConstants
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
@@ -52,7 +53,8 @@ internal class HttpAgentPresentationApis(
                 additionalHeaders,
                 httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.UrlFormEncoded, body)
             ),
-            body
+            body,
+            PresentationResponseValidationTelemetry.ResponseCount.SINGLE
         )
     }
 
@@ -74,18 +76,54 @@ internal class HttpAgentPresentationApis(
                 additionalHeaders,
                 httpAgentUtils.defaultHeaders(HttpAgentUtils.ContentType.UrlFormEncoded, body)
             ),
-            body
+            body,
+            PresentationResponseValidationTelemetry.ResponseCount.MULTIPLE
         )
     }
 
     private suspend fun postResponse(
         url: String,
         headers: Map<String, String>,
-        body: ByteArray
-    ): Result<IResponse> =
-        if (flightProvider.isEnabled(WalletLibraryFlight.PresentationResponseDestinationValidation)) {
+        body: ByteArray,
+        responseCount: PresentationResponseValidationTelemetry.ResponseCount
+    ): Result<IResponse> {
+        val flightEnabled =
+            flightProvider.isEnabled(WalletLibraryFlight.PresentationResponseDestinationValidation)
+        val transport = if (flightEnabled) {
+            PresentationResponseValidationTelemetry.Transport.REDIRECT_RESISTANT
+        } else {
+            PresentationResponseValidationTelemetry.Transport.CALLER_PROVIDED
+        }
+        val result = if (flightEnabled) {
             responseAgent.post(url, headers, body)
         } else {
             agent.post(url, headers, body)
         }
+        result.onSuccess {
+            PresentationResponseValidationTelemetry.record(
+                stage = PresentationResponseValidationTelemetry.Stage.RESPONSE_POST,
+                flightEnabled = flightEnabled,
+                outcome = PresentationResponseValidationTelemetry.Outcome.SUCCEEDED,
+                transport = transport,
+                responseCount = responseCount
+            )
+        }.onFailure { throwable ->
+            PresentationResponseValidationTelemetry.record(
+                stage = PresentationResponseValidationTelemetry.Stage.RESPONSE_POST,
+                flightEnabled = flightEnabled,
+                outcome = PresentationResponseValidationTelemetry.Outcome.FAILED,
+                reason = if (throwable is com.microsoft.walletlibrary.util.NetworkingException) {
+                    PresentationResponseValidationTelemetry.Reason.NETWORK_ERROR
+                } else {
+                    PresentationResponseValidationTelemetry.Reason.OTHER_ERROR
+                },
+                transport = transport,
+                responseCount = responseCount,
+                httpStatusClass = PresentationResponseValidationTelemetry.HttpStatusClass.from(
+                    throwable
+                )
+            )
+        }
+        return result
+    }
 }
