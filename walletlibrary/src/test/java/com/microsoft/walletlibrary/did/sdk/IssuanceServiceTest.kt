@@ -2,6 +2,7 @@
 
 package com.microsoft.walletlibrary.did.sdk
 
+import com.microsoft.walletlibrary.WalletLibraryFlight
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.walletlibrary.did.sdk.credential.models.VerifiableCredentialDescriptor
@@ -184,11 +185,17 @@ class IssuanceServiceTest {
         } returns formattedResponse
         every { mockedPresentationAttestation.credentialType } returns "TestCredentialType"
         every { mockedPresentationAttestation.validityInterval } returns 1000
+        every {
+            mockLibraryConfiguration.isFlightEnabled(
+                WalletLibraryFlight.IssuanceResponseIssuerBindingValidation
+            )
+        } returns false
         coEvery {
             issuanceService["sendResponse"](
                 formattedResponse,
                 issuanceResponse.audience,
-                issuanceResponse.request.contract.input.issuer
+                issuanceResponse.request.contract.input.issuer,
+                false
             )
         } returns Result.Success(expectedVerifiableCredential)
 
@@ -205,6 +212,7 @@ class IssuanceServiceTest {
                 issuanceResponse,
                 masterIdentifier,
                 issuanceResponse.requestedVcMap.mapValues { expectedVerifiableCredential } as RequestedVcMap,
+                mockLibraryConfiguration,
                 DEFAULT_EXPIRATION_IN_SECONDS
             )
         }

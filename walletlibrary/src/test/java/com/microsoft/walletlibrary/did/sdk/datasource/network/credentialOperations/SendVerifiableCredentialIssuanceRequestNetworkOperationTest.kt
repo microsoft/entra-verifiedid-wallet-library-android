@@ -5,7 +5,8 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtVali
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentIssuanceApi
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.DidInHeaderAndPayloadNotMatching
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.IssuanceResponseIssuerBindingException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.IssuanceResponseIssuerBindingFailure
 import com.microsoft.walletlibrary.util.defaultTestSerializer
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import io.mockk.coEvery
@@ -26,14 +27,16 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperationTest {
 
     @Test
     fun sendIssuanceResponse_withAttackerSigner_throwsIssuerMismatch() {
-        val testContext = createTestContext(expectedIssuerDid)
+        val testContext = createTestContext(expectedIssuerDid, issuerBindingValidationEnabled = true)
         every {
             testContext.jwtValidator.validateDidInHeaderAndPayload(testContext.jwsToken, expectedIssuerDid)
         } returns false
 
         assertThatThrownBy {
             runBlocking { testContext.operation.toResult(response) }
-        }.isInstanceOf(DidInHeaderAndPayloadNotMatching::class.java)
+        }.isInstanceOf(IssuanceResponseIssuerBindingException::class.java)
+            .extracting("failure")
+            .isEqualTo(IssuanceResponseIssuerBindingFailure.SignerDidMismatch)
 
         verify(exactly = 1) {
             testContext.jwtValidator.validateDidInHeaderAndPayload(testContext.jwsToken, expectedIssuerDid)
@@ -42,19 +45,21 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperationTest {
 
     @Test
     fun sendIssuanceResponse_withPayloadIssuerMismatch_throwsIssuerMismatch() {
-        val testContext = createTestContext(attackerIssuerDid)
+        val testContext = createTestContext(attackerIssuerDid, issuerBindingValidationEnabled = true)
         every {
             testContext.jwtValidator.validateDidInHeaderAndPayload(testContext.jwsToken, expectedIssuerDid)
         } returns true
 
         assertThatThrownBy {
             runBlocking { testContext.operation.toResult(response) }
-        }.isInstanceOf(DidInHeaderAndPayloadNotMatching::class.java)
+        }.isInstanceOf(IssuanceResponseIssuerBindingException::class.java)
+            .extracting("failure")
+            .isEqualTo(IssuanceResponseIssuerBindingFailure.PayloadIssuerMismatch)
     }
 
     @Test
     fun sendIssuanceResponse_withMatchingIssuer_returnsCredential() {
-        val testContext = createTestContext(expectedIssuerDid)
+        val testContext = createTestContext(expectedIssuerDid, issuerBindingValidationEnabled = true)
         every {
             testContext.jwtValidator.validateDidInHeaderAndPayload(testContext.jwsToken, expectedIssuerDid)
         } returns true
@@ -70,7 +75,22 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperationTest {
         }
     }
 
-    private fun createTestContext(payloadIssuerDid: String): TestContext {
+    @Test
+    fun sendIssuanceResponse_withIssuerMismatchAndFlightDisabled_returnsCredential() {
+        val testContext = createTestContext(attackerIssuerDid, issuerBindingValidationEnabled = false)
+
+        val result = runBlocking { testContext.operation.toResult(response) }
+
+        assertThat(result.isSuccess).isTrue
+        verify(exactly = 0) {
+            testContext.jwtValidator.validateDidInHeaderAndPayload(any(), any())
+        }
+    }
+
+    private fun createTestContext(
+        payloadIssuerDid: String,
+        issuerBindingValidationEnabled: Boolean
+    ): TestContext {
         val credentialContent = """
             {
               "jti": "credential-id",
@@ -105,7 +125,8 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperationTest {
             expectedIssuerDid,
             apiProvider,
             jwtValidator,
-            defaultTestSerializer
+            defaultTestSerializer,
+            issuerBindingValidationEnabled
         )
         return TestContext(operation, jwtValidator, jwsToken)
     }

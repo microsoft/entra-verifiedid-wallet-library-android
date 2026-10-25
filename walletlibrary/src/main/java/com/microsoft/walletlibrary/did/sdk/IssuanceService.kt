@@ -26,6 +26,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.did.sdk.util.logTime
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
+import com.microsoft.walletlibrary.WalletLibraryFlight
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
@@ -122,7 +123,12 @@ internal class IssuanceService @Inject constructor(
             logTime("Issuance sendResponse") {
                 val identifier = libraryConfiguration.identifierFactory.getIdentifier()
                 val requestedVcMap = response.requestedVcMap
-                val verifiableCredential = formAndSendResponse(response, identifier, requestedVcMap).abortOnError()
+                val verifiableCredential = formAndSendResponse(
+                    response,
+                    identifier,
+                    requestedVcMap,
+                    libraryConfiguration
+                ).abortOnError()
                 Result.Success(verifiableCredential)
             }
         }
@@ -144,6 +150,7 @@ internal class IssuanceService @Inject constructor(
         response: IssuanceResponse,
         responder: HolderIdentifier,
         requestedVcMap: RequestedVcMap,
+        libraryConfiguration: LibraryConfiguration,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<VerifiableCredential> {
         val formattedResponse = issuanceResponseFormatter.formatResponse(
@@ -152,16 +159,27 @@ internal class IssuanceService @Inject constructor(
             responder = responder,
             expiryInSeconds = expiryInSeconds
         )
-        return sendResponse(formattedResponse, response.audience, response.request.contract.input.issuer)
+        return sendResponse(
+            formattedResponse,
+            response.audience,
+            response.request.contract.input.issuer,
+            libraryConfiguration.isFlightEnabled(WalletLibraryFlight.IssuanceResponseIssuerBindingValidation)
+        )
     }
 
-    private suspend fun sendResponse(formattedResponse: String, url: String, expectedIssuerDid: String) =
+    private suspend fun sendResponse(
+        formattedResponse: String,
+        url: String,
+        expectedIssuerDid: String,
+        issuerBindingValidationEnabled: Boolean
+    ) =
         SendVerifiableCredentialIssuanceRequestNetworkOperation(
         url,
         formattedResponse,
         expectedIssuerDid,
         apiProvider,
         jwtValidator,
-        serializer
+        serializer,
+        issuerBindingValidationEnabled
     ).fire().toSDK()
 }
