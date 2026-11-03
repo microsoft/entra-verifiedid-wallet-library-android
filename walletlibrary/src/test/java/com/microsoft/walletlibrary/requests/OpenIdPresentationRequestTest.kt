@@ -20,6 +20,8 @@ import com.microsoft.walletlibrary.util.PreviewFeatureFlags
 import com.microsoft.walletlibrary.util.RequirementNotMetException
 import com.microsoft.walletlibrary.util.UnspecifiedVerifiedIdException
 import com.microsoft.walletlibrary.util.UserCanceledException
+import com.microsoft.walletlibrary.util.WalletLibraryEventRecorder
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.wrapper.OpenIdResponder
 import io.mockk.coEvery
@@ -30,6 +32,8 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 enum class FulFilledRequirement {
@@ -39,12 +43,23 @@ enum class FulFilledRequirement {
 }
 
 class OpenIdPresentationRequestTest {
+    private val eventRecorder = WalletLibraryEventRecorder()
     private val requesterStyle: RequesterStyle = mockk()
     private lateinit var requirement: Requirement
     private val rootOfTrust: RootOfTrust = mockk()
     private val rawRequest: VerifiedIdOpenIdJwtRawRequest = mockk()
     private lateinit var openIdPresentationRequest: OpenIdPresentationRequest
     private val mockLibraryConfiguration = mockk<LibraryConfiguration>()
+
+    @Before
+    fun setUp() {
+        WalletLibraryLogger.addConsumer(eventRecorder)
+    }
+
+    @After
+    fun tearDown() {
+        WalletLibraryLogger.CONSUMERS.clear()
+    }
 
     @Test
     fun isSatisfied_ValidRequirement_ReturnsTrue() {
@@ -179,6 +194,14 @@ class OpenIdPresentationRequestTest {
 
             // Assert
             Assertions.assertThat(actualResult.isSuccess).isTrue
+            Assertions.assertThat(eventRecorder.events.single().properties).containsAllEntriesOf(
+                mapOf(
+                    "stage" to "completion",
+                    "flight_enabled" to "false",
+                    "outcome" to "succeeded",
+                    "reason" to "none"
+                )
+            )
         }
     }
 
@@ -224,6 +247,14 @@ class OpenIdPresentationRequestTest {
             Assertions.assertThat(actualResult.isFailure).isTrue
             Assertions.assertThat(actualResult.exceptionOrNull()).isInstanceOf(
                 UnspecifiedVerifiedIdException::class.java
+            )
+            Assertions.assertThat(eventRecorder.events.single().properties).containsAllEntriesOf(
+                mapOf(
+                    "stage" to "completion",
+                    "flight_enabled" to "false",
+                    "outcome" to "failed",
+                    "reason" to "other_error"
+                )
             )
         }
     }
@@ -344,6 +375,14 @@ class OpenIdPresentationRequestTest {
         Assertions.assertThat(linkedDomainResult.captured).isInstanceOf(LinkedDomainVerified::class.java)
         Assertions.assertThat((linkedDomainResult.captured as LinkedDomainVerified).domainUrl)
             .isEqualTo(expectedRootOfTrust.source)
+        Assertions.assertThat(eventRecorder.events.single().properties).containsAllEntriesOf(
+            mapOf(
+                "stage" to "completion",
+                "flight_enabled" to "true",
+                "outcome" to "succeeded",
+                "reason" to "none"
+            )
+        )
     }
 
     @Test

@@ -3,6 +3,9 @@ package com.microsoft.walletlibrary.did.sdk.datasource.network.apis
 import com.microsoft.walletlibrary.WalletLibraryFlight
 import com.microsoft.walletlibrary.WalletLibraryFlightProvider
 import com.microsoft.walletlibrary.did.sdk.util.HttpAgentUtils
+import com.microsoft.walletlibrary.util.NetworkingException
+import com.microsoft.walletlibrary.util.WalletLibraryEventRecorder
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import com.microsoft.walletlibrary.util.http.httpagent.PresentationResponseHttpAgent
@@ -12,9 +15,23 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 class HttpAgentPresentationApisTest {
+    private val eventRecorder = WalletLibraryEventRecorder()
+
+    @Before
+    fun setUp() {
+        WalletLibraryLogger.addConsumer(eventRecorder)
+    }
+
+    @After
+    fun tearDown() {
+        WalletLibraryLogger.CONSUMERS.clear()
+    }
+
     @Test
     fun sendResponse_usesNoRedirectTransport() {
         val url = "https://verifier.example/callback"
@@ -40,6 +57,15 @@ class HttpAgentPresentationApisTest {
         }
 
         assertThat(result.getOrNull()).isSameAs(response)
+        assertThat(eventRecorder.events.single().properties).containsAllEntriesOf(
+            mapOf(
+                "stage" to "response_post",
+                "flight_enabled" to "true",
+                "outcome" to "succeeded",
+                "transport" to "redirect_resistant",
+                "response_count" to "single"
+            )
+        )
         coVerify(exactly = 1) { responseAgent.post(url, any(), any()) }
         coVerify(exactly = 0) { agent.post(any(), any(), any()) }
     }
@@ -156,5 +182,43 @@ class HttpAgentPresentationApisTest {
 
         coVerify(exactly = 1) { agent.post(url, any(), any()) }
         coVerify(exactly = 1) { responseAgent.post(url, any(), any()) }
+    }
+
+    @Test
+    fun sendResponse_recordsBoundedNetworkFailure() {
+        val url = "https://verifier.example/callback"
+        val failure = NetworkingException(
+            message = "Service unavailable",
+            code = "network_error",
+            statusCode = "503"
+        )
+        val responseAgent = mockk<PresentationResponseHttpAgent> {
+            coEvery { post(url, any(), any()) } returns Result.failure(failure)
+        }
+        val api = HttpAgentPresentationApis(
+            mockk(relaxed = true),
+            mockk(relaxed = true) {
+                every { combineMaps(any(), any()) } returns emptyMap()
+            },
+            WalletLibraryFlightProvider { true },
+            responseAgent
+        )
+
+        val result = runBlocking {
+            api.sendResponse(url, "id-token", "vp-token", "state")
+        }
+
+        assertThat(result.exceptionOrNull()).isSameAs(failure)
+        assertThat(eventRecorder.events.single().properties).containsAllEntriesOf(
+            mapOf(
+                "stage" to "response_post",
+                "flight_enabled" to "true",
+                "outcome" to "failed",
+                "reason" to "network_error",
+                "transport" to "redirect_resistant",
+                "response_count" to "single",
+                "http_status_class" to "5xx"
+            )
+        )
     }
 }

@@ -122,13 +122,33 @@ internal class PresentationService @Inject constructor(
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
         val presentationRequestContent =
             serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
-        if (validateSignerDid &&
-            !(skipSignerValidationForPureIssuance && isPureIssuanceRequest(presentationRequestContent)) &&
-            !jwtValidator.validateDidInHeaderAndPayload(jwsToken, presentationRequestContent.clientId)
-        )
-            throw DidInHeaderAndPayloadNotMatching(
-                "DID used to sign the presentation request doesn't match the DID in presentation request."
+        val shouldValidateSigner = validateSignerDid &&
+            !(skipSignerValidationForPureIssuance && isPureIssuanceRequest(presentationRequestContent))
+        if (shouldValidateSigner) {
+            val signerMatchesClientId = jwtValidator.validateDidInHeaderAndPayload(
+                jwsToken,
+                presentationRequestContent.clientId
             )
+            PresentationResponseValidationTelemetry.record(
+                stage = PresentationResponseValidationTelemetry.Stage.SIGNER_BINDING,
+                flightEnabled = true,
+                outcome = if (signerMatchesClientId) {
+                    PresentationResponseValidationTelemetry.Outcome.ACCEPTED
+                } else {
+                    PresentationResponseValidationTelemetry.Outcome.REJECTED
+                },
+                reason = if (signerMatchesClientId) {
+                    PresentationResponseValidationTelemetry.Reason.NONE
+                } else {
+                    PresentationResponseValidationTelemetry.Reason.SIGNER_MISMATCH
+                }
+            )
+            if (!signerMatchesClientId) {
+                throw DidInHeaderAndPayloadNotMatching(
+                    "DID used to sign the presentation request doesn't match the DID in presentation request."
+                )
+            }
+        }
         return Result.Success(presentationRequestContent)
     }
 

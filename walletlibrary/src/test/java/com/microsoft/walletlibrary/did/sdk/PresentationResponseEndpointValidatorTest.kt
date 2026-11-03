@@ -6,11 +6,27 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomai
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.PresentationException
 import com.microsoft.walletlibrary.mappings.toLinkedDomainResult
 import com.microsoft.walletlibrary.requests.RootOfTrust
+import com.microsoft.walletlibrary.util.WalletLibraryEventRecorder
+import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 class PresentationResponseEndpointValidatorTest {
+    private val eventRecorder = WalletLibraryEventRecorder()
+
+    @Before
+    fun setUp() {
+        WalletLibraryLogger.addConsumer(eventRecorder)
+    }
+
+    @After
+    fun tearDown() {
+        WalletLibraryLogger.CONSUMERS.clear()
+    }
+
     @Test
     fun validate_sameVerifiedOriginWithPathAndQuery_returnsEndpoint() {
         val endpoint = PresentationResponseEndpointValidator.validate(
@@ -105,6 +121,21 @@ class PresentationResponseEndpointValidatorTest {
         assertThat(endpoint).isEqualTo(
             "https://verifiedid.did.msidentity.com/v1.0/verifyPresentation"
         )
+        assertThat(eventRecorder.events.single()).isEqualTo(
+            WalletLibraryEventRecorder.Event(
+                "PresentationResponseValidation",
+                mapOf(
+                    "stage" to "destination_validation",
+                    "flight_enabled" to "true",
+                    "outcome" to "accepted",
+                    "reason" to "none",
+                    "destination_relationship" to "external_host",
+                    "transport" to "not_applicable",
+                    "response_count" to "not_applicable",
+                    "http_status_class" to "not_applicable"
+                )
+            )
+        )
     }
 
     @Test
@@ -115,6 +146,12 @@ class PresentationResponseEndpointValidatorTest {
                 LinkedDomainUnVerified("verifier.example")
             )
         }.isInstanceOf(PresentationException::class.java)
+
+        assertThat(eventRecorder.events).allMatch {
+            val properties = it.properties
+            properties?.get("outcome") == "rejected" &&
+                properties["reason"] == "unverified_domain"
+        }
 
         assertThatThrownBy {
             PresentationResponseEndpointValidator.validate(
