@@ -18,5 +18,7 @@ enum class VerifiedIdExceptions(val value: String) {
     REQUEST_SEND_EXCEPTION("request_send_error"),
     REQUIREMENT_MISSING_EXCEPTION("requirement_missing"),
     HOLDER_IDENTIFIER_EXCEPTION("holder_identifier"),
-    CRYPTO_EXCEPTION("crypto_exception")
+    CRYPTO_EXCEPTION("crypto_exception"),
+    ISSUANCE_RESPONSE_SIGNER_DID_MISMATCH("issuance_response_signer_did_mismatch"),
+    ISSUANCE_RESPONSE_PAYLOAD_ISSUER_MISMATCH("issuance_response_payload_issuer_mismatch")
 }

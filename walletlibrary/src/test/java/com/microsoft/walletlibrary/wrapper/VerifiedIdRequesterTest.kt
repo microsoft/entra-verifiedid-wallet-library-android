@@ -17,6 +17,8 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.d
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.SdkException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.IssuanceResponseIssuerBindingException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.IssuanceResponseIssuerBindingFailure
 import com.microsoft.walletlibrary.mappings.issuance.toRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.requests.requirements.SelfAttestedClaimRequirement
@@ -143,5 +145,27 @@ class VerifiedIdRequesterTest {
         }.isInstanceOf(
             VerifiedIdResponseCompletionException::class.java
         )
+    }
+
+    @Test
+    fun completeIssuanceRequest_IssuerBindingFailure_PreservesCategorizedCause() {
+        val issuerBindingException = IssuanceResponseIssuerBindingException(
+            "signer mismatch",
+            IssuanceResponseIssuerBindingFailure.SignerDidMismatch
+        )
+        coEvery {
+            mockIssuanceService.sendResponse(any(), any())
+        } returns Result.Failure(issuerBindingException)
+
+        Assertions.assertThatThrownBy {
+            runBlocking {
+                VerifiedIdRequester.sendIssuanceResponse(
+                    mockIssuanceRequest,
+                    requirement,
+                    mockLibraryConfiguration
+                )
+            }
+        }.isInstanceOf(VerifiedIdResponseCompletionException::class.java)
+            .hasCause(issuerBindingException)
     }
 }

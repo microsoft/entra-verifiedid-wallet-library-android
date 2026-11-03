@@ -12,15 +12,19 @@ import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.datasource.network.PostNetworkOperation
 import com.microsoft.walletlibrary.did.sdk.datasource.network.apis.HttpAgentApiProvider
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidSignatureException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.IssuanceResponseIssuerBindingException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.IssuanceResponseIssuerBindingFailure
 import com.microsoft.walletlibrary.util.http.httpagent.IResponse
 import kotlinx.serialization.json.Json
 
 internal class SendVerifiableCredentialIssuanceRequestNetworkOperation(
     url: String,
     serializedResponse: String,
+    private val expectedIssuerDid: String,
     private val apiProvider: HttpAgentApiProvider,
     private val jwtValidator: JwtValidator,
-    private val serializer: Json
+    private val serializer: Json,
+    private val issuerBindingValidationEnabled: Boolean
 ) : PostNetworkOperation<VerifiableCredential>() {
     override val call: suspend () -> Result<IResponse> = { apiProvider.issuanceApis.sendResponse(url, serializedResponse) }
     override suspend fun toResult(response: IResponse): Result<VerifiableCredential> {
@@ -34,6 +38,18 @@ internal class SendVerifiableCredentialIssuanceRequestNetworkOperation(
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not Valid on Issuance Response.")
         val verifiableCredentialContent = serializer.decodeFromString(VerifiableCredentialContent.serializer(), jwsToken.content())
+        if (issuerBindingValidationEnabled) {
+            if (!jwtValidator.validateDidInHeaderAndPayload(jwsToken, expectedIssuerDid))
+                throw IssuanceResponseIssuerBindingException(
+                    "DID used to sign the issuance response doesn't match the issuer DID in the contract.",
+                    IssuanceResponseIssuerBindingFailure.SignerDidMismatch
+                )
+            if (verifiableCredentialContent.iss != expectedIssuerDid)
+                throw IssuanceResponseIssuerBindingException(
+                    "Issuer DID in the issuance response doesn't match the issuer DID in the contract.",
+                    IssuanceResponseIssuerBindingFailure.PayloadIssuerMismatch
+                )
+        }
         return Result.success(VerifiableCredential(verifiableCredentialContent.jti, jwsTokenString, verifiableCredentialContent))
     }
 }

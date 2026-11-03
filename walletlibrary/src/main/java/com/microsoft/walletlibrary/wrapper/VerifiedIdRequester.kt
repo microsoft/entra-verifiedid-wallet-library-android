@@ -10,6 +10,7 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.Result
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.IssuanceResponseIssuerBindingException
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
 import com.microsoft.walletlibrary.mappings.issuance.addRequirements
 import com.microsoft.walletlibrary.requests.requirements.Requirement
@@ -33,9 +34,14 @@ object VerifiedIdRequester {
         when (val result = VerifiableCredentialSdk.issuanceService.sendResponse(issuanceResponse, libraryConfiguration)) {
             is Result.Success -> return VerifiableCredential(result.payload, issuanceRequest.contract)
             is Result.Failure -> {
+                val cause = if (result.payload is IssuanceResponseIssuerBindingException) {
+                    result.payload
+                } else {
+                    result.payload.cause
+                }
                 throw VerifiedIdResponseCompletionException(
                     "Unable to complete issuance response",
-                    result.payload.cause
+                    cause
                 )
             }
             else -> {

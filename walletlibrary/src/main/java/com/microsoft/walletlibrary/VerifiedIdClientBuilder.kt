@@ -138,6 +138,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
                         )
                     WalletLibraryFlight.LinkedDomainValidationHardening -> false
                     WalletLibraryFlight.PresentationResponseDestinationValidation -> false
+                    WalletLibraryFlight.IssuanceResponseIssuerBindingValidation -> false
                 }
             }
         VerifiableCredentialSdk.init(

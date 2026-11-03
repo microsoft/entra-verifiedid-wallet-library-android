@@ -57,6 +57,16 @@ internal class MissingInputInRequestException(message: String) : ValidatorExcept
 
 internal class DidInHeaderAndPayloadNotMatching(message: String) : ValidatorException(message)
 
+internal enum class IssuanceResponseIssuerBindingFailure {
+    SignerDidMismatch,
+    PayloadIssuerMismatch
+}
+
+internal class IssuanceResponseIssuerBindingException(
+    message: String,
+    val failure: IssuanceResponseIssuerBindingFailure
+) : ValidatorException(message)
+
 internal class SubjectIdentifierTypeNotSupported(message: String) : ValidatorException(message)
 
 internal class VpFormatNotSupported(message: String) : ValidatorException(message)
