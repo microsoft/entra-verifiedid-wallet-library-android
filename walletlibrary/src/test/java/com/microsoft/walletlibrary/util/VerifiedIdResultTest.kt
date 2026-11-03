@@ -115,7 +115,7 @@ class VerifiedIdResultTest {
         assertThat(result.exceptionOrNull())
             .isInstanceOf(MalformedInputException::class.java)
             .extracting("code")
-            .isEqualTo(VerifiedIdExceptions.ISSUANCE_RESPONSE_SIGNER_DID_MISMATCH.value)
+            .containsExactly(VerifiedIdExceptions.ISSUANCE_RESPONSE_SIGNER_DID_MISMATCH.value)
     }
 
     @Test
@@ -132,7 +132,7 @@ class VerifiedIdResultTest {
         assertThat(result.exceptionOrNull())
             .isInstanceOf(MalformedInputException::class.java)
             .extracting("code")
-            .isEqualTo(VerifiedIdExceptions.ISSUANCE_RESPONSE_PAYLOAD_ISSUER_MISMATCH.value)
+            .containsExactly(VerifiedIdExceptions.ISSUANCE_RESPONSE_PAYLOAD_ISSUER_MISMATCH.value)
     }
 
     @Test

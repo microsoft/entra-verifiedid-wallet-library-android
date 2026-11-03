@@ -36,7 +36,7 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperationTest {
             runBlocking { testContext.operation.toResult(response) }
         }.isInstanceOf(IssuanceResponseIssuerBindingException::class.java)
             .extracting("failure")
-            .isEqualTo(IssuanceResponseIssuerBindingFailure.SignerDidMismatch)
+            .containsExactly(IssuanceResponseIssuerBindingFailure.SignerDidMismatch)
 
         verify(exactly = 1) {
             testContext.jwtValidator.validateDidInHeaderAndPayload(testContext.jwsToken, expectedIssuerDid)
@@ -54,7 +54,7 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperationTest {
             runBlocking { testContext.operation.toResult(response) }
         }.isInstanceOf(IssuanceResponseIssuerBindingException::class.java)
             .extracting("failure")
-            .isEqualTo(IssuanceResponseIssuerBindingFailure.PayloadIssuerMismatch)
+            .containsExactly(IssuanceResponseIssuerBindingFailure.PayloadIssuerMismatch)
     }
 
     @Test
