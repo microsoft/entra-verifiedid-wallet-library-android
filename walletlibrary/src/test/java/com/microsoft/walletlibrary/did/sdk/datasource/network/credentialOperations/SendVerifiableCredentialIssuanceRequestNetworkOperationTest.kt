@@ -16,7 +16,7 @@ import io.mockk.mockkObject
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class SendVerifiableCredentialIssuanceRequestNetworkOperationTest {
@@ -32,11 +32,10 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperationTest {
             testContext.jwtValidator.validateDidInHeaderAndPayload(testContext.jwsToken, expectedIssuerDid)
         } returns false
 
-        assertThatThrownBy {
+        val exception = assertThrows(IssuanceResponseIssuerBindingException::class.java) {
             runBlocking { testContext.operation.toResult(response) }
-        }.isInstanceOf(IssuanceResponseIssuerBindingException::class.java)
-            .extracting("failure")
-            .containsExactly(IssuanceResponseIssuerBindingFailure.SignerDidMismatch)
+        }
+        assertThat(exception.failure).isEqualTo(IssuanceResponseIssuerBindingFailure.SignerDidMismatch)
 
         verify(exactly = 1) {
             testContext.jwtValidator.validateDidInHeaderAndPayload(testContext.jwsToken, expectedIssuerDid)
@@ -50,11 +49,10 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperationTest {
             testContext.jwtValidator.validateDidInHeaderAndPayload(testContext.jwsToken, expectedIssuerDid)
         } returns true
 
-        assertThatThrownBy {
+        val exception = assertThrows(IssuanceResponseIssuerBindingException::class.java) {
             runBlocking { testContext.operation.toResult(response) }
-        }.isInstanceOf(IssuanceResponseIssuerBindingException::class.java)
-            .extracting("failure")
-            .containsExactly(IssuanceResponseIssuerBindingFailure.PayloadIssuerMismatch)
+        }
+        assertThat(exception.failure).isEqualTo(IssuanceResponseIssuerBindingFailure.PayloadIssuerMismatch)
     }
 
     @Test

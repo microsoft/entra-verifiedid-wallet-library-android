@@ -112,10 +112,10 @@ class VerifiedIdResultTest {
             getResult<String> { throw WalletLibraryException("Testing", nestedException) }
         }
 
-        assertThat(result.exceptionOrNull())
-            .isInstanceOf(MalformedInputException::class.java)
-            .extracting("code")
-            .containsExactly(VerifiedIdExceptions.ISSUANCE_RESPONSE_SIGNER_DID_MISMATCH.value)
+        val exception = result.exceptionOrNull()
+        assertThat(exception).isInstanceOf(MalformedInputException::class.java)
+        assertThat((exception as MalformedInputException).code)
+            .isEqualTo(VerifiedIdExceptions.ISSUANCE_RESPONSE_SIGNER_DID_MISMATCH.value)
     }
 
     @Test
@@ -129,10 +129,10 @@ class VerifiedIdResultTest {
             getResult<String> { throw WalletLibraryException("Testing", sdkException) }
         }
 
-        assertThat(result.exceptionOrNull())
-            .isInstanceOf(MalformedInputException::class.java)
-            .extracting("code")
-            .containsExactly(VerifiedIdExceptions.ISSUANCE_RESPONSE_PAYLOAD_ISSUER_MISMATCH.value)
+        val exception = result.exceptionOrNull()
+        assertThat(exception).isInstanceOf(MalformedInputException::class.java)
+        assertThat((exception as MalformedInputException).code)
+            .isEqualTo(VerifiedIdExceptions.ISSUANCE_RESPONSE_PAYLOAD_ISSUER_MISMATCH.value)
     }
 
     @Test
