@@ -13,7 +13,14 @@ The Microsoft Entra Wallet Library for Android gives your app the ability to beg
 ---
 ## Requirements
 
-The library runs on a minimum sdk version 26. The app consuming the library should have minsdk version set to at least 26.
+The library currently requires a minimum SDK version of 27, as configured in
+[gradle.properties](gradle.properties). Consuming apps must use at least that version.
+
+## Development and verification
+
+Start with [AGENTS.md](AGENTS.md) for repository context, JDK/SDK setup, the
+verification gate, and JVM/device test commands. On Windows, run
+`pwsh -File .\scripts\verify.ps1` from the repository root after setup.
 
 ## Installation
 
