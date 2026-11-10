@@ -18,7 +18,6 @@ import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.util.VerifiedIdResult
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdSerializer
-import okhttp3.internal.filterList
 
 /**
  * Represents information that describes Verified IDs required in order to complete a VerifiedID request.
@@ -52,7 +51,7 @@ open class VerifiedIdRequirement(
     internal var constraint: VerifiedIdConstraint = toVcTypeConstraint()
 
     internal fun toVcTypeConstraint(): VerifiedIdConstraint {
-        if (types.isEmpty() || types.filterList { isNotBlank() }
+        if (types.isEmpty() || types.filter { it.isNotBlank() }
                 .isEmpty()) throw MalformedInputException(
             "There is no Verified ID type in the request.",
             VerifiedIdExceptions.MALFORMED_INPUT_EXCEPTION.value
