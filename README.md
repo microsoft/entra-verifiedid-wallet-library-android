@@ -35,6 +35,36 @@ project(':walletlibrary').projectDir = new File(rootDir, 'entra-verifiedid-walle
 
 Copy the expected variables from `gradle.properties` into the root project's `gradle.properties`.
 
+### Secrets configuration
+
+Do not commit API keys or access tokens to this repository. Gradle reads secret values from the first available source in this order:
+
+1. Gradle properties supplied with `-PSECRET_NAME=value`
+2. Environment variables
+3. A local, git-ignored `secrets.properties` file
+4. A local, git-ignored `local.properties` file
+
+For local development, copy `secrets.example.properties` to `secrets.properties` and fill in only the values required by your consuming app:
+
+```properties
+GOOGLE_API_KEY=
+COMPANY_PORTAL_POWERLIFT_API_KEY=
+OUTLOOK_POWERLIFT_API_KEY=
+POWERLIFT_API_KEY=
+INTUNE_POWERLIFT_API_KEY=
+```
+
+The same resolved values are provided to local unit tests as environment variables and JVM system properties, so tests can use either `System.getenv("SECRET_NAME")` or `System.getProperty("SECRET_NAME")`.
+
+A CI workflow can load the same values from Azure Key Vault:
+
+1. Configure an Azure workload identity with a federated credential for this repository and grant it the Key Vault Secrets User role on the vault.
+2. Set repository variables for `AZURE_KEYVAULT_NAME`, `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_SUBSCRIPTION_ID`.
+3. Create secrets named `google-api-key`, `company-portal-powerlift-api-key`, `outlook-powerlift-api-key`, `powerlift-api-key`, and `intune-powerlift-api-key`.
+4. Use `azure/login` with OIDC, retrieve each secret with `az keyvault secret show`, mask the value, and export it only to the build step that needs it.
+
+Values injected into `BuildConfig` are packaged in the APK and can be extracted. All Google API keys must be restricted in Google Cloud to the intended Android package name and signing-certificate SHA-1 fingerprint, and limited to only the required APIs, as recommended by Google. Keep privileged service credentials behind a server-side API instead.
+
 Add to your app's build.gradle to add Wallet Library as a dependency:
 ```kotlin
 dependencies {
