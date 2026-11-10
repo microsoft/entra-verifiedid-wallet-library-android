@@ -143,6 +143,15 @@ val client = VerifiedIdClientBuilder(context)
     .build()
 ```
 
+## Secret injection
+Build-time secrets should not be hardcoded in the repository. The library now supports a `wallet_library_api_key` property that can be supplied through a local environment variable (`WALLET_LIBRARY_API_KEY`) or through Gradle properties.
+
+For CI or local automation, use the helper script at `scripts/resolve-wallet-library-secret.sh`. It reads from `WALLET_LIBRARY_API_KEY` first and can also resolve a secret from Azure Key Vault when the following environment variables are provided:
+- `AZURE_KEY_VAULT_NAME`
+- `AZURE_KEY_VAULT_SECRET_NAME`
+
+The helper prints the resolved value and, when `GITHUB_ENV` is set, exports it as `WALLET_LIBRARY_API_KEY` for the next workflow step.
+
 ## Documentation
 
 * [External Architecture](https://github.com/microsoft/entra-verifiedid-wallet-library-ios/blob/dev/Docs/LibraryArchitecture.md)
