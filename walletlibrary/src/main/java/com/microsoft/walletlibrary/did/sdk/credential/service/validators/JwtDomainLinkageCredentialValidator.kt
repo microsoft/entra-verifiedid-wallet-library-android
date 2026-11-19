@@ -23,7 +23,8 @@ internal class JwtDomainLinkageCredentialValidator @Inject constructor(
     override suspend fun validate(
         domainLinkageCredential: String,
         rpDid: String,
-        rpDomain: String
+        rpDomain: String,
+        enforceOriginValidation: Boolean
     ): DomainLinkageCredentialValidationResult {
         val jwt: JwsToken
         val parsedCredential: DomainLinkageCredential
@@ -34,10 +35,14 @@ internal class JwtDomainLinkageCredentialValidator @Inject constructor(
                 jwt.content()
             )
         } catch (ex: Exception) {
-            if (!isLinkedDomainValidationHardeningEnabled()) {
+            if (!enforceOriginValidation && !isLinkedDomainValidationHardeningEnabled()) {
                 throw ex
             }
-            SdkLog.w("Unable to parse linked-domain credential.", ex)
+            if (enforceOriginValidation) {
+                SdkLog.w("Unable to parse linked-domain credential.")
+            } else {
+                SdkLog.w("Unable to parse linked-domain credential.", ex)
+            }
             return DomainLinkageCredentialValidationResult.CLAIMS_INVALID
         }
         if (!jwtValidator.verifySignature(jwt)) {
@@ -48,13 +53,17 @@ internal class JwtDomainLinkageCredentialValidator @Inject constructor(
         ) {
             return DomainLinkageCredentialValidationResult.DID_MISMATCH
         }
-        if (!isCredentialSubjectOriginValid(parsedCredential, rpDomain)) {
-            SdkLog.w(
+        if (!isCredentialSubjectOriginValid(parsedCredential, rpDomain, enforceOriginValidation)) {
+            if (enforceOriginValidation) {
+                SdkLog.w("Linked-domain credential origin mismatch.")
+            } else {
+                SdkLog.w(
                 "Linked-domain credential origin mismatch. " +
                     "Expected origin='${originForLogging(rpDomain)}', " +
                     "observed origin='${originForLogging(parsedCredential.vc.credentialSubject.domainUrl)}', " +
                     "mismatch components='${originMismatchComponents(rpDomain, parsedCredential.vc.credentialSubject.domainUrl)}'."
-            )
+                )
+            }
             return DomainLinkageCredentialValidationResult.ORIGIN_MISMATCH
         }
         return DomainLinkageCredentialValidationResult.VALID
@@ -66,8 +75,12 @@ internal class JwtDomainLinkageCredentialValidator @Inject constructor(
             && domainLinkageCredential.vc.credentialSubject.did == rpDid
     }
 
-    private fun isCredentialSubjectOriginValid(domainLinkageCredential: DomainLinkageCredential, rpDomain: String): Boolean {
-        if (!isLinkedDomainValidationHardeningEnabled()) {
+    private fun isCredentialSubjectOriginValid(
+        domainLinkageCredential: DomainLinkageCredential,
+        rpDomain: String,
+        enforceOriginValidation: Boolean
+    ): Boolean {
+        if (!enforceOriginValidation && !isLinkedDomainValidationHardeningEnabled()) {
             return domainLinkageCredential.vc.credentialSubject.domainUrl.equals(rpDomain, true)
         }
         val expectedOrigin = runCatching { canonicalizeLinkedDomainOrigin(rpDomain) }.getOrNull()

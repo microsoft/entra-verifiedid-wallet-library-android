@@ -14,6 +14,11 @@ import com.microsoft.walletlibrary.util.VerifiedIdExceptions
  */
 internal object LinkedDomainsResolver : RootOfTrustResolver {
 
+    suspend fun resolveForOrigin(document: IdentifierDocument, origin: String): RootOfTrust {
+        val verified = getLinkedDomainsService().validateLinkedDomainForOrigin(document, origin)
+        return RootOfTrust(origin, verified)
+    }
+
     override suspend fun resolve(didMetadata: DidMetadata): RootOfTrust {
         if (didMetadata !is IdentifierDocument) {
             throw MalformedInputException(

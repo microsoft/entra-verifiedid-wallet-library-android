@@ -106,6 +106,23 @@ class JwtDomainLinkageCredentialValidatorTest {
     }
 
     @Test
+    fun `issuer binding enforces canonical origin even when linked domain flight is off`() {
+        val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
+        val credential = response.linkedDids.first()
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
+        val validator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
+        runBlocking {
+            assertThat(validator.validate(credential, validRpDid, "$validDomainUrl:443", true))
+                .isEqualTo(DomainLinkageCredentialValidationResult.VALID)
+            assertThat(validator.validate(credential, validRpDid, "$validDomainUrl:8443", true))
+                .isEqualTo(DomainLinkageCredentialValidationResult.ORIGIN_MISMATCH)
+            assertThat(validator.validate("malformed", validRpDid, validDomainUrl, true))
+                .isEqualTo(DomainLinkageCredentialValidationResult.CLAIMS_INVALID)
+        }
+    }
+
+    @Test
     fun `validation reads linked domain flight state dynamically`() {
         val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
         val domainLinkageCredentialJwt = response.linkedDids.first()

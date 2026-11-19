@@ -9,7 +9,8 @@ enum class WalletLibraryFlight {
     UseLegacyDidResolver,
     LinkedDomainValidationHardening,
     PresentationResponseDestinationValidation,
-    IssuanceResponseIssuerBindingValidation
+    IssuanceResponseIssuerBindingValidation,
+    SignedMetadataValidation
 }
 
 /**

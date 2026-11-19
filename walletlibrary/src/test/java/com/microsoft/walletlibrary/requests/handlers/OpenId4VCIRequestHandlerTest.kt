@@ -56,6 +56,11 @@ class OpenId4VCIRequestHandlerTest {
     """.trimIndent()
 
     init {
+        every {
+            mockLibraryConfiguration.isFlightEnabled(
+                com.microsoft.walletlibrary.WalletLibraryFlight.SignedMetadataValidation
+            )
+        } returns false
         every { mockCredentialMetadata.notificationEndpoint } returns null
         every { mockCredentialOffer.issuer_session } returns "request_state"
     }
