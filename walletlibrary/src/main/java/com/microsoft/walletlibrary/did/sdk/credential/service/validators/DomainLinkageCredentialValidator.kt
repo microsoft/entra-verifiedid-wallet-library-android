@@ -7,7 +7,8 @@ internal interface DomainLinkageCredentialValidator {
     suspend fun validate(
         domainLinkageCredential: String,
         rpDid: String,
-        rpDomain: String
+        rpDomain: String,
+        enforceOriginValidation: Boolean = false
     ): DomainLinkageCredentialValidationResult
 }
 

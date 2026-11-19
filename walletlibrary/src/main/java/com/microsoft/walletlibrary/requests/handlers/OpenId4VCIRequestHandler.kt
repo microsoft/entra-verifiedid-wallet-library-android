@@ -1,5 +1,6 @@
 package com.microsoft.walletlibrary.requests.handlers
 
+import com.microsoft.walletlibrary.WalletLibraryFlight
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialConfiguration
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
@@ -23,6 +24,8 @@ import com.microsoft.walletlibrary.util.OpenId4VciRequestException
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
 import com.microsoft.walletlibrary.util.VerifiedIdExceptions
 import com.microsoft.walletlibrary.wrapper.VerifiedIdRequester
+import com.microsoft.walletlibrary.util.NetworkingException
+import kotlinx.coroutines.CancellationException
 
 class OpenId4VCIRequestHandler internal constructor(
     private val libraryConfiguration: LibraryConfiguration,
@@ -55,6 +58,51 @@ class OpenId4VCIRequestHandler internal constructor(
 
     // Handle and process the provided raw request and returns a VerifiedIdRequest.
     override suspend fun handleRequest(rawRequest: Any): VerifiedIdRequest<*> {
+        val flightEnabled = libraryConfiguration.isFlightEnabled(WalletLibraryFlight.SignedMetadataValidation)
+        try {
+            val request = if (flightEnabled) {
+                handleAuthenticatedRequest(rawRequest)
+            } else {
+                handleLegacyRequest(rawRequest)
+            }
+            SignedMetadataValidation.record(flightEnabled, SignedMetadataValidation.Outcome.ACCEPTED)
+            return request
+        } catch (exception: CancellationException) {
+            SignedMetadataValidation.record(
+                flightEnabled, SignedMetadataValidation.Outcome.CANCELLED, SignedMetadataValidation.Reason.CANCELLED
+            )
+            throw exception
+        } catch (exception: Exception) {
+            val reason = when (exception) {
+                is SignedMetadataValidationException -> exception.reason
+                is NetworkingException -> SignedMetadataValidation.Reason.NETWORK_ERROR
+                else -> SignedMetadataValidation.Reason.VALIDATION_ERROR
+            }
+            SignedMetadataValidation.record(flightEnabled, SignedMetadataValidation.Outcome.REJECTED, reason)
+            if (flightEnabled && exception !is SignedMetadataValidationException) {
+                throw SignedMetadataValidationException(reason)
+            }
+            throw exception
+        }
+    }
+
+    private suspend fun handleAuthenticatedRequest(rawRequest: Any): VerifiedIdRequest<*> {
+        val offer = decodeCredentialOffer(rawRequest)
+        SignedMetadataValidation.issuerOrigin(offer.credential_issuer)
+        val outerMetadata = fetchCredentialMetadata(offer.credential_issuer).getOrThrow()
+        if (outerMetadata.credentialIssuer != offer.credential_issuer) {
+            throw SignedMetadataValidationException(SignedMetadataValidation.Reason.ISSUER_MISMATCH)
+        }
+        val signedMetadata = outerMetadata.signedMetadata
+            ?: throw SignedMetadataValidationException(SignedMetadataValidation.Reason.MISSING_SIGNED_METADATA)
+        val authenticated = signedMetadataProcessor.processAuthenticatedMetadata(signedMetadata, offer.credential_issuer)
+        val metadata = authenticated.metadata
+        validateCredentialMetadata(metadata, offer)
+        val configuration = getSupportedCredentialConfigurationId(metadata, offer)
+        return transformToVerifiedIdRequest(metadata, configuration, offer, authenticated.rootOfTrust)
+    }
+
+    private suspend fun handleLegacyRequest(rawRequest: Any): VerifiedIdRequest<*> {
         val credentialOffer = decodeCredentialOffer(rawRequest)
 
         // Fetch the credential metadata from the credential issuer in credential offer object.

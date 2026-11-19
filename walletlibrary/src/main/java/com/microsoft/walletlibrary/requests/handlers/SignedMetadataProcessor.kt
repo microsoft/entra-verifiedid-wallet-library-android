@@ -4,6 +4,8 @@ import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.mappings.getJwk
 import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.SignedMetadataTokenClaims
+import com.microsoft.walletlibrary.networking.entities.openid4vci.credentialmetadata.CredentialMetadata
+import com.microsoft.walletlibrary.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.walletlibrary.requests.RootOfTrust
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.util.OpenId4VciValidationException
@@ -25,7 +27,36 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
         credentialIssuer: String
     ): RootOfTrust {
         val jwsToken = deserializeSignedMetadata(signedMetadata)
+        val identifierDocument = validateSigner(jwsToken, credentialIssuer)
+        return LinkedDomainsResolver.resolve(identifierDocument)
+    }
 
+    internal suspend fun processAuthenticatedMetadata(
+        signedMetadata: String,
+        credentialIssuer: String
+    ): AuthenticatedCredentialMetadata {
+        val origin = SignedMetadataValidation.issuerOrigin(credentialIssuer)
+        val jwsToken: JwsToken
+        val identifierDocument: IdentifierDocument
+        try {
+            jwsToken = deserializeSignedMetadata(signedMetadata)
+            identifierDocument = validateSigner(jwsToken, credentialIssuer)
+        } catch (_: OpenId4VciValidationException) {
+            throw SignedMetadataValidationException(SignedMetadataValidation.Reason.INVALID_SIGNATURE_OR_CLAIMS)
+        }
+        val rootOfTrust = LinkedDomainsResolver.resolveForOrigin(identifierDocument, origin)
+        if (!rootOfTrust.verified || rootOfTrust.source != origin) {
+            throw SignedMetadataValidationException(SignedMetadataValidation.Reason.UNVERIFIED_ISSUER_ORIGIN)
+        }
+        val metadata = libraryConfiguration.serializer.decodeFromString(
+            CredentialMetadata.serializer(),
+            jwsToken.content()
+        ).copy(signedMetadata = signedMetadata)
+        SignedMetadataValidation.validateFields(metadata, credentialIssuer)
+        return AuthenticatedCredentialMetadata(metadata, rootOfTrust)
+    }
+
+    private suspend fun validateSigner(jwsToken: JwsToken, credentialIssuer: String): IdentifierDocument {
         // Extract the DID and Key ID from the signed metadata token header.
         val kid = jwsToken.keyId ?: throw OpenId4VciValidationException(
             "JWS contains no key id",
@@ -47,9 +78,13 @@ internal class SignedMetadataProcessor(private val libraryConfiguration: Library
             )
         validateSignedMetadata(jwsToken, jwk, credentialIssuer, did)
 
-        // Return the root of trust from the identifier document along with its verification status.
-        return LinkedDomainsResolver.resolve(identifierDocument)
+        return identifierDocument
     }
+
+    internal data class AuthenticatedCredentialMetadata(
+        val metadata: CredentialMetadata,
+        val rootOfTrust: RootOfTrust
+    )
 
     private fun deserializeSignedMetadata(signedMetadata: String): JwsToken {
         return try {

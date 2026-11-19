@@ -38,6 +38,42 @@ internal class LinkedDomainsService @Inject constructor(
         return resolver.resolve(relyingPartyDid)
     }
 
+    suspend fun validateLinkedDomainForOrigin(
+        identifierDocument: IdentifierDocument,
+        expectedOrigin: String
+    ): Boolean {
+        val origin = canonicalizeLinkedDomainOrigin(expectedOrigin)
+        val hasMatchingEndpoint = getLinkedDomainsFromDidDocument(identifierDocument).any {
+            try {
+                canonicalizeLinkedDomainOrigin(it) == origin
+            } catch (_: IllegalArgumentException) {
+                false
+            }
+        }
+        if (!hasMatchingEndpoint) {
+            SdkLog.w("Signing DID does not advertise the expected issuer origin.")
+            return false
+        }
+        val document = FetchWellKnownConfigDocumentNetworkOperation(
+            origin,
+            apiProvider,
+            linkedDomainValidationHardeningEnabled = true
+        ).fire().getOrThrow()
+        for (credential in document.linkedDids) {
+            if (jwtDomainLinkageCredentialValidator.validate(
+                    credential,
+                    identifierDocument.id,
+                    origin,
+                    enforceOriginValidation = true
+                ) == DomainLinkageCredentialValidationResult.VALID
+            ) {
+                return true
+            }
+        }
+        SdkLog.w("No valid domain-linkage credential for the expected issuer origin.")
+        return false
+    }
+
     suspend fun validateLinkedDomains(
         identifierDocument: IdentifierDocument,
         flow: LinkedDomainValidationFlow = LinkedDomainValidationFlow.UNKNOWN

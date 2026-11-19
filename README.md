@@ -47,6 +47,40 @@ maven { url "https://jitpack.io" }
 ```
 
 ## Quick Start
+
+### Flighted OpenID4VCI signed metadata validation
+
+`WalletLibraryFlight.SignedMetadataValidation` is OFF when no flight provider is
+configured. A host can supply its runtime rollout state through
+`VerifiedIdClientBuilder.setFlightProvider`. The state is sampled once per
+issuance-request creation; disabling the flight preserves legacy processing.
+
+When enabled, the wallet requires an HTTPS issuer matching the offer, a valid
+metadata signature, and a domain-linkage proof for that exact issuer origin
+(including the port). The proof is fetched without redirects and checked
+independently of the linked-domain hardening flight. A hostname-only custom
+root-of-trust result is not sufficient for this check.
+
+The signed JWT must contain `credential_issuer`, `credential_endpoint`,
+`authorization_servers`, and `credential_configurations_supported`, in addition
+to its existing identity/time claims. The wallet uses only the signed metadata
+fields; it never fills missing fields from the unsigned outer JSON. Optional
+`display` and `notification_endpoint` values must also be signed to be used.
+Valid HTTPS endpoints delegated to another origin are supported when signed.
+Validation failures do not send callbacks to untrusted outer metadata.
+
+**Issuer readiness is required before enabling this flight.** Existing
+identity-only signed tokens will be rejected when it is ON. This SDK change
+does not enable the flight in Authenticator or deploy an issuer-format change;
+the host ECS mapping and issuer rollout must be coordinated separately.
+Linked-domain verification still relies on trustworthy HTTPS retrieval of the
+issuer's domain-linkage document; this is not protection against an attacker
+who can also substitute that independent trust evidence.
+
+The `SignedMetadataValidation` event reports `flight_enabled`, `outcome`
+(`accepted`, `rejected`, or `cancelled`), and a bounded `reason`. It contains no
+URLs, DIDs, credential contents, tokens, or exception messages.
+
 Here is a simple example of how to use the library. For more in-depth examples, check out the sample app.
 
 ```kotlin
