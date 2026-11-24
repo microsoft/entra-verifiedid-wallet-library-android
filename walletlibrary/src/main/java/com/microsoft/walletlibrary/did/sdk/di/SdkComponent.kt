@@ -14,6 +14,7 @@ import com.microsoft.walletlibrary.did.sdk.LinkedDomainsService
 import com.microsoft.walletlibrary.did.sdk.PresentationService
 import com.microsoft.walletlibrary.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResolver
+import com.microsoft.walletlibrary.identifier.IdentifierFactory
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import dagger.BindsInstance
 import dagger.Component
@@ -77,5 +78,8 @@ internal interface SdkComponent {
         fun flightProvider(
             provider: WalletLibraryFlightProvider
         ): Builder
+
+        @BindsInstance
+        fun identifierFactory(factory: IdentifierFactory): Builder
     }
 }

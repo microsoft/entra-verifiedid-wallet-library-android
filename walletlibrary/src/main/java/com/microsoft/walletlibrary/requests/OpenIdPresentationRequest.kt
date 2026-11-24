@@ -106,7 +106,7 @@ internal class OpenIdPresentationRequest(
     }
 
     private suspend fun sendPresentationRequest(): SuccessfulCompletionResult {
-        val builder = PresentationExchangeResponseBuilder(libraryConfiguration)
+        val builder = PresentationExchangeResponseBuilder(libraryConfiguration, request.presentationRequest.content.registration)
         builder.serialize(requirement, StringVerifiedIdSerializer)
         val vpTokens = builder.buildVpTokens(
             request.presentationRequest.content.clientId,

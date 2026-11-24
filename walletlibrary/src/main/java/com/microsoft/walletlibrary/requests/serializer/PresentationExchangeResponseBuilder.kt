@@ -2,6 +2,7 @@ package com.microsoft.walletlibrary.requests.serializer
 
 import androidx.annotation.VisibleForTesting
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationResponseClaims
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.Registration
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.VpTokenInResponse
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
 import com.microsoft.walletlibrary.did.sdk.credential.service.protectors.JwsHeaderFormatter
@@ -13,6 +14,7 @@ import com.microsoft.walletlibrary.requests.requirements.GroupRequirement
 import com.microsoft.walletlibrary.requests.requirements.MatchingSubjectCryptoRequirement
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeRequirement
 import com.microsoft.walletlibrary.requests.requirements.PresentationExchangeVerifiedIdRequirement
+import com.microsoft.walletlibrary.requests.requirements.PresentationRequestCryptoRequirement
 import com.microsoft.walletlibrary.requests.requirements.Requirement
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import com.microsoft.walletlibrary.verifiedid.VCVerifiedIdSerializer
@@ -21,8 +23,11 @@ import java.util.UUID
 
 @VisibleForTesting
 internal open class PresentationExchangeResponseBuilder(
-    private val libraryConfiguration: LibraryConfiguration
+    private val libraryConfiguration: LibraryConfiguration,
+    registration: Registration? = null
 ) : RequestProcessorSerializer<String> {
+
+    private val cryptoRequirement = registration?.let { PresentationRequestCryptoRequirement(it) }
 
     @VisibleForTesting
     internal var vpTokens: MutableList<PresentationExchangeSubmissionGroup> = mutableListOf()
@@ -50,10 +55,11 @@ internal open class PresentationExchangeResponseBuilder(
                     val identifier = (requirement as? PresentationExchangeVerifiedIdRequirement)?.let {
                         it.verifiedId?.let { verifiedId ->
                             val credentialSubject = VCVerifiedIdSerializer.serialize(verifiedId).contents.sub
-                            libraryConfiguration.identifierFactory.getIdentifier(MatchingSubjectCryptoRequirement(credentialSubject))
+                            cryptoRequirement?.getIdentifier(libraryConfiguration.identifierFactory, credentialSubject)
+                                ?: libraryConfiguration.identifierFactory.getIdentifier(MatchingSubjectCryptoRequirement(credentialSubject))
                         }
                         // Otherwise use the default identifier
-                    } ?: libraryConfiguration.identifierFactory.getIdentifier()
+                    } ?: getIdentifier()
                     val group = PresentationExchangeSubmissionGroup(identifier)
                     group.include(requirement, rawCredential)
                     vpTokens.add(group)
@@ -91,7 +97,7 @@ internal open class PresentationExchangeResponseBuilder(
         requestNonce: String,
         ttlInSeconds: Int = 3600
     ): String {
-        val identifier = libraryConfiguration.identifierFactory.getIdentifier()
+        val identifier = getIdentifier()
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(ttlInSeconds)
         val vpTokens = this.vpTokens.mapIndexed { index, vpToken ->
             vpToken.getPresentationSubmissionMap(index)
@@ -125,4 +131,8 @@ internal open class PresentationExchangeResponseBuilder(
         val jwsToken = JwsToken(jsonContent, jwsHeader)
         return jwsToken.sign(identifier)
     }
+
+    private fun getIdentifier(): HolderIdentifier =
+        cryptoRequirement?.getIdentifier(libraryConfiguration.identifierFactory)
+            ?: libraryConfiguration.identifierFactory.getIdentifier()
 }

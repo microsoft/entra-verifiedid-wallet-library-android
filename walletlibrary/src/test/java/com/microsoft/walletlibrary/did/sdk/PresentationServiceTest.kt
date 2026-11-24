@@ -381,6 +381,9 @@ class PresentationServiceTest {
 
     init {
         coEvery { mockLibraryConfiguration.identifierFactory.getIdentifier() } returns masterIdentifier
+        every { mockLibraryConfiguration.identifierFactory.identifiers } returns mutableListOf(masterIdentifier)
+        every { masterIdentifier.method } returns "did:ion"
+        every { masterIdentifier.algorithm } returns "ES256K"
         mockkConstructor(FetchPresentationRequestNetworkOperation::class)
     }
 

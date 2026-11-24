@@ -11,8 +11,8 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidResponseModeE
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidResponseTypeException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidScopeException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.MissingInputInRequestException
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.SubjectIdentifierTypeNotSupported
-import com.microsoft.walletlibrary.did.sdk.util.controlflow.VpFormatNotSupported
+import com.microsoft.walletlibrary.identifier.IdentifierFactory
+import com.microsoft.walletlibrary.requests.requirements.PresentationRequestCryptoRequirement
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,7 +21,10 @@ import javax.inject.Singleton
  * Validates an OpenID Connect Request.
  */
 @Singleton
-internal class OidcPresentationRequestValidator @Inject constructor(private val jwtValidator: JwtValidator) :
+internal class OidcPresentationRequestValidator @Inject constructor(
+    private val jwtValidator: JwtValidator,
+    private val identifierFactory: IdentifierFactory
+) :
     PresentationRequestValidator {
 
     override suspend fun validate(request: PresentationRequest) {
@@ -34,12 +37,7 @@ internal class OidcPresentationRequestValidator @Inject constructor(private val 
     }
 
     private fun checkRegistrationParameters(registration: Registration) {
-        if (!registration.subjectSyntaxTypesSupported.contains(Constants.SUBJECT_IDENTIFIER_TYPE_DID_ION))
-            throw SubjectIdentifierTypeNotSupported("The subject identifier type in registration of request is not supported")
-        if (registration.vpFormats != null && !registration.vpFormats.jwtVp.contains(Constants.ALGORITHM_SUPPORTED_IN_VP))
-            throw VpFormatNotSupported("VP format algorithm in registration of request is not supported")
-        if (registration.vpFormats != null && !registration.vpFormats.jwtVc.contains(Constants.ALGORITHM_SUPPORTED_IN_VC))
-            throw VpFormatNotSupported("VC format algorithm in registration of request is not supported")
+        PresentationRequestCryptoRequirement(registration).validate(identifierFactory.identifiers)
     }
 
     private fun checkResponseType(responseType: String) {

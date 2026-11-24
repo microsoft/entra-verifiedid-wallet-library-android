@@ -145,6 +145,20 @@ val client = VerifiedIdClientBuilder(context)
 
 ## Documentation
 
+### Presentation cryptographic compatibility
+
+Registrations accepted by the legacy DID:ION/ES256K validator retain their existing negotiation and
+holder selection behavior, including mixed DID:ION/DID:JWK metadata. Other presentation requests are
+checked against the client's configured holder identifiers. DID:JWK/ES256 requires a configured FIPS holder
+(`FIPSCompliantIdentifier`) or an injected compatible `HolderIdentifier`. No new holder is created or
+feature enabled by verifier metadata. DID method and JWT VP algorithm must match the same holder.
+Presentation Exchange responses preserve each credential's subject binding when selecting that holder.
+
+JWT VC algorithm metadata describes issuer signatures, not holder signing. For newly supported
+registrations, the advertised list must intersect ES256, ES256K, ES384, ES512 or EdDSA. Credentials are
+forwarded without changing their issuer signature or adding per-credential algorithm restrictions.
+Omitting `vp_formats` retains the existing optional behavior. Signature and trust validation are unchanged.
+
 * [External Architecture](https://github.com/microsoft/entra-verifiedid-wallet-library-ios/blob/dev/Docs/LibraryArchitecture.md)
 * [Microsoft Docs](https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/)
 

@@ -141,6 +141,7 @@ class VerifiedIdClientBuilder(private val context: Context) {
                     WalletLibraryFlight.IssuanceResponseIssuerBindingValidation -> false
                 }
             }
+        val identifierFactory = IdentifierFactory()
         VerifiableCredentialSdk.init(
             context,
             logConsumer = WalletLibraryVCSDKLogConsumer,
@@ -148,7 +149,8 @@ class VerifiedIdClientBuilder(private val context: Context) {
             walletLibraryVersionInfo = walletLibraryVersionInfo,
             httpAgent = httpAgent,
             rootOfTrustResolver = rootOfTrustResolver,
-            flightProvider = effectiveFlightProvider
+            flightProvider = effectiveFlightProvider,
+            identifierFactory = identifierFactory
         )
 
         val apiProvider = HttpAgentApiProvider(
@@ -161,7 +163,6 @@ class VerifiedIdClientBuilder(private val context: Context) {
             jsonSerializer,
             effectiveFlightProvider
         )
-        val identifierFactory = IdentifierFactory()
         val libraryConfiguration =
             LibraryConfiguration(
                 previewFeatureFlags,
