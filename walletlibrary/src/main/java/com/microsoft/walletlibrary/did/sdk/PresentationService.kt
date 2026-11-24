@@ -27,6 +27,7 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.runResultTry
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.toSDK
 import com.microsoft.walletlibrary.did.sdk.util.logTime
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
+import com.microsoft.walletlibrary.requests.requirements.PresentationRequestCryptoRequirement
 import com.microsoft.walletlibrary.util.LibraryConfiguration
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -173,7 +174,11 @@ internal class PresentationService @Inject constructor(
     ): Result<Unit> {
         return runResultTry {
             logTime("Presentation sendResponse") {
-                val identifier = libraryConfiguration.identifierFactory.getIdentifier()
+                val cryptoRequirement = PresentationRequestCryptoRequirement(presentationRequest.content.registration)
+                val identifier = cryptoRequirement.getResponseIdentifier(
+                    libraryConfiguration.identifierFactory,
+                    response.flatMap { it.requestedVcPresentationSubmissionMap.values }.map { it.contents.sub }
+                )
                 val responseRequest = linkedDomainResult?.let {
                     PresentationRequest(presentationRequest.content, it)
                 } ?: presentationRequest

@@ -8,6 +8,7 @@ package com.microsoft.walletlibrary.did.sdk.credential.service.validators
 import com.microsoft.walletlibrary.did.sdk.credential.service.PresentationRequest
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.Registration
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.VpFormats
 import com.microsoft.walletlibrary.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.did.sdk.util.Constants
@@ -15,6 +16,11 @@ import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidResponseModeE
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidResponseTypeException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.InvalidScopeException
 import com.microsoft.walletlibrary.did.sdk.util.controlflow.MissingInputInRequestException
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.SubjectIdentifierTypeNotSupported
+import com.microsoft.walletlibrary.did.sdk.util.controlflow.VpFormatNotSupported
+import com.microsoft.walletlibrary.identifier.HolderIdentifier
+import com.microsoft.walletlibrary.identifier.IdentifierFactory
+import com.microsoft.walletlibrary.requests.requirements.PresentationRequestCryptoRequirement
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -23,6 +29,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.util.Date
+import kotlin.test.assertFailsWith
 
 class OidcPresentationRequestValidatorTest {
 
@@ -40,7 +47,10 @@ class OidcPresentationRequestValidatorTest {
 
     private val expectedSerializedToken: String = "token2364302"
 
-    private val validator: OidcPresentationRequestValidator = OidcPresentationRequestValidator(mockedJwtValidator)
+    private val legacyHolder = holder("did:ion", "ES256K")
+    private val fipsHolder = holder("did:jwk", "ES256")
+    private val identifierFactory = IdentifierFactory(mutableListOf(legacyHolder))
+    private val validator = OidcPresentationRequestValidator(mockedJwtValidator, identifierFactory)
 
     private val expectedSigningKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
@@ -206,6 +216,161 @@ class OidcPresentationRequestValidatorTest {
                 // Assert
                 assertThat(exception).isInstanceOf(MissingInputInRequestException::class.java)
             }
+        }
+    }
+
+    private fun holder(method: String, algorithm: String): HolderIdentifier = mockk {
+        every { this@mockk.method } returns method
+        every { this@mockk.algorithm } returns algorithm
+        every { id } returns "$method:holder"
+    }
+
+    private fun registration(
+        methods: List<String> = listOf("did:jwk"),
+        vp: List<String> = listOf("ES256"),
+        vc: List<String> = listOf("ES256")
+    ) = Registration(subjectSyntaxTypesSupported = methods, vpFormats = VpFormats(vp, vc))
+
+    private fun validateRegistration(registration: Registration, holders: List<HolderIdentifier>) {
+        identifierFactory.identifiers.clear()
+        identifierFactory.identifiers.addAll(holders)
+        setUpOidcRequestContentWithValidFields()
+        every { mockedPresentationRequest.getPresentationDefinitions() } returns listOf(mockk {
+            every { credentialPresentationInputDescriptors } returns listOf(mockk())
+        })
+        every { mockedOidcRequestContent.registration } returns registration
+        every { mockedOidcRequestContent.pinDetails } returns null
+        runBlocking { validator.validate(mockedPresentationRequest) }
+    }
+
+    @Test
+    fun `JWK holder accepts ESTS FIPS algorithms without ES256K`() {
+        val algorithms = listOf("ES256", "ES384", "ES512", "EdDSA")
+        validateRegistration(registration(vp = algorithms, vc = algorithms), listOf(fipsHolder))
+    }
+
+    @Test
+    fun `legacy only registration and holder remain supported`() {
+        validateRegistration(registration(listOf("did:ion"), listOf("ES256K"), listOf("ES256K")), listOf(legacyHolder))
+    }
+
+    @Test
+    fun `mixed legacy metadata preserves existing default holder selection`() {
+        val registration = registration(listOf("did:ion", "did:jwk"), listOf("ES256K"), listOf("ES256K"))
+        validateRegistration(registration, listOf(fipsHolder, legacyHolder))
+        assertThat(PresentationRequestCryptoRequirement(registration).getIdentifier(identifierFactory)).isSameAs(fipsHolder)
+    }
+
+    @Test
+    fun `mixed legacy metadata remains accepted with FIPS only or legacy only inventory`() {
+        val registration = registration(listOf("did:ion", "did:jwk"), listOf("ES256K"), listOf("ES256K"))
+        for (holder in listOf(fipsHolder, legacyHolder)) {
+            validateRegistration(registration, listOf(holder))
+            assertThat(PresentationRequestCryptoRequirement(registration).getIdentifier(identifierFactory)).isSameAs(holder)
+        }
+    }
+
+    @Test
+    fun `legacy metadata retains preexisting validation without holder negotiation`() {
+        validateRegistration(registration(listOf("did:ion"), listOf("ES256K"), listOf("ES256K")), listOf(fipsHolder))
+        validateRegistration(registration(listOf("did:ion"), listOf("ES256K"), listOf("ES256K")), emptyList())
+    }
+
+    @Test
+    fun `JWK registration selects compatible holder instead of default legacy holder`() {
+        validateRegistration(registration(), listOf(legacyHolder, fipsHolder))
+        assertThat(PresentationRequestCryptoRequirement(registration()).getIdentifier(identifierFactory)).isSameAs(fipsHolder)
+    }
+
+    @Test
+    fun `mixed metadata accepts FIPS only holder when ES256 is advertised`() {
+        validateRegistration(
+            registration(listOf("did:ion", "did:jwk"), listOf("ES256K", "ES256"), listOf("ES256K")),
+            listOf(fipsHolder)
+        )
+    }
+
+    @Test
+    fun `issuer credential algorithm need not equal holder signing algorithm`() {
+        validateRegistration(registration(vc = listOf("ES384")), listOf(fipsHolder))
+    }
+
+    @Test
+    fun `unsupported or empty subject methods are rejected`() {
+        for (methods in listOf(emptyList(), listOf("did:key"), listOf("did:jwk:unexpected"))) {
+            assertFailsWith<SubjectIdentifierTypeNotSupported> {
+                validateRegistration(registration(methods), listOf(fipsHolder))
+            }
+        }
+    }
+
+    @Test
+    fun `no configured holder is rejected`() {
+        assertFailsWith<SubjectIdentifierTypeNotSupported> {
+            validateRegistration(registration(), emptyList())
+        }
+    }
+
+    @Test
+    fun `VP algorithm requires intersection with the same holder as the method`() {
+        assertFailsWith<VpFormatNotSupported> {
+            validateRegistration(registration(vp = listOf("ES256K")), listOf(fipsHolder, legacyHolder))
+        }
+    }
+
+    @Test
+    fun `unsupported or empty VP and VC algorithms are rejected`() {
+        for (algorithms in listOf(emptyList(), listOf("RS256"), listOf("none"))) {
+            assertFailsWith<VpFormatNotSupported> {
+                validateRegistration(registration(vp = algorithms), listOf(fipsHolder))
+            }
+            assertFailsWith<VpFormatNotSupported> {
+                validateRegistration(registration(vc = algorithms), listOf(fipsHolder))
+            }
+        }
+    }
+
+    @Test
+    fun `advertised EdDSA does not enable an unsupported holder signer`() {
+        assertFailsWith<VpFormatNotSupported> {
+            validateRegistration(registration(vp = listOf("EdDSA")), listOf(holder("did:jwk", "EdDSA")))
+        }
+    }
+
+    @Test
+    fun `omitted formats retain legacy optional behavior`() {
+        validateRegistration(Registration(subjectSyntaxTypesSupported = listOf("did:jwk")), listOf(fipsHolder))
+        validateRegistration(Registration(subjectSyntaxTypesSupported = listOf("did:ion")), listOf(legacyHolder))
+    }
+
+    @Test
+    fun `holder selection does not switch away from the credential subject`() {
+        val registration = registration(listOf("did:ion", "did:jwk"), listOf("ES256", "ES256K"), listOf("ES256"))
+        val crypto = PresentationRequestCryptoRequirement(registration)
+        val factory = IdentifierFactory(mutableListOf(fipsHolder, legacyHolder))
+        assertThat(crypto.getIdentifier(factory, legacyHolder.id)).isSameAs(legacyHolder)
+        assertFailsWith<SubjectIdentifierTypeNotSupported> { crypto.getIdentifier(factory, "did:ion:missing") }
+        assertFailsWith<VpFormatNotSupported> {
+            PresentationRequestCryptoRequirement(registration(vp = listOf("ES256K")))
+                .getIdentifier(factory, fipsHolder.id)
+        }
+    }
+
+    @Test
+    fun `single holder response preserves legacy selection but binds new requests to credential subject`() {
+        val factory = IdentifierFactory(mutableListOf(legacyHolder, fipsHolder))
+        val legacy = PresentationRequestCryptoRequirement(
+            registration(listOf("did:ion", "did:jwk"), listOf("ES256K"), listOf("ES256K"))
+        )
+        assertThat(legacy.getResponseIdentifier(factory, listOf(fipsHolder.id))).isSameAs(legacyHolder)
+
+        val jwk = PresentationRequestCryptoRequirement(registration())
+        assertThat(jwk.getResponseIdentifier(factory, listOf(fipsHolder.id, fipsHolder.id))).isSameAs(fipsHolder)
+        assertFailsWith<SubjectIdentifierTypeNotSupported> {
+            jwk.getResponseIdentifier(factory, listOf(legacyHolder.id))
+        }
+        assertFailsWith<SubjectIdentifierTypeNotSupported> {
+            jwk.getResponseIdentifier(factory, listOf(legacyHolder.id, fipsHolder.id))
         }
     }
 }

@@ -10,6 +10,8 @@ import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.d
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.PresentationResponseClaims
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.Registration
+import com.microsoft.walletlibrary.did.sdk.credential.service.models.oidc.VpFormats
 import com.microsoft.walletlibrary.did.sdk.identifier.models.Identifier
 import com.microsoft.walletlibrary.identifier.HolderIdentifier
 import com.microsoft.walletlibrary.identifier.IdentifierFactory
@@ -24,6 +26,15 @@ import com.microsoft.walletlibrary.util.WalletLibraryLogger
 import com.microsoft.walletlibrary.verifiedid.VerifiableCredential
 import com.microsoft.walletlibrary.verifiedid.VerifiedId
 import com.microsoft.walletlibrary.verifiedid.VerifiedIdSerializer
+import com.microsoft.walletlibrary.verifiedid.StringVerifiedIdSerializer
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.JWSHeader
+import com.nimbusds.jose.JWSObject
+import com.nimbusds.jose.crypto.ECDSASigner
+import com.nimbusds.jose.crypto.ECDSAVerifier
+import com.nimbusds.jose.jwk.Curve
+import com.nimbusds.jose.jwk.gen.ECKeyGenerator
+import com.nimbusds.jose.util.Base64URL
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
@@ -33,6 +44,8 @@ import kotlinx.serialization.json.Json
 import java.util.Date
 import kotlin.test.Test
 import kotlin.test.fail
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 internal class PresentationExchangeResponseBuilderTest {
 
@@ -259,5 +272,58 @@ internal class PresentationExchangeResponseBuilderTest {
             assert(peSubmission.presentationSubmission.definitionId == expectedDefinition) { "pe definition mismatched." }
             assert(peSubmission.presentationSubmission.presentationSubmissionDescriptors.isEmpty()) { "No presentation descriptors are expected. " }
         }
+    }
+
+    @Test
+    fun serialize_withJwkHolder_buildsVerifiableES256ResponseAndPreservesIssuerToken() {
+        val key = ECKeyGenerator(Curve.P_256).generate()
+        val holder = mockk<HolderIdentifier> {
+            every { id } returns "did:jwk:test-holder"
+            every { method } returns "did:jwk"
+            every { algorithm } returns "ES256"
+            every { keyReference } returns "0"
+            every { sign(any()) } answers {
+                ECDSASigner(key).sign(JWSHeader(JWSAlgorithm.ES256), firstArg()).decode()
+            }
+        }
+        val fipsConfiguration = LibraryConfiguration(
+            PreviewFeatureFlags(), mockk(), Json.Default, logger = loggerMock,
+            identifierFactory = IdentifierFactory(mutableListOf(holder))
+        )
+        val registration = Registration(
+            subjectSyntaxTypesSupported = listOf("did:jwk"),
+            vpFormats = VpFormats(listOf("ES256"), listOf("ES384"))
+        )
+        val issuerToken =
+            "${Base64URL.encode("""{"alg":"ES384"}""")}.${Base64URL.encode("{}")}.${Base64URL.encode("signature")}"
+        val credential = VerifiableCredential(makeVerifiedId(holder.id).raw.copy(raw = issuerToken))
+        val requirement = PresentationExchangeVerifiedIdRequirement("test", credential.types, inputDescriptorId = "test")
+        requirement.fulfill(credential)
+        val builder = PresentationExchangeResponseBuilder(fipsConfiguration, registration)
+        runBlocking { builder.serialize(requirement, StringVerifiedIdSerializer) }
+
+        val vp = JWSObject.parse(builder.buildVpTokens("audience", "nonce").single())
+        assertEquals("ES256", vp.header.algorithm.name)
+        assertTrue(vp.verify(ECDSAVerifier(key.toPublicJWK())))
+        assertTrue(vp.payload.toString().contains(issuerToken))
+        val idToken = JWSObject.parse(runBlocking { builder.buildIdToken("definition", "audience", "nonce") })
+        assertTrue(idToken.verify(ECDSAVerifier(key.toPublicJWK())))
+        assertEquals(holder.id, idToken.payload.toJSONObject()["sub"])
+    }
+
+    @Test
+    fun serialize_withRegistration_preservesExistingIssuerTokenWithoutNewAlgorithmEnforcement() {
+        val registration = Registration(
+            subjectSyntaxTypesSupported = listOf("did:ion"),
+            vpFormats = VpFormats(listOf("ES256K"), listOf("ES256"))
+        )
+        val issuerToken =
+            "${Base64URL.encode("""{"alg":"ES256K"}""")}.${Base64URL.encode("{}")}.${Base64URL.encode("signature")}"
+        val credential = VerifiableCredential(credentialOne.raw.copy(raw = issuerToken))
+        val requirement = PresentationExchangeVerifiedIdRequirement("test", credential.types, inputDescriptorId = "test")
+        requirement.fulfill(credential)
+        val builder = PresentationExchangeResponseBuilder(configuration, registration)
+        runBlocking { builder.serialize(requirement, StringVerifiedIdSerializer) }
+        assertEquals(1, builder.vpTokens.size)
     }
 }

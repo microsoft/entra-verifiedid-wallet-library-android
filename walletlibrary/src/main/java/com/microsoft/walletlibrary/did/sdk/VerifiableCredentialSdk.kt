@@ -14,6 +14,7 @@ import com.microsoft.walletlibrary.did.sdk.identifier.resolvers.RootOfTrustResol
 import com.microsoft.walletlibrary.did.sdk.util.DifWordList
 import com.microsoft.walletlibrary.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.walletlibrary.did.sdk.util.log.SdkLog
+import com.microsoft.walletlibrary.identifier.IdentifierFactory
 import com.microsoft.walletlibrary.util.http.httpagent.IHttpAgent
 import com.microsoft.walletlibrary.util.http.httpagent.OkHttpAgent
 import kotlinx.serialization.json.Json
@@ -67,6 +68,7 @@ internal object VerifiableCredentialSdk {
      * @param httpAgent http agent implementation to be used for network requests
      * @param rootOfTrustResolver root of trust resolver implementation to be used for verifying the domains.
      * @param flightProvider supplies current Wallet Library flight states; defaults to all flights disabled.
+     * @param identifierFactory shared holder capabilities populated by the client before requests are processed.
      */
     // TODO(Change how version numbers are passed for headers when HTTP client layer is refactored)
     @JvmOverloads
@@ -81,7 +83,8 @@ internal object VerifiableCredentialSdk {
         walletLibraryVersionInfo: String = "",
         httpAgent: IHttpAgent = OkHttpAgent(),
         rootOfTrustResolver: RootOfTrustResolver? = null,
-        flightProvider: WalletLibraryFlightProvider = WalletLibraryFlightProvider { false }
+        flightProvider: WalletLibraryFlightProvider = WalletLibraryFlightProvider { false },
+        identifierFactory: IdentifierFactory = IdentifierFactory()
     ) {
         correlationVectorService = CorrelationVectorService(PreferenceManager.getDefaultSharedPreferences(context))
         val sdkComponent = DaggerSdkComponent.builder()
@@ -94,6 +97,7 @@ internal object VerifiableCredentialSdk {
             .polymorphicJsonSerializer(polymorphicJsonSerializers)
             .rootOfTrustResolver(rootOfTrustResolver)
             .flightProvider(flightProvider)
+            .identifierFactory(identifierFactory)
             .build()
 
         issuanceService = sdkComponent.issuanceService()
